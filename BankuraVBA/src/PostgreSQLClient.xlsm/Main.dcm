@@ -1,0 +1,150 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "Main"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Option Explicit
+
+'*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+'*
+'* [機能名] メイン機能
+'* [詳  細] 本PostgreSQL Clientのメインとなる処理を実装する。
+'*
+'* @author Bankura
+'* Copyright (c) 2019 Bankura
+'*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+'******************************************************************************
+'* 内部変数定義
+'******************************************************************************
+Private psql As String
+Private host As String
+Private port As String
+Private dbName As String
+Private userName As String
+Private password As String
+
+'******************************************************************************
+'* [概  要] メイン処理。
+'* [詳  細] 本PostgreSQL Clientのメイン処理。「実行」ボタンより呼び出される。
+'*
+'******************************************************************************
+Sub Main()
+    On Error GoTo ErrorHandler
+    Dim sql As String
+    
+    ' 設定情報取得
+    Dim settingSh As Worksheet
+    Set settingSh = ThisWorkbook.Worksheets("設定")
+    psql = settingSh.Cells(4, 4).Value
+    host = settingSh.Cells(5, 4).Value
+    port = settingSh.Cells(6, 4).Value
+    dbName = settingSh.Cells(7, 4).Value
+    userName = settingSh.Cells(8, 4).Value
+    password = settingSh.Cells(9, 4).Value
+    
+    'ワークシート作成
+    Dim ws As Worksheet
+    'Set ws = Worksheets.Add(After:=Worksheets(Worksheets.Count))
+    Set ws = MakeSheet()
+    
+    ' SQLの繰り返し実行処理
+    Dim nrow As Long: nrow = 1
+    Dim pos As Long, cnt1 As Long: cnt1 = 0
+    For pos = 8 To 57
+        If Cells(pos, 3).Value = "○" Then
+            sql = Cells(pos, 4).Value
+            
+            ' SQL実行
+            If Not ExecSQL(sql, nrow, ws) Then
+                Exit Sub
+            End If
+        End If
+    Next pos
+    
+    Exit Sub
+
+ErrorHandler:
+    MsgBox "エラーが発生：Number=" & Err.Number & " Description=" & Err.Description, vbOKOnly + vbCritical
+End Sub
+
+'******************************************************************************
+'* [概  要] SQL文実行処理
+'* [詳  細] ExecPsqlを呼び出してSQL文を実行し、結果をシートに出力する。
+'*
+'* @param sql SQL文
+'* @param nrow 出力行位置
+'* @param ws シートオブジェクト
+'* @return 処理結果（True:継続する False：継続しない）
+'******************************************************************************
+Private Function ExecSQL(sql As String, ByRef nrow As Long, ws As Worksheet) As Boolean
+    On Error GoTo ErrorHandler
+    
+    ' 開始処理
+    Call CommonStr
+    
+    ' SQL実行(psql使用)
+    Dim ret As Result
+    Set ret = ExecPsql(psql, host, port, dbName, userName, password, sql)
+    
+    ' コマンド失敗時処理
+    If ret.ExitCd <> 0 Then
+        Debug.Print ret.ExitCd
+        Debug.Print ret.StdErrTxt
+        Call CommonEnd
+        
+        ' MsgBox表示
+        Dim msgRes As VbMsgBoxResult
+        msgRes = MsgBox("【ERROR】ExitCode:" & ret.ExitCd & vbNewLine & "SQL: " & sql & vbNewLine & _
+                        ret.StdErrTxt & vbNewLine & vbNewLine & "継続しますか？", _
+                        vbExclamation + vbYesNo, "SQL実行失敗")
+        If msgRes = vbYes Then
+            ExecSQL = True
+        Else
+            ExecSQL = False
+        End If
+        Exit Function
+    End If
+    
+    ' ワークシートへの結果出力
+    ws.Cells(nrow, 1).Value = sql
+    nrow = nrow + 1
+    Dim stdOut As Variant: stdOut = ret.StdOutList
+    Dim lRowMax As Long: lRowMax = ret.RowMax
+    Dim lColMax As Long: lColMax = ret.ColMax
+    ws.Range(ws.Cells(nrow, 1), ws.Cells(nrow + lRowMax - 1, lColMax)).Value = stdOut
+    nrow = nrow + lRowMax + 1
+    
+    '終了処理
+    Call CommonEnd
+    ExecSQL = True
+    Exit Function
+    
+ErrorHandler:
+    Call CommonEnd
+End Function
+
+'******************************************************************************
+'* [概  要] シート作成処理
+'* [詳  細] フォーマットとなるシート（非表示）をコピーし、「Result」+ nの名称
+'*          （nは重複しない番号）をつけて、対象のWorksheetオブジェクトを返却。
+'*
+'* @return 作成したシートオブジェクト
+'******************************************************************************
+Function MakeSheet() As Worksheet
+    Dim cnt As Long: cnt = 1
+    cnt = 1
+    Do While CheckSheet("Result" & cnt, ThisWorkbook)
+        cnt = cnt + 1
+    Loop
+    Worksheets("wk").Visible = xlSheetVisible
+    Worksheets("wk").Copy After:=Worksheets("wk")
+    ActiveSheet.Name = "Result" & cnt
+    Set MakeSheet = Worksheets("Result" & cnt)
+    Worksheets("wk").Visible = xlSheetVeryHidden
+End Function
+

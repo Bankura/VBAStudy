@@ -1,0 +1,37 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "ThisWorkbook"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Option Explicit
+
+'******************************************************************************
+'* [概  要] ワークブックOpen時処理。
+'* [詳  細] dataシートへ移動する。
+'*
+'******************************************************************************
+Private Sub Workbook_Open()
+    Call GotoSheet(TOOL_SHEET_NAME)
+End Sub
+
+'******************************************************************************
+'* [概  要] ワークブック保存前処理。
+'* [詳  細] titleシートへ移動する。
+'*
+'******************************************************************************
+Private Sub Workbook_BeforeSave(ByVal SaveAsUI As Boolean, Cancel As Boolean)
+    Call GotoSheet("title")
+End Sub
+
+'******************************************************************************
+'* [概  要] ワークブック保存後処理。
+'* [詳  細] dataシートへ移動する。
+'*
+'******************************************************************************
+Private Sub Workbook_AfterSave(ByVal Success As Boolean)
+    Call GotoSheet(TOOL_SHEET_NAME)
+End Sub
