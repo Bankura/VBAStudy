@@ -180,7 +180,7 @@ End Sub
 
 '******************************************************************************
 '* [概  要] FileExists メソッド
-'* [詳  細] ファイルが存在するかどうか判定します｡
+'* [詳  細] ファイルが存在するかどうか判定する｡
 '*
 '* @param targetFilePath ファイルパス。省略可能。
 '* @return 判定結果
@@ -196,7 +196,7 @@ End Function
 
 '******************************************************************************
 '* [概  要] ShowCsvSaveFileDialog メソッド
-'* [詳  細] CSVファイルを保存するダイアログを表示します｡
+'* [詳  細] CSVファイルを保存するダイアログを表示する｡
 '*
 '* @param initialFile 初期表示用ファイルパス。省略可能。
 '* @return 保存ファイルのパス
@@ -270,42 +270,69 @@ Public Sub WriteTextFileFromRecordSet(records As RecordFormat)
     End With
 End Sub
 
+'******************************************************************************
+'* [概  要] ヘッダ編集処理。
+'* [詳  細] レコード情報をCSV文字列（ヘッダ）に編集する。
+'*
+'* @param record レコード情報（Collection）
+'* @return CSV文字列（ヘッダ）
+'******************************************************************************
 Private Function EditHeader(record As Collection) As String
     Dim itm As Item, ret As String, first As Boolean
     first = True
     For Each itm In record
-        If first Then
-            ret = EditItem(itm.Name)
-            first = False
-        Else
-            ret = ret & "," & EditItem(itm.Name)
+        If itm.OutputTarget Then
+            If first Then
+                ret = EditItem(itm.Name)
+                first = False
+            Else
+                ret = ret & "," & EditItem(itm.Name)
+            End If
         End If
     Next
     EditHeader = ret
 End Function
 
+'******************************************************************************
+'* [概  要] レコード編集処理。
+'* [詳  細] レコード情報をCSV文字列に編集する。
+'*
+'* @param record レコード情報（Collection）
+'* @return CSV文字列
+'******************************************************************************
 Private Function EditRecord(record As Collection) As String
     Dim sInfo As SettingInfo: Set sInfo = GetSettingInfo()
            
     Dim itm As Item, ret As String, val As String, first As Boolean
     first = True
     For Each itm In record
-        If itm.InitValueKind = "マスタ変換" Then
-            val = sInfo.GetMasterCodeByValue(itm.InitValue, itm.Value)
-        Else
-            val = itm.Value
-        End If
-    
-        If first Then
-            ret = EditItem(val)
-            first = False
-        Else
-            ret = ret & "," & EditItem(val)
+        If itm.OutputTarget Then
+            If itm.OutputEditKind = "マスタ変換（Code→Value）" Then
+                val = sInfo.GetMasterValueByCode(itm.OutputEditValue, itm.Value)
+            ElseIf itm.OutputEditKind = "マスタ変換（Value→Code）" Then
+                val = sInfo.GetMasterCodeByValue(itm.OutputEditValue, itm.Value)
+            Else
+                val = itm.Value
+            End If
+        
+            If first Then
+                ret = EditItem(val)
+                first = False
+            Else
+                ret = ret & "," & EditItem(val)
+            End If
         End If
     Next
     EditRecord = ret
 End Function
 
+'******************************************************************************
+'* [概  要] 項目値編集処理。
+'* [詳  細] 項目値から改行コードを除外し、ダブルクォートをエスケープする。
+'*
+'* @param val 項目値
+'* @return 編集後項目値
+'******************************************************************************
 Private Function EditItem(val As String) As String
     Dim ret As String
     ret = Replace(val, vbLf, "")

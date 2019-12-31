@@ -1,14 +1,14 @@
 Attribute VB_Name = "Main"
 Option Explicit
 
-'******************************************************************************
+'*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 '*
 '* [機能名] ツールメイン処理モジュール
 '* [詳  細] ツールのメイン処理を行うモジュール。
 '*
 '* @author Bankura
-'* Copyright (c) 2019 Bankura
-'******************************************************************************
+'* Copyright (c) 2019-2020 Bankura
+'*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 '******************************************************************************
 '* WinowsAPI関数定義
@@ -100,16 +100,9 @@ End Sub
 Public Sub ReadFileButton_Click()
     On Error GoTo ErrorHandler
     Call Init
-    
-    Dim sInfo As SettingInfo: Set sInfo = GetSettingInfo()
 
     Dim fReader As FileReader
     Set fReader = New FileReader
-    
-    LogUtil.cmn_iwFlg = True
-    LogUtil.cmn_outLogFlg = 9
-    
-    
 
     'ダイアログ表示
     fReader.ShowCsvFileDialog
@@ -117,7 +110,6 @@ Public Sub ReadFileButton_Click()
     'ファイルが選択されていれば読込を実行
     If fReader.FileExists Then
         Call StartProcess
-        Call LogUtil.OutLog("START", LogUtil.CMN_LOG_LEVEL_DEBUG)
         
         '入力CSV定義情報読込
         Dim rf As RecordFormat: Set rf = New RecordFormat
@@ -164,14 +156,11 @@ Public Sub ReadFileButton_Click()
         Call InjectNumbersToIndexCells(mysheet, dsStartRow, dsKoubanCol, UBound(vFormArr, 1) - LBound(vFormArr, 1) + 1)
         Call CheckEvents
 
-        Call LogUtil.OutLog("END", LogUtil.CMN_LOG_LEVEL_DEBUG)
         Call EndProcess
         
         mysheet.Cells(dsStartRow, dsStartCol).Select
         MsgBox "CSVファイルの読込が完了しました｡", vbOKOnly + vbInformation, TOOL_NAME
     End If
-    
-    
 
     Exit Sub
 ErrorHandler:
@@ -212,13 +201,11 @@ Public Sub OutputFileButton_Click()
     
         If ret = vbYes Then
             Call StartProcess
-            Call LogUtil.OutLog("START", LogUtil.CMN_LOG_LEVEL_DEBUG)
             
             'ファイル出力
             fWriter.HeaderExists = True
             Call fWriter.WriteTextFileFromRecordSet(rf)
-            
-            Call LogUtil.OutLog("END", LogUtil.CMN_LOG_LEVEL_DEBUG)
+
             Call EndProcess
             
             MsgBox "CSVファイルの出力が完了しました｡", vbOKOnly + vbInformation, TOOL_NAME
@@ -289,7 +276,7 @@ End Sub
 '* [詳  細] helpシートへ移動する。
 '*
 '******************************************************************************
-Sub GotoHelpButton_CLick()
+Sub GotoHelpButton_Click()
     On Error GoTo ErrorHandler
 
     Call GotoSheet(HELP_SHEET_NAME)
@@ -304,9 +291,25 @@ End Sub
 '* [詳  細] データシートに戻る。
 '*
 '******************************************************************************
-Sub ReturnFromHelpButton_CLick()
+Sub ReturnFromHelpButton_Click()
     On Error GoTo ErrorHandler
     Call GotoSheet(TOOL_SHEET_NAME)
+    
+    Exit Sub
+
+ErrorHandler:
+    Call ErrorProcess
+End Sub
+
+'******************************************************************************
+'* [概  要] 設定シート「更新」ボタン押下時処理。
+'* [詳  細] 設定情報を更新する。
+'*
+'******************************************************************************
+Sub UpdateSettingButton_Click()
+    On Error GoTo ErrorHandler
+    Call Init
+    Set mSettingInfo = New SettingInfo
     
     Exit Sub
 
@@ -325,7 +328,6 @@ End Sub
 Function CheckDataSheet(mysheet As Worksheet) As RecordFormat
     Call Init
     Call StartProcess
-    Call LogUtil.OutLog("START CheckDataSheet", LogUtil.CMN_LOG_LEVEL_DEBUG)
     
     '項目定義情報読込
     Dim rf As RecordFormat: Set rf = New RecordFormat
@@ -348,7 +350,6 @@ Function CheckDataSheet(mysheet As Worksheet) As RecordFormat
     End If
     Set CheckDataSheet = rf
     
-    Call LogUtil.OutLog("END CheckDataSheet", LogUtil.CMN_LOG_LEVEL_DEBUG)
     Call EndProcess
     Exit Function
 
@@ -426,25 +427,6 @@ Public Sub StartProcess()
     End With
 End Sub
 
-
-Public Sub UnprotectSheet()
-    'シート保護解除
-    If TOOL_PASSWORD = "" Then
-        ThisWorkbook.Sheets(TOOL_SHEET_NAME).Unprotect
-    Else
-        ThisWorkbook.Sheets(TOOL_SHEET_NAME).Unprotect Password:=TOOL_PASSWORD
-    End If
-End Sub
-
-Public Sub ProtectSheet()
-    'シート保護
-    If TOOL_PASSWORD = "" Then
-        ThisWorkbook.Sheets(TOOL_SHEET_NAME).Protect
-    Else
-        ThisWorkbook.Sheets(TOOL_SHEET_NAME).Protect Password:=TOOL_PASSWORD
-    End If
-End Sub
-
 '******************************************************************************
 '* [概  要] 終了処理。
 '* [詳  細] 処理のスピード向上のため変更したExcelの設定を元に戻す。
@@ -463,6 +445,38 @@ Public Sub EndProcess()
     Call ProtectSheet
 End Sub
 
+'******************************************************************************
+'* [概  要] シート保護解除処理。
+'* [詳  細] シートの保護を解除する。
+'*
+'******************************************************************************
+Public Sub UnprotectSheet()
+    'シート保護解除
+    If TOOL_PASSWORD = "" Then
+        ThisWorkbook.Sheets(TOOL_SHEET_NAME).Unprotect
+    Else
+        ThisWorkbook.Sheets(TOOL_SHEET_NAME).Unprotect Password:=TOOL_PASSWORD
+    End If
+End Sub
+
+'******************************************************************************
+'* [概  要] シート保護処理。
+'* [詳  細] シートの保護をする。
+'*
+'******************************************************************************
+Public Sub ProtectSheet()
+    With ThisWorkbook.Sheets(TOOL_SHEET_NAME)
+        .EnableOutlining = True  'アウトライン有効
+        .EnableAutoFilter = True 'オートフィルタ有効
+        
+        'シート保護
+        If TOOL_PASSWORD = "" Then
+            .Protect Contents:=True, UserInterfaceOnly:=True
+        Else
+            .Protect Contents:=True, UserInterfaceOnly:=True, Password:=TOOL_PASSWORD
+        End If
+    End With
+End Sub
 
 '******************************************************************************
 '* [概  要] Application設定退避処理。
@@ -511,8 +525,9 @@ End Function
 '* @param strAddr 移動先セルのアドレス
 '******************************************************************************
 Public Sub GotoSheet(SheetName As String, Optional strAddr As String = "A1")
-    ActiveWorkbook.Worksheets(SheetName).Select
-    ActiveWorkbook.Worksheets(SheetName).Range(strAddr).Activate
+    ThisWorkbook.Activate
+    ThisWorkbook.Worksheets(SheetName).Select
+    ThisWorkbook.Worksheets(SheetName).Range(strAddr).Activate
 End Sub
 
 

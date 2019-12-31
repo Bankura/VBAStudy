@@ -9,6 +9,20 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
+'*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+'*
+'* [機能名] Workbookイベント処理モジュール
+'* [詳  細] Workbookイベント処理処理を行うモジュール。
+'*
+'* @author Bankura
+'* Copyright (c) 2019 Bankura
+'*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+'******************************************************************************
+'* 変数定義
+'******************************************************************************
+Private mUser As String
+
 '******************************************************************************
 '* [概  要] ワークブックOpen時処理。
 '* [詳  細] dataシートへ移動する。
@@ -24,7 +38,28 @@ End Sub
 '*
 '******************************************************************************
 Private Sub Workbook_BeforeSave(ByVal SaveAsUI As Boolean, Cancel As Boolean)
+    With Application
+        .ScreenUpdating = False
+    End With
+    
     Call GotoSheet("title")
+
+    'UserNameを退避
+    mUser = Application.UserName
+
+    Application.UserName = "Excel Tool"
+    With Me
+        With .BuiltinDocumentProperties
+            .Item("Title").Value = ""
+            .Item("Subject").Value = ""
+            .Item("Category").Value = ""
+            .Item("Comments").Value = ""
+            .Item("Author").Value = ""
+            .Item("Company").Value = ""
+            .Item("Manager").Value = ""
+        End With
+    End With
+
 End Sub
 
 '******************************************************************************
@@ -33,5 +68,11 @@ End Sub
 '*
 '******************************************************************************
 Private Sub Workbook_AfterSave(ByVal Success As Boolean)
+    'UserNameを元に戻す
+    Application.UserName = mUser
+    
     Call GotoSheet(TOOL_SHEET_NAME)
+    With Application
+        .ScreenUpdating = True
+    End With
 End Sub

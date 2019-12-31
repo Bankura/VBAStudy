@@ -141,7 +141,6 @@ Public Function GetItemDataFromSheet(dataSheet As Worksheet, lStartRow As Long, 
         GetItemDataFromSheet = False
         Exit Function
     End If
-    mDataRowCount = UBound(vArr, 1) - LBound(vArr, 1) + 1
     
     Call SetItems(vArr)
     
@@ -156,7 +155,7 @@ End Function
 '* @param vArr Variant型2次元配列（項目表データ）
 '*
 '******************************************************************************
-Public Sub SetItems(vArr)
+Private Sub SetItems(vArr)
     Dim i As Long
 
     For i = LBound(vArr, 1) To UBound(vArr, 1)
@@ -173,7 +172,7 @@ End Sub
 '* @param rownum 配列行（1次元添え字）
 '*
 '******************************************************************************
-Public Sub AddItem(vArr, rownum As Long)
+Private Sub AddItem(vArr, rownum As Long)
     Dim itm As Item
     Set itm = New Item
     itm.Name = vArr(rownum, 1)
@@ -185,6 +184,8 @@ Public Sub AddItem(vArr, rownum As Long)
             itm.Attr = AttributeEnum.attrHalf
         Case "半角英数"
             itm.Attr = AttributeEnum.attrHalfAlphaNumeric
+        Case "半角英数記号"
+            itm.Attr = AttributeEnum.attrHalfAlphaNumericSymbol
         Case "数値"
             itm.Attr = AttributeEnum.attrNumeric
         Case "日付"
@@ -209,15 +210,17 @@ Public Sub AddItem(vArr, rownum As Long)
         itm.MaxNumOfDigits = CLng(vArr(rownum, 6))
     End If
     itm.Pattern = vArr(rownum, 7)
-    If UBound(vArr, 2) = 11 Then
+    If UBound(vArr, 2) = 13 Then
         If vArr(rownum, 8) <> "" And VBA.IsNumeric(vArr(rownum, 8)) Then
             itm.InputCsvColNo = vArr(rownum, 8)
         End If
         itm.InitValueKind = vArr(rownum, 9)
         itm.InitValue = vArr(rownum, 10)
-        If vArr(rownum, 11) = "可" Or vArr(rownum, 11) = "" Then
-            itm.InputAllowed = True
+        If vArr(rownum, 11) = "○" Then
+            itm.OutputTarget = True
         End If
+        itm.OutputEditKind = vArr(rownum, 12)
+        itm.OutputEditValue = vArr(rownum, 13)
     End If
     mCol.Add itm
 End Sub
@@ -236,12 +239,12 @@ Public Function Validate(vArr)
         Exit Function
     End If
     Dim statusBarTxt As String: statusBarTxt = "CSVデータ検証中："
+    Application.StatusBar = statusBarTxt
     
     Dim i As Long, j As Long, itm As Item, index As Long
     index = 1
     For i = LBound(vArr, 1) To UBound(vArr, 1)
-    
-        Application.StatusBar = statusBarTxt
+
         If i Mod 5000 = 0 Then
             statusBarTxt = statusBarTxt & "■"
             Application.StatusBar = statusBarTxt
@@ -323,6 +326,7 @@ Public Function SetDataItems(vArr) As Boolean
         index = 1
         For j = LBound(vArr, 2) To UBound(vArr, 2)
             Set itm = CopyItem(mCol(index))
+            itm.ForOutput = True
             itm.Value = vArr(i, j)
             
             If Not itm.Validate Then
@@ -359,8 +363,9 @@ Public Function CopyItem(itm As Item) As Item
     newItem.InitValueKind = itm.InitValueKind
     newItem.InitValue = itm.InitValue
     newItem.InputCsvColNo = itm.InputCsvColNo
-    newItem.InputAllowed = itm.InputAllowed
-
+    newItem.OutputTarget = itm.OutputTarget
+    newItem.OutputEditKind = itm.OutputEditKind
+    newItem.OutputEditValue = itm.OutputEditValue
     Set CopyItem = newItem
 End Function
 
@@ -379,11 +384,11 @@ Public Function GetFormVariantData(vArr) As Variant
     
     Dim sInfo As SettingInfo: Set sInfo = GetSettingInfo()
     Dim statusBarTxt As String: statusBarTxt = "シートデータ変換処理中："
+    Application.StatusBar = statusBarTxt
 
     Dim i As Long, j As Long, itm As Item, index As Long, val As String
     For i = LBound(vFormArr, 1) To UBound(vFormArr, 1)
-        
-        Application.StatusBar = statusBarTxt
+
         If i Mod 5000 = 0 Then
             statusBarTxt = statusBarTxt & "■"
             Application.StatusBar = statusBarTxt
@@ -404,8 +409,10 @@ Public Function GetFormVariantData(vArr) As Variant
             If itm.InitValueKind <> "" Then
                 If itm.InitValueKind = "デフォルト" Then
                     val = itm.InitValue
-                ElseIf itm.InitValueKind = "マスタ変換" Then
+                ElseIf itm.InitValueKind = "マスタ変換（Code→Value）" Then
                     val = sInfo.GetMasterValueByCode(itm.InitValue, val)
+                ElseIf itm.InitValueKind = "マスタ変換（Value→Code）" Then
+                    val = sInfo.GetMasterCodeByValue(itm.InitValue, val)
                 End If
             End If
             vFormArr(i, j) = val

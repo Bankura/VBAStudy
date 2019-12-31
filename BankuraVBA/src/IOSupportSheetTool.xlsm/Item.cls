@@ -31,6 +31,7 @@ Public Enum AttributeEnum
     attrString
     attrHalf
     attrHalfAlphaNumeric
+    attrHalfAlphaNumericSymbol
     attrNumeric
     attrDate
 End Enum
@@ -60,7 +61,9 @@ Private mPattern As String
 Private mInputCsvColNo As Long
 Private mInitValueKind As String
 Private mInitValue As String
-Private mInputAllowed As Boolean
+Private mOutputTarget As Boolean
+Private mOutputEditKind As String
+Private mOutputEditValue As String
 
 Private mValidOk As Boolean
 Private mRequiredOk As Boolean
@@ -187,13 +190,33 @@ Property Let InitValue(arg As String)
 End Property
 
 '*-----------------------------------------------------------------------------
-'* InputAllowed プロパティ
+'* OutputTarget プロパティ
 '*-----------------------------------------------------------------------------
-Property Get InputAllowed() As Boolean
-    InputAllowed = mInputAllowed
+Property Get OutputTarget() As Boolean
+    OutputTarget = mOutputTarget
 End Property
-Property Let InputAllowed(arg As Boolean)
-    mInputAllowed = arg
+Property Let OutputTarget(arg As Boolean)
+    mOutputTarget = arg
+End Property
+
+'*-----------------------------------------------------------------------------
+'* OutputEditKind プロパティ
+'*-----------------------------------------------------------------------------
+Property Get OutputEditKind() As String
+    OutputEditKind = mOutputEditKind
+End Property
+Property Let OutputEditKind(arg As String)
+    mOutputEditKind = arg
+End Property
+
+'*-----------------------------------------------------------------------------
+'* OutputEditValue プロパティ
+'*-----------------------------------------------------------------------------
+Property Get OutputEditValue() As String
+    OutputEditValue = mOutputEditValue
+End Property
+Property Let OutputEditValue(arg As String)
+    mOutputEditValue = arg
 End Property
 
 '*-----------------------------------------------------------------------------
@@ -229,7 +252,7 @@ Private Sub Class_Initialize()
     mAttributeOk = False
     mSizeOk = False
     mPatternOk = False
-    mInputAllowed = True
+    mOutputTarget = False
 End Sub
 Private Sub Class_Terminate()
     Set mRegExp = Nothing
@@ -330,6 +353,11 @@ Public Function ValidateAttribute() As Boolean
                 ValidateAttribute = False
                 Exit Function
             End If
+        Case attrHalfAlphaNumericSymbol
+            If Not IsHalfAlphaNumericSymbol() Then
+                ValidateAttribute = False
+                Exit Function
+            End If
         Case attrNumeric
             If Not IsNumeric() Then
                 ValidateAttribute = False
@@ -364,7 +392,6 @@ Private Function ValidatePattern() As Boolean
     ValidatePattern = True
 End Function
 
-'★
 '******************************************************************************
 '* [概  要] マスタ存在チェック処理。
 '* [詳  細] Valueがマスタに存在するかどうか判定します｡
@@ -373,19 +400,37 @@ End Function
 '*
 '******************************************************************************
 Private Function ValidateMasterExists() As Boolean
-    If Len(mValue) > 0 And mInitValue <> "" And mInitValueKind = "マスタ変換" Then
-        Dim sInfo As SettingInfo: Set sInfo = GetSettingInfo()
-        
-        Dim val As String
-        If mForOutput Then
-            val = sInfo.GetMasterValueByCode(mInitValue, mValue)
-        Else
-            val = sInfo.GetMasterCodeByValue(mInitValue, mValue)
-        End If
+    If mValue = "" Then
+        ValidateMasterExists = True
+        Exit Function
+    End If
+    
+    Dim val As String
+    Dim sInfo As SettingInfo: Set sInfo = GetSettingInfo()
 
-        If val = "" Then
-            ValidateMasterExists = False
-            Exit Function
+    If mForOutput Then
+        If mOutputEditValue <> "" Then
+            If mOutputEditKind = "マスタ変換（Code→Value）" Then
+                val = sInfo.GetMasterValueByCode(mOutputEditValue, mValue)
+            ElseIf mOutputEditKind = "マスタ変換（Value→Code）" Then
+                val = sInfo.GetMasterCodeByValue(mOutputEditValue, mValue)
+            End If
+            If val = "" Then
+                ValidateMasterExists = False
+                Exit Function
+            End If
+        End If
+    Else
+        If mInitValue <> "" Then
+            If mInitValueKind = "マスタ変換（Code→Value）" Then
+                val = sInfo.GetMasterValueByCode(mInitValue, mValue)
+            ElseIf mInitValueKind = "マスタ変換（Value→Code）" Then
+                val = sInfo.GetMasterCodeByValue(mInitValue, mValue)
+            End If
+            If val = "" Then
+                ValidateMasterExists = False
+                Exit Function
+            End If
         End If
     End If
     ValidateMasterExists = True
@@ -428,6 +473,26 @@ Private Function IsHalfAlphaNumeric() As Boolean
         Next
     End If
     IsHalfAlphaNumeric = True
+End Function
+
+'******************************************************************************
+'* [概  要] 半角英数字記号チェック処理。
+'* [詳  細] Valueが半角英数字記号かどうか判定します｡
+'*
+'* @return 判定結果
+'*
+'******************************************************************************
+Private Function IsHalfAlphaNumericSymbol() As Boolean
+    If Len(mValue) > 0 Then
+        With mRegExp
+            .Pattern = "^[a-zA-Z0-9!-/:-@\[-`{-~]*$"
+            .IgnoreCase = False
+            .Global = True
+            IsHalfAlphaNumericSymbol = .Test(mValue)
+        End With
+        Exit Function
+    End If
+    IsHalfAlphaNumericSymbol = True
 End Function
 
 '******************************************************************************
@@ -553,7 +618,7 @@ End Function
 
 '*******************************************************************************
 '* [概  要] メッセージ編集処理。
-'* [詳  細] メッセージに値を埋込み返却却します｡
+'* [詳  細] メッセージに値を埋込み返却します｡
 '*
 '* @param msg メッセージ（{0}{1}といった埋込指定あり）
 '* @param padVals 埋込文字
