@@ -64,7 +64,7 @@ Private fmItemCount As Long
 Public dsStartRow As Long
 Public dsStartCol As Long
 Public dsKoubanCol As Long
-Private dsItemCount As Long
+Public dsItemCount As Long
 
 Private mTime As Variant
 
@@ -219,11 +219,42 @@ ErrorHandler:
 End Sub
 
 '******************************************************************************
+'* [概  要] 行削除ボタン押下時処理。
+'* [詳  細] データシートを読み込みCSVファイルに出力する。
+'*
+'******************************************************************************
+Public Sub DeleteRowButton_Click()
+    On Error GoTo ErrorHandler
+    Call Init
+    Dim mysheet As Worksheet
+    Set mysheet = ThisWorkbook.Sheets(TOOL_SHEET_NAME)
+
+    If ActiveWindow.RangeSelection.Row >= dsStartRow Then
+        Call StartProcess
+        
+        '選択範囲の行を削除
+        ActiveWindow.RangeSelection.EntireRow.Delete
+        
+        '項番振り直し
+        Dim lMaxRow As Long: lMaxRow = mysheet.Cells(Rows.Count, dsKoubanCol).End(xlUp).Row
+        Call InjectNumbersToIndexCells(mysheet, dsStartRow, dsKoubanCol, lMaxRow - dsStartRow + 1)
+        
+        Call EndProcess
+    End If
+    Exit Sub
+
+ErrorHandler:
+    Call EndProcess
+    Call ErrorProcess
+End Sub
+
+
+'******************************************************************************
 '* [概  要] チェックボタン押下時処理。
 '* [詳  細] データのチェックを行う。
 '*
 '******************************************************************************
-Sub CheckButton_CLick()
+Sub CheckButton_Click()
     On Error GoTo ErrorHandler
     Call Init
     
@@ -256,12 +287,21 @@ Public Sub ClearButton_Click()
     On Error GoTo ErrorHandler
     Call Init
 
-    'シートをクリア
     Call StartProcess
     Dim mysheet As Worksheet
     Set mysheet = ThisWorkbook.Sheets(TOOL_SHEET_NAME)
+    
+    'フィルタ選択解除
+    If Not mysheet.AutoFilter Is Nothing Then
+        If mysheet.FilterMode Then
+            mysheet.ShowAllData
+        End If
+    End If
+    
+    'シートをクリア
     Call ClearActualUsedRangeFromSheet(mysheet, dsStartRow, dsKoubanCol, dsItemCount)
     Call DeleteNoUsedRange(mysheet, dsStartRow)
+    
     Call EndProcess
     mysheet.Cells(dsStartRow, dsStartCol).Select
 
@@ -380,6 +420,9 @@ End Sub
 '*
 '******************************************************************************
 Private Sub InjectNumbersToIndexCells(ByVal dataSheet As Worksheet, lStartRow As Long, lStartCol As Long, rownum As Long)
+    If rownum < 1 Then
+        Exit Sub
+    End If
     With dataSheet
         .Cells(lStartRow, lStartCol) = 1
         If rownum > 1 Then
@@ -420,6 +463,7 @@ Public Sub StartProcess()
     Call UnprotectSheet
     
     With Application
+        .Cursor = xlWait
         .DisplayAlerts = False
         .ScreenUpdating = False
         .Calculation = xlCalculationManual
@@ -434,6 +478,7 @@ End Sub
 '******************************************************************************
 Public Sub EndProcess()
     With Application
+        .Cursor = xlDefault
         .DisplayAlerts = mDisplayAlerts
         .ScreenUpdating = mScreenUpdating
         .Calculation = mCalculation
@@ -542,7 +587,7 @@ End Sub
 '*
 '******************************************************************************
 Public Function GetVariantDataFromSheet(dataSheet As Worksheet, lStartRow As Long, lStartCol As Long, Optional colCount As Long)
-    Dim lMaxRow As Long: lMaxRow = dataSheet.Cells(Rows.Count, lStartCol).End(xlUp).row
+    Dim lMaxRow As Long: lMaxRow = dataSheet.Cells(Rows.Count, lStartCol).End(xlUp).Row
     Dim lMaxCol As Long
     If colCount = 0 Then
         lMaxCol = Cells(lStartRow, Columns.Count).End(xlToLeft).Column
@@ -603,9 +648,9 @@ Public Sub DeleteNoUsedRange(dataSheet As Worksheet, lStartRow As Long)
     If rng Is Nothing Then
         delStartRow = lStartRow
     Else
-        delStartRow = rng.Item(rng.Count).row + 1
+        delStartRow = rng.Item(rng.Count).Row + 1
     End If
-    delEndRow = dataSheet.UsedRange.Item(dataSheet.UsedRange.Count).row
+    delEndRow = dataSheet.UsedRange.Item(dataSheet.UsedRange.Count).Row
     
     If delStartRow > delEndRow Then
         Exit Sub
@@ -678,7 +723,7 @@ Public Function GetFinalRow(ByVal dataSheet As Worksheet, Optional ignoreColnum 
             End If
         Next
         If ret > 0 Then
-            ret = ret + .row - 1
+            ret = ret + .Row - 1
         End If
     End With
     GetFinalRow = ret
@@ -744,6 +789,11 @@ Private Sub PrintRecordSet(rf As RecordFormat)
     Next
 End Sub
 
+'******************************************************************************
+'* [概  要] DoEvents実行処理
+'* [詳  細] DoEventsを最適なタイミングで実行する。
+'*
+'******************************************************************************
 Public Sub CheckEvents()
     If GetInputState() Or (DateDiff("s", mTime, Time) > 3) Then
         DoEvents

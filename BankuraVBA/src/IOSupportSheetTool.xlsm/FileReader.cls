@@ -15,7 +15,7 @@ Option Explicit
 '* [詳  細] File読込用のユーティリティを提供する。
 '*
 '* @author Bankura
-'* Copyright (c) 2019 Bankura
+'* Copyright (c) 2019-2020 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 
@@ -187,7 +187,7 @@ End Sub
 '* @return 判定結果
 '*
 '******************************************************************************
-Function FileExists(Optional ByVal targetFilePath As String) As Boolean
+Public Function FileExists(Optional ByVal targetFilePath As String) As Boolean
     Dim tempPath As String: tempPath = mFilePath
     If targetFilePath <> "" Then
         tempPath = targetFilePath
@@ -202,7 +202,7 @@ End Function
 '* @return 判定結果
 '*
 '******************************************************************************
-Function IsEmpty() As Boolean
+Public Function IsEmpty() As Boolean
     IsEmpty = (mSize = 0)
 End Function
 
@@ -269,6 +269,7 @@ Public Function ReadTextFileToVArray() As Variant
         Dim ColumnCount As Long: ColumnCount = UBound(vRow)
         
         Dim statusBarTxt As String: statusBarTxt = "CSV読込処理中："
+        Application.StatusBar = statusBarTxt
          
         '2行目以降処理
         Do While Not .EOS
@@ -279,8 +280,7 @@ Public Function ReadTextFileToVArray() As Variant
                 mValidFormat = False
                 Exit Function
             End If
-           
-            Application.StatusBar = statusBarTxt
+
             If lCount Mod 5000 = 0 Then
                 statusBarTxt = statusBarTxt & "■"
                 Application.StatusBar = statusBarTxt
@@ -298,6 +298,16 @@ Public Function ReadTextFileToVArray() As Variant
     ReadTextFileToVArray = vArr
 End Function
 
+'******************************************************************************
+'* [概  要] CSV行分割処理。
+'* [詳  細] CSV文字列をカンマごとに分割してVariant配列に格納し、返却する。
+'*          項目両端の「"」を削除する。
+'*
+'* @param line CSV行
+'* @param quotExist ダブルクォート存在有無（True：あり）。省略可能。
+'* @param delimiter デリミタ。省略可能。
+'* @return 分割後Variant配列
+'******************************************************************************
 Public Function SplitCsvRow(line As String, Optional ByVal quotExist As Boolean = False, Optional delimiter As String = ",") As Variant
     If quotExist Then
         Dim lQuoteCount As Long, lItemCount As Long, i As Long, tmpTxt As String, v()
@@ -339,7 +349,15 @@ Public Function SplitCsvRow(line As String, Optional ByVal quotExist As Boolean 
     End If
 End Function
 
-Function EditIncludeQuotItem(ByVal text As String) As String
+'******************************************************************************
+'* [概  要] ダブルクォート入り項目編集処理。
+'* [詳  細] エスケープされているダブルクォート「""」を「"」に変換し、
+'*          項目両端の「"」を削除する。
+'*
+'* @param text ダブルクォート入り項目
+'* @return 編集後項目
+'******************************************************************************
+Private Function EditIncludeQuotItem(ByVal text As String) As String
     text = Replace(text, """""", """")
     If Left(text, 1) = """" And Right(text, 1) = """" Then
         If Len(text) <= 2 Then

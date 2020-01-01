@@ -188,8 +188,18 @@ Private Sub AddItem(vArr, rownum As Long)
             itm.Attr = AttributeEnum.attrHalfAlphaNumericSymbol
         Case "数値"
             itm.Attr = AttributeEnum.attrNumeric
+        Case "全角カタカナ"
+            itm.Attr = AttributeEnum.attrZenKatakana
+        Case "全角ひらがな"
+            itm.Attr = AttributeEnum.attrZenHiragana
         Case "日付"
             itm.Attr = AttributeEnum.attrDate
+        Case "郵便番号"
+            itm.Attr = AttributeEnum.attrZipCode
+        Case "電話番号"
+            itm.Attr = AttributeEnum.attrTelNo
+        Case "メールアドレス"
+            itm.Attr = AttributeEnum.attrMailAddress
         Case Else
             itm.Attr = AttributeEnum.attrString
     End Select

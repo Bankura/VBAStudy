@@ -33,7 +33,12 @@ Public Enum AttributeEnum
     attrHalfAlphaNumeric
     attrHalfAlphaNumericSymbol
     attrNumeric
+    attrZenKatakana
+    attrZenHiragana
     attrDate
+    attrZipCode
+    attrTelNo
+    attrMailAddress
 End Enum
 
 '*-----------------------------------------------------------------------------
@@ -363,8 +368,33 @@ Public Function ValidateAttribute() As Boolean
                 ValidateAttribute = False
                 Exit Function
             End If
+        Case attrZenKatakana
+            If Not IsZenKatakana() Then
+                ValidateAttribute = False
+                Exit Function
+            End If
+        Case attrZenHiragana
+            If Not IsZenHiragana() Then
+                ValidateAttribute = False
+                Exit Function
+            End If
         Case attrDate
             If Not IsDate() Then
+                ValidateAttribute = False
+                Exit Function
+            End If
+        Case attrZipCode
+            If Not IsZipCode() Then
+                ValidateAttribute = False
+                Exit Function
+            End If
+        Case attrTelNo
+            If Not IsTelNo() Then
+                ValidateAttribute = False
+                Exit Function
+            End If
+        Case attrMailAddress
+            If Not IsMailAddress() Then
                 ValidateAttribute = False
                 Exit Function
             End If
@@ -515,6 +545,45 @@ Private Function IsNumeric() As Boolean
     IsNumeric = True
 End Function
 
+'******************************************************************************
+'* [概  要] 全角カタカナチェック処理。
+'* [詳  細] Valueが全角カタカナかどうか判定します｡
+'*
+'* @return 判定結果
+'*
+'******************************************************************************
+Private Function IsZenKatakana() As Boolean
+    If Len(mValue) > 0 Then
+        With mRegExp
+            .Pattern = "^[ァ-ンヴー]*$"
+            .IgnoreCase = False
+            .Global = True
+            IsZenKatakana = .Test(mValue)
+        End With
+        Exit Function
+    End If
+    IsZenKatakana = True
+End Function
+
+'******************************************************************************
+'* [概  要] 全角ひらがなチェック処理。
+'* [詳  細] Valueが全角ひらがなかどうか判定します｡
+'*
+'* @return 判定結果
+'*
+'******************************************************************************
+Private Function IsZenHiragana() As Boolean
+    If Len(mValue) > 0 Then
+        With mRegExp
+            .Pattern = "^[ぁ-んー]*$"
+            .IgnoreCase = False
+            .Global = True
+            IsZenHiragana = .Test(mValue)
+        End With
+        Exit Function
+    End If
+    IsZenHiragana = True
+End Function
 
 '******************************************************************************
 '* [概  要] 日付チェック処理。
@@ -546,6 +615,65 @@ Private Function IsDate() As Boolean
     IsDate = True
 End Function
 
+'******************************************************************************
+'* [概  要] 郵便番号チェック処理。
+'* [詳  細] Valueが郵便番号かどうか判定します｡
+'*
+'* @return 判定結果
+'*
+'******************************************************************************
+Private Function IsZipCode() As Boolean
+    If Len(mValue) > 0 Then
+        With mRegExp
+            .Pattern = "^\d{7}$|^\d{3}-\d{4}$"
+            .IgnoreCase = False
+            .Global = True
+            IsZipCode = .Test(mValue)
+        End With
+        Exit Function
+    End If
+    IsZipCode = True
+End Function
+
+'******************************************************************************
+'* [概  要] 電話番号チェック処理。
+'* [詳  細] Valueが電話番号かどうか判定します｡
+'*
+'* @return 判定結果
+'*
+'******************************************************************************
+Private Function IsTelNo() As Boolean
+    If Len(mValue) > 0 Then
+        With mRegExp
+            .Pattern = "^0\d{9,10}$|^0\d{2,3}-\d{1,4}-\d{4}$"
+            .IgnoreCase = False
+            .Global = True
+            IsTelNo = .Test(mValue)
+        End With
+        Exit Function
+    End If
+    IsTelNo = True
+End Function
+
+'******************************************************************************
+'* [概  要] メールアドレスチェック処理。
+'* [詳  細] Valueがメールアドレスかどうか判定します｡
+'*
+'* @return 判定結果
+'*
+'******************************************************************************
+Private Function IsMailAddress() As Boolean
+    If Len(mValue) > 0 Then
+        With mRegExp
+            .Pattern = "^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$"
+            .IgnoreCase = False
+            .Global = True
+            IsMailAddress = .Test(mValue)
+        End With
+        Exit Function
+    End If
+    IsMailAddress = True
+End Function
 
 '******************************************************************************
 '* [概  要] エラーメッセージ取得処理。
@@ -569,10 +697,22 @@ Public Function GetErrorMessage() As String
                     attrName = "半角"
                 Case attrHalfAlphaNumeric
                     attrName = "半角英数"
+                Case attrHalfAlphaNumericSymbol
+                    attrName = "半角英数記号"
                 Case attrNumeric
                     attrName = "数値"
+                Case attrZenKatakana
+                    attrName = "全角カタカナ"
+                Case attrZenHiragana
+                    attrName = "全角ひらがな"
                 Case attrDate
                     attrName = "日付"
+                Case attrZipCode
+                    attrName = "郵便番号"
+                Case attrTelNo
+                    attrName = "電話番号"
+                Case attrMailAddress
+                    attrName = "メールアドレス"
             End Select
             msg = EditMessage(msg, "・{0}は{1}で入力してください。", Array(mName, attrName))
         End If

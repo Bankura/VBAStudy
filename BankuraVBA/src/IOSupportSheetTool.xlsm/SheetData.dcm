@@ -15,17 +15,29 @@ Private Sub Worksheet_Change(ByVal Target As Range)
     If dsKoubanCol = 0 Then
         Call Init
     End If
-    If Me.Cells(Target.row, dsKoubanCol).Value = "" Then
+    If Target.Row >= dsStartRow Then
         Call MyUnprotectSheet
-        Me.Cells(Target.row, dsKoubanCol).Value = Target.row - dsStartRow + 1
+        Dim rng As Range
+        For Each rng In Target.Rows
+            If WorksheetFunction.counta(Me.Range(Me.Cells(rng.Row, dsStartCol), Me.Cells(rng.Row, dsStartCol + dsItemCount - 2))) > 0 Then
+                Me.Cells(rng.Row, dsKoubanCol).Value = rng.Row - dsStartRow + 1
+            Else
+                Me.Cells(rng.Row, dsKoubanCol).Value = ""
+            End If
+        Next
         Call MyProtectSheet
     End If
+
     Exit Sub
 ErrorHandler:
     Call ErrorProcess
 End Sub
 
 Private Sub MyUnprotectSheet()
+    With Application
+        .EnableEvents = False
+    End With
+    
     'ÉVÅ[Égï€åÏâèú
     If TOOL_PASSWORD = "" Then
         Me.Unprotect
@@ -41,4 +53,8 @@ Private Sub MyProtectSheet()
     Else
         Me.Protect Password:=TOOL_PASSWORD
     End If
+    
+    With Application
+        .EnableEvents = True
+    End With
 End Sub
