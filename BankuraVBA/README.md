@@ -1,8 +1,8 @@
 # VBA勉強用リポジトリ
 
-Ariawaseを使用。
+- Ariawaseを使用。
 https://github.com/vbaidiot/ariawase
-VBA-Webを使用。
+- VBA-Webを使用。
 https://github.com/VBA-tools/VBA-Web
 
 ## やっていること
