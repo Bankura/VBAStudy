@@ -103,19 +103,19 @@ Private xxFso As Object 'Is Scripting.FileSystemObject
 Private xxMimeCharsets As Variant '(Of Array(Of String))
 
 ''' @return As Object Is Scripting.FileSystemObject
-Public Property Get Fso() As Object
+Public Property Get fso() As Object
     If xxFso Is Nothing Then Set xxFso = CreateObject("Scripting.FileSystemObject")
-    Set Fso = xxFso
+    Set fso = xxFso
 End Property
 
 ''' @return As String
 Public Property Get ExecPath() As String
     Dim app As Object: Set app = Application
     Select Case app.Name
-        Case "Microsoft Word":   ExecPath = app.MacroContainer.Path
-        Case "Microsoft Excel":  ExecPath = app.ThisWorkbook.Path
-        Case "Microsoft Access": ExecPath = app.CurrentProject.Path
-        Case Else: Err.Raise 17
+        Case "Microsoft Word":   ExecPath = app.MacroContainer.path
+        Case "Microsoft Excel":  ExecPath = app.ThisWorkbook.path
+        Case "Microsoft Access": ExecPath = app.CurrentProject.path
+        Case Else: err.Raise 17
     End Select
 End Property
 
@@ -132,15 +132,15 @@ End Property
 ''' @param propCharset As String In MimeCharsets
 ''' @param propLineSeparator As Integer Is LineSeparatorsEnum
 ''' @return As Object Is ADODB.Stream
-Public Function CreateAdoDbStream( _
+Public Function CreateADODBStream( _
     Optional ByVal propType As StreamTypeEnum = adTypeText, _
     Optional ByVal propCharset As String = "Unicode", _
     Optional ByVal propLineSeparator As LineSeparatorsEnum = adCRLF _
     ) As Object
     
-    Set CreateAdoDbStream = CreateObject("ADODB.Stream")
-    With CreateAdoDbStream
-        .Charset = propCharset
+    Set CreateADODBStream = CreateObject("ADODB.Stream")
+    With CreateADODBStream
+        .charset = propCharset
         .LineSeparator = propLineSeparator
         .Type = propType
     End With
@@ -158,13 +158,13 @@ Public Sub SaveToFileWithoutBom( _
     ByVal strm As Object, ByVal fpath As String, ByVal opSave As SaveOptionsEnum _
     )
     
-    If TypeName(strm) <> "Stream" Then Err.Raise 13
-    If strm.Type <> adTypeText Then Err.Raise 5
+    If TypeName(strm) <> "Stream" Then err.Raise 13
+    If strm.Type <> adTypeText Then err.Raise 5
     
-    Dim strmZ As Object: Set strmZ = CreateAdoDbStream(adTypeBinary)
+    Dim strmZ As Object: Set strmZ = CreateADODBStream(adTypeBinary)
     strmZ.Open
     
-    Dim chrset As String: chrset = strm.Charset
+    Dim chrset As String: chrset = strm.charset
     Dim lnsep As Integer: lnsep = strm.LineSeparator
     strm.Type = adTypeBinary
     strm.Position = BomSize(chrset)
@@ -176,7 +176,7 @@ Public Sub SaveToFileWithoutBom( _
     
     strm.Position = 0
     strm.Type = adTypeText
-    strm.Charset = chrset
+    strm.charset = chrset
     strm.LineSeparator = lnsep
 End Sub
 
@@ -184,7 +184,7 @@ Public Sub RemoveBom( _
     ByVal fpath As String, ByVal chrset As String, ByVal linsep As LineSeparatorsEnum _
     )
     
-    Dim strm As Object: Set strm = CreateAdoDbStream(chrset, linsep)
+    Dim strm As Object: Set strm = CreateADODBStream(chrset, linsep)
     strm.Open
     strm.LoadFromFile fpath
     SaveToFileWithoutBom strm, fpath, adSaveCreateOverWrite
@@ -192,10 +192,10 @@ Public Sub RemoveBom( _
 End Sub
 
 Public Function ChangeCharset(ByVal strm As Object, ByVal chrset As String) As Object
-    If TypeName(strm) <> "Stream" Then Err.Raise 13
-    If strm.Type <> adTypeText Then Err.Raise 5
+    If TypeName(strm) <> "Stream" Then err.Raise 13
+    If strm.Type <> adTypeText Then err.Raise 5
     
-    Dim strmZ As Object: Set strmZ = CreateAdoDbStream(adTypeText, chrset, strm.LineSeparator)
+    Dim strmZ As Object: Set strmZ = CreateADODBStream(adTypeText, chrset, strm.LineSeparator)
     strmZ.Open
     
     If strm.State = adStateClosed Then strm.Open
@@ -210,7 +210,7 @@ Public Sub ChangeFileCharset( _
     ByVal fpath As String, ByVal crrChrset As String, ByVal chgChrset As String _
     )
     
-    Dim strm As Object: Set strm = CreateAdoDbStream(adTypeText, crrChrset)
+    Dim strm As Object: Set strm = CreateADODBStream(adTypeText, crrChrset)
     strm.Open
     strm.LoadFromFile fpath
     Set strm = ChangeCharset(strm, chgChrset)
@@ -222,10 +222,10 @@ Public Function ChangeLineSeparator( _
     ByVal strm As Object, ByVal linsep As LineSeparatorsEnum _
     ) As Object
     
-    If TypeName(strm) <> "Stream" Then Err.Raise 13
-    If strm.Type <> adTypeText Then Err.Raise 5
+    If TypeName(strm) <> "Stream" Then err.Raise 13
+    If strm.Type <> adTypeText Then err.Raise 5
     
-    Dim strmZ As Object: Set strmZ = CreateAdoDbStream(strm.Charset, linsep)
+    Dim strmZ As Object: Set strmZ = CreateADODBStream(strm.charset, linsep)
     strmZ.Open
     
     If strm.State = adStateClosed Then strm.Open
@@ -242,7 +242,7 @@ Public Sub ChangeFileLineSeparator( _
     ByVal crrLinsep As LineSeparatorsEnum, ByVal chgLinsep As LineSeparatorsEnum _
     )
     
-    Dim strm As Object: Set strm = CreateAdoDbStream(chrset, crrLinsep)
+    Dim strm As Object: Set strm = CreateADODBStream(chrset, crrLinsep)
     strm.Open
     strm.LoadFromFile fpath
     Set strm = ChangeLineSeparator(strm, chgLinsep)
@@ -269,11 +269,11 @@ End Function
 
 Public Function GetSpecialFolder(ByVal spFolder As Variant) As String
     If IsNumeric(spFolder) Then
-        GetSpecialFolder = Fso.GetSpecialFolder(spFolder)
+        GetSpecialFolder = fso.GetSpecialFolder(spFolder)
     ElseIf VarType(spFolder) = vbString Then
         GetSpecialFolder = Wsh.SpecialFolders(spFolder)
     Else
-        Err.Raise 13
+        err.Raise 13
     End If
 End Function
 
@@ -281,24 +281,24 @@ Public Function GetTempFilePath( _
     Optional ByVal tdir As String, Optional extName As String = ".tmp" _
     ) As String
     
-    If StrPtr(tdir) = 0 Then tdir = Fso.GetSpecialFolder(TemporaryFolder)
+    If StrPtr(tdir) = 0 Then tdir = fso.GetSpecialFolder(TemporaryFolder)
     Do
-        GetTempFilePath = Fso.BuildPath(tdir, Replace(Fso.GetTempName(), ".tmp", extName))
-    Loop While Fso.FileExists(GetTempFilePath)
+        GetTempFilePath = fso.BuildPath(tdir, Replace(fso.GetTempName(), ".tmp", extName))
+    Loop While fso.FileExists(GetTempFilePath)
 End Function
 
 Public Function GetUniqueFileName( _
     ByVal fpath As String, Optional delim As String = "_" _
     ) As String
     
-    Dim d As String: d = Fso.GetParentFolderName(fpath)
-    Dim b As String: b = Fso.GetBaseName(fpath) & delim
-    Dim x As String: x = "." & Fso.GetExtensionName(fpath)
+    Dim d As String: d = fso.GetParentFolderName(fpath)
+    Dim b As String: b = fso.GetBaseName(fpath) & delim
+    Dim x As String: x = "." & fso.GetExtensionName(fpath)
     
     Dim n As Long: n = 0
-    While Fso.FileExists(fpath)
+    While fso.FileExists(fpath)
         n = n + 1
-        fpath = Fso.BuildPath(d, b & CStr(n) & x)
+        fpath = fso.BuildPath(d, b & CStr(n) & x)
     Wend
     GetUniqueFileName = fpath
 End Function
@@ -309,12 +309,12 @@ Public Function GetAllFolders(ByVal folderPath As String) As Variant
     GetAllFolders = ClctToArr(ret)
 End Function
 Private Sub GetAllFoldersImpl(ByVal folderPath As String, ByVal ret As Collection)
-    Dim d As Object: Set d = Fso.GetFolder(folderPath)
+    Dim d As Object: Set d = fso.GetFolder(folderPath)
     
     Dim sd As Object
     For Each sd In d.SubFolders
-        ret.Add sd.Path
-        GetAllFoldersImpl sd.Path, ret
+        ret.Add sd.path
+        GetAllFoldersImpl sd.path, ret
     Next
 End Sub
 
@@ -324,23 +324,23 @@ Public Function GetAllFiles(ByVal folderPath As String) As Variant
     GetAllFiles = ClctToArr(ret)
 End Function
 Private Sub GetAllFilesImpl(ByVal folderPath As String, ByVal ret As Collection)
-    Dim d As Object: Set d = Fso.GetFolder(folderPath)
+    Dim d As Object: Set d = fso.GetFolder(folderPath)
     
     Dim fl As Object
-    For Each fl In d.Files: ret.Add fl.Path: Next
+    For Each fl In d.Files: ret.Add fl.path: Next
     
     Dim sd As Object
-    For Each sd In d.SubFolders: GetAllFilesImpl sd.Path, ret: Next
+    For Each sd In d.SubFolders: GetAllFilesImpl sd.path, ret: Next
 End Sub
 
 Public Sub CreateFolderTree(ByVal folderPath As String)
-    If Not Fso.DriveExists(Fso.GetDriveName(folderPath)) Then Err.Raise 5
+    If Not fso.DriveExists(fso.GetDriveName(folderPath)) Then err.Raise 5
     CreateFolderTreeImpl folderPath
 End Sub
 Private Sub CreateFolderTreeImpl(ByVal folderPath As String)
-    If Fso.FolderExists(folderPath) Then GoTo Escape
-    CreateFolderTreeImpl Fso.GetParentFolderName(folderPath)
-    Fso.CreateFolder folderPath
+    If fso.FolderExists(folderPath) Then GoTo Escape
+    CreateFolderTreeImpl fso.GetParentFolderName(folderPath)
+    fso.CreateFolder folderPath
     
 Escape:
 End Sub

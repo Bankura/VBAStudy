@@ -76,7 +76,7 @@ Private Property Get VBProject() As Object
         Case "Microsoft Word":   Set VBProject = app.MacroContainer.VBProject
         Case "Microsoft Excel":  Set VBProject = app.ThisWorkbook.VBProject
         Case "Microsoft Access": Set VBProject = app.VBE.ActiveVBProject
-        Case Else: Err.Raise 17
+        Case Else: err.Raise 17
     End Select
 End Property
 
@@ -133,11 +133,11 @@ Private Sub RunTestSub(ByVal obj As Object, ByVal proc As String)
     
     On Error GoTo Catch
     
-    CallByName obj, proc, VbMethod
+    CallByName obj, proc, vbMethod
     
     On Error GoTo 0
     
-    If xFailMsgs.Count < 1 Then
+    If xFailMsgs.count < 1 Then
         WriteResult "+ " & proc
         IncrPre xSuccSubCount
     Else
@@ -156,7 +156,7 @@ End Sub
 
 Public Sub RunTestOf(ByVal clsObj As Object)
     Dim clsName As String: clsName = TypeName(clsObj)
-    If Not CheckTestClassName(clsName) Then Err.Raise 5
+    If Not CheckTestClassName(clsName) Then err.Raise 5
     
     Dim proc As Variant, procs As Collection
     Set procs = ProcNames(VBProject.VBComponents(clsName))
@@ -192,11 +192,11 @@ Public Sub TestRunnerGenerate()
     Dim st1 As Long: st1 = asrt.ProcBodyLine(GeneratedProc, 0)
     Dim pos As Long: pos = st1 + (1 + CommentLineInGeneratedProc)
     
-    Dim vbcompo As Object, ln As String
+    Dim vbcompo As Object, Ln As String
     For Each vbcompo In VBProject.VBComponents
         If vbcompo.Type = 2 And CheckTestClassName(vbcompo.Name) Then
-            ln = "Assert.RunTestOf New " & vbcompo.Name
-            asrt.InsertLines pos, vbTab & ln
+            Ln = "Assert.RunTestOf New " & vbcompo.Name
+            asrt.InsertLines pos, vbTab & Ln
             IncrPre pos
         End If
     Next
@@ -293,22 +293,22 @@ Public Sub Fail(Optional ByVal msg As String = "")
     xAssertMsg = msg
     
     If Len(msg) > 0 Then
-        Err.Raise 1004, AssertModule, xAssertMsg
+        err.Raise 1004, AssertModule, xAssertMsg
     Else
-        Err.Raise 1004, AssertModule
+        err.Raise 1004, AssertModule
     End If
 End Sub
 
 Public Sub IsErrFunc( _
-    ByVal errnum As Variant, _
+    ByVal errNum As Variant, _
     ByVal fun As Func, ByVal params As Variant, _
     Optional ByVal msg As String = "" _
     )
     
     xAssertMsg = msg
     
-    If Not (IsEmpty(errnum) Or IsNumeric(errnum)) Then Err.Raise 5
-    If Not IsArray(params) Then Err.Raise 5
+    If Not (IsEmpty(errNum) Or IsNumeric(errNum)) Then err.Raise 5
+    If Not IsArray(params) Then err.Raise 5
     
     On Error GoTo Catch
     
@@ -316,28 +316,28 @@ Public Sub IsErrFunc( _
     
     Dim buf As Variant, ret As Boolean
     fun.CallByPtr buf, params
-    AssertDone True, ret, errnum, act
+    AssertDone True, ret, errNum, act
     GoTo Escape
     
 Catch:
-    act = Err.Number
-    ret = IsEmpty(errnum) Or act = errnum
+    act = err.Number
+    ret = IsEmpty(errNum) Or act = errNum
     Resume Next
     
 Escape:
 End Sub
 
 Public Sub IsErrMethod( _
-    ByVal errnum As Variant, _
+    ByVal errNum As Variant, _
     ByVal obj As Object, ByVal proc As String, ByVal params As Variant, _
     Optional ByVal msg As String = "" _
     )
     
     xAssertMsg = msg
     
-    If Not (IsEmpty(errnum) Or IsNumeric(errnum)) Then Err.Raise 5
-    If Not IsArray(params) Then Err.Raise 5
-    If LBound(params) <> 0 Then Err.Raise 5
+    If Not (IsEmpty(errNum) Or IsNumeric(errNum)) Then err.Raise 5
+    If Not IsArray(params) Then err.Raise 5
+    If LBound(params) <> 0 Then err.Raise 5
     
     On Error GoTo Catch
     
@@ -353,14 +353,14 @@ Public Sub IsErrMethod( _
             Let ps(i) = params(i)
         End If
     Next
-    rtcCallByName obj, StrPtr(proc), VbMethod, ps
+    rtcCallByName obj, StrPtr(proc), vbMethod, ps
     
-    AssertDone True, ret, errnum, act
+    AssertDone True, ret, errNum, act
     GoTo Escape
     
 Catch:
-    act = Err.Number
-    ret = IsEmpty(errnum) Or act = errnum
+    act = err.Number
+    ret = IsEmpty(errNum) Or act = errNum
     Resume Next
     
 Escape:

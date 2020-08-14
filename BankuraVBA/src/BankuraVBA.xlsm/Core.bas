@@ -62,7 +62,7 @@ End Function
 ''' @return As Boolean
 Public Function IsInt(ByVal num As Variant) As Boolean
     If IsDate(num) Then num = CDbl(num)
-    If Not IsNumeric(num) Then Err.Raise 13
+    If Not IsNumeric(num) Then err.Raise 13
     
     IsInt = num = Fix(num)
 End Function
@@ -75,8 +75,8 @@ Public Function ARound( _
     ByVal num As Variant, Optional ByVal digits As Integer = 0, Optional rndup As Integer = 5 _
     ) As Variant
     
-    If Not IsNumeric(num) Then Err.Raise 13
-    If Not (1 <= rndup And rndup <= 10) Then Err.Raise 5
+    If Not IsNumeric(num) Then err.Raise 13
+    If Not (1 <= rndup And rndup <= 10) Then err.Raise 5
     
     num = CDec(num)
     Dim n As Variant: n = CDec(10 ^ Abs(digits))
@@ -194,16 +194,16 @@ Public Function Formats(ByVal strTemplate As String, ParamArray vals() As Varian
     Dim ms As Object: Set ms = re.Execute(strTemplate)
     
     Dim ret As Variant: ret = Array()
-    If ms.Count < 1 Then GoTo Ending
+    If ms.count < 1 Then GoTo Ending
     
-    ReDim ret(2 * ms.Count)
+    ReDim ret(2 * ms.count)
     Dim ix0 As Long: ix0 = 1
     Dim ix1 As Long: ix1 = 1
     
     Dim i As Long: i = 0
     Dim m As Object, s As String
     For Each m In ms
-        ix1 = m.FirstIndex + Abs(Left$(m.Value, 1) <> "{")
+        ix1 = m.FirstIndex + Abs(Left$(m.value, 1) <> "{")
         s = Mid$(strTemplate, ix0, ix1 - ix0 + 1)
         Dim mbrc As Variant: mbrc = ReMatch(s, "{+$")
         Dim brcs As String:  If ArrLen(mbrc) > 0 Then brcs = mbrc(0) Else brcs = ""
@@ -269,10 +269,10 @@ Public Function ToStr(ByVal x As Variant) As String
     GoTo Escape
     
 Err438:
-    Dim e As ErrObject: Set e = Err
+    Dim e As ErrObject: Set e = err
     Select Case e.Number
         Case 438: ToStr = TypeName(x): Resume Next
-        Case Else: Err.Raise e.Number, e.Source, e.Description, e.HelpFile, e.HelpContext
+        Case Else: err.Raise e.Number, e.Source, e.Description, e.HelpFile, e.HelpContext
     End Select
     
 Escape:
@@ -287,7 +287,7 @@ Public Function Dump(ByVal x As Variant) As String
     Case "Integer":     Dump = x & "%"
     Case "Long":        Dump = x & "&"
     #If Win64 Then
-    Case "LongLong":    Dump = x & "^"
+    Case "LongPtr":    Dump = x & "^"
     #End If
     Case "Single":      Dump = x & "!"
     Case "Double":      Dump = x & "#"
@@ -338,7 +338,7 @@ Public Function Dump(ByVal x As Variant) As String
                 Dump = Replace(ty, "()", "(" & String(rnk - 1, ",") & ")")
             End If
         Else
-            Err.Raise 51
+            err.Raise 51
         End If
     End Select
 End Function
@@ -394,7 +394,7 @@ Public Function Compare( _
     Dim xIsObj As Boolean: xIsObj = IsObject(x)
     Dim yIsObj As Boolean: yIsObj = IsObject(y)
     If xIsObj Or yIsObj Then
-        If xIsObj And yIsObj Then Compare = x.Compare(y) Else Err.Raise 13
+        If xIsObj And yIsObj Then Compare = x.Compare(y) Else err.Raise 13
     Else
         Dim xIsNul As Boolean: xIsNul = IsNull(x)
         Dim yIsNul As Boolean: yIsNul = IsNull(y)
@@ -412,7 +412,7 @@ Public Function Compare( _
                 If x < y Then Compare = -1 Else _
                 Compare = 1
             Else
-                Err.Raise 13
+                err.Raise 13
             End If
         End If
     End If
@@ -454,12 +454,12 @@ End Function
 ''' @param arr As Variant(Of Array(Of T))
 ''' @return As Integer
 Public Function ArrRank(ByVal arr As Variant) As Integer
-    If Not IsArray(arr) Then Err.Raise 13
+    If Not IsArray(arr) Then err.Raise 13
     
     Dim x As Long
     Dim i As Integer: i = 0
     On Error Resume Next
-    While Err.Number = 0: x = UBound(arr, IncrPre(i)): Wend
+    While err.Number = 0: x = UBound(arr, IncrPre(i)): Wend
     ArrRank = i - 1
 End Function
 
@@ -467,7 +467,7 @@ End Function
 ''' @param dimen As Integer
 ''' @return As Long
 Public Function ArrLen(ByVal arr As Variant, Optional ByVal dimen As Integer = 1) As Long
-    If Not IsArray(arr) Then Err.Raise 13
+    If Not IsArray(arr) Then err.Raise 13
     ArrLen = UBound(arr, dimen) - LBound(arr, dimen) + 1
 End Function
 
@@ -480,7 +480,7 @@ Public Function ArrEquals( _
     Optional ByVal swAllowNull As Boolean = False _
     ) As Variant
     
-    If Not (IsArray(arr1) And IsArray(arr2)) Then Err.Raise 13
+    If Not (IsArray(arr1) And IsArray(arr2)) Then err.Raise 13
     
     Dim lb1 As Long, alen1 As Long: lb1 = LBound(arr1): alen1 = UBound(arr1) - lb1 + 1
     Dim lb2 As Long, alen2 As Long: lb2 = LBound(arr2): alen2 = UBound(arr2) - lb2 + 1
@@ -488,8 +488,8 @@ Public Function ArrEquals( _
     
     Dim ret As Variant: ret = True
     Dim i As Long: i = 0
-    Dim alen As Long: alen = IIf(compLen < 1, alen1, alen2)
-    While ret And (i < alen)
+    Dim aLen As Long: aLen = IIf(compLen < 1, alen1, alen2)
+    While ret And (i < aLen)
         ret = Equals(arr1(lb1 + i), arr2(lb2 + i), swAllowNull)
         i = i + 1
     Wend
@@ -505,7 +505,7 @@ Public Function ArrCompare( _
     Optional ByVal swAllowNull As Boolean = False _
     ) As Variant
     
-    If Not (IsArray(arr1) And IsArray(arr2)) Then Err.Raise 13
+    If Not (IsArray(arr1) And IsArray(arr2)) Then err.Raise 13
     
     Dim lb1 As Long, alen1 As Long: lb1 = LBound(arr1): alen1 = UBound(arr1) - lb1 + 1
     Dim lb2 As Long, alen2 As Long: lb2 = LBound(arr2): alen2 = UBound(arr2) - lb2 + 1
@@ -513,8 +513,8 @@ Public Function ArrCompare( _
     
     Dim ret As Variant: ret = 0
     Dim i As Long: i = 0
-    Dim alen As Long: alen = IIf(compLen < 1, alen1, alen2)
-    While ret = 0 And (i < alen)
+    Dim aLen As Long: aLen = IIf(compLen < 1, alen1, alen2)
+    While ret = 0 And (i < aLen)
         ret = Compare(arr1(lb1 + i), arr2(lb2 + i), swAllowNull)
         i = i + 1
     Wend
@@ -532,16 +532,16 @@ Public Function ArrIndexOf( _
     Optional ByVal ixStart As Variant, Optional ByVal cnt As Variant _
     ) As Long
     
-    If Not IsArray(arr) Then Err.Raise 13
+    If Not IsArray(arr) Then err.Raise 13
     
     Dim ix0 As Long:  ix0 = LBound(arr)
-    Dim alen As Long: alen = ArrLen(arr)
+    Dim aLen As Long: aLen = ArrLen(arr)
     If IsMissing(ixStart) Then ixStart = ix0
-    If IsNumeric(ixStart) Then ixStart = CLng(ixStart) Else Err.Raise 13
-    If ixStart < ix0 Then Err.Raise 5
-    If IsMissing(cnt) Then cnt = alen
-    If IsNumeric(cnt) Then cnt = CLng(cnt) Else Err.Raise 13
-    cnt = Min(cnt, alen)
+    If IsNumeric(ixStart) Then ixStart = CLng(ixStart) Else err.Raise 13
+    If ixStart < ix0 Then err.Raise 5
+    If IsMissing(cnt) Then cnt = aLen
+    If IsNumeric(cnt) Then cnt = CLng(cnt) Else err.Raise 13
+    cnt = Min(cnt, aLen)
     
     ArrIndexOf = ixStart - 1
     
@@ -558,7 +558,7 @@ End Function
 
 ''' @param arr As Variant(Of Array(Of T))
 Public Sub ArrRev(ByRef arr As Variant)
-    If Not IsArray(arr) Then Err.Raise 13
+    If Not IsArray(arr) Then err.Raise 13
     
     Dim ixL As Long: ixL = LBound(arr)
     Dim ixU As Long: ixU = UBound(arr)
@@ -583,7 +583,7 @@ End Sub
 ''' @param arr As Variant(Of Array(Of T))
 ''' @param orderAsc As Boolean
 Public Sub ArrSort(ByRef arr As Variant, Optional ByVal orderAsc As Boolean = True)
-    If Not IsArray(arr) Then Err.Raise 13
+    If Not IsArray(arr) Then err.Raise 13
     If ArrLen(arr) <= 1 Then GoTo Escape
     
     Dim ix0 As Long: ix0 = LBound(arr)
@@ -596,18 +596,18 @@ Public Sub ArrSort(ByRef arr As Variant, Optional ByVal orderAsc As Boolean = Tr
 Escape:
 End Sub
 Private Sub ObjArrMSort(arr As Variant, lb As Long, orderAsc As Boolean)
-    Dim alen As Long: alen = ArrLen(arr)
-    If alen <= 1 Then GoTo Escape
+    Dim aLen As Long: aLen = ArrLen(arr)
+    If aLen <= 1 Then GoTo Escape
     
     '' optimization
-    If alen <= 8 Then
+    If aLen <= 8 Then
         ObjArrISort arr, lb, orderAsc
         GoTo Escape
     End If
     
     Dim i As Long
-    Dim l1 As Long: l1 = Fix(alen / 2)
-    Dim l2 As Long: l2 = alen - l1
+    Dim l1 As Long: l1 = Fix(aLen / 2)
+    Dim l2 As Long: l2 = aLen - l1
     
     Dim ub1 As Long:   ub1 = lb + l1 - 1
     Dim a1 As Variant: ReDim a1(lb To ub1)
@@ -632,18 +632,18 @@ Private Sub ObjArrMSort(arr As Variant, lb As Long, orderAsc As Boolean)
 Escape:
 End Sub
 Private Sub ValArrMSort(arr As Variant, lb As Long, orderAsc As Boolean)
-    Dim alen As Long: alen = ArrLen(arr)
-    If alen <= 1 Then GoTo Escape
+    Dim aLen As Long: aLen = ArrLen(arr)
+    If aLen <= 1 Then GoTo Escape
     
     '' optimization
-    If alen <= 8 Then
+    If aLen <= 8 Then
         ValArrISort arr, lb, orderAsc
         GoTo Escape
     End If
     
     Dim i As Long
-    Dim l1 As Long: l1 = Fix(alen / 2)
-    Dim l2 As Long: l2 = alen - l1
+    Dim l1 As Long: l1 = Fix(aLen / 2)
+    Dim l2 As Long: l2 = aLen - l1
     
     Dim ub1 As Long:   ub1 = lb + l1 - 1
     Dim a1 As Variant: ReDim a1(lb To ub1)
@@ -703,7 +703,7 @@ End Function
 ''' @param arr As Variant(Of Array(Of T))
 ''' @return As Variant(Of Array(Of T))
 Public Function ArrUniq(ByVal arr As Variant) As Variant
-    If Not IsArray(arr) Then Err.Raise 13
+    If Not IsArray(arr) Then err.Raise 13
     Dim ret As Variant: ret = Array()
     Dim lbA As Long: lbA = LBound(arr)
     Dim ubA As Long: ubA = UBound(arr)
@@ -736,7 +736,7 @@ End Function
 ''' @param arr2 As Variant(Of Array(Of T))
 ''' @return As Variant(Of Array(Of T))
 Public Function ArrConcat(ByVal arr1 As Variant, ByVal arr2 As Variant) As Variant
-    If Not (IsArray(arr1) And IsArray(arr2)) Then Err.Raise 13
+    If Not (IsArray(arr1) And IsArray(arr2)) Then err.Raise 13
     
     Dim lb2 As Long: lb2 = LBound(arr2)
     Dim ub2 As Long: ub2 = UBound(arr2)
@@ -748,7 +748,7 @@ Public Function ArrConcat(ByVal arr1 As Variant, ByVal arr2 As Variant) As Varia
     Dim lb1 As Long: lb1 = LBound(arr1)
     Dim ub1 As Long: ub1 = UBound(arr1)
     Dim alen1 As Long: alen1 = ub1 - lb1 + 1
-    If alen1 > 0 Then If IsObject(arr1(lb1)) <> isObj2 Then Err.Raise 13
+    If alen1 > 0 Then If IsObject(arr1(lb1)) <> isObj2 Then err.Raise 13
     
     Dim ret As Variant: ReDim ret(alen1 + alen2 - 1)
     
@@ -774,16 +774,16 @@ Public Function ArrSlice( _
     Optional ByVal ixStart As Variant, Optional ByVal ixEnd As Variant _
     ) As Variant
     
-    If Not IsArray(arr) Then Err.Raise 13
+    If Not IsArray(arr) Then err.Raise 13
     
     Dim lbA As Long: lbA = LBound(arr)
     Dim ubA As Long: ubA = UBound(arr)
     If IsMissing(ixStart) Then ixStart = lbA
-    If IsNumeric(ixStart) Then ixStart = CLng(ixStart) Else Err.Raise 13
+    If IsNumeric(ixStart) Then ixStart = CLng(ixStart) Else err.Raise 13
     If IsMissing(ixEnd) Then ixEnd = ubA
-    If IsNumeric(ixEnd) Then ixEnd = CLng(ixEnd) Else Err.Raise 13
+    If IsNumeric(ixEnd) Then ixEnd = CLng(ixEnd) Else err.Raise 13
     
-    If Not (lbA <= ixStart And ixEnd <= ubA) Then Err.Raise 5
+    If Not (lbA <= ixStart And ixEnd <= ubA) Then err.Raise 5
     
     Dim ret As Variant: ret = Array()
     Dim ubR As Long: ubR = ixEnd - ixStart
@@ -806,7 +806,7 @@ End Function
 ''' @param jagArray As Variant(Of Array(Of Array(Of T)))
 ''' @return As Variant(Of Array(Of T))
 Public Function ArrFlatten(ByVal jagArr As Variant) As Variant
-    If Not IsArray(jagArr) Then Err.Raise 13
+    If Not IsArray(jagArr) Then err.Raise 13
     Dim ret As Variant: ret = Array()
     If ArrLen(jagArr) < 1 Then GoTo Ending
     
@@ -826,7 +826,7 @@ End Sub
 ''' @param clct As Collection(Of T)
 ''' @return As Variant(Of T)
 Public Function Pop(ByVal clct As Collection) As Variant
-    Dim i As Long: i = clct.Count
+    Dim i As Long: i = clct.count
     If IsObject(clct.Item(i)) Then Set Pop = clct.Item(i) Else Let Pop = clct.Item(i)
     clct.Remove i
 End Function
@@ -834,7 +834,7 @@ End Function
 ''' @param clct As Collection(Of T)
 ''' @param val As Variant(Of T)
 Public Sub Shift(ByVal clct As Collection, ByVal val As Variant)
-    If clct.Count < 1 Then
+    If clct.count < 1 Then
         clct.Add val
     Else
         clct.Add val, , 1
@@ -852,7 +852,7 @@ End Function
 ''' @param arr As Variant(Of Array(Of T))
 ''' @return As Collection(Of T)
 Public Function ArrToClct(ByVal arr As Variant) As Collection
-    If Not IsArray(arr) Then Err.Raise 13
+    If Not IsArray(arr) Then err.Raise 13
     Set ArrToClct = New Collection
     Dim v As Variant
     For Each v In arr: ArrToClct.Add v: Next
@@ -862,7 +862,7 @@ End Function
 ''' @return As Variant(Of Array(Of T))
 Public Function ClctToArr(ByVal clct As Collection) As Variant
     Dim arr As Variant: arr = Array()
-    Dim clen As Long: clen = clct.Count
+    Dim clen As Long: clen = clct.count
     If clen < 1 Then GoTo Ending
     
     ReDim arr(clen - 1)
@@ -887,18 +887,18 @@ Public Function JagArrToArr2D(ByVal jagArr As Variant) As Variant
     Dim lbOut As Long, lbInn As Long, lbInnFst As Long
     Dim ubOut As Long, ubInn As Long, ubInnFst As Long
     
-    If Not IsArray(jagArr) Then Err.Raise 13
+    If Not IsArray(jagArr) Then err.Raise 13
     lbOut = LBound(jagArr)
     ubOut = UBound(jagArr)
     If ubOut - lbOut < 0 Then GoTo Ending
     
-    If Not IsArray(jagArr(lbOut)) Then Err.Raise 13
+    If Not IsArray(jagArr(lbOut)) Then err.Raise 13
     
     lbInnFst = LBound(jagArr(lbOut))
     ubInnFst = UBound(jagArr(lbOut))
     If ubInnFst - lbInnFst < 0 Then
         For ixOut = lbOut + 1 To ubOut
-            If ArrLen(jagArr(ixOut)) > 0 Then Err.Raise 5
+            If ArrLen(jagArr(ixOut)) > 0 Then err.Raise 5
         Next
         GoTo Ending
     End If
@@ -908,14 +908,14 @@ Public Function JagArrToArr2D(ByVal jagArr As Variant) As Variant
         For ixOut = lbOut To ubOut
             lbInn = LBound(jagArr(ixOut))
             ubInn = UBound(jagArr(ixOut))
-            If lbInn <> lbInnFst Or ubInn <> ubInnFst Then Err.Raise 5
+            If lbInn <> lbInnFst Or ubInn <> ubInnFst Then err.Raise 5
             For ixInn = lbInn To ubInn: Set arr2D(ixOut, ixInn) = jagArr(ixOut)(ixInn): Next
         Next
     Else
         For ixOut = lbOut To ubOut
             lbInn = LBound(jagArr(ixOut))
             ubInn = UBound(jagArr(ixOut))
-            If lbInn <> lbInnFst Or ubInn <> ubInnFst Then Err.Raise 5
+            If lbInn <> lbInnFst Or ubInn <> ubInnFst Then err.Raise 5
             For ixInn = lbInn To ubInn: Let arr2D(ixOut, ixInn) = jagArr(ixOut)(ixInn): Next
         Next
     End If
@@ -956,12 +956,12 @@ End Function
 ''' @param arr() As Variant
 ''' @return As Object Is Scripting.Dictionary
 Public Function CreateDictionary(ParamArray arr() As Variant) As Object
-    Dim alen As Long: alen = UBound(arr)
-    If Abs(alen Mod 2) = 0 Then Err.Raise 5
+    Dim aLen As Long: aLen = UBound(arr)
+    If Abs(aLen Mod 2) = 0 Then err.Raise 5
     
     Set CreateDictionary = CreateObject("Scripting.Dictionary")
     Dim i As Long
-    For i = 0 To alen Step 2: CreateDictionary.Add arr(i), arr(i + 1): Next
+    For i = 0 To aLen Step 2: CreateDictionary.Add arr(i), arr(i + 1): Next
 End Function
 
 ''' @return As Object Is WScript.Shell
@@ -987,8 +987,8 @@ Public Function CreateRegExp( _
     Set CreateRegExp = CreateObject("VBScript.RegExp")
     CreateRegExp.Pattern = ptrnFind
     CreateRegExp.Global = WithIncrIf(InStr(regexpOption, "g") > 0, True, cnt)
-    CreateRegExp.IgnoreCase = WithIncrIf(InStr(regexpOption, "i") > 0, True, cnt)
-    If cnt <> Len(regexpOption) Then Err.Raise 5
+    CreateRegExp.ignorecase = WithIncrIf(InStr(regexpOption, "i") > 0, True, cnt)
+    If cnt <> Len(regexpOption) Then err.Raise 5
 End Function
 Private Function WithIncrIf( _
     ByVal expr As Variant, ByVal incif As Variant, ByRef cntr As Long _
@@ -1011,12 +1011,12 @@ Public Function ReMatch( _
     
     Dim regex As Object:  Set regex = CreateRegExp(ptrnFind, IIf(iCase, "i", ""))
     Dim ms As Object:     Set ms = regex.Execute(expr)
-    If ms.Count < 1 Then: GoTo Ending
+    If ms.count < 1 Then: GoTo Ending
     
     Dim sms As Object:    Set sms = ms(0).SubMatches
-    ReDim ret(sms.Count)
+    ReDim ret(sms.count)
     
-    ret(0) = ms.Item(0).Value
+    ret(0) = ms.Item(0).value
     Dim i As Integer
     For i = 1 To UBound(ret): ret(i) = sms.Item(i - 1): Next
     
@@ -1037,17 +1037,17 @@ Public Function ReMatcheGlobal( _
     
     Dim regex As Object: Set regex = CreateRegExp(ptrnFind, IIf(iCase, "i", "") & "g")
     Dim ms As Object:    Set ms = regex.Execute(expr)
-    If ms.Count < 1 Then GoTo Ending
+    If ms.count < 1 Then GoTo Ending
     
-    ReDim ret(ms.Count - 1)
+    ReDim ret(ms.count - 1)
     
-    Dim arr As Variant: ReDim arr(ms(0).SubMatches.Count)
+    Dim arr As Variant: ReDim arr(ms(0).SubMatches.count)
     
     Dim i As Integer, j As Integer
     For i = 0 To UBound(ret)
         ret(i) = arr
         
-        ret(i)(0) = ms.Item(i).Value
+        ret(i)(0) = ms.Item(i).value
         For j = 1 To UBound(arr): ret(i)(j) = ms(i).SubMatches.Item(j - 1): Next
     Next
     
@@ -1087,7 +1087,7 @@ End Function
 Private Function EvalScript(ByVal expr As String, ByVal lang As String) As String
     Dim doc As Object: Set doc = CreateObject("HtmlFile")
     doc.parentWindow.execScript "document.write(" & expr & ")", lang
-    If Not doc.body Is Nothing Then EvalScript = doc.body.innerHTML
+    If Not doc.Body Is Nothing Then EvalScript = doc.Body.innerHTML
 End Function
 
 ''' @param vbsExpr As String

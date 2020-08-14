@@ -8,11 +8,11 @@ Option Explicit
 Option Private Module
 
 Public Function CreateAssocArray(ParamArray arr() As Variant) As Variant
-    Dim alen As Long: alen = UBound(arr)
-    If Abs(alen Mod 2) = 0 Then Err.Raise 5
+    Dim aLen As Long: aLen = UBound(arr)
+    If Abs(aLen Mod 2) = 0 Then err.Raise 5
     
     Dim aarr As Variant: aarr = Array()
-    If alen < 0 Then GoTo Ending
+    If aLen < 0 Then GoTo Ending
     
     ReDim aarr(Fix(UBound(arr) / 2))
     Dim i As Long
@@ -23,17 +23,17 @@ Ending:
 End Function
 
 Public Function AssocArrToDict(ByVal aarr As Variant) As Object
-    If Not IsArray(aarr) Then Err.Raise 13
+    If Not IsArray(aarr) Then err.Raise 13
     Set AssocArrToDict = CreateDictionary()
     Dim v As Variant '(Of Tuple`2)
     For Each v In aarr: AssocArrToDict.Add v.Item1, v.Item2: Next
 End Function
 
 Public Function DictToAssocArr(ByVal dict As Object) As Variant
-    If TypeName(dict) <> "Dictionary" Then Err.Raise 13
+    If TypeName(dict) <> "Dictionary" Then err.Raise 13
     Dim arr As Variant: arr = Array()
     
-    Dim ks As Variant: ks = dict.Keys
+    Dim ks As Variant: ks = dict.keys
     Dim dlen As Long: dlen = UBound(ks)
     If dlen < 0 Then GoTo Ending
     
@@ -69,7 +69,7 @@ Public Function ArrRange( _
     ByVal fromVal As Variant, ByVal toVal As Variant, Optional ByVal stepVal As Variant = 1 _
     ) As Variant
     
-    If Not (IsNumeric(fromVal) And IsNumeric(toVal) And IsNumeric(stepVal)) Then Err.Raise 13
+    If Not (IsNumeric(fromVal) And IsNumeric(toVal) And IsNumeric(stepVal)) Then err.Raise 13
     
     Dim arrx As ArrayEx: Set arrx = New ArrayEx
     
@@ -83,7 +83,7 @@ Public Function ArrRange( _
             arrx.AddVal IncrPst(fromVal, stepVal)
         Wend
     Case Else
-        Err.Raise 5
+        err.Raise 5
     End Select
     
     ArrRange = arrx.ToArray()
@@ -93,7 +93,7 @@ End Function
 ''' @param arr As Variant(Of Array(Of T))
 ''' @return As Variant(Of Array(Of U))
 Public Function ArrMap(ByVal fun As Func, ByVal arr As Variant) As Variant
-    If Not IsArray(arr) Then Err.Raise 13
+    If Not IsArray(arr) Then err.Raise 13
     Dim lb As Long: lb = LBound(arr)
     Dim ub As Long: ub = UBound(arr)
     Dim ret As Variant
@@ -119,11 +119,11 @@ Public Function ArrZip( _
     ByVal fun As Func, ByVal arr1 As Variant, ByVal arr2 As Variant _
     ) As Variant
     
-    If Not (IsArray(arr1) And IsArray(arr2)) Then Err.Raise 13
+    If Not (IsArray(arr1) And IsArray(arr2)) Then err.Raise 13
     Dim lb1 As Long: lb1 = LBound(arr1)
     Dim lb2 As Long: lb2 = LBound(arr2)
     Dim ub0 As Long: ub0 = UBound(arr1) - lb1
-    If ub0 <> UBound(arr2) - lb2 Then Err.Raise 5
+    If ub0 <> UBound(arr2) - lb2 Then err.Raise 5
     Dim ret As Variant
     If ub0 < 0 Then
         ret = Array()
@@ -143,7 +143,7 @@ End Function
 ''' @param arr As Variant(Of Array(Of T))
 ''' @return As Variant(Of Array(Of T))
 Public Function ArrFilter(ByVal fun As Func, ByVal arr As Variant) As Variant
-    If Not IsArray(arr) Then Err.Raise 13
+    If Not IsArray(arr) Then err.Raise 13
     Dim lb As Long: lb = LBound(arr)
     Dim ub As Long: ub = UBound(arr)
     Dim ret As Variant
@@ -183,7 +183,7 @@ End Function
 ''' @param arr As Variant(Of Array(Of T))
 ''' @return As Variant(Of Array(Of Tuple`2(Of K, T)))
 Public Function ArrGroupBy(ByVal fun As Func, ByVal arr As Variant) As Variant
-    If Not IsArray(arr) Then Err.Raise 13
+    If Not IsArray(arr) Then err.Raise 13
     Dim lb As Long: lb = LBound(arr)
     Dim ub As Long: ub = UBound(arr)
     Dim ixRet As Long: ixRet = -1
@@ -262,7 +262,7 @@ Public Function ArrFold( _
     ByVal fun As Func, ByVal arr As Variant, Optional ByVal seedv As Variant _
     ) As Variant
     
-    If Not IsArray(arr) Then Err.Raise 13
+    If Not IsArray(arr) Then err.Raise 13
     
     Dim stat As Variant
     Dim i As Long: i = LBound(arr)
@@ -287,7 +287,7 @@ Public Function ArrScan( _
     ByVal fun As Func, ByVal arr As Variant, Optional ByVal seedv As Variant _
     ) As Variant
     
-    If Not IsArray(arr) Then Err.Raise 13
+    If Not IsArray(arr) Then err.Raise 13
     
     Dim isObj As Boolean
     Dim stat As Variant

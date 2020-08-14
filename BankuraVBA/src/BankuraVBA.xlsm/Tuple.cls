@@ -30,22 +30,22 @@ End Property
 
 Public Property Get Item3() As Variant
     Dim i As Long: i = 2
-    If xLength <= i Then Err.Raise 380
+    If xLength <= i Then err.Raise 380
     If IsObject(xItems(i)) Then Set Item3 = xItems(i) Else Let Item3 = xItems(i)
 End Property
 
 Public Property Get Item4() As Variant
     Dim i As Long: i = 3
-    If xLength <= i Then Err.Raise 380
+    If xLength <= i Then err.Raise 380
     If IsObject(xItems(i)) Then Set Item4 = xItems(i) Else Let Item4 = xItems(i)
 End Property
 
 Public Sub Init(ParamArray itms() As Variant)
-    If xInit Then Err.Raise 5
+    If xInit Then err.Raise 5
     xItems = itms
     xLength = UBound(itms) + 1
     
-    If xLength < 2 Then Err.Raise 5
+    If xLength < 2 Then err.Raise 5
     xInit = True
 End Sub
 

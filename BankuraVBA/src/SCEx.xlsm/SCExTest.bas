@@ -40,8 +40,8 @@ Sub SCExTest()
     Debug.Print sc.State
     Debug.Print sc.Timeout
     Debug.Print sc.UseSafeSubset
-    Debug.Print sc.Modules.Count
-    Debug.Print sc.Procedures.Count
+    'Debug.Print sc.Modules.Count
+    'Debug.Print sc.Procedures.Count
 
 
     Set sc = Nothing
