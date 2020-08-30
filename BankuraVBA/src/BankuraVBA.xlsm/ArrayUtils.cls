@@ -224,7 +224,7 @@ Public Function ArrayLen(ByVal arr As Variant, Optional ByVal dimen As Integer =
 End Function
 
 '******************************************************************************
-'* [概  要] ArrayEquals
+'* [概  要] Equals
 '* [詳  細] ２つの一次元配列を比較し、イコールであればTrueを返却する。
 '*          AriawaseのCoreモジュールラッパーメソッド。
 '*
@@ -233,15 +233,15 @@ End Function
 '* @param swAllowNull As Boolean
 '* @return As Variant(Of Boolean Or Null Or Empty)
 '******************************************************************************
-Public Function ArrayEquals( _
+Public Function Equals( _
     ByVal arr1 As Variant, ByVal arr2 As Variant, _
     Optional ByVal swAllowNull As Boolean = False _
     ) As Variant
-    ArrayEquals = Core.ArrEquals(arr1, arr2, swAllowNull)
+    Equals = Core.ArrEquals(arr1, arr2, swAllowNull)
 End Function
 
 '******************************************************************************
-'* [概  要] ArrayCompare
+'* [概  要] Compare
 '* [詳  細] ２つの一次元配列（x,y）を比較し、x=yであれば0、x<yであれば-1、x>y
 '*          であれば1を返却する。
 '*          AriawaseのCoreモジュールラッパーメソッド。
@@ -250,15 +250,15 @@ End Function
 '* @param arr2 As Variant(Of Array(Of T))
 '* @return As Variant(Of Integer Or Null)
 '******************************************************************************
-Public Function ArrayCompare( _
+Public Function Compare( _
     ByVal arr1 As Variant, ByVal arr2 As Variant, _
     Optional ByVal swAllowNull As Boolean = False _
     ) As Variant
-    ArrayCompare = Core.ArrCompare(arr1, arr2, swAllowNull)
+    Compare = Core.ArrCompare(arr1, arr2, swAllowNull)
 End Function
 
 '******************************************************************************
-'* [概  要] ArrayIndexOf
+'* [概  要] IndexOf
 '* [詳  細] 一次元配列から指定した値と一致する要素のインデックスを返却する。
 '*          値の捜査開始位置と要素数を任意指定可能。
 '*          AriawaseのCoreモジュールラッパーメソッド。
@@ -269,33 +269,33 @@ End Function
 '* @param cnt As Variant(Of Long)
 '* @return As Long
 '******************************************************************************
-Public Function ArrayIndexOf( _
+Public Function IndexOf( _
     ByVal arr As Variant, ByVal val As Variant, _
     Optional ByVal ixStart As Variant, Optional ByVal cnt As Variant _
     ) As Long
-    ArrayIndexOf = Core.ArrIndexOf(arr, val, ixStart, cnt)
+    IndexOf = Core.ArrIndexOf(arr, val, ixStart, cnt)
 End Function
 
 '******************************************************************************
-'* [概  要] ArrayReverse
+'* [概  要] Reverse
 '* [詳  細] 一次元配列の要素の並び順を反転させる。
 '*          AriawaseのCoreモジュールラッパーメソッド。
 '*
 '* @param arr As Variant(Of Array(Of T))
 '******************************************************************************
-Public Sub ArrayReverse(ByRef arr As Variant)
+Public Sub Reverse(ByRef arr As Variant)
     Call Core.ArrRev(arr)
 End Sub
 
 '******************************************************************************
-'* [概  要] ArraySort
+'* [概  要] Sort
 '* [詳  細] 一次元配列のソートを行う。デフォルトは昇順。
 '*          AriawaseのCoreモジュールラッパーメソッド。
 '*
 '* @param arr As Variant(Of Array(Of T))
 '* @param orderAsc As Boolean
 '******************************************************************************
-Public Sub ArraySort(ByRef arr As Variant, Optional ByVal orderAsc As Boolean = True)
+Public Sub Sort(ByRef arr As Variant, Optional ByVal orderAsc As Boolean = True)
     Call Core.ArrSort(arr, orderAsc)
 End Sub
 
@@ -307,12 +307,12 @@ End Sub
 '* @param arr As Variant(Of Array(Of T))
 '* @return As Variant(Of Array(Of T))
 '******************************************************************************
-Public Function ArrayUniq(ByVal arr As Variant) As Variant
-    ArrayUniq = Core.ArrUniq(arr)
+Public Function Uniq(ByVal arr As Variant) As Variant
+    Uniq = Core.ArrUniq(arr)
 End Function
 
 '******************************************************************************
-'* [概  要] ArrayConcat
+'* [概  要] Concat
 '* [詳  細] 一次元配列と一次元配列を合体（マージ）して返却する。
 '*          AriawaseのCoreモジュールラッパーメソッド。
 '*
@@ -320,8 +320,8 @@ End Function
 '* @param arr2 As Variant(Of Array(Of T))
 '* @return As Variant(Of Array(Of T))
 '******************************************************************************
-Public Function ArrayConcat(ByVal arr1 As Variant, ByVal arr2 As Variant) As Variant
-    ArrayConcat = Core.ArrConcat(arr1, arr2)
+Public Function Concat(ByVal arr1 As Variant, ByVal arr2 As Variant) As Variant
+    Concat = Core.ArrConcat(arr1, arr2)
 End Function
 
 '******************************************************************************
@@ -334,11 +334,11 @@ End Function
 '* @param ixEnd As Variant(Of Long)
 '* @return As Variant(Of Array(Of T))
 '******************************************************************************
-Public Function ArraySlice( _
+Public Function Slice( _
     ByVal arr As Variant, _
     Optional ByVal ixStart As Variant, Optional ByVal ixEnd As Variant _
     ) As Variant
-    ArraySlice = Core.ArrSlice(arr, ixStart, ixEnd)
+    Slice = Core.ArrSlice(arr, ixStart, ixEnd)
 End Function
 
 '******************************************************************************
@@ -349,8 +349,8 @@ End Function
 '* @param jagArray As Variant(Of Array(Of Array(Of T)))
 '* @return As Variant(Of Array(Of T))
 '******************************************************************************
-Public Function ArrayFlatten(ByVal jagArr As Variant) As Variant
-    ArrayFlatten = Core.ArrFlatten(jagArr)
+Public Function Flatten(ByVal jagArr As Variant) As Variant
+    Flatten = Core.ArrFlatten(jagArr)
 End Function
 
 '******************************************************************************
@@ -447,14 +447,14 @@ End Function
 '* @param stepVal As Variant(Of T)
 '* @return As Variant(Of Array(Of T))
 '******************************************************************************
-Public Function ArrayRange( _
+Public Function Range( _
     ByVal fromVal As Variant, ByVal toVal As Variant, Optional ByVal stepVal As Variant = 1 _
     ) As Variant
-    ArrayRange = Ext.ArrRange(fromVal, toVal, stepVal)
+    Range = Ext.ArrRange(fromVal, toVal, stepVal)
 End Function
 
 '******************************************************************************
-'* [概  要] ArrayMap
+'* [概  要] Map
 '* [詳  細] 配列の全要素に対して指定したファンクションの処理を適用する。
 '*          AriawaseのExtモジュールラッパーメソッド。
 '*
@@ -462,12 +462,12 @@ End Function
 '* @param arr As Variant(Of Array(Of T))
 '* @return As Variant(Of Array(Of U))
 '******************************************************************************
-Public Function ArrayMap(ByVal fun As Func, ByVal arr As Variant) As Variant
-    ArrayMap = Ext.ArrMap(fun, arr)
+Public Function Map(ByVal fun As Func, ByVal arr As Variant) As Variant
+    Map = Ext.ArrMap(fun, arr)
 End Function
 
 '******************************************************************************
-'* [概  要] ArrayZip
+'* [概  要] Zip
 '* [詳  細] ２つの配列に対して指定したファンクションの処理を適用し
 '*          １つの配列を返す。
 '*          AriawaseのExtモジュールラッパーメソッド。
@@ -477,14 +477,14 @@ End Function
 '* @param arr2 As Variant(Of Array(Of U))
 '* @return As Variant(Of Array(Of R))
 '******************************************************************************
-Public Function ArrayZip( _
+Public Function Zip( _
     ByVal fun As Func, ByVal arr1 As Variant, ByVal arr2 As Variant _
     ) As Variant
-    ArrayZip = Ext.ArrZip(fun, arr1, arr2)
+    Zip = Ext.ArrZip(fun, arr1, arr2)
 End Function
 
 '******************************************************************************
-'* [概  要] ArrayFilter
+'* [概  要] Filter
 '* [詳  細] 配列に対して指定したフィルタ処理用のファンクションを適用し、
 '*          条件に一致する要素のみの配列を返す。
 '*          AriawaseのExtモジュールラッパーメソッド。
@@ -493,12 +493,12 @@ End Function
 '* @param arr As Variant(Of Array(Of T))
 '* @return As Variant(Of Array(Of T))
 '******************************************************************************
-Public Function ArrayFilter(ByVal fun As Func, ByVal arr As Variant) As Variant
-    ArrayFilter = Ext.ArrFilter(fun, arr)
+Public Function Filter(ByVal fun As Func, ByVal arr As Variant) As Variant
+    Filter = Ext.ArrFilter(fun, arr)
 End Function
 
 '******************************************************************************
-'* [概  要] ArrayGroupBy
+'* [概  要] GroupBy
 '* [詳  細] 配列に対して指定したグルーピング処理用のファンクションを適用し、
 '*          結果を返す。
 '*          AriawaseのExtモジュールラッパーメソッド。
@@ -507,12 +507,12 @@ End Function
 '* @param arr As Variant(Of Array(Of T))
 '* @return As Variant(Of Array(Of Tuple`2(Of K, T)))
 '******************************************************************************
-Public Function ArrayGroupBy(ByVal fun As Func, ByVal arr As Variant) As Variant
-    ArrayGroupBy = Ext.ArrGroupBy(fun, arr)
+Public Function GroupBy(ByVal fun As Func, ByVal arr As Variant) As Variant
+    GroupBy = Ext.ArrGroupBy(fun, arr)
 End Function
 
 '******************************************************************************
-'* [概  要] ArrayFold
+'* [概  要] Fold
 '* [詳  細] 畳み込み関数。配列内の要素に対して指定した演算用ファンクション
 '*          を適用し、その結果と次の要素にまたファンクションを適用する
 '*          といった処理を繰り返し最終的な結果を返す。
@@ -523,14 +523,14 @@ End Function
 '* @param seedv As Variant(Of U)
 '* @return As Variant(Of U)
 '******************************************************************************
-Public Function ArrayFold( _
+Public Function Fold( _
     ByVal fun As Func, ByVal arr As Variant, Optional ByVal seedv As Variant _
     ) As Variant
-    ArrayFold = Ext.ArrFold(fun, arr, seedv)
+    Fold = Ext.ArrFold(fun, arr, seedv)
 End Function
 
 '******************************************************************************
-'* [概  要] ArrayScan
+'* [概  要] Scan
 '* [詳  細] 配列の各要素に対して繰り返し指定した演算用ファンクションを適用し、
 '*          累積した計算結果のリストを返す。
 '*          AriawaseのExtモジュールラッパーメソッド。
@@ -540,14 +540,14 @@ End Function
 '* @param seedv As Variant(Of U)
 '* @return As Variant(Of Array(Of U))
 '******************************************************************************
-Public Function ArrayScan( _
+Public Function Scan( _
     ByVal fun As Func, ByVal arr As Variant, Optional ByVal seedv As Variant _
     ) As Variant
-    ArrayScan = Ext.ArrScan(fun, arr, seedv)
+    Scan = Ext.ArrScan(fun, arr, seedv)
 End Function
 
 '******************************************************************************
-'* [概  要] ArrayUnfold
+'* [概  要] Unfold
 '* [詳  細] Foldの逆。初期値から指定した演算用ファンクションを適用しリストを
 '*          生成する。
 '*          AriawaseのExtモジュールラッパーメソッド。
@@ -556,8 +556,8 @@ End Function
 '* @param seedv As Variant(Of T)
 '* @return As Variant(Of Array(Of U))
 '******************************************************************************
-Public Function ArrayUnfold(ByVal fun As Func, ByVal seedv As Variant) As Variant
-    ArrayUnfold = Ext.ArrUnfold(fun, seedv)
+Public Function Unfold(ByVal fun As Func, ByVal seedv As Variant) As Variant
+    Unfold = Ext.ArrUnfold(fun, seedv)
 End Function
 
 '******************************************************************************
@@ -757,67 +757,67 @@ Public Function Contains(ByRef varr As Variant, ByVal itm As Variant) As Boolean
 End Function
 
 '******************************************************************************
-'* [概  要] ArrayInsert
+'* [概  要] Insert
 '* [詳  細] 項目を1次元配列の指定位置に追加する。
 '*
 '* @param varr 1次元配列
 '* @param itm 項目
 '* @return Variant 追加後1次元配列
 '******************************************************************************
-Public Function ArrayInsert(ByRef varr As Variant, ByVal idx As Long, ByVal itm As Variant) As Variant
+Public Function Insert(ByRef varr As Variant, ByVal idx As Long, ByVal itm As Variant) As Variant
     If idx < LBound(varr) Or UBound(varr) + 1 < idx Then
-        ArrayInsert = varr
+        Insert = varr
         Exit Function
     ElseIf idx = LBound(varr) Then
         If LBound(varr) = UBound(varr) Then
             Dim ax As New ArrayEx
-            ArrayInsert = ax.Add(itm).ToArray
+            Insert = ax.Add(itm).ToArray
             Exit Function
         End If
         Dim ax1 As New ArrayEx
-        ArrayInsert = ax1.AddAll(itm, varr).ToArray
+        Insert = ax1.AddAll(itm, varr).ToArray
         Exit Function
     ElseIf idx = UBound(varr) + 1 Then
         Dim ax2 As New ArrayEx
-        ArrayInsert = ax2.AddAll(varr, itm).ToArray
+        Insert = ax2.AddAll(varr, itm).ToArray
         Exit Function
     End If
 
     Dim arr1: arr1 = Core.ArrSlice(varr, LBound(varr), idx - 1)
     Dim arr2: arr2 = Core.ArrSlice(varr, idx, UBound(varr))
     Dim ax3 As New ArrayEx
-    ArrayInsert = ax3.AddAll(arr1, itm, arr2).ToArray
+    Insert = ax3.AddAll(arr1, itm, arr2).ToArray
 End Function
 
 '******************************************************************************
-'* [概  要] ArrayInsertAll
+'* [概  要] InsertAll
 '* [詳  細] 項目（複数）を指定位置に追加する。
 '*
 '* @param varr 1次元配列
 '* @param itms 項目
 '* @return Variant 追加後1次元配列
 '******************************************************************************
-Public Function ArrayInsertAll(ByRef varr As Variant, ByVal idx As Long, ParamArray itms() As Variant) As Variant
+Public Function InsertAll(ByRef varr As Variant, ByVal idx As Long, ParamArray itms() As Variant) As Variant
     If IsMissing(itms) Then
-        ArrayInsertAll = varr
+        InsertAll = varr
         Exit Function
     End If
     Dim tmp: tmp = itms
     If idx < LBound(varr) Or UBound(varr) + 1 < idx Then
-        ArrayInsertAll = varr
+        InsertAll = varr
         Exit Function
     ElseIf idx = LBound(varr) Then
         If LBound(varr) = UBound(varr) Then
             Dim ax1 As New ArrayEx
-            ArrayInsertAll = ax1.AddAll(tmp).ToArray
+            InsertAll = ax1.AddAll(tmp).ToArray
             Exit Function
         End If
         Dim ax2 As New ArrayEx
-        ArrayInsertAll = ax2.AddAll(tmp, varr).ToArray
+        InsertAll = ax2.AddAll(tmp, varr).ToArray
         Exit Function
     ElseIf idx = UBound(varr) + 1 Then
         Dim ax3 As New ArrayEx
-        ArrayInsertAll = ax3.AddAll(varr, tmp).ToArray
+        InsertAll = ax3.AddAll(varr, tmp).ToArray
         Exit Function
     End If
     
@@ -825,11 +825,11 @@ Public Function ArrayInsertAll(ByRef varr As Variant, ByVal idx As Long, ParamAr
     Dim arr2: arr2 = Core.ArrSlice(varr, idx, UBound(varr))
     Dim ax As New ArrayEx
     
-    ArrayInsertAll = ax.AddAll(arr1, tmp, arr2).ToArray
+    InsertAll = ax.AddAll(arr1, tmp, arr2).ToArray
 End Function
 
 '******************************************************************************
-'* [概  要] ArrayLastIndexOf
+'* [概  要] LastIndexOf
 '* [詳  細] 一次元配列から指定した値と一致する要素のインデックスを返却する。
 '*          最後尾から検索して最初に一致したものを返却。
 '*          値の捜査開始位置と要素数を任意指定可能。
@@ -840,7 +840,7 @@ End Function
 '* @param cnt As Variant(Of Long)
 '* @return As Long
 '******************************************************************************
-Public Function ArrayLastIndexOf(ByVal arr As Variant, ByVal val As Variant, _
+Public Function LastIndexOf(ByVal arr As Variant, ByVal val As Variant, _
     Optional ByVal ixStart As Variant, Optional ByVal cnt As Variant _
     ) As Long
     
@@ -855,12 +855,12 @@ Public Function ArrayLastIndexOf(ByVal arr As Variant, ByVal val As Variant, _
     If IsNumeric(cnt) Then cnt = CLng(cnt) Else err.Raise 13
     cnt = Min(cnt, aLen)
     
-    ArrayLastIndexOf = -1
+    LastIndexOf = -1
     
     Dim i As Long
     For i = ixStart To ixStart - cnt + 1 Step -1
         If Equals(arr(i), val, True) Then
-            ArrayLastIndexOf = i
+            LastIndexOf = i
             GoTo Escape
         End If
     Next
@@ -877,7 +877,7 @@ End Function
 '* @return Variant 削除後1次元配列
 '******************************************************************************
 Public Function Remove(ByRef varr As Variant, ByVal itm As Variant) As Variant
-    Dim idx As Long: idx = ArrayIndexOf(varr, itm)
+    Dim idx As Long: idx = IndexOf(varr, itm)
     Remove = RemoveAt(varr, idx)
 End Function
 
@@ -957,15 +957,15 @@ End Function
 '* @param count 項目
 '* @return Variant 1次元配列
 '******************************************************************************
-Public Function Repeat(ByVal itm As Variant, ByVal count As Long) As Variant
-    If count <= 0 Then
+Public Function Repeat(ByVal itm As Variant, ByVal Count As Long) As Variant
+    If Count <= 0 Then
         Repeat = EmptyVariantArray
         Exit Function
     End If
     Dim varr
-    ReDim varr(0 To count - 1)
+    ReDim varr(0 To Count - 1)
     Dim i As Long
-    For i = 0 To count - 1
+    For i = 0 To Count - 1
         If IsObject(itm) Then
             Set varr(i) = itm
         Else
@@ -974,7 +974,6 @@ Public Function Repeat(ByVal itm As Variant, ByVal count As Long) As Variant
     Next
     Repeat = varr
 End Function
-
 
 '******************************************************************************
 '* [概  要] ToString
@@ -998,3 +997,80 @@ Public Function ToString(ByRef varr As Variant) As String
     strx.Append "]"
     ToString = strx.ToString
 End Function
+
+'******************************************************************************
+'* [概  要] GetFirst
+'* [詳  細] 最初の要素を取得する。
+'*
+'* @param varr 1次元配列
+'* @return Variant 最初の要素
+'******************************************************************************
+Public Function GetFirst(ByRef varr As Variant) As Variant
+    If Not IsArray(varr) Then
+        GetFirst = Empty
+        Exit Function
+    End If
+    If IsObject(varr(UBound(varr))) Then
+        Set GetFirst = varr(LBound(varr))
+    Else
+        GetFirst = varr(LBound(varr))
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] GetLast
+'* [詳  細] 最後の要素を取得する。
+'*
+'* @param varr 1次元配列
+'* @return Variant 最後の要素
+'******************************************************************************
+Public Function GetLast(ByRef varr As Variant) As Variant
+    If Not IsArray(varr) Then
+        GetLast = Empty
+        Exit Function
+    End If
+    If IsObject(varr(UBound(varr))) Then
+        Set GetLast = varr(UBound(varr))
+    Else
+        GetLast = varr(UBound(varr))
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] Join
+'* [詳  細] 配列を連結して文字列にする。
+'*
+'* @param varr 1次元配列
+'* @param delimiter デリミタ
+'* @param wrapChar 囲み文字
+'* @param rmLineSeparator 改行を除去するか
+'* @return String 連結文字列
+'******************************************************************************
+Public Function Join(ByRef varr As Variant, Optional ByVal delimiter As String, Optional ByVal wrapChar As String, Optional ByVal rmLineSeparator As Boolean = True) As String
+    If Not IsArray(varr) Then
+        Join = ""
+        Exit Function
+    End If
+    If wrapChar = "" And rmLineSeparator = False Then
+        Join = VBA.Join(varr, delimiter)
+        Exit Function
+    End If
+    Dim tmpItm As String
+    Dim v, sbuf As StringEx: Set sbuf = New StringEx
+    Dim firstAct As Boolean: firstAct = True
+    For Each v In varr
+        If firstAct Then
+            sbuf.Append wrapChar
+            sbuf.Append IIf(rmLineSeparator, StringUtils.RemoveLineSeparator(CStr(v)), CStr(v))
+            sbuf.Append wrapChar
+            firstAct = False
+        Else
+            sbuf.Append delimiter
+            sbuf.Append wrapChar
+            sbuf.Append IIf(rmLineSeparator, StringUtils.RemoveLineSeparator(CStr(v)), CStr(v))
+            sbuf.Append wrapChar
+        End If
+    Next
+    Join = sbuf.ToString
+End Function
+

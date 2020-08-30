@@ -301,8 +301,8 @@ Public Function Coth(arg1 As Double) As Double
     Coth = mXlWsFunc.Coth(arg1)
 End Function
 
-Public Function count(arg1, Optional arg2, Optional arg3, Optional arg4, Optional arg5, Optional arg6, Optional arg7, Optional arg8, Optional arg9, Optional arg10, Optional arg11, Optional arg12, Optional arg13, Optional arg14, Optional arg15, Optional arg16, Optional arg17, Optional arg18, Optional arg19, Optional arg20, Optional arg21, Optional arg22, Optional arg23, Optional arg24, Optional arg25, Optional arg26, Optional arg27, Optional arg28, Optional arg29, Optional arg30) As Double
-    count = mXlWsFunc.count(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30)
+Public Function Count(arg1, Optional arg2, Optional arg3, Optional arg4, Optional arg5, Optional arg6, Optional arg7, Optional arg8, Optional arg9, Optional arg10, Optional arg11, Optional arg12, Optional arg13, Optional arg14, Optional arg15, Optional arg16, Optional arg17, Optional arg18, Optional arg19, Optional arg20, Optional arg21, Optional arg22, Optional arg23, Optional arg24, Optional arg25, Optional arg26, Optional arg27, Optional arg28, Optional arg29, Optional arg30) As Double
+    Count = mXlWsFunc.Count(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30)
 End Function
 
 Public Function CountA(arg1, Optional arg2, Optional arg3, Optional arg4, Optional arg5, Optional arg6, Optional arg7, Optional arg8, Optional arg9, Optional arg10, Optional arg11, Optional arg12, Optional arg13, Optional arg14, Optional arg15, Optional arg16, Optional arg17, Optional arg18, Optional arg19, Optional arg20, Optional arg21, Optional arg22, Optional arg23, Optional arg24, Optional arg25, Optional arg26, Optional arg27, Optional arg28, Optional arg29, Optional arg30) As Double
@@ -381,8 +381,8 @@ Public Function DAverage(arg1 As Object, arg2, arg3) As Double
     DAverage = mXlWsFunc.DAverage(arg1, arg2, arg3)
 End Function
 
-Public Function Days(arg1, arg2) As Double
-    Days = mXlWsFunc.Days(arg1, arg2)
+Public Function days(arg1, arg2) As Double
+    days = mXlWsFunc.days(arg1, arg2)
 End Function
 
 Public Function Days360(arg1, arg2, Optional arg3) As Double
@@ -1533,8 +1533,8 @@ Public Function Unichar(arg1 As Double) As String
     Unichar = mXlWsFunc.Unichar(arg1)
 End Function
 
-Public Function Unicode(arg1 As String) As Double
-    Unicode = mXlWsFunc.Unicode(arg1)
+Public Function unicode(arg1 As String) As Double
+    unicode = mXlWsFunc.unicode(arg1)
 End Function
 
 Public Function USDollar(arg1 As Double, arg2 As Double) As String

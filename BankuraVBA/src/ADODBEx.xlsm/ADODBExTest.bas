@@ -33,7 +33,7 @@ Sub test()
   Dim adoCn As ADODBExConnection
   Set adoCn = New ADODBExConnection 'ADOコネクションのインスタンス作成
   adoCn.OpenCn "Provider=Microsoft.ACE.OLEDB.12.0;" & _
-             "Data Source=C:\develop\BP管理.accdb;" 'Accessファイルを指定
+             "Data Source=C:\develop\mydb.accdb;" 'Accessファイルを指定
              
   Dim strSQL As String
   strSQL = "select * from 消費税率マスタ"

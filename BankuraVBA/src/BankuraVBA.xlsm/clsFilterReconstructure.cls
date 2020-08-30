@@ -41,10 +41,10 @@ Public Sub StoreCriterias()
     If fltr.FilterMode Then
         Dim i As Long
         
-        ReDim mCriterias(1 To Clms.count)
+        ReDim mCriterias(1 To Clms.Count)
         
         '// 全カラムのフィルタ条件を調査
-        For i = 1 To Clms.count
+        For i = 1 To Clms.Count
         
             Set mCriterias(i) = New Collection
             
@@ -55,12 +55,12 @@ Public Sub StoreCriterias()
                 mCriterias(i).Add Clms.Item(i).operator, "operator"
                 
                 '// 第1条件
-                If Clms.Item(i).count > 0 Then
+                If Clms.Item(i).Count > 0 Then
                     mCriterias(i).Add Clms.Item(i).Criteria1, "Criteria1"
                 End If
                 
                 '//operatorが、xlFilterValues(7) 以外で、条件が2つ以上の場合は第2条件があるので取得
-                If 7 <> Clms.Item(i).operator And Clms.Item(i).count > 1 Then
+                If 7 <> Clms.Item(i).operator And Clms.Item(i).Count > 1 Then
                     mCriterias(i).Add Clms.Item(i).Criteria2, "Criteria2"
                 End If
             
@@ -97,7 +97,7 @@ Public Sub ReConstructFilter()
     Set rng = mws.AutoFilter.Range
     
     '// フィルタ領域の全ての列の条件を復元
-    For i = 1 To mws.AutoFilter.Filters.count
+    For i = 1 To mws.AutoFilter.Filters.Count
         
         With mCriterias(i)
             ' 第2条件がある場合

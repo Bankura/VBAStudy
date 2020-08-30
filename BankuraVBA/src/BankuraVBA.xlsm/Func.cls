@@ -86,17 +86,17 @@ Private Sub EarlyBindParamTypes(ByVal paramTypes As Variant)
     End If
 End Sub
 
-Private Sub LateBindParamTypes(ByVal params As Variant)
+Private Sub LateBindParamTypes(ByVal Params As Variant)
 '    If Not IsArray(params) Then Err.Raise 5
     
-    xUbParam = UBound(params)
+    xUbParam = UBound(Params)
     
     If xUbParam >= 0 Then
         Dim i As Long, ty As VbVarType
         
         ReDim xParamTypes(xUbParam)
         For i = 0 To xUbParam
-            ty = VarType(params(i))
+            ty = VarType(Params(i))
             If (ty < 2 Or 12 < ty) And ty <> 17 Then ty = vbVariant
             xParamTypes(i) = ty
         Next
@@ -122,7 +122,7 @@ Public Sub Init( _
     EarlyBindParamTypes paramTypes
 End Sub
 
-Public Sub CallByPtr(ByRef returnVal As Variant, ByVal params As Variant)
+Public Sub CallByPtr(ByRef returnVal As Variant, ByVal Params As Variant)
 '    If Not IsArray(params) Then Err.Raise 5
     
 #If VBA7 Then
@@ -133,7 +133,7 @@ Public Sub CallByPtr(ByRef returnVal As Variant, ByVal params As Variant)
     If xUbParam >= 0 Then
         Dim i As Long
         ReDim lpParams(xUbParam)
-        For i = 0 To xUbParam: lpParams(i) = VarPtr(params(i)): Next
+        For i = 0 To xUbParam: lpParams(i) = VarPtr(Params(i)): Next
     Else
         ReDim lpParams(0)
     End If
@@ -147,18 +147,18 @@ Public Sub CallByPtr(ByRef returnVal As Variant, ByVal params As Variant)
     If IsObject(ret) Then Set returnVal = ret Else Let returnVal = ret
 End Sub
 
-Public Sub FastApply(ByRef returnVal As Variant, ParamArray params() As Variant)
+Public Sub FastApply(ByRef returnVal As Variant, ParamArray Params() As Variant)
     If Not xParamTypeBinding Then
-        LateBindParamTypes params
+        LateBindParamTypes Params
     End If
-    CallByPtr returnVal, params
+    CallByPtr returnVal, Params
 End Sub
 
-Public Function Apply(ParamArray params() As Variant) As Variant
+Public Function Apply(ParamArray Params() As Variant) As Variant
     If Not xParamTypeBinding Then
-        LateBindParamTypes params
+        LateBindParamTypes Params
     Else
-        If xUbParam <> UBound(params) Then err.Raise 5
+        If xUbParam <> UBound(Params) Then err.Raise 5
     End If
-    CallByPtr Apply, params
+    CallByPtr Apply, Params
 End Function

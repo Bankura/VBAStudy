@@ -99,19 +99,29 @@ Public Enum StreamWriteEnum
     adWriteLine = 1
 End Enum
 
+'*-----------------------------------------------------------------------------
+'* StandardStreamTypes
+'*   Add By Bankura
+'*-----------------------------------------------------------------------------
+Public Enum StandardStreamTypes
+    StdErr = 2
+    StdIn = 0
+    StdOut = 1
+End Enum
+
 Private xxFso As Object 'Is Scripting.FileSystemObject
 Private xxMimeCharsets As Variant '(Of Array(Of String))
 
 ''' @return As Object Is Scripting.FileSystemObject
-Public Property Get fso() As Object
+Public Property Get Fso() As Object
     If xxFso Is Nothing Then Set xxFso = CreateObject("Scripting.FileSystemObject")
-    Set fso = xxFso
+    Set Fso = xxFso
 End Property
 
 ''' @return As String
 Public Property Get ExecPath() As String
     Dim app As Object: Set app = Application
-    Select Case app.Name
+    Select Case app.name
         Case "Microsoft Word":   ExecPath = app.MacroContainer.path
         Case "Microsoft Excel":  ExecPath = app.ThisWorkbook.path
         Case "Microsoft Access": ExecPath = app.CurrentProject.path
@@ -140,8 +150,8 @@ Public Function CreateADODBStream( _
     
     Set CreateADODBStream = CreateObject("ADODB.Stream")
     With CreateADODBStream
-        .charset = propCharset
-        .LineSeparator = propLineSeparator
+        .charSet = propCharset
+        .lineSeparator = propLineSeparator
         .Type = propType
     End With
 End Function
@@ -164,8 +174,8 @@ Public Sub SaveToFileWithoutBom( _
     Dim strmZ As Object: Set strmZ = CreateADODBStream(adTypeBinary)
     strmZ.Open
     
-    Dim chrset As String: chrset = strm.charset
-    Dim lnsep As Integer: lnsep = strm.LineSeparator
+    Dim chrset As String: chrset = strm.charSet
+    Dim lnsep As Integer: lnsep = strm.lineSeparator
     strm.Type = adTypeBinary
     strm.Position = BomSize(chrset)
     
@@ -176,8 +186,8 @@ Public Sub SaveToFileWithoutBom( _
     
     strm.Position = 0
     strm.Type = adTypeText
-    strm.charset = chrset
-    strm.LineSeparator = lnsep
+    strm.charSet = chrset
+    strm.lineSeparator = lnsep
 End Sub
 
 Public Sub RemoveBom( _
@@ -195,7 +205,7 @@ Public Function ChangeCharset(ByVal strm As Object, ByVal chrset As String) As O
     If TypeName(strm) <> "Stream" Then err.Raise 13
     If strm.Type <> adTypeText Then err.Raise 5
     
-    Dim strmZ As Object: Set strmZ = CreateADODBStream(adTypeText, chrset, strm.LineSeparator)
+    Dim strmZ As Object: Set strmZ = CreateADODBStream(adTypeText, chrset, strm.lineSeparator)
     strmZ.Open
     
     If strm.State = adStateClosed Then strm.Open
@@ -225,7 +235,7 @@ Public Function ChangeLineSeparator( _
     If TypeName(strm) <> "Stream" Then err.Raise 13
     If strm.Type <> adTypeText Then err.Raise 5
     
-    Dim strmZ As Object: Set strmZ = CreateADODBStream(strm.charset, linsep)
+    Dim strmZ As Object: Set strmZ = CreateADODBStream(strm.charSet, linsep)
     strmZ.Open
     
     If strm.State = adStateClosed Then strm.Open
@@ -269,7 +279,7 @@ End Function
 
 Public Function GetSpecialFolder(ByVal spFolder As Variant) As String
     If IsNumeric(spFolder) Then
-        GetSpecialFolder = fso.GetSpecialFolder(spFolder)
+        GetSpecialFolder = Fso.GetSpecialFolder(spFolder)
     ElseIf VarType(spFolder) = vbString Then
         GetSpecialFolder = Wsh.SpecialFolders(spFolder)
     Else
@@ -281,24 +291,24 @@ Public Function GetTempFilePath( _
     Optional ByVal tdir As String, Optional extName As String = ".tmp" _
     ) As String
     
-    If StrPtr(tdir) = 0 Then tdir = fso.GetSpecialFolder(TemporaryFolder)
+    If StrPtr(tdir) = 0 Then tdir = Fso.GetSpecialFolder(TemporaryFolder)
     Do
-        GetTempFilePath = fso.BuildPath(tdir, Replace(fso.GetTempName(), ".tmp", extName))
-    Loop While fso.FileExists(GetTempFilePath)
+        GetTempFilePath = Fso.BuildPath(tdir, Replace(Fso.GetTempName(), ".tmp", extName))
+    Loop While Fso.FileExists(GetTempFilePath)
 End Function
 
 Public Function GetUniqueFileName( _
     ByVal fpath As String, Optional delim As String = "_" _
     ) As String
     
-    Dim d As String: d = fso.GetParentFolderName(fpath)
-    Dim b As String: b = fso.GetBaseName(fpath) & delim
-    Dim x As String: x = "." & fso.GetExtensionName(fpath)
+    Dim d As String: d = Fso.GetParentFolderName(fpath)
+    Dim b As String: b = Fso.GetBaseName(fpath) & delim
+    Dim x As String: x = "." & Fso.GetExtensionName(fpath)
     
     Dim n As Long: n = 0
-    While fso.FileExists(fpath)
+    While Fso.FileExists(fpath)
         n = n + 1
-        fpath = fso.BuildPath(d, b & CStr(n) & x)
+        fpath = Fso.BuildPath(d, b & CStr(n) & x)
     Wend
     GetUniqueFileName = fpath
 End Function
@@ -309,7 +319,7 @@ Public Function GetAllFolders(ByVal folderPath As String) As Variant
     GetAllFolders = ClctToArr(ret)
 End Function
 Private Sub GetAllFoldersImpl(ByVal folderPath As String, ByVal ret As Collection)
-    Dim d As Object: Set d = fso.GetFolder(folderPath)
+    Dim d As Object: Set d = Fso.GetFolder(folderPath)
     
     Dim sd As Object
     For Each sd In d.SubFolders
@@ -324,7 +334,7 @@ Public Function GetAllFiles(ByVal folderPath As String) As Variant
     GetAllFiles = ClctToArr(ret)
 End Function
 Private Sub GetAllFilesImpl(ByVal folderPath As String, ByVal ret As Collection)
-    Dim d As Object: Set d = fso.GetFolder(folderPath)
+    Dim d As Object: Set d = Fso.GetFolder(folderPath)
     
     Dim fl As Object
     For Each fl In d.Files: ret.Add fl.path: Next
@@ -334,13 +344,389 @@ Private Sub GetAllFilesImpl(ByVal folderPath As String, ByVal ret As Collection)
 End Sub
 
 Public Sub CreateFolderTree(ByVal folderPath As String)
-    If Not fso.DriveExists(fso.GetDriveName(folderPath)) Then err.Raise 5
+    If Not Fso.DriveExists(Fso.GetDriveName(folderPath)) Then err.Raise 5
     CreateFolderTreeImpl folderPath
 End Sub
 Private Sub CreateFolderTreeImpl(ByVal folderPath As String)
-    If fso.FolderExists(folderPath) Then GoTo Escape
-    CreateFolderTreeImpl fso.GetParentFolderName(folderPath)
-    fso.CreateFolder folderPath
+    If Fso.FolderExists(folderPath) Then GoTo Escape
+    CreateFolderTreeImpl Fso.GetParentFolderName(folderPath)
+    Fso.CreateFolder folderPath
     
 Escape:
 End Sub
+
+
+'*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+'*
+'* 拡張メソッド
+'*
+'* @author Bankura
+'* Copyright (c) 2020 Bankura
+'*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+'******************************************************************************
+'* FileSystemObject ラッパープロシージャ
+'******************************************************************************
+'*-----------------------------------------------------------------------------
+'* Drives プロパティ（読み取り専用）
+'*
+'* [補  足]
+'* ・Drivesオブジェクトを取得する。
+'*-----------------------------------------------------------------------------
+Public Property Get Drives() As Object
+    Set Drives = Fso.Drives
+End Property
+
+'******************************************************************************
+'* [概  要] BuildPath メソッド
+'* [詳  細] BuildPath のラッパーメソッド。
+'*          既存のパスおよび名前からパスを作成します｡
+'*
+'* @param Path
+'* @param Name
+'* @return パス
+'*
+'******************************************************************************
+Public Function BuildPath(ByVal path As String, ByVal name As String) As String
+    BuildPath = Fso.BuildPath(path, name)
+End Function
+
+'******************************************************************************
+'* [概  要] CopyFile メソッド
+'* [詳  細] CopyFile のラッパーメソッド。
+'*         ファイルをコピーします｡
+'*
+'* @param Source
+'* @param Destination
+'* @param OverWriteFiles 省略可能。
+'*
+'******************************************************************************
+Public Sub CopyFile(ByVal source As String, ByVal destination As String, Optional ByVal overWriteFiles As Boolean = True)
+    Call Fso.CopyFile(source, destination, overWriteFiles)
+End Sub
+
+'******************************************************************************
+'* [概  要] CopyFolder メソッド
+'* [詳  細] CopyFolder のラッパーメソッド。
+'*          フォルダをコピーします｡
+'*
+'* @param Source
+'* @param Destination
+'* @param OverWriteFiles 省略可能。
+'*
+'******************************************************************************
+Public Sub CopyFolder(ByVal source As String, ByVal destination As String, Optional ByVal overWriteFiles As Boolean = True)
+    Call Fso.CopyFolder(source, destination, overWriteFiles)
+End Sub
+
+'******************************************************************************
+'* [概  要] CreateFolder メソッド
+'* [詳  細] CreateFolder のラッパーメソッド。
+'*          フォルダを作成します｡
+'*
+'* @param Path
+'* @return Folder
+'*
+'******************************************************************************
+Public Function CreateFolder(ByVal path As String) As Object
+    Set CreateFolder = Fso.CreateFolder(path)
+End Function
+
+'******************************************************************************
+'* [概  要] CreateTextFile メソッド
+'* [詳  細] CreateTextFile のラッパーメソッド。
+'*          TextStream オブジェクトとしてファイルを作成します｡
+'*
+'* @param FileName
+'* @param Overwrite 省略可能。
+'* @param Unicode 省略可能。
+'* @return TextStream
+'*
+'******************************************************************************
+Public Function CreateTextFile(ByVal fileName As String, Optional ByVal overwrite As Boolean = True, Optional ByVal unicode As Boolean = False) As Object
+    Set CreateTextFile = Fso.CreateTextFile(fileName, overwrite, unicode)
+End Function
+
+'******************************************************************************
+'* [概  要] DeleteFile メソッド
+'* [詳  細] DeleteFile のラッパーメソッド。
+'*         ファイルを削除します｡
+'*
+'* @param FileSpec
+'* @param Force 省略可能。
+'*
+'******************************************************************************
+Public Sub DeleteFile(ByVal fileSpec As String, Optional ByVal force As Boolean = False)
+    Call Fso.DeleteFile(fileSpec, force)
+End Sub
+
+'******************************************************************************
+'* [概  要] DeleteFolder メソッド
+'* [詳  細] DeleteFolder のラッパーメソッド。
+'*          フォルダを削除します｡
+'*
+'* @param FolderSpec
+'* @param Force 省略可能。
+'*
+'******************************************************************************
+Public Sub DeleteFolder(ByVal folderSpec As String, Optional ByVal force As Boolean = False)
+    Call Fso.DeleteFolder(folderSpec, force)
+End Sub
+
+
+'******************************************************************************
+'* [概  要] DriveExists メソッド
+'* [詳  細] DriveExists のラッパーメソッド。
+'*          ディスク ドライブまたはネットワーク ドライブが存在するかどうか
+'*          判定します｡
+'*
+'* @param DriveSpec
+'* @return 判定結果
+'*
+'******************************************************************************
+Public Function DriveExists(ByVal driveSpec As String) As Boolean
+    DriveExists = Fso.DriveExists(driveSpec)
+End Function
+
+'******************************************************************************
+'* [概  要] FileExists メソッド
+'* [詳  細] FileExists のラッパーメソッド。
+'*          ファイルが存在するかどうか判定します｡
+'*
+'* @param FileSpec
+'* @return 判定結果
+'*
+'******************************************************************************
+Public Function FileExists(ByVal fileSpec As String) As Boolean
+    FileExists = Fso.FileExists(fileSpec)
+End Function
+
+'******************************************************************************
+'* [概  要] FolderExists メソッド
+'* [詳  細] FolderExists のラッパーメソッド。
+'*          パスが存在するかどうか判定します｡
+'*
+'* @param FolderSpec
+'* @return 判定結果
+'*
+'******************************************************************************
+Public Function FolderExists(ByVal folderSpec As String) As Boolean
+    FolderExists = Fso.FolderExists(folderSpec)
+End Function
+
+'******************************************************************************
+'* [概  要] GetAbsolutePathName メソッド
+'* [詳  細] GetAbsolutePathName のラッパーメソッド。
+'*          パスの基準表現を返します｡
+'*
+'* @param Path
+'* @return 絶対パス
+'*
+'******************************************************************************
+Public Function GetAbsolutePathName(ByVal path As String) As String
+    GetAbsolutePathName = Fso.GetAbsolutePathName(path)
+End Function
+
+'******************************************************************************
+'* [概  要] GetBaseName メソッド
+'* [詳  細] GetBaseName のラッパーメソッド。
+'*          パスのベース名を返します｡
+'*
+'* @param Path
+'* @return パスのベース名
+'*
+'******************************************************************************
+Public Function GetBaseName(ByVal path As String) As String
+    GetBaseName = Fso.GetBaseName(path)
+End Function
+
+'******************************************************************************
+'* [概  要] GetDrive メソッド
+'* [詳  細] GetDrive のラッパーメソッド。
+'*          ディスクドライブ名またはネットワークドライブのUNC 名を取得します｡
+'*
+'* @param DriveSpec
+'* @return Drive ディスクドライブ名／ネットワークドライブのUNC名
+'*
+'******************************************************************************
+Public Function GetDrive(ByVal driveSpec As String) As Object
+    Set GetDrive = Fso.GetDrive(driveSpec)
+End Function
+
+
+'******************************************************************************
+'* [概  要] GetDriveName メソッド
+'* [詳  細] GetDriveName のラッパーメソッド。
+'*          パスのドライブ名を返します｡
+'*
+'* @param Path
+'* @return パスのドライブ名
+'*
+'******************************************************************************
+Public Function GetDriveName(ByVal path As String) As String
+    GetDriveName = Fso.GetDriveName(path)
+End Function
+
+
+'******************************************************************************
+'* [概  要] GetExtensionName メソッド
+'* [詳  細] GetExtensionName のラッパーメソッド。
+'*          パスの拡張子を返します｡
+'*
+'* @param Path
+'* @return パスの拡張子
+'*
+'******************************************************************************
+Public Function GetExtensionName(ByVal path As String) As String
+    GetExtensionName = Fso.GetExtensionName(path)
+End Function
+
+'******************************************************************************
+'* [概  要] GetFile メソッド
+'* [詳  細] GetFile のラッパーメソッド。
+'*         ファイルを取得します｡
+'*
+'* @param FilePath
+'* @return File ファイル
+'*
+'******************************************************************************
+Public Function GetFile(ByVal filePath As String) As Object
+    Set GetFile = Fso.GetFile(filePath)
+End Function
+
+'******************************************************************************
+'* [概  要] GetFileName メソッド
+'* [詳  細] GetFileName のラッパーメソッド。
+'*         パスのファイル名を返します｡
+'*
+'* @param Path
+'* @return ファイル名
+'*
+'******************************************************************************
+Public Function GetFileName(ByVal path As String) As String
+    GetFileName = Fso.GetFileName(path)
+End Function
+
+'******************************************************************************
+'* [概  要] GetFileVersion メソッド
+'* [詳  細] GetFileVersion のラッパーメソッド。
+'*         Retrieve the file version of the specified file into a string
+'*
+'* @param FileName
+'* @return file version
+'*
+'******************************************************************************
+Public Function GetFileVersion(ByVal fileName As String) As String
+    GetFileVersion = Fso.GetFileVersion(fileName)
+End Function
+
+'******************************************************************************
+'* [概  要] GetFolder メソッド
+'* [詳  細] GetFolder のラッパーメソッド。
+'*         フォルダを取得します｡
+'*
+'* @param FolderPath
+'* @return Folder フォルダ
+'*
+'******************************************************************************
+Public Function GetFolder(ByVal folderPath As String) As Object
+    Set GetFolder = Fso.GetFolder(folderPath)
+End Function
+
+'******************************************************************************
+'* [概  要] GetParentFolderName メソッド
+'* [詳  細] GetParentFolderName のラッパーメソッド。
+'*         1 つ上のフォルダのパスを返します｡
+'*
+'* @param Path
+'* @return 1つ上のフォルダパス
+'*
+'******************************************************************************
+Public Function GetParentFolderName(ByVal path As String) As String
+    GetParentFolderName = Fso.GetParentFolderName(path)
+End Function
+
+'重複のためコメントアウト
+'******************************************************************************
+'* [概  要] GetSpecialFolder メソッド
+'* [詳  細] GetSpecialFolder のラッパーメソッド。
+'*         各システムフォルダの位置を取得します｡
+'*
+'* @param SpecialFolder
+'* @return Folder 各システムフォルダの位置
+'*
+'******************************************************************************
+'Public Function GetSpecialFolder(SpecialFolder As SpFolderEnum) As Object
+'    Set GetSpecialFolder = fso.GetSpecialFolder(SpecialFolder)
+'End Function
+
+'******************************************************************************
+'* [概  要] GetStandardStream メソッド
+'* [詳  細] GetStandardStream のラッパーメソッド。
+'*         指定した標準の TextStream オブジェクトを返します｡
+'*
+'* @param StandardStreamType
+'* @param Unicode 省略可能。
+'* @return TextStream 標準のTextStreamオブジェクト
+'*
+'******************************************************************************
+Public Function GetStandardStream(ByVal standardStreamType As StandardStreamTypes, Optional ByVal unicode As Boolean = False) As Object
+    Set GetStandardStream = Fso.GetStandardStream(standardStreamType, unicode)
+End Function
+
+'******************************************************************************
+'* [概  要] GetTempName メソッド
+'* [詳  細] GetTempName のラッパーメソッド。
+'*         一時ファイルの名前として使用する名前を作成します｡
+'*
+'* @return 一時ファイルの名前
+'*
+'******************************************************************************
+Public Function GetTempName() As String
+    GetTempName = Fso.GetTempName()
+End Function
+
+'******************************************************************************
+'* [概  要] MoveFile メソッド
+'* [詳  細] MoveFile のラッパーメソッド。
+'*          ファイルを移動します｡
+'*
+'* @param Source
+'* @param Destination
+'*
+'******************************************************************************
+Public Sub MoveFile(ByVal source As String, ByVal destination As String)
+    Call Fso.MoveFile(source, destination)
+End Sub
+
+'******************************************************************************
+'* [概  要] MoveFolder メソッド
+'* [詳  細] MoveFolder のラッパーメソッド。
+'*          フォルダを移動します｡
+'*
+'* @param Source
+'* @param Destination
+'*
+'******************************************************************************
+Public Sub MoveFolder(ByVal source As String, ByVal destination As String)
+    Call Fso.MoveFolder(source, destination)
+End Sub
+
+'******************************************************************************
+'* [概  要] OpenTextFile メソッド
+'* [詳  細] OpenTextFile のラッパーメソッド。
+'*          ファイルを TextStream オブジェクトとして開きます｡
+'*
+'* @param FileName
+'* @param IOMode 省略可能。
+'* @param Create 省略可能。
+'* @param Format 省略可能。
+'* @return TextStream ファイルストリーム
+'*
+'******************************************************************************
+Public Function OpenTextFile(ByVal fileName As String, _
+                      Optional ByVal IOMode As OpenFileEnum = ForReading, _
+                      Optional ByVal create As Boolean = False, _
+                      Optional ByVal format As TristateEnum = False_) As Object
+    Set OpenTextFile = Fso.OpenTextFile(fileName, IOMode, create, format)
+End Function

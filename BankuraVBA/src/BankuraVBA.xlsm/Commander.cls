@@ -89,7 +89,7 @@ Public Function GetCommandResultAsTextStream(commandString, Optional myTempPath)
     
     ' コマンド実行
     Call Core.Wsh.Run(execComandString.ToString, WshHide, True)
-    Set GetCommandResultAsTextStream = IO.fso.OpenTextFile(tempPath, Base.ForReading)
+    Set GetCommandResultAsTextStream = IO.Fso.OpenTextFile(tempPath, Base.ForReading)
 End Function
 
 '******************************************************************************
@@ -113,7 +113,7 @@ Public Function GetCommandResult(commandString) As String
         ret = ts.ReadAll
     End If
     ts.Close
-    Call IO.fso.DeleteFile(tempPath, True)
+    Call IO.Fso.DeleteFile(tempPath, True)
     GetCommandResult = ret
 End Function
 
@@ -143,7 +143,7 @@ Public Function Exec(commandString As String) As CommandResult
     Dim oExec: Set oExec = Core.Wsh.Exec(commandString)
     
     ' コマンド実行中待機
-    Do While (oExec.status = 0)
+    Do While (oExec.Status = 0)
         Application.Wait [Now()] + 100 / 86400000
         DoEvents
     Loop
@@ -161,8 +161,8 @@ Public Function Exec(commandString As String) As CommandResult
 
     ' 正常時処理
     Dim varr As New ArrayEx
-    While Not oExec.stdOut.AtEndOfStream
-        varr.Add oExec.stdOut.ReadLine
+    While Not oExec.StdOut.AtEndOfStream
+        varr.Add oExec.StdOut.ReadLine
     Wend
     res.StdOutList = varr.ToArray
     res.RowMax = varr.Length
@@ -309,5 +309,54 @@ End Sub
 Public Sub RunCharmap()
     Core.Wsh.Run "charmap.exe"
     Core.Wsh.AppActivate "文字コード表"
+End Sub
+
+'******************************************************************************
+'* [概  要] RunMsPaint
+'* [詳  細] ペイントを起動する。
+'*
+'******************************************************************************
+Public Sub RunMsPaint()
+    Core.Wsh.Run "mspaint.exe"
+    Core.Wsh.AppActivate "ペイント"
+End Sub
+
+'******************************************************************************
+'* [概  要] RunNotepad
+'* [詳  細] メモ帳を起動する。
+'*
+'******************************************************************************
+Public Sub RunNotepad()
+    Core.Wsh.Run "notepad.exe"
+    Core.Wsh.AppActivate "メモ帳"
+End Sub
+
+'******************************************************************************
+'* [概  要] RunCmd
+'* [詳  細] コマンドプロンプトを起動する。
+'*
+'******************************************************************************
+Public Sub RunCmd()
+    Core.Wsh.Run "cmd.exe"
+    Core.Wsh.AppActivate "コマンドプロンプト"
+End Sub
+
+'******************************************************************************
+'* [概  要] RunPowerShell
+'* [詳  細] PowerShellを起動する。
+'*
+'******************************************************************************
+Public Sub RunPowerShell()
+    Core.Wsh.Run "powershell.exe"
+    Core.Wsh.AppActivate "Windows PowerShell"
+End Sub
+
+'******************************************************************************
+'* [概  要] RunVSCode
+'* [詳  細] Visual Studio Codeを起動する。
+'*
+'******************************************************************************
+Public Sub RunVSCode()
+    Core.Wsh.Run "code"
 End Sub
 

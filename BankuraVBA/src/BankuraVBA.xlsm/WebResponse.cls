@@ -136,9 +136,9 @@ End Sub
 Public Sub CreateFromHttp(Client As WebClient, Request As WebRequest, Http As Object)
     On Error GoTo web_ErrorHandling
 
-    Me.StatusCode = Http.status
+    Me.StatusCode = Http.Status
     Me.StatusDescription = Http.StatusText
-    Me.Content = Http.ResponseText
+    Me.Content = Http.responseText
     Me.Body = Http.ResponseBody
 
     web_LoadValues Http.GetAllResponseHeaders, Me.Content, Me.Body, Request
@@ -308,7 +308,7 @@ Private Sub web_LoadValues(web_Headers As String, web_Content As String, web_Bod
             WebHelpers.ParseByFormat(web_Content, web_Request.ResponseFormat, web_Request.CustomResponseFormat, web_Body)
 
         If err.Number <> 0 Then
-            WebHelpers.LogError err.Description, err.Source, err.Number
+            WebHelpers.LogError err.Description, err.source, err.Number
             err.Clear
         End If
         On Error GoTo 0

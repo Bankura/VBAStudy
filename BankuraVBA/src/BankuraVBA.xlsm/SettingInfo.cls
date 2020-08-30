@@ -80,17 +80,17 @@ Private Sub GetMasterInfo()
     Set reg = GetRegExp()
     With reg
         .Pattern = "^" & mstHeadLetters & ".*"
-        .ignorecase = True
+        .IgnoreCase = True
         .Global = True
     End With
     
     Dim wb As Workbook, ws As Worksheet
     Set wb = Application.ThisWorkbook
     For Each ws In wb.Worksheets
-        If reg.Test(ws.Name) Then
+        If reg.Test(ws.name) Then
             Dim master As Object
             Set master = GetMasterDataFromSheet(ws, StartRow, StartCol, 2)
-            Call mMasters.Add(ws.Name, master)
+            Call mMasters.Add(ws.name, master)
         End If
     Next
 End Sub

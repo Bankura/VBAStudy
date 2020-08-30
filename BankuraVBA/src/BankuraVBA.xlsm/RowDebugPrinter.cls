@@ -49,7 +49,7 @@ End Sub
 
 '******************************************************************************
 '* [概  要] Edit
-'* [詳  細] 開始時の行編集処理を行う。
+'* [詳  細] 行編集処理を行う。
 '*
 '******************************************************************************
 Public Sub Edit(enumerator As Object)
@@ -62,8 +62,6 @@ Public Sub Edit(enumerator As Object)
     Debug.Print msg.ToString
 End Sub
 
-Public Property Get MaxReportCount() As Long
-End Property
 '******************************************************************************
 '* [概  要] EndProcess
 '* [詳  細] 終了時の処理を行う。

@@ -194,9 +194,9 @@ Public Function Formats(ByVal strTemplate As String, ParamArray vals() As Varian
     Dim ms As Object: Set ms = re.Execute(strTemplate)
     
     Dim ret As Variant: ret = Array()
-    If ms.count < 1 Then GoTo Ending
+    If ms.Count < 1 Then GoTo Ending
     
-    ReDim ret(2 * ms.count)
+    ReDim ret(2 * ms.Count)
     Dim ix0 As Long: ix0 = 1
     Dim ix1 As Long: ix1 = 1
     
@@ -210,7 +210,7 @@ Public Function Formats(ByVal strTemplate As String, ParamArray vals() As Varian
         
         ret(i + 0) = Replace(Replace(s, "{{", "{"), "}}", "}") 'FIXME: check non-escape brace
         If Len(brcs) Mod 2 = 0 Then
-            ret(i + 1) = Format$(vals(m.SubMatches(1)), m.SubMatches(3))
+            ret(i + 1) = format$(vals(m.SubMatches(1)), m.SubMatches(3))
         Else
             ret(i + 1) = m.SubMatches(1)
         End If
@@ -272,7 +272,7 @@ Err438:
     Dim e As ErrObject: Set e = err
     Select Case e.Number
         Case 438: ToStr = TypeName(x): Resume Next
-        Case Else: err.Raise e.Number, e.Source, e.Description, e.HelpFile, e.HelpContext
+        Case Else: err.Raise e.Number, e.source, e.Description, e.HelpFile, e.HelpContext
     End Select
     
 Escape:
@@ -297,7 +297,7 @@ Public Function Dump(ByVal x As Variant) As String
     Case "Date":
         Dim d As String, t As String
         If Abs(x) >= 1 Then d = Month(x) & "/" & Day(x) & "/" & Year(x)
-        If Not IsInt(x) Then t = Format(x, "h:nn:ss AM/PM")
+        If Not IsInt(x) Then t = format(x, "h:nn:ss AM/PM")
         Dump = "#" & Trim(d & " " & t) & "#"
     Case "String"
         If StrPtr(x) = 0 Then
@@ -826,7 +826,7 @@ End Sub
 ''' @param clct As Collection(Of T)
 ''' @return As Variant(Of T)
 Public Function Pop(ByVal clct As Collection) As Variant
-    Dim i As Long: i = clct.count
+    Dim i As Long: i = clct.Count
     If IsObject(clct.Item(i)) Then Set Pop = clct.Item(i) Else Let Pop = clct.Item(i)
     clct.Remove i
 End Function
@@ -834,7 +834,7 @@ End Function
 ''' @param clct As Collection(Of T)
 ''' @param val As Variant(Of T)
 Public Sub Shift(ByVal clct As Collection, ByVal val As Variant)
-    If clct.count < 1 Then
+    If clct.Count < 1 Then
         clct.Add val
     Else
         clct.Add val, , 1
@@ -862,7 +862,7 @@ End Function
 ''' @return As Variant(Of Array(Of T))
 Public Function ClctToArr(ByVal clct As Collection) As Variant
     Dim arr As Variant: arr = Array()
-    Dim clen As Long: clen = clct.count
+    Dim clen As Long: clen = clct.Count
     If clen < 1 Then GoTo Ending
     
     ReDim arr(clen - 1)
@@ -987,7 +987,7 @@ Public Function CreateRegExp( _
     Set CreateRegExp = CreateObject("VBScript.RegExp")
     CreateRegExp.Pattern = ptrnFind
     CreateRegExp.Global = WithIncrIf(InStr(regexpOption, "g") > 0, True, cnt)
-    CreateRegExp.ignorecase = WithIncrIf(InStr(regexpOption, "i") > 0, True, cnt)
+    CreateRegExp.IgnoreCase = WithIncrIf(InStr(regexpOption, "i") > 0, True, cnt)
     If cnt <> Len(regexpOption) Then err.Raise 5
 End Function
 Private Function WithIncrIf( _
@@ -1011,10 +1011,10 @@ Public Function ReMatch( _
     
     Dim regex As Object:  Set regex = CreateRegExp(ptrnFind, IIf(iCase, "i", ""))
     Dim ms As Object:     Set ms = regex.Execute(expr)
-    If ms.count < 1 Then: GoTo Ending
+    If ms.Count < 1 Then: GoTo Ending
     
     Dim sms As Object:    Set sms = ms(0).SubMatches
-    ReDim ret(sms.count)
+    ReDim ret(sms.Count)
     
     ret(0) = ms.Item(0).value
     Dim i As Integer
@@ -1037,11 +1037,11 @@ Public Function ReMatcheGlobal( _
     
     Dim regex As Object: Set regex = CreateRegExp(ptrnFind, IIf(iCase, "i", "") & "g")
     Dim ms As Object:    Set ms = regex.Execute(expr)
-    If ms.count < 1 Then GoTo Ending
+    If ms.Count < 1 Then GoTo Ending
     
-    ReDim ret(ms.count - 1)
+    ReDim ret(ms.Count - 1)
     
-    Dim arr As Variant: ReDim arr(ms(0).SubMatches.count)
+    Dim arr As Variant: ReDim arr(ms(0).SubMatches.Count)
     
     Dim i As Integer, j As Integer
     For i = 0 To UBound(ret)

@@ -364,15 +364,16 @@ End Function
 '*
 '* @param val 検証値
 '* @param patternStr パターン文字列（正規表現）
+'* @param igCase 大文字小文字を区別するか
 '* @return 判定結果（True：合致）、
 '*         検証・パターン文字列が設定されていない場合False
 '*
 '******************************************************************************
-Public Function ValidatePattern(val As String, patternStr As String) As Boolean
+Public Function ValidatePattern(ByVal val As String, ByVal patternStr As String, Optional ByVal igCase As Boolean = False) As Boolean
     If Len(val) > 0 And patternStr <> "" Then
         With Base.GetRegExp
             .Pattern = patternStr
-            .ignorecase = False
+            .IgnoreCase = igCase
             .Global = True
             ValidatePattern = .Test(val)
         End With
@@ -390,7 +391,7 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG）
 '*
 '******************************************************************************
-Public Function IsHalf(val As String, Optional required As Boolean = False) As Boolean
+Public Function IsHalf(ByVal val As String, Optional ByVal required As Boolean = False) As Boolean
     Dim checkValue As String
     If Len(val) > 0 Then
         checkValue = StrConv(val, vbFromUnicode)
@@ -414,7 +415,7 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG）
 '*
 '******************************************************************************
-Public Function IsNotHalf(val As String, Optional required As Boolean = False) As Boolean
+Public Function IsNotHalf(ByVal val As String, Optional ByVal required As Boolean = False) As Boolean
     If Len(val) > 0 Then
     
         IsNotHalf = Not IsHalf(val, True)
@@ -435,7 +436,7 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG）
 '*
 '******************************************************************************
-Public Function IsHalfAlphaNumeric(val As String, Optional required As Boolean = False) As Boolean
+Public Function IsHalfAlphaNumeric(ByVal val As String, Optional ByVal required As Boolean = False) As Boolean
     Dim i As Long
     If Len(val) > 0 Then
         For i = 1 To Len(val)
@@ -460,7 +461,7 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG）
 '*
 '******************************************************************************
-Public Function IsNotHalfAlphaNumeric(val As String, Optional required As Boolean = False) As Boolean
+Public Function IsNotHalfAlphaNumeric(ByVal val As String, Optional ByVal required As Boolean = False) As Boolean
     If Len(val) > 0 Then
         IsNotHalfAlphaNumeric = Not IsHalfAlphaNumeric(val, True)
         Exit Function
@@ -480,7 +481,7 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG）
 '*
 '******************************************************************************
-Public Function IsHalfAlphaNumericSymbol(val As String, Optional required As Boolean = False) As Boolean
+Public Function IsHalfAlphaNumericSymbol(ByVal val As String, Optional ByVal required As Boolean = False) As Boolean
     If Len(val) > 0 Then
         IsHalfAlphaNumericSymbol = ValidatePattern(val, "^[a-zA-Z0-9!-/:-@\[-`{-~]*$")
         Exit Function
@@ -500,7 +501,7 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG）
 '*
 '******************************************************************************
-Public Function IsNotHalfAlphaNumericSymbol(val As String, Optional required As Boolean = False) As Boolean
+Public Function IsNotHalfAlphaNumericSymbol(ByVal val As String, Optional ByVal required As Boolean = False) As Boolean
     If Len(val) > 0 Then
         IsNotHalfAlphaNumericSymbol = Not IsHalfAlphaNumericSymbol(val, True)
         Exit Function
@@ -520,7 +521,7 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG）
 '*
 '******************************************************************************
-Public Function IsNumber(val As String, Optional required As Boolean = False) As Boolean
+Public Function IsNumber(ByVal val As String, Optional ByVal required As Boolean = False) As Boolean
     Dim i As Long
     If Len(val) > 0 Then
         For i = 1 To Len(val)
@@ -545,7 +546,7 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG）
 '*
 '******************************************************************************
-Public Function IsNotNumber(val As String, Optional required As Boolean = False) As Boolean
+Public Function IsNotNumber(ByVal val As String, Optional ByVal required As Boolean = False) As Boolean
     Dim i As Long
     If Len(val) > 0 Then
         IsNotNumber = Not IsNumber(val, True)
@@ -566,7 +567,7 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG）
 '*
 '******************************************************************************
-Public Function IsZenKatakana(val As String, Optional required As Boolean = False) As Boolean
+Public Function IsZenKatakana(ByVal val As String, Optional ByVal required As Boolean = False) As Boolean
     If Len(val) > 0 Then
         IsZenKatakana = ValidatePattern(val, "^[ァ-ンヴー]*$")
         Exit Function
@@ -586,7 +587,7 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG）
 '*
 '******************************************************************************
-Public Function IsNotZenKatakana(val As String, Optional required As Boolean = False) As Boolean
+Public Function IsNotZenKatakana(ByVal val As String, Optional ByVal required As Boolean = False) As Boolean
     If Len(val) > 0 Then
         IsNotZenKatakana = Not IsZenKatakana(val, True)
         Exit Function
@@ -606,7 +607,7 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG））
 '*
 '******************************************************************************
-Public Function IsZenHiragana(val As String, Optional required As Boolean = False) As Boolean
+Public Function IsZenHiragana(ByVal val As String, Optional ByVal required As Boolean = False) As Boolean
     If Len(val) > 0 Then
         IsZenHiragana = ValidatePattern(val, "^[ぁ-んー]*$")
         Exit Function
@@ -626,7 +627,7 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG）
 '*
 '******************************************************************************
-Public Function IsNotZenHiragana(val As String, Optional required As Boolean = False) As Boolean
+Public Function IsNotZenHiragana(ByVal val As String, Optional ByVal required As Boolean = False) As Boolean
     If Len(val) > 0 Then
         IsNotZenHiragana = Not IsZenHiragana(val, True)
         Exit Function
@@ -647,12 +648,12 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG）
 '*
 '******************************************************************************
-Public Function IsDateString(val As String, Optional separator As String = "/", Optional required As Boolean = False) As Boolean
+Public Function IsDateString(ByVal val As String, Optional ByVal separator As String = "/", Optional ByVal required As Boolean = False) As Boolean
     Dim i As Long, tmp As String, tmpDate As String
     If Len(val) > 0 Then
         For i = 1 To Len(val)
             tmp = Mid(val, i, 1)
-            If i <> 5 And i <> 8 And (tmp Like "[0-9]") Then
+            If separator = "" Or (i <> 5 And i <> 8 And (tmp Like "[0-9]")) Then
                 tmpDate = tmpDate & tmp
             ElseIf i = 5 Or i = 8 Then
                 If separator <> "" And (tmp <> separator) Then
@@ -665,7 +666,7 @@ Public Function IsDateString(val As String, Optional separator As String = "/", 
             IsDateString = False
             Exit Function
         End If
-        tmpDate = Format(tmpDate, "####/##/##")
+        tmpDate = format(tmpDate, "####/##/##")
         IsDateString = VBA.IsDate(tmpDate)
         Exit Function
     ElseIf required Then
@@ -685,7 +686,7 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG）
 '*
 '******************************************************************************
-Public Function IsNotDateString(val As String, Optional separator As String = "/", Optional required As Boolean = False) As Boolean
+Public Function IsNotDateString(ByVal val As String, Optional ByVal separator As String = "/", Optional ByVal required As Boolean = False) As Boolean
     If Len(val) > 0 Then
         IsNotDateString = Not IsDateString(val, separator, True)
         Exit Function
@@ -697,6 +698,76 @@ Public Function IsNotDateString(val As String, Optional separator As String = "/
 End Function
 
 '******************************************************************************
+'* [概  要] 日時チェック処理。
+'* [詳  細] 値が日付（yyyy/mm/dd hh:nn:ss）かどうか判定する｡
+'*
+'* @param val 検証値
+'* @param separator 日付セパレータ。デフォルト「/」
+'* @param required 必須か（デフォルトFalse）
+'* @return Boolean チェック結果（True：OK、False：NG）
+'*
+'******************************************************************************
+Public Function IsDateTimeString(ByVal val As String, Optional ByVal separator As String = "/", Optional ByVal required As Boolean = False) As Boolean
+    Dim i As Long, tmp As String, tmpDate As String
+    If Len(val) > 0 Then
+        For i = 1 To Len(val)
+            tmp = Mid(val, i, 1)
+            If separator = "" Or _
+               (i <> 5 And i <> 8 And i <> 11 And i <> 14 And i <> 17 And (tmp Like "[0-9]")) Then
+                tmpDate = tmpDate & tmp
+            ElseIf i = 5 Or i = 8 Then
+                If separator <> "" And (tmp <> separator) Then
+                    IsDateTimeString = False
+                    Exit Function
+                End If
+            ElseIf i = 11 Then
+                If separator <> "" And (tmp <> " ") Then
+                    IsDateTimeString = False
+                    Exit Function
+                End If
+            ElseIf i <> 14 And i <> 17 Then
+                If separator <> "" And (tmp <> ":") Then
+                    IsDateTimeString = False
+                    Exit Function
+                End If
+            End If
+        Next
+        If Len(tmpDate) <> 14 Then
+            IsDateTimeString = False
+            Exit Function
+        End If
+        tmpDate = format(tmpDate, "####/##/## ##:##:##")
+        IsDateTimeString = VBA.IsDate(tmpDate)
+        Exit Function
+    ElseIf required Then
+        IsDateTimeString = False
+        Exit Function
+    End If
+    IsDateTimeString = True
+End Function
+
+'******************************************************************************
+'* [概  要] 日時チェック処理。
+'* [詳  細] 値が日付（yyyy/mm/dd hh:nn:ss）以外かどうか判定する｡
+'*
+'* @param val 検証値
+'* @param separator 日付セパレータ。デフォルト「/」
+'* @param required 必須か（デフォルトFalse）
+'* @return Boolean チェック結果（True：OK、False：NG）
+'*
+'******************************************************************************
+Public Function IsNotDateTimeString(ByVal val As String, Optional ByVal separator As String = "/", Optional ByVal required As Boolean = False) As Boolean
+    If Len(val) > 0 Then
+        IsNotDateTimeString = Not IsDateTimeString(val, separator, True)
+        Exit Function
+    ElseIf required Then
+        IsNotDateTimeString = False
+        Exit Function
+    End If
+    IsNotDateTimeString = True
+End Function
+
+'******************************************************************************
 '* [概  要] 郵便番号チェック処理。
 '* [詳  細] 値が郵便番号かどうか判定する｡
 '*
@@ -705,7 +776,7 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG）
 '*
 '******************************************************************************
-Public Function IsZipCode(val As String, Optional required As Boolean = False) As Boolean
+Public Function IsZipCode(ByVal val As String, Optional ByVal required As Boolean = False) As Boolean
     If Len(val) > 0 Then
         IsZipCode = ValidatePattern(val, "^\d{7}$|^\d{3}-\d{4}$")
         Exit Function
@@ -725,7 +796,7 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG）
 '*
 '******************************************************************************
-Public Function IsTelNo(val As String, Optional required As Boolean = False) As Boolean
+Public Function IsTelNo(ByVal val As String, Optional ByVal required As Boolean = False) As Boolean
     If Len(val) > 0 Then
         IsTelNo = ValidatePattern(val, "^0\d{9,10}$|^0\d{2,3}-\d{1,4}-\d{4}$")
         Exit Function
@@ -745,7 +816,7 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG）
 '*
 '******************************************************************************
-Public Function IsMailAddress(val As String, Optional required As Boolean = False) As Boolean
+Public Function IsMailAddress(ByVal val As String, Optional ByVal required As Boolean = False) As Boolean
     If Len(val) > 0 Then
         IsMailAddress = ValidatePattern(val, "^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$")
         Exit Function
@@ -767,10 +838,10 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG）
 '*
 '******************************************************************************
-Public Function ValidateNumRange(checkVal As Variant, _
-                                  startVal As Long, _
-                                  endVal As Long, _
-                                  Optional required As Boolean = False) As Boolean
+Public Function ValidateNumRange(ByVal checkVal As Variant, _
+                                 ByVal startVal As Long, _
+                                 ByVal endVal As Long, _
+                                 Optional ByVal required As Boolean = False) As Boolean
     If required Then
         If IsNotPrimitive(checkVal) Then
             ValidateNumRange = False
@@ -807,8 +878,8 @@ End Function
 '          pLength チェック桁数
 '* @return Boolean チェック結果（True：False：NG）
 '******************************************************************************
-Public Function ValidateFixedLength(checkVal As Variant, _
-                                pLength As Long) As Boolean
+Public Function ValidateFixedLength(ByVal checkVal As Variant, _
+                                    ByVal pLength As Long) As Boolean
     If IsNotPrimitive(checkVal) Then
         ValidateFixedLength = False
         Exit Function
@@ -829,8 +900,8 @@ End Function
 '          pLength チェック桁数
 '* @return Boolean チェック結果（True：False：NG）
 '******************************************************************************
-Public Function ValidateMaxLength(checkVal As Variant, _
-                                  pLength As Long) As Boolean
+Public Function ValidateMaxLength(ByVal checkVal As Variant, _
+                                  ByVal pLength As Long) As Boolean
     If IsNotPrimitive(checkVal) Then
         ValidateMaxLength = False
         Exit Function
@@ -852,8 +923,8 @@ End Function
 '          pLength チェック桁数
 '* @return Boolean チェック結果（True：False：NG）
 '******************************************************************************
-Public Function ValidateMinLength(checkVal As Variant, _
-                                  pLength As Long) As Boolean
+Public Function ValidateMinLength(ByVal checkVal As Variant, _
+                                  ByVal pLength As Long) As Boolean
     If IsNotPrimitive(checkVal) Then
         ValidateMinLength = False
         Exit Function
@@ -876,9 +947,9 @@ End Function
 '* @param maxLength 最大桁数
 '* @return Boolean チェック結果（True：False：NG）
 '******************************************************************************
-Public Function ValidateRangeLength(checkVal As Variant, _
-                                    minLength As Long, _
-                                    maxLength As Long) As Boolean
+Public Function ValidateRangeLength(ByVal checkVal As Variant, _
+                                    ByVal minLength As Long, _
+                                    ByVal maxLength As Long) As Boolean
     ValidateRangeLength = ValidateMinLength(checkVal, minLength) And _
                           ValidateMaxLength(checkVal, maxLength)
 End Function
@@ -891,7 +962,7 @@ End Function
 '* @return Boolean チェック結果（True：OK、False：NG）
 '*
 '******************************************************************************
-Public Function ValidateCellAddress(val As Variant) As Boolean
+Public Function ValidateCellAddress(ByVal val As Variant) As Boolean
     Dim cntAlph As Integer
     Dim iLen As Integer
     Dim i As Integer

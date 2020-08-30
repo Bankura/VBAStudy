@@ -87,7 +87,7 @@ End Enum
 '* íËêîíËã`
 '******************************************************************************
 Public Const ANYSIZE_ARRAY = 1
-Public Const DELETE = &H10000
+Public Const Delete = &H10000
 Public Const READ_CONTROL = &H20000
 Public Const WRITE_DAC = &H40000
 Public Const WRITE_OWNER = &H80000
@@ -13016,7 +13016,7 @@ Public Type PRINTER_INFO_2
         DefaultPriority As Long
         StartTime As Long
         UntilTime As Long
-        status As Long
+        Status As Long
         cJobs As Long
         AveragePPM As Long
 End Type
@@ -13033,7 +13033,7 @@ Public Type JOB_INFO_1
         pDocument As String
         pDatatype As String
         pStatus As String
-        status As Long
+        Status As Long
         Priority As Long
         Position As Long
         TotalPages As Long
@@ -13055,7 +13055,7 @@ Public Type JOB_INFO_2
         pDevmode As DEVMODE
         pStatus As String
         pSecurityDescriptor As SECURITY_DESCRIPTOR
-        status As Long
+        Status As Long
         Priority As Long
         Position As Long
         StartTime As Long
@@ -13292,7 +13292,7 @@ End Type
 '
 Public Type USER_INFO_3
    ' Level 0 starts here
-   Name As LongPtr
+   name As LongPtr
    ' Level 1 starts here
    Password As LongPtr
    PasswordAge As Long
@@ -13327,7 +13327,7 @@ Public Type USER_INFO_3
 End Type
 
 Public Type GROUP_INFO_2
-   Name As LongPtr
+   name As LongPtr
    Comment As LongPtr
    GroupID As Long
    Attributes As Long

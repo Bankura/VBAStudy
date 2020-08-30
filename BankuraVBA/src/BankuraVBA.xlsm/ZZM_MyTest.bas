@@ -108,7 +108,7 @@ Sub TestHoge()
     Debug.Print GetExcelBookProc
     Dim i As Long
     For i = 0 To UBound(WinApiFunctions.wD)
-        Debug.Print WinApiFunctions.wD(i).wkb.Name
+        Debug.Print WinApiFunctions.wD(i).wkb.name
     Next
     
 End Sub
@@ -552,7 +552,7 @@ Sub ColUtils_Test()
     col.Add "ddd", "D"
     col.Add "e", "E"
 
-    Debug.Print col.count
+    Debug.Print col.Count
     Dim v
     For Each v In col
         Debug.Print v
@@ -604,16 +604,18 @@ End Sub
 
 Sub Commander_Test001()
     Dim cmdr As New Commander
-    cmdr.RunRegistoryEditor
+    cmdr.RunVSCode
 
 End Sub
 Sub DosCommander_Test001()
     Dim cmdr As New DosCommander
     Dim v
-    For Each v In cmdr.CmdDir("C:\dev\vba", "/R", "/A")
+'    For Each v In cmdr.CmdDir("C:\dev\vba", "/R", "/A")
+'        Debug.Print v
+'    Next
+    For Each v In cmdr.GetFilePathsRecursive("C:\dev\vba")
         Debug.Print v
     Next
-
 End Sub
 
 Sub PowershellCommander_Test001()

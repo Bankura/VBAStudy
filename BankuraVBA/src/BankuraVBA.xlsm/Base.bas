@@ -149,7 +149,7 @@ End Sub
 '*
 '******************************************************************************
 Public Sub ErrorProcess()
-    Debug.Print "エラー発生 Number: " & err.Number & " Source: " & err.Source & " Description: " & err.Description
+    Debug.Print "エラー発生 Number: " & err.Number & " Source: " & err.source & " Description: " & err.Description
 End Sub
 
 '******************************************************************************
@@ -299,7 +299,7 @@ End Function
 '*
 '******************************************************************************
 Public Function CheckXlApplication() As Boolean
-    CheckXlApplication = InStr(Application.Name, "Excel") > 0
+    CheckXlApplication = InStr(Application.name, "Excel") > 0
 End Function
 
 '******************************************************************************
@@ -367,7 +367,7 @@ Public Function CreateObject32bit(ByVal strClassName As String) As Variant
                      ""
 
     ' 一時スクリプトファイル作成
-    With IO.fso
+    With IO.Fso
         Dim strTempFile As String
         Do
             strTempFile = .BuildPath(.GetSpecialFolder(2), .GetTempName() & ".vbs")
@@ -380,9 +380,9 @@ Public Function CreateObject32bit(ByVal strClassName As String) As Variant
     
     ' 一時スクリプトファイル実行(32bit)
     With Core.Wsh.Environment("Process")
-        .Item("SysWOW64") = IO.fso.BuildPath(.Item("SystemRoot"), "SysWOW64")
-        .Item("WScriptName") = IO.fso.GetFileName("C:\WINDOWS\SysWOW64\cscript.exe")
-        .Item("WScriptWOW64") = IO.fso.BuildPath(.Item("SysWOW64"), .Item("WScriptName"))
+        .Item("SysWOW64") = IO.Fso.BuildPath(.Item("SystemRoot"), "SysWOW64")
+        .Item("WScriptName") = IO.Fso.GetFileName("C:\WINDOWS\SysWOW64\cscript.exe")
+        .Item("WScriptWOW64") = IO.Fso.BuildPath(.Item("SysWOW64"), .Item("WScriptName"))
         .Item("Run") = .Item("WScriptWOW64") & " """ & strTempFile & """"
          Core.Wsh.Run .Item("Run"), True
     End With

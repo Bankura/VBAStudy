@@ -87,10 +87,10 @@ Private mRegExp As Object
 '*-----------------------------------------------------------------------------
 '* Name プロパティ
 '*-----------------------------------------------------------------------------
-Property Get Name() As String
-    Name = mName
+Property Get name() As String
+    name = mName
 End Property
-Property Let Name(arg As String)
+Property Let name(arg As String)
     mName = arg
 End Property
 
@@ -245,12 +245,7 @@ End Property
 '* コンストラクタ・デストラクタ
 '******************************************************************************
 Private Sub Class_Initialize()
-    On Error Resume Next
-    Set mRegExp = GetRegExp
-    On Error GoTo 0
-    If mRegExp Is Nothing Then
-        Set mRegExp = CreateObject("VBScript.RegExp")
-    End If
+    Set mRegExp = Base.GetRegExp
     mRequired = False
     mValidOk = False
     mRequiredOk = False
@@ -413,7 +408,7 @@ Private Function ValidatePattern() As Boolean
     If Len(mValue) > 0 And mPattern <> "" Then
         With mRegExp
             .Pattern = mPattern
-            .ignorecase = False
+            .IgnoreCase = False
             .Global = True
             ValidatePattern = .Test(mValue)
         End With
@@ -516,7 +511,7 @@ Private Function IsHalfAlphaNumericSymbol() As Boolean
     If Len(mValue) > 0 Then
         With mRegExp
             .Pattern = "^[a-zA-Z0-9!-/:-@\[-`{-~]*$"
-            .ignorecase = False
+            .IgnoreCase = False
             .Global = True
             IsHalfAlphaNumericSymbol = .Test(mValue)
         End With
@@ -556,7 +551,7 @@ Private Function IsZenKatakana() As Boolean
     If Len(mValue) > 0 Then
         With mRegExp
             .Pattern = "^[ァ-ンヴー]*$"
-            .ignorecase = False
+            .IgnoreCase = False
             .Global = True
             IsZenKatakana = .Test(mValue)
         End With
@@ -576,7 +571,7 @@ Private Function IsZenHiragana() As Boolean
     If Len(mValue) > 0 Then
         With mRegExp
             .Pattern = "^[ぁ-んー]*$"
-            .ignorecase = False
+            .IgnoreCase = False
             .Global = True
             IsZenHiragana = .Test(mValue)
         End With
@@ -608,7 +603,7 @@ Private Function IsDate() As Boolean
             IsDate = False
             Exit Function
         End If
-        tmpDate = Format(tmpDate, "####/##/##")
+        tmpDate = format(tmpDate, "####/##/##")
         IsDate = VBA.IsDate(tmpDate)
         Exit Function
     End If
@@ -626,7 +621,7 @@ Private Function IsZipCode() As Boolean
     If Len(mValue) > 0 Then
         With mRegExp
             .Pattern = "^\d{7}$|^\d{3}-\d{4}$"
-            .ignorecase = False
+            .IgnoreCase = False
             .Global = True
             IsZipCode = .Test(mValue)
         End With
@@ -646,7 +641,7 @@ Private Function IsTelNo() As Boolean
     If Len(mValue) > 0 Then
         With mRegExp
             .Pattern = "^0\d{9,10}$|^0\d{2,3}-\d{1,4}-\d{4}$"
-            .ignorecase = False
+            .IgnoreCase = False
             .Global = True
             IsTelNo = .Test(mValue)
         End With
@@ -666,7 +661,7 @@ Private Function IsMailAddress() As Boolean
     If Len(mValue) > 0 Then
         With mRegExp
             .Pattern = "^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$"
-            .ignorecase = False
+            .IgnoreCase = False
             .Global = True
             IsMailAddress = .Test(mValue)
         End With

@@ -91,3 +91,7 @@ End Function
 Public Function CmdDir(ByVal path As String, ParamArray Options() As Variant) As String()
     CmdDir = GetCommandResultAsArray("DIR " & path & " " & Join(Options, " "))
 End Function
+
+Public Function GetFilePathsRecursive(ByVal path As String) As String()
+    GetFilePathsRecursive = CmdDir(path, "/b", "/s", "/a:-d")
+End Function

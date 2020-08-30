@@ -216,8 +216,8 @@ End Sub
 '*          Lib "kernel32"
 '*
 '******************************************************************************
-Friend Sub CopyMemory(Destination As LongPtr, Source As LongPtr, ByVal Length As LongPtr)
-    Call mWinApiKernel.WinApi_CopyMemory(Destination, Source, Length)
+Friend Sub CopyMemory(destination As LongPtr, source As LongPtr, ByVal Length As LongPtr)
+    Call mWinApiKernel.WinApi_CopyMemory(destination, source, Length)
 End Sub
 
 '******************************************************************************
@@ -226,9 +226,9 @@ End Sub
 '*          Lib "kernel32"
 '*
 '******************************************************************************
-Friend Sub CopyMemoryByRef(ByRef Destination As LongPtr, ByRef Source As LongPtr, ByVal Length As LongPtr, _
+Friend Sub CopyMemoryByRef(ByRef destination As LongPtr, ByRef source As LongPtr, ByVal Length As LongPtr, _
                            Optional destByVal As Boolean = False, Optional sourceByVal As Boolean = False)
-    Call mWinApiKernel.WinApi_CopyMemoryByRef(Destination, Source, Length, destByVal, sourceByVal)
+    Call mWinApiKernel.WinApi_CopyMemoryByRef(destination, source, Length, destByVal, sourceByVal)
 End Sub
 
 '******************************************************************************

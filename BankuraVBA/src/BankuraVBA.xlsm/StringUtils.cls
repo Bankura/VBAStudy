@@ -55,7 +55,7 @@ Private Const PAD_LIMIT As Long = 8192
 '******************************************************************************
 
 '******************************************************************************
-'* プロシージャ定義
+'* メソッド定義
 '******************************************************************************
 
 '******************************************************************************
@@ -1293,16 +1293,16 @@ Public Function CountMatches(ByVal str As String, ByVal searchStr As String) As 
         CountMatches = 0
         Exit Function
     End If
-    Dim count As Long: count = 0
+    Dim Count As Long: Count = 0
     Dim idx As Long: idx = 0
     
     idx = Me.IndexOf(str, searchStr, idx)
     Do While idx <> INDEX_NOT_FOUND
-        count = count + 1
+        Count = Count + 1
         idx = idx + Len(searchStr)
         idx = Me.IndexOf(str, searchStr, idx)
     Loop
-    CountMatches = count
+    CountMatches = Count
 End Function
 
 '******************************************************************************
@@ -2910,6 +2910,28 @@ Public Function Remove(ByVal str As String, ByVal removeStr As String) As String
 End Function
 
 '******************************************************************************
+'* [概  要] RemoveEach
+'* [詳  細] 検索文字列リストで指定した文字列に合致するすべての文字列を
+'*          削除する｡
+'*
+'* @param text 文字列
+'* @param searchList 検索文字列リスト（Variant配列）
+'* @return String 変換後文字列
+'*
+'******************************************************************************
+Public Function RemoveEach(ByVal text As String, ByVal searchList As Variant) As String
+    If Me.IsEmpty(text) Or Not VBA.IsArray(searchList) Then
+        RemoveEach = text
+        Exit Function
+    End If
+    Dim i As Long, j As Long
+    For i = LBound(searchList) To UBound(searchList)
+        text = Remove(text, searchList(i))
+    Next
+    RemoveEach = text
+End Function
+
+'******************************************************************************
 '* [概  要] RemoveEnd
 '* [詳  細] ソース文字列の末尾にある場合にのみ部分文字列を削除し、
 '*          それ以外の場合はソース文字列を返す。
@@ -3146,7 +3168,7 @@ End Function
 '*
 '******************************************************************************
 Public Function ReplaceEach(ByVal text As String, ByVal searchList As Variant, ByVal replacementList As Variant) As String
-    If Me.IsEmpty(text) Or Not VBA.IsArray(searchList) Or Not VBA.IsArray(searchList) Then
+    If Me.IsEmpty(text) Or Not VBA.IsArray(searchList) Or Not VBA.IsArray(replacementList) Then
         ReplaceEach = text
         Exit Function
     End If
@@ -3191,7 +3213,7 @@ Public Function ReplaceIgnoreCase(ByVal str As String, ByVal searchString As Str
     Dim sb As StringEx: Set sb = New StringEx
     Dim pos As Long: pos = 1
     Dim nextpos As Long: nextpos = InStr(strIc, searchStringIc)
-    Dim count As Long: count = 0
+    Dim Count As Long: Count = 0
     
     Do Until nextpos = 0
         Call sb.Append(Mid(str, pos, nextpos - pos)) _
@@ -3199,9 +3221,9 @@ Public Function ReplaceIgnoreCase(ByVal str As String, ByVal searchString As Str
         
         pos = nextpos + Len(searchStringIc)
         nextpos = InStr(pos, strIc, searchStringIc)
-        count = count + 1
+        Count = Count + 1
     Loop
-    If count = 0 Then
+    If Count = 0 Then
         ReplaceIgnoreCase = str
         Exit Function
     Else
@@ -3631,8 +3653,8 @@ End Function
 '* @return String 変換後文字列
 '*
 '******************************************************************************
-Public Function ToEncodedString(Bytes() As Byte, ByVal charset As String) As String
-    With IO.CreateADODBStream(adTypeBinary, charset)
+Public Function ToEncodedString(Bytes() As Byte, ByVal charSet As String) As String
+    With IO.CreateADODBStream(adTypeBinary, charSet)
         .Mode = adModeReadWrite
         .Open
         .Write Bytes
@@ -4012,4 +4034,97 @@ Public Function EditTextByFunc(ByVal txt As String, ByRef fun As Variant) As Str
         Exit Function
     End If
     EditTextByFunc = txt
+End Function
+
+'******************************************************************************
+'* [概  要] CSV行分割処理。
+'* [詳  細] CSV文字列をカンマごとに分割してVariant配列に格納し、返却する。
+'*          項目両端の「"」を削除する。
+'*
+'* @param csvLine CSV行
+'* @param quotExists ダブルクォート存在有無（True：あり）。省略可能。
+'* @param delimiter デリミタ。省略可能。
+'* @return 分割後Variant配列
+'******************************************************************************
+Public Function SplitCsvRow(csvLine As String, Optional ByVal quotExists As Boolean = False, Optional delimiter As String = ",") As Variant
+    If quotExists Then
+        Dim lQuoteCount As Long, lItemCount As Long, i As Long, tmpTxt As String, v()
+        For i = 1 To Len(csvLine)
+            Select Case Mid(csvLine, i, 1)
+                Case delimiter
+                    If lQuoteCount Mod 2 = 0 Then
+                        lItemCount = lItemCount + 1
+                    End If
+                Case """"
+                    lQuoteCount = lQuoteCount + 1
+            End Select
+        Next
+        ReDim v(lItemCount) As Variant
+        lQuoteCount = 0: lItemCount = 0
+        For i = 1 To Len(csvLine)
+            Select Case Mid(csvLine, i, 1)
+                Case delimiter
+                    If lQuoteCount Mod 2 = 0 Then
+                        v(lItemCount) = EditIncludeQuotItem(tmpTxt)
+                        tmpTxt = ""
+                        lItemCount = lItemCount + 1
+                    Else
+                        tmpTxt = tmpTxt & Mid(csvLine, i, 1)
+                    End If
+                Case """"
+                    lQuoteCount = lQuoteCount + 1
+                    tmpTxt = tmpTxt & Mid(csvLine, i, 1)
+                Case Else
+                    tmpTxt = tmpTxt & Mid(csvLine, i, 1)
+            End Select
+        Next
+        If tmpTxt <> "" Then
+            v(lItemCount) = EditIncludeQuotItem(tmpTxt)
+        End If
+        SplitCsvRow = v
+    Else
+        SplitCsvRow = Split(csvLine, delimiter)
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] ダブルクォート入り項目編集処理。
+'* [詳  細] エスケープされているダブルクォート「""」を「"」に変換し、
+'*          項目両端の「"」を削除する。
+'*
+'* @param text ダブルクォート入り項目
+'* @return 編集後項目
+'******************************************************************************
+Private Function EditIncludeQuotItem(ByVal text As String) As String
+    text = Replace(text, """""", """")
+    If Left(text, 1) = """" And Right(text, 1) = """" Then
+        If Len(text) <= 2 Then
+            EditIncludeQuotItem = ""
+        Else
+            EditIncludeQuotItem = Mid(text, 2, Len(text) - 2)
+            
+        End If
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] RemoveLineSeparator
+'* [詳  細] 改行コード除去処理。
+'*
+'* @param val 文字列
+'* @return 編集後文字列
+'******************************************************************************
+Public Function RemoveLineSeparator(ByVal val As String) As String
+    RemoveLineSeparator = RemoveEach(val, Array(vbLf, vbCr))
+End Function
+
+'******************************************************************************
+'* [概  要] EscapeDoubleQuote
+'* [詳  細] ダブルクォーテーションエスケープ処理。
+'*
+'* @param val 文字列
+'* @return 編集後文字列
+'******************************************************************************
+Public Function EscapeDoubleQuote(ByVal val As String) As String
+    EscapeDoubleQuote = VBA.Replace(val, """", """""")
 End Function

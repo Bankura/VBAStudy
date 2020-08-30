@@ -109,6 +109,27 @@ Public Function ShowOpenFileDialog(Optional sheetName As String, Optional pos As
 End Function
 
 '******************************************************************************
+'* [概  要] ShowCsvFileDialog メソッド
+'* [詳  細] CSVファイルを選択するダイアログを表示します｡
+'*
+'* @param initialFile 初期表示用ファイルパス。省略可能。
+'* @return 選択したファイルのパス
+'*
+'******************************************************************************
+Public Function ShowCsvFileDialog(Optional ByVal initialFile As String) As String
+    ShowCsvFileDialog = ""
+    With Application.FileDialog(msoFileDialogOpen)
+        .Filters.Clear
+        .Filters.Add "CSVファイル", "*.csv"
+        .InitialFileName = initialFile
+        .AllowMultiSelect = False
+        If .Show = True Then
+            ShowCsvFileDialog = .SelectedItems(1)
+        End If
+    End With
+End Function
+
+'******************************************************************************
 '* [概  要] ShowCsvSaveFileDialog メソッド
 '* [詳  細] CSVファイルを保存するダイアログを表示する｡
 '*
@@ -141,9 +162,9 @@ Public Function ShowFolderDialog(Optional sheetName As String, Optional pos As S
     Dim objPath As Object
     Set objPath = Base.GetShell().BrowseForFolder(0, "フォルダを選択してください", &H1)
     If Not objPath Is Nothing Then
-        ShowFolderDialog = CStr(objPath.Items.Item.path)
+        ShowFolderDialog = CStr(objPath.items.Item.path)
         If sheetName <> "" Then
-            ThisWorkbook.Worksheets(sheetName).Range(pos).value = CStr(objPath.Items.Item.path)
+            ThisWorkbook.Worksheets(sheetName).Range(pos).value = CStr(objPath.items.Item.path)
         End If
     End If
     Exit Function

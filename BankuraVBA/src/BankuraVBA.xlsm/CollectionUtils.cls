@@ -195,16 +195,16 @@ Public Function GetCollectionKeyByIndex(ByVal Index As Long, col As Collection) 
         err.Raise 91
     Else
         Select Case Index
-            Case Is > col.count
+            Case Is > col.Count
                 err.Raise 9
-            Case Is <= col.count / 2
+            Case Is <= col.Count / 2
                 Call mWinApi.CopyMemoryByRef(ptr, ObjPtr(col) + FOWARD_SHIFT, LONGPTR_SIZE, False, True)
                 For i = 2 To Index
                     Call mWinApi.CopyMemoryByRef(ptr, ptr + FOWARD_SHIFT, LONGPTR_SIZE, False, True)
                 Next i
             Case Else
                 Call mWinApi.CopyMemoryByRef(ptr, ObjPtr(col) + BACKWARD_SHIFT, LONGPTR_SIZE, False, True)
-                For i = col.count - 1 To Index Step -1
+                For i = col.Count - 1 To Index Step -1
                     Call mWinApi.CopyMemoryByRef(ptr, ptr + BACKWARD_SHIFT, LONGPTR_SIZE, False, True)
                 Next i
         End Select
@@ -234,7 +234,7 @@ Public Function GetCollectionIndexByKey(ByVal Key As String, col As Collection, 
     If col Is Nothing Then
         err.Raise 91
     Else
-        If col.count Then
+        If col.Count Then
             'save StrPtr
             aKey = StrPtr(sKey)
             'first Ptr
@@ -252,7 +252,7 @@ Public Function GetCollectionIndexByKey(ByVal Key As String, col As Collection, 
                 GetCollectionIndexByKey = GetCollectionIndexByKey + 1
                 
                 ' –³ŒÀƒ‹[ƒv‘Îô
-                If GetCollectionIndexByKey > col.count Then
+                If GetCollectionIndexByKey > col.Count Then
                     GetCollectionIndexByKey = -1
                     Exit Function
                 End If
@@ -281,6 +281,7 @@ End Function
 '*
 '*******************************************************************************
 Public Function CollectionToString(ByVal col As Collection) As String
+    WebHelpers.JsonOptions.NonEncode = True
     CollectionToString = WebHelpers.ConvertToJson(col)
 End Function
 
@@ -294,5 +295,6 @@ End Function
 '*
 '*******************************************************************************
 Public Function DictionaryToString(ByVal dic As Object) As String
+    WebHelpers.JsonOptions.NonEncode = True
     DictionaryToString = WebHelpers.ConvertToJson(dic)
 End Function

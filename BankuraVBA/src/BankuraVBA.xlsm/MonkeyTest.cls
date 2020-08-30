@@ -269,7 +269,7 @@ Public Sub CoreEnumr_Test()
     
     Dim dict As Object
     Set dict = CreateDictionary("One", 1, "Two", 2, "Three", 3)
-    Assert.AreEqual 3&, dict.count
+    Assert.AreEqual 3&, dict.Count
     Assert.AreEqual 1, dict!one
     Assert.AreEqual 2, dict!Two
     Assert.AreEqual 3, dict!Three
@@ -277,13 +277,13 @@ End Sub
 
 Public Sub CoreXLib_Test()
     Assert.AreEqual "C:\WINDOWS", UCase(Wsh.ExpandEnvironmentStrings("%windir%"))
-    Assert.AreEqual 0&, Wmi.Security_.Privileges.count
+    Assert.AreEqual 0&, Wmi.Security_.Privileges.Count
     
     Dim regex As Object
     Set regex = CreateRegExp(".*", "ig")
     Assert.AreEqual ".*", regex.Pattern
     Assert.AreEqual True, regex.Global
-    Assert.AreEqual True, regex.ignorecase
+    Assert.AreEqual True, regex.IgnoreCase
     
     Assert.AreEqual "#VBA", ReMatch("beyond the limit of #VBA.", "#\w+")(0)
     Assert.AreEqualArr Array("2013/5/1", "2013", "5", "1"), ReMatch("2013/5/1", "(\d{4})/(\d{1,2})/(\d{1,2})")
@@ -313,7 +313,7 @@ Public Sub Ext_Test()
     Assert.AreEqual Init(New Tuple, "Three", 3), aarr(2)
     
     Set dict = AssocArrToDict(aarr)
-    Assert.AreEqual 3&, dict.count
+    Assert.AreEqual 3&, dict.Count
     Assert.AreEqual 1, dict!one
     Assert.AreEqual 2, dict!Two
     Assert.AreEqual 3, dict!Three

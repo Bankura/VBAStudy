@@ -101,6 +101,21 @@ Public Function Append(ByVal val As String) As StringEx
     Set Append = Me
 End Function
 
+'******************************************************************************
+'* [概  要] AppendLine メソッド
+'* [詳  細] 文字列を行追加する｡
+'*
+'* @param val 追加文字列
+'* @param lineSeparator 改行コード
+'* @return StringExオブジェクト
+'*
+'******************************************************************************
+Public Function AppendLine(ByVal val As String, Optional ByVal lineSeparator As String = vbNewLine) As StringEx
+    If Mid$(mBuffer, mLength, 1) <> lineSeparator Then
+        Append lineSeparator
+    End If
+    Set AppendLine = Append(val).Append(lineSeparator)
+End Function
 
 '******************************************************************************
 '* [概  要] CodePointCount
@@ -1360,8 +1375,8 @@ End Function
 '* @return StringEx 変換後文字列
 '*
 '******************************************************************************
-Public Function ToEncodedString(Bytes() As Byte, charset As String) As StringEx
-    Set ToEncodedString = Me.Init(StringUtils.ToEncodedString(Bytes(), charset))
+Public Function ToEncodedString(Bytes() As Byte, charSet As String) As StringEx
+    Set ToEncodedString = Me.Init(StringUtils.ToEncodedString(Bytes(), charSet))
 End Function
 
 '******************************************************************************

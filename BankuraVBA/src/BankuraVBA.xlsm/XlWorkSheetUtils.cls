@@ -82,7 +82,7 @@ Private Sub InjectNumbersToIndexCells(ByVal dataSheet As Worksheet, lStartRow As
         .Cells(lStartRow, lStartCol) = 1
         If rownum > 1 Then
             .Cells(lStartRow, lStartCol).AutoFill _
-              Destination:=.Range(.Cells(lStartRow, lStartCol), .Cells(lStartRow + rownum - 1, lStartCol)), Type:=xlLinearTrend
+              destination:=.Range(.Cells(lStartRow, lStartCol), .Cells(lStartRow + rownum - 1, lStartCol)), Type:=xlLinearTrend
         End If
     End With
 End Sub
@@ -172,7 +172,7 @@ Public Function InitializeWorkSheets(varMakeSheets As Variant, _
     If Not IsArray(varMakeSheets) And Not IsArray(varFormSheets) Then
         If DeleteWorkSheet(varMakeSheets) = False Then GoTo ErrorHandler
         ThisWorkbook.Worksheets(varFormSheets).Copy After:=Worksheets(strAfShName)
-        ActiveSheet.Name = varMakeSheets
+        ActiveSheet.name = varMakeSheets
         InitializeWorkSheets = True
         Exit Function
     End If
@@ -186,7 +186,7 @@ Public Function InitializeWorkSheets(varMakeSheets As Variant, _
     Dim i As Long
     For i = LBound(varMakeSheets) To UBound(varMakeSheets)
         ThisWorkbook.Worksheets(varFormSheets(i)).Copy After:=Worksheets(strAfShName)
-        ActiveSheet.Name = varMakeSheets(i)
+        ActiveSheet.name = varMakeSheets(i)
     Next i
 
     InitializeWorkSheets = True
@@ -245,7 +245,7 @@ Public Function DeleteWorkSheet(ByVal sheetName As String, Optional ByRef wb As 
     End If
     
     If Me.SheetExists(sheetName, wb) Then
-        wb.Worksheets(sheetName).DELETE
+        wb.Worksheets(sheetName).Delete
     End If
     DeleteWorkSheet = True
     Exit Function
@@ -270,7 +270,7 @@ Public Function SheetExists(ByVal sheetName As String, Optional ByRef wb As Work
     'シートの検索
     Dim ws As Worksheet
     For Each ws In wb.Worksheets
-        If ws.Name = sheetName Then
+        If ws.name = sheetName Then
             SheetExists = True
             Exit Function
         End If
@@ -316,7 +316,7 @@ Public Function GetFinalRow(ByVal dataSheet As Worksheet, Optional ignoreColnum 
     Dim ret As Long
     Dim i As Long, cnta As Long
     With dataSheet.UsedRange
-        For i = .Rows.count To 1 Step -1
+        For i = .Rows.Count To 1 Step -1
             cnta = WorksheetFunction.CountA(.Rows(i))
             If cnta > 0 Then
                 If cnta <> 1 Then
@@ -354,7 +354,7 @@ Public Function GetFinalCol(ByVal dataSheet As Worksheet) As Long
     Dim ret As Long
     Dim i As Long
     With dataSheet.UsedRange
-        For i = .Columns.count To 1 Step -1
+        For i = .Columns.Count To 1 Step -1
             If WorksheetFunction.CountA(.Columns(i)) > 0 Then
                 ret = i
                 Exit For
@@ -377,7 +377,7 @@ End Function
 '*
 '******************************************************************************
 Public Function GetFinalKeyRow(ByVal dataSheet As Worksheet, StartCol As Long) As Long
-    GetFinalKeyRow = dataSheet.Cells(Rows.count, StartCol).End(xlUp).row
+    GetFinalKeyRow = dataSheet.Cells(Rows.Count, StartCol).End(xlUp).row
 End Function
 
 '******************************************************************************
@@ -390,7 +390,7 @@ End Function
 '*
 '******************************************************************************
 Public Function GetFinalKeyCol(ByVal dataSheet As Worksheet, StartRow As Long) As Long
-    GetFinalKeyCol = dataSheet.Cells(StartRow, Columns.count).End(xlToLeft).Column
+    GetFinalKeyCol = dataSheet.Cells(StartRow, Columns.Count).End(xlToLeft).Column
 End Function
 
 '******************************************************************************
@@ -464,15 +464,15 @@ Public Sub DeleteNoUsedRange(dataSheet As Worksheet, lStartRow As Long)
     If rng Is Nothing Then
         delStartRow = lStartRow
     Else
-        delStartRow = rng.Item(rng.count).row + 1
+        delStartRow = rng.Item(rng.Count).row + 1
     End If
-    delEndRow = dataSheet.UsedRange.Item(dataSheet.UsedRange.count).row
+    delEndRow = dataSheet.UsedRange.Item(dataSheet.UsedRange.Count).row
     
     If delStartRow > delEndRow Then
         Exit Sub
     End If
     With dataSheet
-        .Range(.Rows(delStartRow), .Rows(delEndRow)).DELETE
+        .Range(.Rows(delStartRow), .Rows(delEndRow)).Delete
     End With
 End Sub
 
@@ -520,20 +520,20 @@ Public Sub SetHyperLink(sh As Worksheet, row As Long, col As Long, strLinkAddres
     Dim strFontName As String
     Dim iFontSize As Integer
     With sh
-        strFontName = .Range(.Cells(row, col), .Cells(row, col)).Font.Name
+        strFontName = .Range(.Cells(row, col), .Cells(row, col)).Font.name
         iFontSize = sh.Range(.Cells(row, col), .Cells(row, col)).Font.size
 
         .Hyperlinks.Add Anchor:=.Range(.Cells(row, col), .Cells(row, col)), _
                           Address:=strLinkAddress
                         
-        .Range(.Cells(row, col), .Cells(row, col)).Font.Name = strFontName
+        .Range(.Cells(row, col), .Cells(row, col)).Font.name = strFontName
         .Range(.Cells(row, col), .Cells(row, col)).Font.size = iFontSize
     End With
 End Sub
 
 '******************************************************************************
 '* [概  要] シートコピー処理
-'* [詳  細] フォーマットとなるシートをコピーし、「Result」+ nの名称
+'* [詳  細] フォーマットとなるシートをコピーし、シート名+ nの名称
 '*          （nは重複しない番号）をつけて、対象のWorksheetオブジェクトを返却。
 '*
 '* @param formatSheetName フォーマットとなるコピー元シート
@@ -541,7 +541,7 @@ End Sub
 '* @param wb 対象のワークブック
 '* @return 作成したシートオブジェクト
 '******************************************************************************
-Function CopySheet(ByVal formatSheetName As String, ByVal destSheetName As String, _
+Public Function CopySheet(ByVal formatSheetName As String, ByVal destSheetName As String, _
                    Optional ByRef wb As Workbook, Optional ByVal countAppend As Boolean = False) As Worksheet
     If wb Is Nothing Then
         Set wb = ThisWorkbook
@@ -560,9 +560,42 @@ Function CopySheet(ByVal formatSheetName As String, ByVal destSheetName As Strin
     wb.Worksheets(formatSheetName).Visible = xlSheetVisible
     
     wb.Worksheets(formatSheetName).Copy After:=wb.Worksheets(formatSheetName)
-    wb.ActiveSheet.Name = destSheetName & IIf(cnt > 0, CStr(cnt), "")
+    wb.ActiveSheet.name = destSheetName & IIf(cnt > 0, CStr(cnt), "")
     Set CopySheet = wb.ActiveSheet
     
     wb.Worksheets(formatSheetName).Visible = tmpVisible
 End Function
+
+Public Sub ClearBookAuthor(Optional ByRef wb As Workbook)
+    If wb Is Nothing Then
+        Set wb = ThisWorkbook
+    End If
+    wb.BuiltinDocumentProperties("Author").value = " "
+    wb.BuiltinDocumentProperties("Last Author").value = " "
+End Sub
+
+Public Sub RemoveBookInformationAndSave(Optional ByRef wb As Workbook)
+    If wb Is Nothing Then
+        Set wb = ThisWorkbook
+    End If
+    With wb
+        .RemoveDocumentInformation xlRDIAll
+        .RemoveDocumentInformation xlRDIComments
+        .RemoveDocumentInformation xlRDIDocumentProperties
+        .RemoveDocumentInformation xlRDIRemovePersonalInformation
+        .RemoveDocumentInformation xlRDIPrinterPath
+        .RemovePersonalInformation = False
+        Dim dp As DocumentProperty
+        Dim tmpUserName As String
+        tmpUserName = Application.UserName
+        Application.UserName = "unknown"
+         For Each dp In .BuiltinDocumentProperties
+            If dp.Type = msoPropertyTypeString Then
+                dp.value = ""
+            End If
+        Next
+        .Save
+        Application.UserName = tmpUserName
+    End With
+End Sub
 

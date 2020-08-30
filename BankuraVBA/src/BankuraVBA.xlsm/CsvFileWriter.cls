@@ -2,7 +2,7 @@ VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
-Attribute VB_Name = "FileWriter"
+Attribute VB_Name = "CsvFileWriter"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
@@ -11,11 +11,11 @@ Option Explicit
 
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 '*
-'* [機能名] File書込クラス
-'* [詳  細] File書込用のユーティリティを提供する。
+'* [機能名] CSVFile書込クラス
+'* [詳  細] CSVFile書込用のユーティリティを提供する。
 '*
 '* @author Bankura
-'* Copyright (c) 2019 Bankura
+'* Copyright (c) 2019-2020 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 
@@ -107,30 +107,30 @@ End Property
 '*-----------------------------------------------------------------------------
 '* Charset プロパティ
 '*-----------------------------------------------------------------------------
-Property Get charset() As String
-    charset = mCharSet
+Property Get charSet() As String
+    charSet = mCharSet
 End Property
-Property Let charset(arg As String)
+Property Let charSet(arg As String)
     mCharSet = arg
 End Property
 
 '*-----------------------------------------------------------------------------
 '* LineSeparator プロパティ
 '*-----------------------------------------------------------------------------
-Property Get LineSeparator() As LineSeparatorsEnum
-    LineSeparator = mLineSeparator
+Property Get lineSeparator() As LineSeparatorsEnum
+    lineSeparator = mLineSeparator
 End Property
-Property Let LineSeparator(arg As LineSeparatorsEnum)
+Property Let lineSeparator(arg As LineSeparatorsEnum)
     mLineSeparator = arg
 End Property
 
 '*-----------------------------------------------------------------------------
 '* HeaderExists プロパティ
 '*-----------------------------------------------------------------------------
-Property Get HeaderExists() As Boolean
-    HeaderExists = mHeaderExists
+Property Get headerExists() As Boolean
+    headerExists = mHeaderExists
 End Property
-Property Let HeaderExists(arg As Boolean)
+Property Let headerExists(arg As Boolean)
     mHeaderExists = arg
 End Property
 
@@ -223,8 +223,8 @@ Public Sub WriteTextFileFromVArray(vArray As Variant)
     With mAdoStream
         .Mode = adModeReadWrite
         .Type = adTypeText
-        .charset = mCharSet
-        .LineSeparator = mLineSeparator
+        .charSet = mCharSet
+        .lineSeparator = mLineSeparator
         .Open
         For Each tmp In vArray
             .WriteText CStr(tmp), adWriteLine
@@ -247,8 +247,8 @@ Public Sub WriteTextFileFromRecordSet(records As RecordFormat)
     With mAdoStream
         .Mode = adModeReadWrite
         .Type = adTypeText
-        .charset = mCharSet
-        .LineSeparator = mLineSeparator
+        .charSet = mCharSet
+        .lineSeparator = mLineSeparator
         .Open
         Dim recText As String
         'ヘッダ行出力
@@ -283,10 +283,10 @@ Private Function EditHeader(record As Collection) As String
     For Each itm In record
         If itm.OutputTarget Then
             If first Then
-                ret = EditItem(itm.Name)
+                ret = EditItem(itm.name)
                 first = False
             Else
-                ret = ret & "," & EditItem(itm.Name)
+                ret = ret & "," & EditItem(itm.name)
             End If
         End If
     Next

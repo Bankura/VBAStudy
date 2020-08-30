@@ -250,6 +250,9 @@ Private Type json_Options
 
     ' The solidus (/) is not required to be escaped, use this option to escape them as \/ in ConvertToJson
     EscapeSolidus As Boolean
+    
+    ' (Add By Bankura) Json•ÏŠ·Žž‚ÉEncode‚ðŽÀŽ{‚µ‚È‚¢
+    NonEncode As Boolean
 End Type
 Public JsonOptions As json_Options
 ' === End VBA-JSON
@@ -523,8 +526,8 @@ End Sub
 ''
 Public Sub LogRequest(Client As WebClient, Request As WebRequest)
     If EnableLogging Then
-        Debug.Print "--> Request - " & Format(Now, "Long Time")
-        Debug.Print MethodToName(Request.Method) & " " & Client.GetFullUrl(Request)
+        Debug.Print "--> Request - " & format(Now, "Long Time")
+        Debug.Print MethodToName(Request.method) & " " & Client.GetFullUrl(Request)
 
         Dim web_KeyValue As DictionaryEx
         For Each web_KeyValue In Request.Headers
@@ -555,7 +558,7 @@ Public Sub LogResponse(Client As WebClient, Request As WebRequest, Response As W
     If EnableLogging Then
         Dim web_KeyValue As DictionaryEx
 
-        Debug.Print "<-- Response - " & Format(Now, "Long Time")
+        Debug.Print "<-- Response - " & format(Now, "Long Time")
         Debug.Print Response.StatusCode & " " & Response.StatusDescription
 
         For Each web_KeyValue In Response.Headers
@@ -734,7 +737,7 @@ End Function
 ' @return {Dictionary|Collection|Object}
 ' @throws 11000 - Error during parsing
 ''
-Public Function ParseByFormat(value As String, Format As WebFormat, _
+Public Function ParseByFormat(value As String, format As WebFormat, _
     Optional CustomFormat As String = "", Optional Bytes As Variant) As Object
 
     On Error GoTo web_ErrorHandling
@@ -744,7 +747,7 @@ Public Function ParseByFormat(value As String, Format As WebFormat, _
         Exit Function
     End If
 
-    Select Case Format
+    Select Case format
     Case WebFormat.Json
         Set ParseByFormat = ParseJson(value)
     Case WebFormat.FormUrlEncoded
@@ -803,10 +806,10 @@ End Function
 ' @return {Variant}
 ' @throws 11001 - Error during conversion
 ''
-Public Function ConvertToFormat(obj As Variant, Format As WebFormat, Optional CustomFormat As String = "") As Variant
+Public Function ConvertToFormat(obj As Variant, format As WebFormat, Optional CustomFormat As String = "") As Variant
     On Error GoTo web_ErrorHandling
 
-    Select Case Format
+    Select Case format
     Case WebFormat.Json
         ConvertToFormat = ConvertToJson(obj)
     Case WebFormat.FormUrlEncoded
@@ -1173,7 +1176,7 @@ End Function
 '   "String"` (default) or `"Binary"` to pass raw binary response to `ParseCallback`
 ''
 Public Sub RegisterConverter( _
-    Name As String, MediaType As String, ConvertCallback As String, ParseCallback As String, _
+    name As String, MediaType As String, ConvertCallback As String, ParseCallback As String, _
     Optional Instance As Object, Optional ParseType As String = "String")
 
     Dim web_Converter As New DictionaryEx
@@ -1187,7 +1190,7 @@ Public Sub RegisterConverter( _
     End If
 
     If web_pConverters Is Nothing Then: Set web_pConverters = New DictionaryEx
-    Set web_pConverters(Name) = web_Converter
+    Set web_pConverters(name) = web_Converter
 End Sub
 
 ' Helper for getting custom converter
@@ -1337,12 +1340,12 @@ Public Function GetUrlParts(Url As String) As DictionaryEx
     End If
 
     web_pElHelper.href = Url
-    web_Parts.Add "Protocol", Replace(web_pElHelper.Protocol, ":", "", count:=1)
+    web_Parts.Add "Protocol", Replace(web_pElHelper.Protocol, ":", "", Count:=1)
     web_Parts.Add "Host", web_pElHelper.hostname
     web_Parts.Add "Port", web_pElHelper.Port
     web_Parts.Add "Path", web_pElHelper.pathname
-    web_Parts.Add "Querystring", Replace(web_pElHelper.Search, "?", "", count:=1)
-    web_Parts.Add "Hash", Replace(web_pElHelper.hash, "#", "", count:=1)
+    web_Parts.Add "Querystring", Replace(web_pElHelper.Search, "?", "", Count:=1)
+    web_Parts.Add "Hash", Replace(web_pElHelper.hash, "#", "", Count:=1)
 #End If
 
     If web_Parts("Protocol") = "localhost" Then
@@ -1353,7 +1356,7 @@ Public Function GetUrlParts(Url As String) As DictionaryEx
         web_Parts("Port") = PathParts(0)
         web_Parts("Protocol") = ""
         web_Parts("Host") = "localhost"
-        web_Parts("Path") = Replace(web_Parts("Path"), web_Parts("Port"), "", count:=1)
+        web_Parts("Path") = Replace(web_Parts("Path"), web_Parts("Port"), "", Count:=1)
     End If
     If Left(web_Parts("Path"), 1) <> "/" Then
         web_Parts("Path") = "/" & web_Parts("Path")
@@ -1508,9 +1511,9 @@ Public Sub AddOrReplaceInKeyValues(KeyValues As Collection, Key As Variant, valu
             ' Replace existing
             KeyValues.Remove web_Index
 
-            If KeyValues.count = 0 Then
+            If KeyValues.Count = 0 Then
                 KeyValues.Add web_NewKeyValue
-            ElseIf web_Index > KeyValues.count Then
+            ElseIf web_Index > KeyValues.Count Then
                 KeyValues.Add web_NewKeyValue, After:=web_Index - 1
             Else
                 KeyValues.Add web_NewKeyValue, Before:=web_Index
@@ -1537,8 +1540,8 @@ End Sub
 ' @param {String} [CustomFormat] Needed if `Format = WebFormat.Custom`
 ' @return {String}
 ''
-Public Function FormatToMediaType(Format As WebFormat, Optional CustomFormat As String) As String
-    Select Case Format
+Public Function FormatToMediaType(format As WebFormat, Optional CustomFormat As String) As String
+    Select Case format
     Case WebFormat.FormUrlEncoded
         FormatToMediaType = "application/x-www-form-urlencoded;charset=UTF-8"
     Case WebFormat.Json
@@ -1565,8 +1568,8 @@ End Function
 ' @param {WebMethod} Method
 ' @return {String}
 ''
-Public Function MethodToName(Method As WebMethod) As String
-    Select Case Method
+Public Function MethodToName(method As WebMethod) As String
+    Select Case method
     Case WebMethod.HttpDelete
         MethodToName = "DELETE"
     Case WebMethod.HttpPut
@@ -1745,12 +1748,12 @@ End Function
 ' @param {String} [Format="Hex"] "Hex" or "Base64" encoding for result
 ' @return {String} HMAC-SHA1
 ''
-Public Function HMACSHA1(text As String, Secret As String, Optional Format As String = "Hex") As String
+Public Function HMACSHA1(text As String, Secret As String, Optional format As String = "Hex") As String
 #If Mac Then
     Dim web_Command As String
     web_Command = "printf " & PrepareTextForPrintf(text) & " | openssl dgst -sha1 -hmac " & PrepareTextForShell(Secret)
 
-    If Format = "Base64" Then
+    If format = "Base64" Then
         web_Command = web_Command & " -binary | openssl enc -base64"
     End If
 
@@ -1768,7 +1771,7 @@ Public Function HMACSHA1(text As String, Secret As String, Optional Format As St
     web_Crypto.Key = web_SecretBytes
     web_Bytes = web_Crypto.ComputeHash_2(web_TextBytes)
 
-    Select Case Format
+    Select Case format
     Case "Base64"
         HMACSHA1 = web_AnsiBytesToBase64(web_Bytes)
     Case Else
@@ -1792,12 +1795,12 @@ End Function
 ' @param {String} [Format="Hex"] "Hex" or "Base64" encoding for result
 ' @return {String} HMAC-SHA256
 ''
-Public Function HMACSHA256(text As String, Secret As String, Optional Format As String = "Hex") As String
+Public Function HMACSHA256(text As String, Secret As String, Optional format As String = "Hex") As String
 #If Mac Then
     Dim web_Command As String
     web_Command = "printf " & PrepareTextForPrintf(text) & " | openssl dgst -sha256 -hmac " & PrepareTextForShell(Secret)
 
-    If Format = "Base64" Then
+    If format = "Base64" Then
         web_Command = web_Command & " -binary | openssl enc -base64"
     End If
 
@@ -1815,7 +1818,7 @@ Public Function HMACSHA256(text As String, Secret As String, Optional Format As 
     web_Crypto.Key = web_SecretBytes
     web_Bytes = web_Crypto.ComputeHash_2(web_TextBytes)
 
-    Select Case Format
+    Select Case format
     Case "Base64"
         HMACSHA256 = web_AnsiBytesToBase64(web_Bytes)
     Case Else
@@ -1841,12 +1844,12 @@ End Function
 ' @param {String} [Format="Hex"] "Hex" or "Base64" encoding for result
 ' @return {String} MD5 Hash
 ''
-Public Function MD5(text As String, Optional Format As String = "Hex") As String
+Public Function MD5(text As String, Optional format As String = "Hex") As String
 #If Mac Then
     Dim web_Command As String
     web_Command = "printf " & PrepareTextForPrintf(text) & " | openssl dgst -md5"
 
-    If Format = "Base64" Then
+    If format = "Base64" Then
         web_Command = web_Command & " -binary | openssl enc -base64"
     End If
 
@@ -1861,7 +1864,7 @@ Public Function MD5(text As String, Optional Format As String = "Hex") As String
     Set web_Crypto = CreateObject("System.Security.Cryptography.MD5CryptoServiceProvider")
     web_Bytes = web_Crypto.ComputeHash_2(web_TextBytes)
 
-    Select Case Format
+    Select Case format
     Case "Base64"
         MD5 = web_AnsiBytesToBase64(web_Bytes)
     Case Else
@@ -2104,7 +2107,12 @@ Public Function ConvertToJson(ByVal JsonValue As Variant, Optional ByVal Whitesp
         If Not JsonOptions.UseDoubleForLargeNumbers And json_StringIsLargeNumber(JsonValue) Then
             ConvertToJson = JsonValue
         Else
-            ConvertToJson = """" & json_Encode(JsonValue) & """"
+            ' Mod By Bankura
+            If JsonOptions.NonEncode Then
+                ConvertToJson = """" & JsonValue & """"
+            Else
+                ConvertToJson = """" & json_Encode(JsonValue) & """"
+            End If
         End If
     Case VBA.vbBoolean
         If JsonValue Then
@@ -2895,7 +2903,7 @@ End Function
 Public Function ConvertToIso(utc_LocalDate As Date) As String
     On Error GoTo utc_ErrorHandling
 
-    ConvertToIso = VBA.Format$(ConvertToUtc(utc_LocalDate), "yyyy-mm-ddTHH:mm:ss.000Z")
+    ConvertToIso = VBA.format$(ConvertToUtc(utc_LocalDate), "yyyy-mm-ddTHH:mm:ss.000Z")
 
     Exit Function
 
@@ -2918,11 +2926,11 @@ Private Function utc_ConvertDate(utc_Value As Date, Optional utc_ConvertToUtc As
 
     If utc_ConvertToUtc Then
         utc_ShellCommand = "date -ur `date -jf '%Y-%m-%d %H:%M:%S' " & _
-            "'" & VBA.Format$(utc_Value, "yyyy-mm-dd HH:mm:ss") & "' " & _
+            "'" & VBA.format$(utc_Value, "yyyy-mm-dd HH:mm:ss") & "' " & _
             " +'%s'` +'%Y-%m-%d %H:%M:%S'"
     Else
         utc_ShellCommand = "date -jf '%Y-%m-%d %H:%M:%S %z' " & _
-            "'" & VBA.Format$(utc_Value, "yyyy-mm-dd HH:mm:ss") & " +0000' " & _
+            "'" & VBA.format$(utc_Value, "yyyy-mm-dd HH:mm:ss") & " +0000' " & _
             "+'%Y-%m-%d %H:%M:%S'"
     End If
 
@@ -3169,7 +3177,7 @@ AutoProxy_Cleanup:
     ' Error handling
     If err.Number <> 0 Then
         ' Unmanaged error
-        err.Raise err.Number, "AutoProxy:" & err.Source, err.Description, err.HelpFile, err.HelpContext
+        err.Raise err.Number, "AutoProxy:" & err.source, err.Description, err.HelpFile, err.HelpContext
     ElseIf AutoProxy_Error <> 0 Then
         err.Raise AutoProxy_Error, "AutoProxy", AutoProxy_ErrorMsg
     End If

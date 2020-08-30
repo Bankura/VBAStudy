@@ -9,7 +9,6 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
-
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 '*
 '* [機能名] 暗号化・復号ユーティリティクラス
@@ -30,7 +29,6 @@ Option Explicit
 '* @author Bankura
 '* Copyright (c) 2020 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
-
 
 '******************************************************************************
 '* WindowsAPI定義
@@ -73,7 +71,7 @@ End Property
 
 '*-----------------------------------------------------------------------------
 '* TripleDesKey プロパティ
-'* 暗号用共通鍵。必ず16文字分指定する。例："bankurarakusitai"
+'* TripleDes暗号用共通鍵。必ず16文字分指定する。例："bankurarakusitai"
 '*-----------------------------------------------------------------------------
 Public Property Get TripleDesKey() As String
     TripleDesKey = mTripleDesKey

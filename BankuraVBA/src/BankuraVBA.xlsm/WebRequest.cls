@@ -109,7 +109,7 @@ Public Resource As String
 ' @property Method
 ' @type WebMethod
 ''
-Public Method As WebMethod
+Public method As WebMethod
 
 ''
 ' _Note_ To add headers, use [`AddHeader`](#/WebRequest/AddHeader).
@@ -210,10 +210,10 @@ Public UserAgent As String
 ' @property Format
 ' @type WebFormat
 ''
-Public Property Get Format() As WebFormat
-    Format = RequestFormat
+Public Property Get format() As WebFormat
+    format = RequestFormat
 End Property
-Public Property Let Format(value As WebFormat)
+Public Property Let format(value As WebFormat)
     Me.RequestFormat = value
     Me.ResponseFormat = value
 End Property
@@ -524,7 +524,7 @@ Public Property Get FormattedResource() As String
     Next web_Segment
 
     ' Add querystring
-    If Me.QuerystringParams.count > 0 Then
+    If Me.QuerystringParams.Count > 0 Then
         If VBA.InStr(FormattedResource, "?") <= 0 Then
             FormattedResource = FormattedResource & "?"
         Else
@@ -741,7 +741,7 @@ Public Sub Prepare()
     ' Add/replace general headers for request
     SetHeader "User-Agent", Me.UserAgent
     SetHeader "Accept", Me.Accept
-    If Me.Method <> WebMethod.HttpGet Then
+    If Me.method <> WebMethod.HttpGet Then
         SetHeader "Content-Type", Me.ContentType
         SetHeader "Content-Length", VBA.CStr(Me.ContentLength)
     End If
@@ -759,7 +759,7 @@ Public Function Clone() As WebRequest
 
     ' Note: Clone underlying for properties with default values
     Clone.Resource = Me.Resource
-    Clone.Method = Me.Method
+    Clone.method = Me.method
     Clone.UserAgent = Me.UserAgent
     Clone.Accept = web_pAccept
     Clone.ContentType = web_pContentType

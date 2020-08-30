@@ -62,7 +62,7 @@ End Sub
 Public Function EncodeUrl(Target As String, Optional cSet As String = "UTF-8") As String
     Dim buf() As Byte, s As String, i As Long
     
-    buf = BinaryUtils.String2Binary(Target, cSet)
+    buf = BinaryUtils.TxtString2ByteArray(Target, cSet)
     
     For i = 0 To UBound(buf)
         Dim flg As Boolean: flg = False
@@ -142,7 +142,7 @@ Public Function DecodeUrl(Target As String, Optional cSet As String = "UTF-8") A
     Next i
     
     ' Byte‚©‚ç•¶Žš—ñ‚Ö•ÏŠ·
-    DecodeUrl = BinaryUtils.Binary2String(bin, cSet)
+    DecodeUrl = BinaryUtils.ByteArray2TxtString(bin, cSet)
 End Function
 
 '******************************************************************************
@@ -154,7 +154,7 @@ End Function
 '******************************************************************************
 Public Function EncodeBase64(Target As String, Optional cSet As String = "UTF-8") As String
     Dim byteData() As Byte
-    byteData = BinaryUtils.String2Binary(Target, cSet)
+    byteData = BinaryUtils.TxtString2ByteArray(Target, cSet)
     
     EncodeBase64 = BytesToBase64(byteData)
 End Function
@@ -166,7 +166,7 @@ End Function
 '* @param varBytes Byte”z—ñ
 '* @return base64•¶Žš—ñ
 '******************************************************************************
-Function BytesToBase64(varBytes() As Byte) As String
+Public Function BytesToBase64(varBytes() As Byte) As String
     With CreateObject("Msxml2.DOMDocument.6.0").createElement("b64")
         .DataType = "bin.base64"
         .nodeTypedValue = varBytes
@@ -186,7 +186,7 @@ Public Function DecodeBase64(Target As String, Optional cSet As String = "UTF-8"
     Dim byteData() As Byte
     byteData = Base64toBytes(Target)
     
-    DecodeBase64 = BinaryUtils.Binary2String(byteData, cSet)
+    DecodeBase64 = BinaryUtils.ByteArray2TxtString(byteData, cSet)
 End Function
 
 '******************************************************************************
@@ -196,7 +196,7 @@ End Function
 '* @param varStr base64•¶Žš—ñ
 '* @return Byte”z—ñ
 '******************************************************************************
- Function Base64toBytes(varStr As String) As Byte()
+ Public Function Base64toBytes(varStr As String) As Byte()
     With CreateObject("Msxml2.DOMDocument.6.0").createElement("b64")
          .DataType = "bin.base64"
          .text = varStr

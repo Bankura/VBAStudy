@@ -24,8 +24,8 @@ Option Explicit
 '******************************************************************************
 '* WindowsAPI’è‹`
 '******************************************************************************
-Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByVal Destination As Any, ByVal Source As Any, ByVal Length As LongPtr)
-Private Declare PtrSafe Sub CopyMemoryByRef Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As LongPtr)
+Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByVal destination As Any, ByVal source As Any, ByVal Length As LongPtr)
+Private Declare PtrSafe Sub CopyMemoryByRef Lib "kernel32" Alias "RtlMoveMemory" (ByRef destination As Any, ByRef source As Any, ByVal Length As LongPtr)
 
 Private Declare PtrSafe Function InterlockedIncrement64 Lib "kernel32" (lpAddend As LongPtr) As LongPtr
 Private Declare PtrSafe Function InterlockedDecrement64 Lib "kernel32" (lpAddend As LongPtr) As LongPtr
@@ -253,7 +253,7 @@ Private Declare PtrSafe Function GetKernelObjectSecurity Lib "advapi32.dll" (ByV
 Private Declare PtrSafe Function ImpersonateNamedPipeClient Lib "advapi32.dll" (ByVal hNamedPipe As LongPtr) As Long
 Private Declare PtrSafe Function ImpersonateSelf Lib "advapi32.dll" (ImpersonationLevel As Integer) As Long
 Private Declare PtrSafe Function RevertToSelf Lib "advapi32.dll" () As Long
-Private Declare PtrSafe Function AccessCheck Lib "advapi32.dll" (pSecurityDescriptor As SECURITY_DESCRIPTOR, ByVal ClientToken As LongPtr, ByVal DesiredAccess As Long, GenericMapping As GENERIC_MAPPING, PrivilegeSet As PRIVILEGE_SET, PrivilegeSetLength As Long, GrantedAccess As Long, ByVal status As LongPtr) As Long
+Private Declare PtrSafe Function AccessCheck Lib "advapi32.dll" (pSecurityDescriptor As SECURITY_DESCRIPTOR, ByVal ClientToken As LongPtr, ByVal DesiredAccess As Long, GenericMapping As GENERIC_MAPPING, PrivilegeSet As PRIVILEGE_SET, PrivilegeSetLength As Long, GrantedAccess As Long, ByVal Status As LongPtr) As Long
 
 Private Declare PtrSafe Function OpenProcessToken Lib "advapi32.dll" (ByVal ProcessHandle As LongPtr, ByVal DesiredAccess As Long, TokenHandle As LongPtr) As Long
 Private Declare PtrSafe Function OpenThreadToken Lib "advapi32.dll" (ByVal ThreadHandle As LongPtr, ByVal DesiredAccess As Long, ByVal OpenAsSelf As Long, TokenHandle As LongPtr) As Long
@@ -459,7 +459,7 @@ Private Declare PtrSafe Function IsBadStringPtr Lib "kernel32" Alias "IsBadStrin
 Private Declare PtrSafe Function IsBadHugeReadPtr Lib "kernel32" (lp As Any, ByVal ucb As LongPtr) As Long
 Private Declare PtrSafe Function IsBadHugeWritePtr Lib "kernel32" (lp As Any, ByVal ucb As LongPtr) As Long
 
-Private Declare PtrSafe Function LookupAccountSid Lib "advapi32.dll" Alias "LookupAccountSidA" (ByVal lpSystemName As String, Sid As Any, ByVal Name As String, cbName As Long, ByVal ReferencedDomainName As String, cbReferencedDomainName As Long, peUse As Integer) As Long
+Private Declare PtrSafe Function LookupAccountSid Lib "advapi32.dll" Alias "LookupAccountSidA" (ByVal lpSystemName As String, Sid As Any, ByVal name As String, cbName As Long, ByVal ReferencedDomainName As String, cbReferencedDomainName As Long, peUse As Integer) As Long
 
 Private Declare PtrSafe Function LookupAccountName Lib "advapi32.dll" Alias "LookupAccountNameA" (ByVal lpSystemName As String, ByVal lpAccountName As String, ByVal Sid As LongPtr, cbSid As Long, ByVal ReferencedDomainName As String, cbReferencedDomainName As Long, peUse As Integer) As Long
 Private Declare PtrSafe Function LookupPrivilegeValue Lib "advapi32.dll" Alias "LookupPrivilegeValueA" (ByVal lpSystemName As String, ByVal lpName As String, lpLuid As LARGE_INTEGER) As Long
@@ -568,8 +568,8 @@ End Sub
 '*          Lib "kernel32"
 '*
 '******************************************************************************
-Friend Sub WinApi_CopyMemory(ByVal Destination As LongPtr, ByVal Source As LongPtr, ByVal Length As LongPtr)
-    Call CopyMemory(Destination, Source, Length)
+Friend Sub WinApi_CopyMemory(ByVal destination As LongPtr, ByVal source As LongPtr, ByVal Length As LongPtr)
+    Call CopyMemory(destination, source, Length)
 End Sub
 
 '******************************************************************************
@@ -578,16 +578,16 @@ End Sub
 '*          Lib "kernel32"
 '*
 '******************************************************************************
-Friend Sub WinApi_CopyMemoryByRef(ByRef Destination As LongPtr, ByRef Source As LongPtr, ByVal Length As LongPtr, _
+Friend Sub WinApi_CopyMemoryByRef(ByRef destination As LongPtr, ByRef source As LongPtr, ByVal Length As LongPtr, _
                                 Optional destByVal As Boolean = False, Optional sourceByVal As Boolean = False)
     If destByVal And sourceByVal Then
-        Call CopyMemoryByRef(ByVal Destination, ByVal Source, Length)
+        Call CopyMemoryByRef(ByVal destination, ByVal source, Length)
     ElseIf destByVal Then
-        Call CopyMemoryByRef(ByVal Destination, Source, Length)
+        Call CopyMemoryByRef(ByVal destination, source, Length)
     ElseIf sourceByVal Then
-        Call CopyMemoryByRef(Destination, ByVal Source, Length)
+        Call CopyMemoryByRef(destination, ByVal source, Length)
     Else
-        Call CopyMemoryByRef(Destination, Source, Length)
+        Call CopyMemoryByRef(destination, source, Length)
     End If
 End Sub
 

@@ -24,7 +24,7 @@ Option Explicit
 '******************************************************************************
 '* WindowsAPI’è‹`
 '******************************************************************************
-Private Declare PtrSafe Function EnumPrinters Lib "winspool.drv" Alias "EnumPrintersA" (ByVal Flags As Long, ByVal Name As String, ByVal Level As Long, pPrinterEnum As Byte, ByVal cdBuf As Long, pcbNeeded As Long, pcReturned As Long) As Long
+Private Declare PtrSafe Function EnumPrinters Lib "winspool.drv" Alias "EnumPrintersA" (ByVal Flags As Long, ByVal name As String, ByVal Level As Long, pPrinterEnum As Byte, ByVal cdBuf As Long, pcbNeeded As Long, pcReturned As Long) As Long
 
 Private Declare PtrSafe Function OpenPrinter Lib "winspool.drv" Alias "OpenPrinterA" (ByVal pPrinterName As String, phPrinter As LongPtr, pDefault As PRINTER_DEFAULTS) As Long
 Private Declare PtrSafe Function ResetPrinter Lib "winspool.drv" Alias "ResetPrinterA" (ByVal hPrinter As LongPtr, pDefault As PRINTER_DEFAULTS) As Long

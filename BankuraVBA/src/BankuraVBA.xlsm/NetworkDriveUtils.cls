@@ -112,7 +112,7 @@ Public Function GetUnusedNetworkDriveName() As String
     Set colDrives = objNetWork.EnumNetworkDrives
     For Each strTmpNd In vNdArr
         flg = True
-        For i = 0 To colDrives.count - 1 Step 2
+        For i = 0 To colDrives.Count - 1 Step 2
             If colDrives.Item(i) = strTmpNd Then
                 flg = False
                 Exit For

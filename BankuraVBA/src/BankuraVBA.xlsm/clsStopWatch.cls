@@ -132,13 +132,13 @@ End Function
 Public Property Get Laps() As Variant
     If StartNum = 0 Then err.Raise NOSTART_ERROR_CODE, class_name, NOSTART_ERROR_MESSAGE
     
-    If LapTimes.count = 0 Then
+    If LapTimes.Count = 0 Then
         Laps = Split(vbNullString)
     Else
         Dim arr() As Variant
-        ReDim arr(1 To LapTimes.count)
+        ReDim arr(1 To LapTimes.Count)
         Dim i As Long
-        For i = 1 To LapTimes.count
+        For i = 1 To LapTimes.Count
             arr(i) = LapTimes(i)
         Next
         Laps = arr
@@ -157,13 +157,13 @@ Private Function GetTimeFormat(tm As Long, timeFormat As String) As Variant
             GetTimeFormat = tm
             
         Case timeFormat Like "*ms"
-            GetTimeFormat = Right(String(10, " ") & Format(tm, timeFormat), 10)
+            GetTimeFormat = Right(String(10, " ") & format(tm, timeFormat), 10)
         
         Case timeFormat Like "*s"
-            GetTimeFormat = Right(String(10, " ") & Format(CDbl(tm) / 1000, timeFormat), 10)
+            GetTimeFormat = Right(String(10, " ") & format(CDbl(tm) / 1000, timeFormat), 10)
         
         Case Else
-            GetTimeFormat = Format(tm, timeFormat)
+            GetTimeFormat = format(tm, timeFormat)
     End Select
             
 End Function

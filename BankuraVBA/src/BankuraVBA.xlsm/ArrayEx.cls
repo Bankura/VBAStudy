@@ -512,7 +512,7 @@ End Function
 '* @return ArrayEx
 '******************************************************************************
 Public Function Insert(ByVal idx As Long, ByVal itm As Variant) As ArrayEx
-    Set Insert = Init(ArrayUtils.ArrayInsert(Me.ToArray, idx, itm))
+    Set Insert = Init(ArrayUtils.Insert(Me.ToArray, idx, itm))
 End Function
 
 '******************************************************************************
@@ -524,7 +524,7 @@ End Function
 '******************************************************************************
 Public Function InsertAll(ByVal idx As Long, ParamArray itms() As Variant) As ArrayEx
     Dim tmp: tmp = itms
-    Set InsertAll = Init(ArrayUtils.ArrayInsertAll(Me.ToArray, idx, tmp))
+    Set InsertAll = Init(ArrayUtils.InsertAll(Me.ToArray, idx, tmp))
 End Function
 
 '******************************************************************************
@@ -541,7 +541,7 @@ End Function
 Public Function LastIndexOf(ByVal val As Variant, _
     Optional ByVal ixStart As Variant, Optional ByVal cnt As Variant _
     ) As Long
-    LastIndexOf = ArrayUtils.ArrayLastIndexOf(Me.ToArray, val, ixStart, cnt)
+    LastIndexOf = ArrayUtils.LastIndexOf(Me.ToArray, val, ixStart, cnt)
 End Function
 
 '******************************************************************************
@@ -586,6 +586,20 @@ End Function
 '* @param count 項目
 '* @return Variant 1次元配列
 '******************************************************************************
-Public Function Repeat(ByVal itm As Variant, ByVal count As Long) As ArrayEx
-    Set Repeat = Init(ArrayUtils.Repeat(itm, count))
+Public Function Repeat(ByVal itm As Variant, ByVal Count As Long) As ArrayEx
+    Set Repeat = Init(ArrayUtils.Repeat(itm, Count))
+End Function
+
+
+'******************************************************************************
+'* [概  要] Join
+'* [詳  細] 配列を連結して文字列にする。
+'*
+'* @param delimiter デリミタ
+'* @param wrapChar 囲み文字
+'* @param rmLineSeparator 改行を除去するか
+'* @return String 連結文字列
+'******************************************************************************
+Public Function Join(Optional ByVal delimiter As String, Optional ByVal wrapChar As String, Optional ByVal rmLineSeparator As Boolean = True) As String
+    Join = ArrayUtils.Join(Me.ToArray, delimiter, wrapChar, rmLineSeparator)
 End Function

@@ -395,8 +395,8 @@ Public Function GetJson(Url As String, Optional Options As DictionaryEx) As WebR
     Dim web_Request As New WebRequest
     web_Request.CreateFromOptions Options
     web_Request.Resource = Url
-    web_Request.Format = WebFormat.Json
-    web_Request.Method = WebMethod.HttpGet
+    web_Request.format = WebFormat.Json
+    web_Request.method = WebMethod.HttpGet
 
     Set GetJson = Me.Execute(web_Request)
 End Function
@@ -442,8 +442,8 @@ Public Function PostJson(Url As String, Body As Variant, Optional Options As Dic
     Dim web_Request As New WebRequest
     web_Request.CreateFromOptions Options
     web_Request.Resource = Url
-    web_Request.Format = WebFormat.Json
-    web_Request.Method = WebMethod.HttpPost
+    web_Request.format = WebFormat.Json
+    web_Request.method = WebMethod.HttpPost
     If VBA.IsObject(Body) Then
         Set web_Request.Body = Body
     Else
@@ -477,10 +477,10 @@ End Function
 ' @param {String} [BypassList=""] Comma-separated list of servers that should bypass proxy
 ''
 Public Sub SetProxy(ProxyServer As String, _
-    Optional userName As String = "", Optional Password As String = "", Optional BypassList As String = "")
+    Optional UserName As String = "", Optional Password As String = "", Optional BypassList As String = "")
 
     Me.ProxyServer = ProxyServer
-    Me.ProxyUsername = userName
+    Me.ProxyUsername = UserName
     Me.ProxyPassword = Password
     Me.ProxyBypassList = BypassList
 End Sub
@@ -517,7 +517,7 @@ Public Function PrepareHttpRequest(Request As WebRequest, Optional Async As Bool
     web_BeforeExecute Request
 
     ' Open http request
-    web_Http.Open WebHelpers.MethodToName(Request.Method), Me.GetFullUrl(Request), Async
+    web_Http.Open WebHelpers.MethodToName(Request.method), Me.GetFullUrl(Request), Async
 
     ' Set timeouts
     web_Http.SetTimeouts Me.TimeoutMs, Me.TimeoutMs, Me.TimeoutMs, Me.TimeoutMs
@@ -656,7 +656,7 @@ Public Function PrepareCurlRequest(Request As WebRequest) As String
     End If
 
     ' Add method, data, and url
-    web_Curl = web_Curl & " -X " & WebHelpers.MethodToName(Request.Method)
+    web_Curl = web_Curl & " -X " & WebHelpers.MethodToName(Request.method)
     web_Curl = web_Curl & " -d '" & Request.Body & "'"
     web_Curl = web_Curl & " '" & Me.GetFullUrl(Request) & "'"
 

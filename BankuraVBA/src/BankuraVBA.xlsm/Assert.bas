@@ -72,7 +72,7 @@ Private xFailMsgs As Collection
 
 Private Property Get VBProject() As Object
     Dim app As Object: Set app = Application
-    Select Case app.Name
+    Select Case app.name
         Case "Microsoft Word":   Set VBProject = app.MacroContainer.VBProject
         Case "Microsoft Excel":  Set VBProject = app.ThisWorkbook.VBProject
         Case "Microsoft Access": Set VBProject = app.VBE.ActiveVBProject
@@ -116,7 +116,7 @@ Private Sub TestEnd()
     WriteResult String$(ResultLineLen, "=")
     WriteResult _
           xSuccSubCount & " succeeded, " & xFailSubCount & " failed," _
-        & " took " & Format$(xEndTime - xStartTime, "0.00") & " seconds."
+        & " took " & format$(xEndTime - xStartTime, "0.00") & " seconds."
 End Sub
 
 Private Function CheckTestProcName(ByVal proc As String) As Boolean
@@ -137,7 +137,7 @@ Private Sub RunTestSub(ByVal obj As Object, ByVal proc As String)
     
     On Error GoTo 0
     
-    If xFailMsgs.count < 1 Then
+    If xFailMsgs.Count < 1 Then
         WriteResult "+ " & proc
         IncrPre xSuccSubCount
     Else
@@ -194,8 +194,8 @@ Public Sub TestRunnerGenerate()
     
     Dim vbcompo As Object, Ln As String
     For Each vbcompo In VBProject.VBComponents
-        If vbcompo.Type = 2 And CheckTestClassName(vbcompo.Name) Then
-            Ln = "Assert.RunTestOf New " & vbcompo.Name
+        If vbcompo.Type = 2 And CheckTestClassName(vbcompo.name) Then
+            Ln = "Assert.RunTestOf New " & vbcompo.name
             asrt.InsertLines pos, vbTab & Ln
             IncrPre pos
         End If
@@ -301,21 +301,21 @@ End Sub
 
 Public Sub IsErrFunc( _
     ByVal errNum As Variant, _
-    ByVal fun As Func, ByVal params As Variant, _
+    ByVal fun As Func, ByVal Params As Variant, _
     Optional ByVal msg As String = "" _
     )
     
     xAssertMsg = msg
     
     If Not (IsEmpty(errNum) Or IsNumeric(errNum)) Then err.Raise 5
-    If Not IsArray(params) Then err.Raise 5
+    If Not IsArray(Params) Then err.Raise 5
     
     On Error GoTo Catch
     
     Dim act As Variant: act = Empty
     
     Dim buf As Variant, ret As Boolean
-    fun.CallByPtr buf, params
+    fun.CallByPtr buf, Params
     AssertDone True, ret, errNum, act
     GoTo Escape
     
@@ -329,28 +329,28 @@ End Sub
 
 Public Sub IsErrMethod( _
     ByVal errNum As Variant, _
-    ByVal obj As Object, ByVal proc As String, ByVal params As Variant, _
+    ByVal obj As Object, ByVal proc As String, ByVal Params As Variant, _
     Optional ByVal msg As String = "" _
     )
     
     xAssertMsg = msg
     
     If Not (IsEmpty(errNum) Or IsNumeric(errNum)) Then err.Raise 5
-    If Not IsArray(params) Then err.Raise 5
-    If LBound(params) <> 0 Then err.Raise 5
+    If Not IsArray(Params) Then err.Raise 5
+    If LBound(Params) <> 0 Then err.Raise 5
     
     On Error GoTo Catch
     
     Dim act As Variant: act = Empty
     
     Dim i As Long, ret As Boolean
-    Dim ubParam As Long: ubParam = UBound(params)
+    Dim ubParam As Long: ubParam = UBound(Params)
     Dim ps() As Variant: ReDim ps(ubParam)
     For i = 0 To ubParam
-        If IsObject(params(i)) Then
-            Set ps(i) = params(i)
+        If IsObject(Params(i)) Then
+            Set ps(i) = Params(i)
         Else
-            Let ps(i) = params(i)
+            Let ps(i) = Params(i)
         End If
     Next
     rtcCallByName obj, StrPtr(proc), vbMethod, ps

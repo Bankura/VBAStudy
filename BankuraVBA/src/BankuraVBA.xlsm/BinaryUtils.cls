@@ -340,8 +340,8 @@ End Function
 '*                 「HKEY_CLASSES_ROOT\MIME\Database\Charset」参照。
 '* @return 変換後バイトデータ
 '******************************************************************************
-Public Function String2Binary(ByVal text As String, Optional ByVal cSet As String = "UTF-8") As Byte()
-    String2Binary = StringUtils.GetBytes(text, cSet)
+Public Function TxtString2ByteArray(ByVal text As String, Optional ByVal cSet As String = "UTF-8") As Byte()
+    TxtString2ByteArray = StringUtils.GetBytes(text, cSet)
 End Function
 
 '******************************************************************************
@@ -355,6 +355,6 @@ End Function
 '*                 「HKEY_CLASSES_ROOT\MIME\Database\Charset」参照。
 '* @return 変換後文字列
 '******************************************************************************
-Public Function Binary2String(bin() As Byte, Optional ByVal cSet As String = "UTF-8") As String
-    Binary2String = StringUtils.ToEncodedString(bin, cSet)
+Public Function ByteArray2TxtString(bin() As Byte, Optional ByVal cSet As String = "UTF-8") As String
+    ByteArray2TxtString = StringUtils.ToEncodedString(bin, cSet)
 End Function
