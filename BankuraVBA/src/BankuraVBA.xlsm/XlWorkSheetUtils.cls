@@ -104,7 +104,7 @@ Public Sub UnprotectSheet(sheetName As String, Optional sheetPassword As String,
     If sheetPassword = "" Then
         wb.Sheets(sheetName).Unprotect
     Else
-        wb.Sheets(sheetName).Unprotect Password:=sheetPassword
+        wb.Sheets(sheetName).Unprotect password:=sheetPassword
     End If
 End Sub
 
@@ -129,7 +129,7 @@ Public Sub ProtectSheet(sheetName As String, Optional sheetPassword As String, O
         If sheetPassword = "" Then
             .Protect Contents:=True, UserInterfaceOnly:=True
         Else
-            .Protect Contents:=True, UserInterfaceOnly:=True, Password:=sheetPassword
+            .Protect Contents:=True, UserInterfaceOnly:=True, password:=sheetPassword
         End If
     End With
 End Sub
@@ -418,9 +418,9 @@ Public Function GetVariantDataFromSheet(dataSheet As Worksheet, lStartRow As Lon
         Exit Function
     End If
     
-    Dim varr: varr = dataSheet.Range(dataSheet.Cells(lStartRow, lStartCol), dataSheet.Cells(lMaxRow, lMaxCol))
+    Dim vArr: vArr = dataSheet.Range(dataSheet.Cells(lStartRow, lStartCol), dataSheet.Cells(lMaxRow, lMaxCol))
     
-    GetVariantDataFromSheet = varr
+    GetVariantDataFromSheet = vArr
 End Function
 
 '******************************************************************************

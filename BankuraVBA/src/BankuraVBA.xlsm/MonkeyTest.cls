@@ -277,7 +277,7 @@ End Sub
 
 Public Sub CoreXLib_Test()
     Assert.AreEqual "C:\WINDOWS", UCase(Wsh.ExpandEnvironmentStrings("%windir%"))
-    Assert.AreEqual 0&, Wmi.Security_.Privileges.Count
+    Assert.AreEqual 0&, wmi.Security_.Privileges.Count
     
     Dim regex As Object
     Set regex = CreateRegExp(".*", "ig")
@@ -326,7 +326,7 @@ Public Sub Ext_Test()
     
     Assert.IsInstanceOfTypeName _
         "Decimal", _
-        CDec(EnumeratorToArr(Wmi.ConnectServer().ExecQuery("SELECT * FROM Win32_ComputerSystem"))(0).TotalPhysicalMemory)
+        CDec(EnumeratorToArr(wmi.ConnectServer().ExecQuery("SELECT * FROM Win32_ComputerSystem"))(0).TotalPhysicalMemory)
     
     Assert.AreEqualArr Array(1, 2, 3, 4, 5, 6, 7, 8, 9), ArrRange(1, 9)
     

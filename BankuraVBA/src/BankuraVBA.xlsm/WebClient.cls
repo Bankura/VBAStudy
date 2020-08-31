@@ -391,9 +391,9 @@ End Function
 ' @param {Dictionary} [Options.UrlSegments]
 ' @return {WebResponse} Response
 ''
-Public Function GetJson(Url As String, Optional Options As DictionaryEx) As WebResponse
+Public Function GetJson(Url As String, Optional options As DictionaryEx) As WebResponse
     Dim web_Request As New WebRequest
-    web_Request.CreateFromOptions Options
+    web_Request.CreateFromOptions options
     web_Request.Resource = Url
     web_Request.format = WebFormat.Json
     web_Request.method = WebMethod.HttpGet
@@ -438,9 +438,9 @@ End Function
 ' @param {Dictionary} [Options.UrlSegments]
 ' @return {WebResponse} Response
 ''
-Public Function PostJson(Url As String, Body As Variant, Optional Options As DictionaryEx) As WebResponse
+Public Function PostJson(Url As String, Body As Variant, Optional options As DictionaryEx) As WebResponse
     Dim web_Request As New WebRequest
-    web_Request.CreateFromOptions Options
+    web_Request.CreateFromOptions options
     web_Request.Resource = Url
     web_Request.format = WebFormat.Json
     web_Request.method = WebMethod.HttpPost
@@ -477,11 +477,11 @@ End Function
 ' @param {String} [BypassList=""] Comma-separated list of servers that should bypass proxy
 ''
 Public Sub SetProxy(ProxyServer As String, _
-    Optional UserName As String = "", Optional Password As String = "", Optional BypassList As String = "")
+    Optional UserName As String = "", Optional password As String = "", Optional BypassList As String = "")
 
     Me.ProxyServer = ProxyServer
     Me.ProxyUsername = UserName
-    Me.ProxyPassword = Password
+    Me.ProxyPassword = password
     Me.ProxyBypassList = BypassList
 End Sub
 

@@ -89,7 +89,7 @@ Public Function GetCommandResultAsTextStream(commandString, Optional myTempPath)
     
     ' コマンド実行
     Call Core.Wsh.Run(execComandString.ToString, WshHide, True)
-    Set GetCommandResultAsTextStream = IO.Fso.OpenTextFile(tempPath, Base.ForReading)
+    Set GetCommandResultAsTextStream = IO.fso.OpenTextFile(tempPath, Base.ForReading)
 End Function
 
 '******************************************************************************
@@ -113,7 +113,7 @@ Public Function GetCommandResult(commandString) As String
         ret = ts.ReadAll
     End If
     ts.Close
-    Call IO.Fso.DeleteFile(tempPath, True)
+    Call IO.fso.DeleteFile(tempPath, True)
     GetCommandResult = ret
 End Function
 
@@ -160,12 +160,12 @@ Public Function Exec(commandString As String) As CommandResult
     End If
 
     ' 正常時処理
-    Dim varr As New ArrayEx
+    Dim vArr As New ArrayEx
     While Not oExec.StdOut.AtEndOfStream
-        varr.Add oExec.StdOut.ReadLine
+        vArr.Add oExec.StdOut.ReadLine
     Wend
-    res.StdOutList = varr.ToArray
-    res.RowMax = varr.Length
+    res.StdOutList = vArr.ToArray
+    res.RowMax = vArr.Length
 
     Set Exec = res
 

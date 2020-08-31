@@ -106,15 +106,15 @@ End Sub
 '*
 '******************************************************************************
 Private Function GetMasterDataFromSheet(dataSheet As Worksheet, lStartRow As Long, lStartCol As Long, Optional colCount As Long) As Object
-    Dim varr: varr = XlWorkSheetUtils.GetVariantDataFromSheet(dataSheet, lStartRow, lStartCol, colCount)
-    If IsEmpty(varr) Then
+    Dim vArr: vArr = XlWorkSheetUtils.GetVariantDataFromSheet(dataSheet, lStartRow, lStartCol, colCount)
+    If IsEmpty(vArr) Then
         Exit Function
     End If
     Dim master As Object: Set master = CreateObject("Scripting.Dictionary")
     Dim i As Long
-    For i = LBound(varr, 1) To UBound(varr, 1)
-        Dim code As String: code = varr(i, 1)
-        Dim val As String: val = varr(i, 2)
+    For i = LBound(vArr, 1) To UBound(vArr, 1)
+        Dim code As String: code = vArr(i, 1)
+        Dim val As String: val = vArr(i, 2)
         Call master.Add(code, val)
     Next
     Set GetMasterDataFromSheet = master

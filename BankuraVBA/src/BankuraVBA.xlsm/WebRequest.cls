@@ -791,19 +791,19 @@ End Function
 ' @param {Collection} [Options.QuerystringParams] Collection of `KeyValue`
 ' @param {Dictionary} [Options.UrlSegments]
 ''
-Public Sub CreateFromOptions(Options As DictionaryEx)
-    If Not Options Is Nothing Then
-        If Options.Exists("Headers") Then
-            Set Me.Headers = Options("Headers")
+Public Sub CreateFromOptions(options As DictionaryEx)
+    If Not options Is Nothing Then
+        If options.Exists("Headers") Then
+            Set Me.Headers = options("Headers")
         End If
-        If Options.Exists("Cookies") Then
-            Set Me.Cookies = Options("Cookies")
+        If options.Exists("Cookies") Then
+            Set Me.Cookies = options("Cookies")
         End If
-        If Options.Exists("QuerystringParams") Then
-            Set Me.QuerystringParams = Options("QuerystringParams")
+        If options.Exists("QuerystringParams") Then
+            Set Me.QuerystringParams = options("QuerystringParams")
         End If
-        If Options.Exists("UrlSegments") Then
-            Set Me.UrlSegments = Options("UrlSegments")
+        If options.Exists("UrlSegments") Then
+            Set Me.UrlSegments = options("UrlSegments")
         End If
     End If
 End Sub

@@ -90,15 +90,15 @@ End Sub
 '*
 '* @param vArr Variant配列
 '******************************************************************************
-Public Sub PrintVariantArray(varr)
+Public Sub PrintVariantArray(vArr)
     Dim i As Long, j As Long, tmp As String
-    For i = LBound(varr, 1) To UBound(varr, 1)
-        If ArrayUtils.Is2DArray(varr) Then
-            For j = LBound(varr, 2) To UBound(varr, 2)
-                tmp = tmp & varr(i, j) & " | "
+    For i = LBound(vArr, 1) To UBound(vArr, 1)
+        If ArrayUtils.Is2DArray(vArr) Then
+            For j = LBound(vArr, 2) To UBound(vArr, 2)
+                tmp = tmp & vArr(i, j) & " | "
             Next
         Else
-            tmp = varr(i)
+            tmp = vArr(i)
         End If
         Debug.Print tmp
         tmp = ""
@@ -113,10 +113,10 @@ End Sub
 '* @param vArr Variant配列
 '* @param row 行（1次元インデックス）
 '******************************************************************************
-Public Sub Print2DArrayRow(varr, ByVal row As Long)
+Public Sub Print2DArrayRow(vArr, ByVal row As Long)
     Dim j As Long, tmp As String
-    For j = LBound(varr, 2) To UBound(varr, 2)
-        tmp = tmp & varr(row, j) & " | "
+    For j = LBound(vArr, 2) To UBound(vArr, 2)
+        tmp = tmp & vArr(row, j) & " | "
     Next
     Debug.Print tmp
     tmp = ""

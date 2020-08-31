@@ -36,7 +36,7 @@ Sub TestValidateUtils001()
     Dim wshObj As Object
     Set wshObj = Core.Wsh
     Dim wmiObj As Object
-    Set wmiObj = Core.Wmi
+    Set wmiObj = Core.wmi
     Dim regObj As Object
     Set regObj = Core.CreateRegExp("[a-Z]")
     Set regObj = Base.GetRegExp
@@ -686,10 +686,22 @@ End Sub
 Sub ObjectCreate_Test001()
     Dim obj As Object
     'Set obj = CreateObject("AMOVIE.ActiveMovieControl.2")
-    Set obj = CreateObject("new:{05589FA1-C356-11CE-BF01-00AA0055595A}")
+    'Set obj = CreateObject("new:{05589FA1-C356-11CE-BF01-00AA0055595A}")
+    
+    
     Debug.Print TypeName(obj)
 
     
 End Sub
 
+Sub AccessDriverExists_Test001()
 
+    Dim vArr, v
+    Dim stdRegProv As Object: Set stdRegProv = CreateStdRegProv()
+    stdRegProv.EnumKey HKEY_LOCAL_MACHINE, "SOFTWARE\Classes", vArr
+    
+    For Each v In ArrayUtils.Search(vArr, "Microsoft.ACE.OLEDB")
+        Debug.Print v
+    Next
+
+End Sub

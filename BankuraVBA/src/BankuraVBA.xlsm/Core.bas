@@ -971,9 +971,9 @@ Public Property Get Wsh() As Object
 End Property
 
 ''' @return As Object Is WbemScripting.SWbemLocator
-Public Property Get Wmi() As Object
+Public Property Get wmi() As Object
     If xxWmi Is Nothing Then Set xxWmi = CreateObject("WbemScripting.SWbemLocator")
-    Set Wmi = xxWmi
+    Set wmi = xxWmi
 End Property
 
 ''' @param ptrnFind As String
@@ -1104,6 +1104,6 @@ End Function
 
 ''' @return As Object Is StdRegProv
 Public Function CreateStdRegProv() As Object
-    Dim wmiSrv As Object: Set wmiSrv = Wmi.ConnectServer(, "root\default")
+    Dim wmiSrv As Object: Set wmiSrv = wmi.ConnectServer(, "root\default")
     Set CreateStdRegProv = wmiSrv.Get("StdRegProv")
 End Function

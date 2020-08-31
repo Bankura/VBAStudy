@@ -88,10 +88,10 @@ Public Function GetCommandResultAsArray(commandString) As String()
     GetCommandResultAsArray = mCommander.GetCommandResultAsArray(commandString)
 End Function
 
-Public Function CmdDir(ByVal path As String, ParamArray Options() As Variant) As String()
-    CmdDir = GetCommandResultAsArray("DIR " & path & " " & Join(Options, " "))
+Public Function CmdDir(ByVal Path As String, ParamArray options() As Variant) As String()
+    CmdDir = GetCommandResultAsArray("DIR " & Path & " " & Join(options, " "))
 End Function
 
-Public Function GetFilePathsRecursive(ByVal path As String) As String()
-    GetFilePathsRecursive = CmdDir(path, "/b", "/s", "/a:-d")
+Public Function GetFilePathsRecursive(ByVal Path As String) As String()
+    GetFilePathsRecursive = CmdDir(Path, "/b", "/s", "/a:-d")
 End Function

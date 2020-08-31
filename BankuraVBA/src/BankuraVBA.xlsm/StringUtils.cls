@@ -406,10 +406,10 @@ Public Function PlaceHolder(ByVal str As String, ParamArray p() As Variant) As S
     strMsg = StringUtils.Unescape(str)
     If UBound(p) >= 0 Then
         Dim tmp: tmp = p
-        Dim varr: varr = ArrayUtils.ToVArrayFlattened(tmp)
+        Dim vArr: vArr = ArrayUtils.ToVArrayFlattened(tmp)
         Dim i As Long
-        For i = 0 To UBound(varr)
-            strMsg = VBA.Replace(strMsg, "{" & CStr(i) & "}", varr(i))
+        For i = 0 To UBound(vArr)
+            strMsg = VBA.Replace(strMsg, "{" & CStr(i) & "}", vArr(i))
         Next
     End If
     PlaceHolder = strMsg

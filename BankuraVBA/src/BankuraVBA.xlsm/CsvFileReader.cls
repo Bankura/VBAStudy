@@ -229,7 +229,7 @@ End Function
 '******************************************************************************
 Public Function ReadTextFileToVArray() As Variant
 
-    Dim lSize As Long, lCount As Long, i As Long, vRow, varr()
+    Dim lSize As Long, lCount As Long, i As Long, vRow, vArr()
     With mAdoStream
         .Mode = adModeReadWrite
         .Type = adTypeText
@@ -248,13 +248,13 @@ Public Function ReadTextFileToVArray() As Variant
         .Position = 0
         vRow = SplitCsvRow(.ReadText(adReadLine), True)
          If Not mHeaderExists Then
-            ReDim varr(0 To lSize - 1, 0 To UBound(vRow))
+            ReDim vArr(0 To lSize - 1, 0 To UBound(vRow))
             For i = LBound(vRow) To UBound(vRow)
-                varr(lCount, i) = vRow(i)
+                vArr(lCount, i) = vRow(i)
             Next
             lCount = lCount + 1
         Else
-            ReDim varr(0 To lSize - 2, 0 To UBound(vRow))
+            ReDim vArr(0 To lSize - 2, 0 To UBound(vRow))
         End If
         Dim ColumnCount As Long: ColumnCount = UBound(vRow)
         
@@ -278,14 +278,14 @@ Public Function ReadTextFileToVArray() As Variant
             End If
             
             For i = LBound(vRow) To UBound(vRow)
-                varr(lCount, i) = vRow(i)
+                vArr(lCount, i) = vRow(i)
             Next
             lCount = lCount + 1
         Loop
         .Close
     End With
 
-    ReadTextFileToVArray = varr
+    ReadTextFileToVArray = vArr
 End Function
 
 '******************************************************************************

@@ -136,13 +136,13 @@ End Sub
 '******************************************************************************
 Public Function GetItemDataFromSheet(dataSheet As Worksheet, lStartRow As Long, lStartCol As Long, Optional colCount As Long) As Boolean
     mDataRowCount = 0
-    Dim varr: varr = XlWorkSheetUtils.GetVariantDataFromSheet(dataSheet, lStartRow, lStartCol, colCount)
-    If IsEmpty(varr) Then
+    Dim vArr: vArr = XlWorkSheetUtils.GetVariantDataFromSheet(dataSheet, lStartRow, lStartCol, colCount)
+    If IsEmpty(vArr) Then
         GetItemDataFromSheet = False
         Exit Function
     End If
     
-    Call SetItems(varr)
+    Call SetItems(vArr)
     
     GetItemDataFromSheet = True
 End Function
@@ -155,13 +155,13 @@ End Function
 '* @param vArr Variant型2次元配列（項目表データ）
 '*
 '******************************************************************************
-Private Sub SetItems(varr)
+Private Sub SetItems(vArr)
     Dim i As Long
 
-    For i = LBound(varr, 1) To UBound(varr, 1)
-        Call AddItem(varr, i)
+    For i = LBound(vArr, 1) To UBound(vArr, 1)
+        Call AddItem(vArr, i)
     Next
-    mColumnCount = UBound(varr, 1) - LBound(varr, 1) + 1
+    mColumnCount = UBound(vArr, 1) - LBound(vArr, 1) + 1
 End Sub
 
 '******************************************************************************
@@ -172,14 +172,14 @@ End Sub
 '* @param rownum 配列行（1次元添え字）
 '*
 '******************************************************************************
-Private Sub AddItem(varr, rownum As Long)
+Private Sub AddItem(vArr, rownum As Long)
     Dim itm As Item
     Set itm = New Item
-    itm.name = varr(rownum, 1)
-    If varr(rownum, 2) = "○" Then
+    itm.name = vArr(rownum, 1)
+    If vArr(rownum, 2) = "○" Then
         itm.required = True
     End If
-    Select Case varr(rownum, 3)
+    Select Case vArr(rownum, 3)
         Case "半角"
             itm.Attr = AttributeEnum.attrHalf
         Case "半角英数"
@@ -203,7 +203,7 @@ Private Sub AddItem(varr, rownum As Long)
         Case Else
             itm.Attr = AttributeEnum.attrString
     End Select
-    Select Case varr(rownum, 4)
+    Select Case vArr(rownum, 4)
         Case "固定"
             itm.KindOfDigits = KindOfDigitsEnum.digitFixed
         Case "以内"
@@ -213,24 +213,24 @@ Private Sub AddItem(varr, rownum As Long)
         Case Else
             itm.KindOfDigits = KindOfDigitsEnum.digitNone
     End Select
-    If varr(rownum, 5) <> "" And VBA.IsNumeric(varr(rownum, 5)) Then
-        itm.MinNumOfDigits = CLng(varr(rownum, 5))
+    If vArr(rownum, 5) <> "" And VBA.IsNumeric(vArr(rownum, 5)) Then
+        itm.MinNumOfDigits = CLng(vArr(rownum, 5))
     End If
-    If varr(rownum, 6) <> "" And VBA.IsNumeric(varr(rownum, 6)) Then
-        itm.MaxNumOfDigits = CLng(varr(rownum, 6))
+    If vArr(rownum, 6) <> "" And VBA.IsNumeric(vArr(rownum, 6)) Then
+        itm.MaxNumOfDigits = CLng(vArr(rownum, 6))
     End If
-    itm.Pattern = varr(rownum, 7)
-    If UBound(varr, 2) = 13 Then
-        If varr(rownum, 8) <> "" And VBA.IsNumeric(varr(rownum, 8)) Then
-            itm.InputCsvColNo = varr(rownum, 8)
+    itm.Pattern = vArr(rownum, 7)
+    If UBound(vArr, 2) = 13 Then
+        If vArr(rownum, 8) <> "" And VBA.IsNumeric(vArr(rownum, 8)) Then
+            itm.InputCsvColNo = vArr(rownum, 8)
         End If
-        itm.InitValueKind = varr(rownum, 9)
-        itm.InitValue = varr(rownum, 10)
-        If varr(rownum, 11) = "○" Then
+        itm.InitValueKind = vArr(rownum, 9)
+        itm.InitValue = vArr(rownum, 10)
+        If vArr(rownum, 11) = "○" Then
             itm.OutputTarget = True
         End If
-        itm.OutputEditKind = varr(rownum, 12)
-        itm.OutputEditValue = varr(rownum, 13)
+        itm.OutputEditKind = vArr(rownum, 12)
+        itm.OutputEditValue = vArr(rownum, 13)
     End If
     mCol.Add itm
 End Sub
@@ -243,8 +243,8 @@ End Sub
 '* @return 検証結果
 '*
 '******************************************************************************
-Public Function Validate(varr)
-    If mColumnCount <> (UBound(varr, 2) - LBound(varr, 2) + 1) Then
+Public Function Validate(vArr)
+    If mColumnCount <> (UBound(vArr, 2) - LBound(vArr, 2) + 1) Then
         Validate = False
         Exit Function
     End If
@@ -253,7 +253,7 @@ Public Function Validate(varr)
     
     Dim i As Long, j As Long, itm As Item, Index As Long
     Index = 1
-    For i = LBound(varr, 1) To UBound(varr, 1)
+    For i = LBound(vArr, 1) To UBound(vArr, 1)
 
         If i Mod 5000 = 0 Then
             statusBarTxt = statusBarTxt & "■"
@@ -261,9 +261,9 @@ Public Function Validate(varr)
             Call UXUtils.CheckEvents
         End If
             
-        For j = LBound(varr, 2) To UBound(varr, 2)
+        For j = LBound(vArr, 2) To UBound(vArr, 2)
             Set itm = mCol(Index)
-            itm.value = varr(i, j)
+            itm.value = vArr(i, j)
             If Not itm.Validate Then
                 Validate = False
                 Call SetErrorMessage(itm, i, j)
@@ -313,10 +313,10 @@ Public Function GetRecordDataFromSheet(dataSheet As Worksheet, lStartRow As Long
         GetRecordDataFromSheet = False
         Exit Function
     End If
-    Dim varr: varr = rng
-    mDataRowCount = UBound(varr, 1) - LBound(varr, 1) + 1
+    Dim vArr: vArr = rng
+    mDataRowCount = UBound(vArr, 1) - LBound(vArr, 1) + 1
     
-    GetRecordDataFromSheet = SetDataItems(varr)
+    GetRecordDataFromSheet = SetDataItems(vArr)
 End Function
 
 
@@ -327,17 +327,17 @@ End Function
 '* @param vArr Variant型2次元配列（レコード情報データ）
 '*
 '******************************************************************************
-Public Function SetDataItems(varr) As Boolean
+Public Function SetDataItems(vArr) As Boolean
     Dim i As Long, j As Long, itm As Item, Index As Long
     Dim recordCol As Collection
-    For i = LBound(varr, 1) To UBound(varr, 1)
+    For i = LBound(vArr, 1) To UBound(vArr, 1)
         Set recordCol = New Collection
 
         Index = 1
-        For j = LBound(varr, 2) To UBound(varr, 2)
+        For j = LBound(vArr, 2) To UBound(vArr, 2)
             Set itm = CopyItem(mCol(Index))
             itm.ForOutput = True
-            itm.value = varr(i, j)
+            itm.value = vArr(i, j)
             
             If Not itm.Validate Then
                 SetDataItems = False
@@ -388,9 +388,9 @@ End Function
 '* @return Variant型2次元配列（フォーム用データ）
 '*
 '******************************************************************************
-Public Function GetFormVariantData(varr) As Variant
+Public Function GetFormVariantData(vArr) As Variant
     Dim vFormArr()
-    ReDim vFormArr(0 To UBound(varr, 1) - LBound(varr, 1), 0 To mColumnCount - 1)
+    ReDim vFormArr(0 To UBound(vArr, 1) - LBound(vArr, 1), 0 To mColumnCount - 1)
     
     Dim sInfo As SettingInfo: Set sInfo = GetSettingInfo()
     Dim statusBarTxt As String: statusBarTxt = "シートデータ変換処理中："
@@ -413,7 +413,7 @@ Public Function GetFormVariantData(varr) As Variant
             If itm.InputCsvColNo = 0 Then
                 val = ""
             Else
-                val = varr(i, itm.InputCsvColNo - 1)
+                val = vArr(i, itm.InputCsvColNo - 1)
             End If
             
             If itm.InitValueKind <> "" Then

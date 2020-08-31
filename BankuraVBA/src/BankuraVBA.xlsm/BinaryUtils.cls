@@ -120,22 +120,22 @@ Public Function HexStrings2ByteArray(ByVal hstr As String, Optional ByVal delimi
         Exit Function
     End If
     
-    Dim varr
+    Dim vArr
     If delimiter = "" Then
         If Len(hstr) Mod 2 <> 0 Then
             HexStrings2ByteArray = ArrayUtils.EmptyByteArray
             Exit Function
         End If
-        varr = StringUtils.SplitByLength(hstr, 2)
+        vArr = StringUtils.SplitByLength(hstr, 2)
     Else
-        varr = Split(hstr, delimiter)
+        vArr = Split(hstr, delimiter)
     End If
     
     Dim bData() As Byte, i As Long
-    ReDim bData(LBound(varr) To UBound(varr)) As Byte
+    ReDim bData(LBound(vArr) To UBound(vArr)) As Byte
     
-    For i = LBound(varr) To UBound(varr)
-        bData(i) = HexString2Byte(varr(i))
+    For i = LBound(vArr) To UBound(vArr)
+        bData(i) = HexString2Byte(vArr(i))
     Next i
     HexStrings2ByteArray = bData
 End Function

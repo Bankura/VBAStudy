@@ -162,9 +162,9 @@ Public Function ShowFolderDialog(Optional sheetName As String, Optional pos As S
     Dim objPath As Object
     Set objPath = Base.GetShell().BrowseForFolder(0, "フォルダを選択してください", &H1)
     If Not objPath Is Nothing Then
-        ShowFolderDialog = CStr(objPath.items.Item.path)
+        ShowFolderDialog = CStr(objPath.items.Item.Path)
         If sheetName <> "" Then
-            ThisWorkbook.Worksheets(sheetName).Range(pos).value = CStr(objPath.items.Item.path)
+            ThisWorkbook.Worksheets(sheetName).Range(pos).value = CStr(objPath.items.Item.Path)
         End If
     End If
     Exit Function

@@ -150,9 +150,9 @@ End Function
 '*
 '******************************************************************************
 Public Sub SaveToFileWithoutBom( _
-    ByVal strm As Object, ByVal fpath As String, ByVal opSave As SaveOptionsEnum _
+    ByVal strm As Object, ByVal fPath As String, ByVal opSave As SaveOptionsEnum _
     )
-    Call IO.SaveToFileWithoutBom(strm, fpath, opSave)
+    Call IO.SaveToFileWithoutBom(strm, fPath, opSave)
 End Sub
 
 '******************************************************************************
@@ -166,9 +166,9 @@ End Sub
 '*
 '******************************************************************************
 Public Sub RemoveBom( _
-    ByVal fpath As String, ByVal chrset As String, ByVal linsep As LineSeparatorsEnum _
+    ByVal fPath As String, ByVal chrset As String, ByVal linsep As LineSeparatorsEnum _
     )
-    Call IO.RemoveBom(fpath, chrset, linsep)
+    Call IO.RemoveBom(fPath, chrset, linsep)
 End Sub
 
 '******************************************************************************
@@ -196,9 +196,9 @@ End Function
 '*
 '******************************************************************************
 Public Sub ChangeFileCharset( _
-    ByVal fpath As String, ByVal crrChrset As String, ByVal chgChrset As String _
+    ByVal fPath As String, ByVal crrChrset As String, ByVal chgChrset As String _
     )
-    Call IO.ChangeFileCharset(fpath, crrChrset, chgChrset)
+    Call IO.ChangeFileCharset(fPath, crrChrset, chgChrset)
 End Sub
 
 '******************************************************************************
@@ -229,10 +229,10 @@ End Function
 '*
 '******************************************************************************
 Public Sub ChangeFileLineSeparator( _
-    ByVal fpath As String, ByVal chrset As String, _
+    ByVal fPath As String, ByVal chrset As String, _
     ByVal crrLinsep As LineSeparatorsEnum, ByVal chgLinsep As LineSeparatorsEnum _
     )
-    Call IO.ChangeFileLineSeparator(fpath, chrset, crrLinsep, chgLinsep)
+    Call IO.ChangeFileLineSeparator(fPath, chrset, crrLinsep, chgLinsep)
 End Sub
 
 '******************************************************************************
@@ -244,8 +244,8 @@ End Sub
 '* @return Boolean チェック結果（True:該当）
 '*
 '******************************************************************************
-Public Function IsPathRooted(ByVal fpath As String) As Boolean
-    IsPathRooted = IO.IsPathRooted(fpath)
+Public Function IsPathRooted(ByVal fPath As String) As Boolean
+    IsPathRooted = IO.IsPathRooted(fPath)
 End Function
 
 '******************************************************************************
@@ -280,7 +280,7 @@ Public Function GetTempFilePath( _
     Optional willCreateFile As Boolean = False) As String
     GetTempFilePath = IO.GetTempFilePath(tdir, extName)
     If willCreateFile Then
-        Call IO.Fso.CreateTextFile(GetTempFilePath)
+        Call IO.fso.CreateTextFile(GetTempFilePath)
     End If
 End Function
 
@@ -296,9 +296,9 @@ End Function
 '*
 '******************************************************************************
 Public Function GetUniqueFileName( _
-    ByVal fpath As String, Optional delim As String = "_" _
+    ByVal fPath As String, Optional delim As String = "_" _
     ) As String
-    GetUniqueFileName = IO.GetUniqueFileName(fpath, delim)
+    GetUniqueFileName = IO.GetUniqueFileName(fPath, delim)
 End Function
 
 '******************************************************************************
@@ -496,7 +496,7 @@ Public Sub ChangeFilesEncode(targetFolderName As String, srcEncode As String, de
     
     For Each oFile In oFiles
         Dim filePath As String
-        filePath = Fso.GetAbsolutePathName(AddPathSeparator(targetFolderName) & oFile.name)
+        filePath = fso.GetAbsolutePathName(AddPathSeparator(targetFolderName) & oFile.name)
          
         ' ファイルエンコード変換
         Call ChangeFileEncode(filePath, srcEncode, destEncode, bomInclude)
@@ -528,7 +528,7 @@ Public Sub ChangeFileEncode(filePath As String, srcEncode As String, destEncode 
     adoStream2.Open
      
     ' エンコード変換
-    adoStream1.CopyTo adoStream2
+    adoStream1.copyto adoStream2
     If Not bomInclude Then ExcludeBom adoStream2  ' BOM対応
     adoStream2.SaveToFile filePath, adSaveCreateOverWrite 'ファイル上書指定
      
@@ -694,23 +694,23 @@ Public Function ReadTextFileToVArray(filePath As String, _
                                      Optional cSet As String = "_autodetect_all", _
                                      Optional separator As LineSeparatorsEnum = LineSeparatorsEnum.adCRLF) As Variant
 
-    Dim varr(), lineCount As Long, cnt As Long
+    Dim vArr(), lineCount As Long, cnt As Long
     Dim stream As Object: Set stream = IO.CreateADODBStream(adTypeText, cSet, separator)
     With stream
         .Mode = adModeReadWrite
         .Open
         .LoadFromFile filePath 'ファイル指定
         lineCount = CountLine(stream)
-        ReDim Preserve varr(lineCount - 1)
+        ReDim Preserve vArr(lineCount - 1)
         .Position = 0
         Do While Not .EOS
-            varr(cnt) = .ReadText(adReadLine)
+            vArr(cnt) = .ReadText(adReadLine)
             cnt = cnt + 1
         Loop
         .Close
     End With
 
-    ReadTextFileToVArray = varr
+    ReadTextFileToVArray = vArr
 End Function
 
 '******************************************************************************
@@ -730,7 +730,7 @@ Public Function ReadCsvFile(ByVal filePath As String, _
                             Optional ByVal cSet As String = "UTF-8", _
                             Optional ByVal separator As LineSeparatorsEnum = adCRLF) As Variant
 
-    Dim lSize As Long, lCount As Long, i As Long, vRow, varr()
+    Dim lSize As Long, lCount As Long, i As Long, vRow, vArr()
     Dim stream As Object: Set stream = IO.CreateADODBStream(adTypeText, cSet, separator)
     With stream
         .Mode = adModeReadWrite
@@ -748,13 +748,13 @@ Public Function ReadCsvFile(ByVal filePath As String, _
         .Position = 0
         vRow = StringUtils.SplitCsvRow(.ReadText(adReadLine), quotExists)
         If Not headerExists Then
-            ReDim varr(0 To lSize - 1, 0 To UBound(vRow))
+            ReDim vArr(0 To lSize - 1, 0 To UBound(vRow))
             For i = LBound(vRow) To UBound(vRow)
-                varr(lCount, i) = vRow(i)
+                vArr(lCount, i) = vRow(i)
             Next
             lCount = lCount + 1
         Else
-            ReDim varr(0 To lSize - 2, 0 To UBound(vRow))
+            ReDim vArr(0 To lSize - 2, 0 To UBound(vRow))
         End If
         Dim colCount As Long: colCount = UBound(vRow)
 
@@ -768,14 +768,14 @@ Public Function ReadCsvFile(ByVal filePath As String, _
             End If
             
             For i = LBound(vRow) To UBound(vRow)
-                varr(lCount, i) = vRow(i)
+                vArr(lCount, i) = vRow(i)
             Next
             lCount = lCount + 1
         Loop
         .Close
     End With
 
-    ReadCsvFile = varr
+    ReadCsvFile = vArr
 End Function
 
 '******************************************************************************
@@ -798,7 +798,7 @@ Public Function SelectCsvCol(ByVal filePath As String, _
                             Optional ByVal cSet As String = "UTF-8", _
                             Optional ByVal separator As LineSeparatorsEnum = adCRLF) As Variant
 
-    Dim lSize As Long, lCount As Long, i As Long, vRow, varr()
+    Dim lSize As Long, lCount As Long, i As Long, vRow, vArr()
     Dim stream As Object: Set stream = IO.CreateADODBStream(adTypeText, cSet, separator)
     With stream
         .Mode = adModeReadWrite
@@ -825,13 +825,13 @@ Public Function SelectCsvCol(ByVal filePath As String, _
         .Position = 0
         vRow = StringUtils.SplitCsvRow(.ReadText(adReadLine), quotExists)
         If Not headerExists Then
-            ReDim varr(0 To lSize - 1, 0 To UBound(colIndexes))
+            ReDim vArr(0 To lSize - 1, 0 To UBound(colIndexes))
             For i = LBound(colIndexes) To UBound(colIndexes)
-                varr(lCount, i) = vRow(colIndexes(i))
+                vArr(lCount, i) = vRow(colIndexes(i))
             Next
             lCount = lCount + 1
         Else
-            ReDim varr(0 To lSize - 2, 0 To UBound(colIndexes))
+            ReDim vArr(0 To lSize - 2, 0 To UBound(colIndexes))
         End If
         Dim colCount As Long: colCount = UBound(vRow)
 
@@ -845,14 +845,14 @@ Public Function SelectCsvCol(ByVal filePath As String, _
             End If
             
             For i = LBound(colIndexes) To UBound(colIndexes)
-                varr(lCount, i) = vRow(colIndexes(i))
+                vArr(lCount, i) = vRow(colIndexes(i))
             Next
             lCount = lCount + 1
         Loop
         .Close
     End With
 
-    SelectCsvCol = varr
+    SelectCsvCol = vArr
 End Function
 
 '******************************************************************************
@@ -918,13 +918,13 @@ Public Function GetTextFileLineCount(filePath As String, _
                                       Optional cSet As String = "_autodetect_all", _
                                       Optional separator As LineSeparatorsEnum = adCRLF) As Long
     ' ファイルが存在しない場合は-1返却
-    If (IO.Fso.FileExists(filePath) = False) Then
+    If (IO.fso.FileExists(filePath) = False) Then
         GetTextFileLineCount = -1
         Exit Function
     End If
     If Not separator = adCR Then
         ' 追記モードで開き行数をカウント
-        GetTextFileLineCount = IO.Fso.OpenTextFile(filePath, ForAppending).line - 1
+        GetTextFileLineCount = IO.fso.OpenTextFile(filePath, ForAppending).line - 1
         Exit Function
     End If
     
@@ -1033,7 +1033,7 @@ End Sub
 '* @param filePath 書込み対象となるテキストファイルのフルパス
 '******************************************************************************
 Public Sub AppendMode(stream As Object, filePath As String)
-    If IO.Fso.FileExists(filePath) Then
+    If IO.fso.FileExists(filePath) Then
         With stream
             .LoadFromFile filePath
             .Position = .size 'ポインタを終端へ
@@ -1470,7 +1470,7 @@ Public Function ReplaceFileNames(ByVal dirPath As String, ByVal searchStr As Str
     On Error GoTo ErrorHandler
     Dim f As Object
     For Each f In IO.GetFolder(dirPath).Files
-        Call ReplaceFileName(f.path, searchStr, replaceStr)
+        Call ReplaceFileName(f.Path, searchStr, replaceStr)
     Next
     ReplaceFileNames = True
     Exit Function
@@ -1600,18 +1600,18 @@ End Sub
 '* [概  要] IsValidFilePath
 '* [詳  細] 指定したファイルパスが、ファイルパスとして妥当な内容か判定する。
 '*
-'* @param path ファイルパス
+'* @param fPath ファイルパス
 '* @param pathSeparator パス区切り文字
 '* @return Boolean 判定結果（True:OK）
 '******************************************************************************
-Public Function IsValidFilePath(ByVal path As String, Optional ByVal pathSeparator As String = "\") As Boolean
-    If Len(path) > 260 Then
+Public Function IsValidFilePath(ByVal fPath As String, Optional ByVal pathSeparator As String = "\") As Boolean
+    If Len(fPath) > 260 Then
         IsValidFilePath = False
         Exit Function
     End If
 
     ' ディレクトリパス妥当性チェック
-    Dim pathElements As Variant: pathElements = Split(path, pathSeparator)
+    Dim pathElements As Variant: pathElements = Split(fPath, pathSeparator)
     Dim i As Long
     For i = LBound(pathElements) To UBound(pathElements) - 1
         If ValidateUtils.ValidatePattern(pathElements(i), _
@@ -1632,27 +1632,65 @@ Public Function IsValidFilePath(ByVal path As String, Optional ByVal pathSeparat
 End Function
 
 '******************************************************************************
+'* [概  要] IsValidFolderPath
+'* [詳  細] 指定したフォルダパスが、フォルダパスとして妥当な内容か判定する。
+'*
+'* @param fPath ファイルパス
+'* @param pathSeparator パス区切り文字
+'* @return Boolean 判定結果（True:OK）
+'******************************************************************************
+Public Function IsValidFolderPath(ByVal fPath As String, Optional ByVal pathSeparator As String = "\") As Boolean
+    If Len(fPath) > 260 Then
+        IsValidFolderPath = False
+        Exit Function
+    End If
+
+    ' ディレクトリパス妥当性チェック
+    Dim pathElements As Variant: pathElements = Split(fPath, pathSeparator)
+    Dim i As Long
+    For i = LBound(pathElements) To UBound(pathElements)
+        If ValidateUtils.ValidatePattern(pathElements(i), _
+        "[\x00-\x1f<>""|]|^(CON|PRN|AUX|NUL|COM[0-9]|LPT[0-9]|CLOCK\$)$", True) Then
+            IsValidFolderPath = False
+            Exit Function
+        End If
+    Next
+    IsValidFolderPath = True
+End Function
+
+'******************************************************************************
+'* [概  要] IsFolder
+'* [詳  細] 指定したパスが、フォルダか判定する。
+'*
+'* @param fPath パス
+'* @return Boolean 判定結果（True:OK）
+'******************************************************************************
+Public Function IsFolder(ByVal fPath As String) As Boolean
+    IsFolder = ((GetAttr(fPath) And vbDirectory) > 0)
+End Function
+
+'******************************************************************************
 '* [概  要] ChangeExtension
 '* [詳  細] 指定したファイルパスから、拡張子を変更したファイルパスを取得する。
 '*
-'* @param path ファイルパス
+'* @param fPath ファイルパス
 '* @param extension 拡張子
 '* @return String 変更後ファイルパス
 '******************************************************************************
-Public Function ChangeExtension(ByVal path As String, ByVal extension As String) As String
-    If InStrRev(path, ".") = 0 Then
+Public Function ChangeExtension(ByVal fPath As String, ByVal extension As String) As String
+    If InStrRev(fPath, ".") = 0 Then
         If extension = "" Then
-            ChangeExtension = path
+            ChangeExtension = fPath
         Else
-            ChangeExtension = path & "." & StringUtils.RemoveStart(extension, ".")
+            ChangeExtension = fPath & "." & StringUtils.RemoveStart(extension, ".")
         End If
         Exit Function
     End If
     If extension = "" Then
-        ChangeExtension = Mid(path, 1, InStrRev(path, ".") - 1)
+        ChangeExtension = Mid(fPath, 1, InStrRev(fPath, ".") - 1)
         Exit Function
     End If
-    ChangeExtension = Mid(path, 1, InStrRev(path, ".")) & StringUtils.RemoveStart(extension, ".")
+    ChangeExtension = Mid(fPath, 1, InStrRev(fPath, ".")) & StringUtils.RemoveStart(extension, ".")
 End Function
 
 '******************************************************************************
@@ -1753,18 +1791,18 @@ Private Sub GrepImpl(ByVal folder As Object, _
             
             Dim tmpCSet As String: tmpCSet = cSet
             If tmpCSet = "auto" Then
-                tmpCSet = GetFileCharset(f.path)
+                tmpCSet = GetFileCharset(f.Path)
             End If
             
             If tmpCSet = "" Then
-                Call GrepTextFile(f.path, reg, arr, , showConsole, tmpSep)
+                Call GrepTextFile(f.Path, reg, arr, , showConsole, tmpSep)
             ElseIf tmpCSet <> "BINARY" Then
                 If separator = 0 Then
-                    tmpSep = GetFileLineSeparator(f.path)
+                    tmpSep = GetFileLineSeparator(f.Path)
                 End If
-                Call GrepTextFile(f.path, reg, arr, tmpCSet, showConsole, tmpSep)
+                Call GrepTextFile(f.Path, reg, arr, tmpCSet, showConsole, tmpSep)
             Else
-                Debug.Print tmpCSet, f.path
+                Debug.Print tmpCSet, f.Path
             End If
         End If
     Next
@@ -2256,20 +2294,20 @@ Private Sub GrepAndReplaceImpl(ByVal folder As Object, _
             
             Dim tmpCSet As String: tmpCSet = cSet
             If tmpCSet = "auto" Then
-                tmpCSet = GetFileCharset(f.path, bomInclude)
+                tmpCSet = GetFileCharset(f.Path, bomInclude)
             Else
-                bomInclude = IsBomIncluded(f.path, tmpCSet)
+                bomInclude = IsBomIncluded(f.Path, tmpCSet)
             End If
             
             If tmpCSet = "" Then
-                Call GrepAndReplaceTextFile(f.path, reg, replaceString, arr, , showConsole, True, tmpSep)
+                Call GrepAndReplaceTextFile(f.Path, reg, replaceString, arr, , showConsole, True, tmpSep)
             ElseIf tmpCSet <> "BINARY" Then
                 If separator = 0 Then
-                    tmpSep = GetFileLineSeparator(f.path)
+                    tmpSep = GetFileLineSeparator(f.Path)
                 End If
-                Call GrepAndReplaceTextFile(f.path, reg, replaceString, arr, tmpCSet, showConsole, bomInclude, tmpSep)
+                Call GrepAndReplaceTextFile(f.Path, reg, replaceString, arr, tmpCSet, showConsole, bomInclude, tmpSep)
             Else
-                Debug.Print tmpCSet, f.path
+                Debug.Print tmpCSet, f.Path
             End If
         End If
     Next
@@ -2409,7 +2447,7 @@ Private Sub SearchFileImpl(ByVal folder As Object, _
     For Each f In folder.Files
         If f.name Like wildCards Then
             If reg.Test(f.name) Then
-                arr.Add f.path
+                arr.Add f.Path
             End If
         End If
     Next
@@ -2423,18 +2461,146 @@ End Sub
 '* [概  要] MoveTrashBox
 '* [詳  細] ゴミ箱に移動する。
 '*
-'* @param path パス
+'* @param fPath パス
 '* @return Boolean 実行結果
 '******************************************************************************
-Public Function MoveTrashBox(ByVal path As String) As Boolean
+Public Function MoveTrashBox(ByVal fPath As String) As Boolean
     Dim sh As SHFILEOPSTRUCT, re As Long
     With sh
         .hWnd = Application.hWnd
         .wFunc = FO_DELETE
-        .pFrom = path
+        .pFrom = fPath
         .fFlags = FOF_ALLOWUNDO + FOF_NOCONFIRMATION + FOF_NOERRORUI
     End With
     re = SHFileOperation(sh)
     If re = 0 Then MoveTrashBox = True
 End Function
 
+'******************************************************************************
+'* [概  要] GetUniqueFolderName
+'* [詳  細] 一意となるフォルダパスを作成する。
+'*          指定したフォルダパスが存在する場合は、フォルダ名末尾にデリミタと
+'*          番号を付与して現状存在しないフォルダパスとなるまで番号をインクリ
+'*          メントする。
+'*
+'* @param fPath 元となるフォルダパス
+'* @param delim パス
+'* @return String 一意となるフォルダパス
+'******************************************************************************
+Public Function GetUniqueFolderName(ByVal fPath As String, Optional delim As String = "_") As String
+    Dim d As String: d = fso.GetParentFolderName(fPath)
+    Dim b As String: b = fso.GetBaseName(fPath) & delim
+    Dim n As Long: n = 0
+    Do While IO.FolderExists(fPath)
+        n = n + 1
+        fPath = fso.BuildPath(d, b & n)
+    Loop
+    GetUniqueFolderName = fPath
+End Function
+
+'******************************************************************************
+'* [概  要] CreateZipFile
+'* [詳  細] zipファイルを作成する。
+'* [参  考] https://qiita.com/kou_tana77/items/72346c69107fabf99335
+'*          http://scripting.cocolog-nifty.com/blog/2007/11/vbazip_a144.html
+'* [補  足] Microsoft非推奨の方法であるため、Powershell経由でZIP圧縮する方法
+'*          をとるのが望ましい。
+'*
+'* @param filePath 保存先zipファイルパス
+'* @param targetFiles()  対象ファイルパス（複数指定可）
+'* @return Boolean 実行結果
+'******************************************************************************
+Public Function CreateZipFile(filePath As String, ParamArray targetFiles() As Variant) As Boolean
+    If IsMissing(targetFiles) Or UCase(IO.GetExtensionName(filePath)) <> "ZIP" Then
+        CreateZipFile = False
+        Exit Function
+    End If
+    If IO.FileExists(filePath) Then
+        IO.DeleteFile filePath
+        IO.CreateTextFile(filePath, False).Write "PK" & Chr(5) & Chr(6) & String(18, 0)
+    Else
+        IO.CreateTextFile(filePath, False).Write "PK" & Chr(5) & Chr(6) & String(18, 0)
+    End If
+    Dim shellObj As Object: Set shellObj = Base.GetShell
+    Dim zipFolder As Object: Set zipFolder = shellObj.Namespace(IO.GetAbsolutePathName(filePath))
+    Dim targetFilePath As Variant
+    For Each targetFilePath In targetFiles
+        Dim fileName As String: fileName = fso.GetFileName(targetFilePath)
+        Dim sFolderItem As Object
+        Set sFolderItem = shellObj.Namespace(IO.GetParentFolderName(IO.GetAbsolutePathName(targetFilePath))).ParseName(fileName)
+        Dim skip As Boolean: skip = False
+        If sFolderItem Is Nothing Then
+            Debug.Print "Nothing: " & targetFilePath
+            skip = True
+        End If
+        If IsFolder(targetFilePath) Then
+            If shellObj.Namespace(IO.GetAbsolutePathName(targetFilePath)).items().Count > 0 Then
+                ' 空フォルダをスキップ対象とする
+                skip = True
+            End If
+        End If
+        If Not skip Then
+            Dim retryCnt0 As Long: retryCnt0 = 0
+            Do
+                Dim zFolderItem As Object: Set zFolderItem = zipFolder.ParseName(fileName)
+                If zFolderItem Is Nothing Then
+                    Dim cnt As Long: cnt = zipFolder.items().Count
+                    zipFolder.CopyHere sFolderItem, &H4 Or &H10
+                    Dim retryCnt As Long: retryCnt = 0
+                    Do While zipFolder.items().Count <= cnt
+                        If retryCnt > 10 Then
+                            Debug.Print "RetryOver: " & targetFilePath
+                            Exit Function
+                        End If
+                        Application.Wait Now + TimeSerial(0, 0, 1)
+                        retryCnt = retryCnt + 1
+                    Loop
+                    Exit Do
+                Else
+                    ' ファイルがあれば置き換え
+                    Call zFolderItem.InvokeVerb("delete")
+                End If
+            Loop
+        End If
+    Next
+    CreateZipFile = True
+End Function
+
+'******************************************************************************
+'* [概  要] UnZipFile
+'* [詳  細] zipファイルを解凍する。
+'* [補  足] Microsoft非推奨の方法であるため、Powershell経由でZIP解凍する方法
+'*          をとるのが望ましい。
+'*
+'* @param zipFilePath zipファイルパス
+'* @param targetFolderPath 解凍先フォルダパス
+'*                         （解凍先フォルダにzipファイルのベース名と同じ名称
+'*                           のフォルダを作成）
+'* @return Boolean 実行結果
+'******************************************************************************
+Public Function UnZipFile(zipFilePath As String, targetFolderPath As String) As Boolean
+    If Not FileExists(zipFilePath) Then
+        UnZipFile = False
+        Exit Function
+    End If
+    Dim saveFolderPath As String
+    saveFolderPath = GetUniqueFolderName(IO.BuildPath(targetFolderPath, IO.GetBaseName(ChangeExtension(zipFilePath, ""))))
+    Call CreateFolderTree(saveFolderPath)
+    
+    Dim shellObj As Object: Set shellObj = Base.GetShell
+    Dim targetFolder As Object: Set targetFolder = shellObj.Namespace(IO.GetAbsolutePathName(saveFolderPath))
+    Dim srcFolder As Object: Set srcFolder = shellObj.Namespace(IO.GetAbsolutePathName(zipFilePath))
+    Dim cnt As Long: cnt = srcFolder.items().Count
+    Dim retryCnt As Long: retryCnt = 0
+    
+    targetFolder.CopyHere srcFolder.items, &H4 Or &H10
+    Do While targetFolder.items().Count < cnt
+        If retryCnt > 10 Then
+            Debug.Print "RetryOver"
+            Exit Function
+        End If
+        Application.Wait Now + TimeSerial(0, 0, 1)
+        retryCnt = retryCnt + 1
+    Loop
+    UnZipFile = True
+End Function

@@ -113,18 +113,18 @@ Private xxFso As Object 'Is Scripting.FileSystemObject
 Private xxMimeCharsets As Variant '(Of Array(Of String))
 
 ''' @return As Object Is Scripting.FileSystemObject
-Public Property Get Fso() As Object
+Public Property Get fso() As Object
     If xxFso Is Nothing Then Set xxFso = CreateObject("Scripting.FileSystemObject")
-    Set Fso = xxFso
+    Set fso = xxFso
 End Property
 
 ''' @return As String
 Public Property Get ExecPath() As String
     Dim app As Object: Set app = Application
     Select Case app.name
-        Case "Microsoft Word":   ExecPath = app.MacroContainer.path
-        Case "Microsoft Excel":  ExecPath = app.ThisWorkbook.path
-        Case "Microsoft Access": ExecPath = app.CurrentProject.path
+        Case "Microsoft Word":   ExecPath = app.MacroContainer.Path
+        Case "Microsoft Excel":  ExecPath = app.ThisWorkbook.Path
+        Case "Microsoft Access": ExecPath = app.CurrentProject.Path
         Case Else: err.Raise 17
     End Select
 End Property
@@ -165,7 +165,7 @@ Public Function BomSize(ByVal chrset As String) As Integer
 End Function
 
 Public Sub SaveToFileWithoutBom( _
-    ByVal strm As Object, ByVal fpath As String, ByVal opSave As SaveOptionsEnum _
+    ByVal strm As Object, ByVal fPath As String, ByVal opSave As SaveOptionsEnum _
     )
     
     If TypeName(strm) <> "Stream" Then err.Raise 13
@@ -181,7 +181,7 @@ Public Sub SaveToFileWithoutBom( _
     
     strmZ.Write strm.Read(adReadAll)
     strmZ.Position = 0
-    strmZ.SaveToFile fpath, opSave
+    strmZ.SaveToFile fPath, opSave
     strmZ.Close
     
     strm.Position = 0
@@ -191,13 +191,13 @@ Public Sub SaveToFileWithoutBom( _
 End Sub
 
 Public Sub RemoveBom( _
-    ByVal fpath As String, ByVal chrset As String, ByVal linsep As LineSeparatorsEnum _
+    ByVal fPath As String, ByVal chrset As String, ByVal linsep As LineSeparatorsEnum _
     )
     
     Dim strm As Object: Set strm = CreateADODBStream(chrset, linsep)
     strm.Open
-    strm.LoadFromFile fpath
-    SaveToFileWithoutBom strm, fpath, adSaveCreateOverWrite
+    strm.LoadFromFile fPath
+    SaveToFileWithoutBom strm, fPath, adSaveCreateOverWrite
     strm.Close
 End Sub
 
@@ -209,7 +209,7 @@ Public Function ChangeCharset(ByVal strm As Object, ByVal chrset As String) As O
     strmZ.Open
     
     If strm.State = adStateClosed Then strm.Open
-    strm.CopyTo strmZ
+    strm.copyto strmZ
     strm.Close
     
     strmZ.Position = 0
@@ -217,14 +217,14 @@ Public Function ChangeCharset(ByVal strm As Object, ByVal chrset As String) As O
 End Function
 
 Public Sub ChangeFileCharset( _
-    ByVal fpath As String, ByVal crrChrset As String, ByVal chgChrset As String _
+    ByVal fPath As String, ByVal crrChrset As String, ByVal chgChrset As String _
     )
     
     Dim strm As Object: Set strm = CreateADODBStream(adTypeText, crrChrset)
     strm.Open
-    strm.LoadFromFile fpath
+    strm.LoadFromFile fPath
     Set strm = ChangeCharset(strm, chgChrset)
-    strm.SaveToFile fpath, adSaveCreateOverWrite
+    strm.SaveToFile fPath, adSaveCreateOverWrite
     strm.Close
 End Sub
 
@@ -248,26 +248,26 @@ Public Function ChangeLineSeparator( _
 End Function
 
 Public Sub ChangeFileLineSeparator( _
-    ByVal fpath As String, ByVal chrset As String, _
+    ByVal fPath As String, ByVal chrset As String, _
     ByVal crrLinsep As LineSeparatorsEnum, ByVal chgLinsep As LineSeparatorsEnum _
     )
     
     Dim strm As Object: Set strm = CreateADODBStream(chrset, crrLinsep)
     strm.Open
-    strm.LoadFromFile fpath
+    strm.LoadFromFile fPath
     Set strm = ChangeLineSeparator(strm, chgLinsep)
-    strm.SaveToFile fpath, adSaveCreateOverWrite
+    strm.SaveToFile fPath, adSaveCreateOverWrite
     strm.Close
 End Sub
 
-Public Function IsPathRooted(ByVal fpath As String) As Boolean
+Public Function IsPathRooted(ByVal fPath As String) As Boolean
     Dim s As String
-    s = Left(fpath, 1)
+    s = Left(fPath, 1)
     If s = "\" Or s = "/" Then
         IsPathRooted = True
         GoTo Escape
     End If
-    s = Mid(fpath, 2, 1)
+    s = Mid(fPath, 2, 1)
     If s = ":" Then
         IsPathRooted = True
         GoTo Escape
@@ -279,7 +279,7 @@ End Function
 
 Public Function GetSpecialFolder(ByVal spFolder As Variant) As String
     If IsNumeric(spFolder) Then
-        GetSpecialFolder = Fso.GetSpecialFolder(spFolder)
+        GetSpecialFolder = fso.GetSpecialFolder(spFolder)
     ElseIf VarType(spFolder) = vbString Then
         GetSpecialFolder = Wsh.SpecialFolders(spFolder)
     Else
@@ -291,26 +291,26 @@ Public Function GetTempFilePath( _
     Optional ByVal tdir As String, Optional extName As String = ".tmp" _
     ) As String
     
-    If StrPtr(tdir) = 0 Then tdir = Fso.GetSpecialFolder(TemporaryFolder)
+    If StrPtr(tdir) = 0 Then tdir = fso.GetSpecialFolder(TemporaryFolder)
     Do
-        GetTempFilePath = Fso.BuildPath(tdir, Replace(Fso.GetTempName(), ".tmp", extName))
-    Loop While Fso.FileExists(GetTempFilePath)
+        GetTempFilePath = fso.BuildPath(tdir, Replace(fso.GetTempName(), ".tmp", extName))
+    Loop While fso.FileExists(GetTempFilePath)
 End Function
 
 Public Function GetUniqueFileName( _
-    ByVal fpath As String, Optional delim As String = "_" _
+    ByVal fPath As String, Optional delim As String = "_" _
     ) As String
     
-    Dim d As String: d = Fso.GetParentFolderName(fpath)
-    Dim b As String: b = Fso.GetBaseName(fpath) & delim
-    Dim x As String: x = "." & Fso.GetExtensionName(fpath)
+    Dim d As String: d = fso.GetParentFolderName(fPath)
+    Dim b As String: b = fso.GetBaseName(fPath) & delim
+    Dim x As String: x = "." & fso.GetExtensionName(fPath)
     
     Dim n As Long: n = 0
-    While Fso.FileExists(fpath)
+    While fso.FileExists(fPath)
         n = n + 1
-        fpath = Fso.BuildPath(d, b & CStr(n) & x)
+        fPath = fso.BuildPath(d, b & CStr(n) & x)
     Wend
-    GetUniqueFileName = fpath
+    GetUniqueFileName = fPath
 End Function
 
 Public Function GetAllFolders(ByVal folderPath As String) As Variant
@@ -319,12 +319,12 @@ Public Function GetAllFolders(ByVal folderPath As String) As Variant
     GetAllFolders = ClctToArr(ret)
 End Function
 Private Sub GetAllFoldersImpl(ByVal folderPath As String, ByVal ret As Collection)
-    Dim d As Object: Set d = Fso.GetFolder(folderPath)
+    Dim d As Object: Set d = fso.GetFolder(folderPath)
     
     Dim sd As Object
     For Each sd In d.SubFolders
-        ret.Add sd.path
-        GetAllFoldersImpl sd.path, ret
+        ret.Add sd.Path
+        GetAllFoldersImpl sd.Path, ret
     Next
 End Sub
 
@@ -334,23 +334,23 @@ Public Function GetAllFiles(ByVal folderPath As String) As Variant
     GetAllFiles = ClctToArr(ret)
 End Function
 Private Sub GetAllFilesImpl(ByVal folderPath As String, ByVal ret As Collection)
-    Dim d As Object: Set d = Fso.GetFolder(folderPath)
+    Dim d As Object: Set d = fso.GetFolder(folderPath)
     
     Dim fl As Object
-    For Each fl In d.Files: ret.Add fl.path: Next
+    For Each fl In d.Files: ret.Add fl.Path: Next
     
     Dim sd As Object
-    For Each sd In d.SubFolders: GetAllFilesImpl sd.path, ret: Next
+    For Each sd In d.SubFolders: GetAllFilesImpl sd.Path, ret: Next
 End Sub
 
 Public Sub CreateFolderTree(ByVal folderPath As String)
-    If Not Fso.DriveExists(Fso.GetDriveName(folderPath)) Then err.Raise 5
+    If Not fso.DriveExists(fso.GetDriveName(folderPath)) Then err.Raise 5
     CreateFolderTreeImpl folderPath
 End Sub
 Private Sub CreateFolderTreeImpl(ByVal folderPath As String)
-    If Fso.FolderExists(folderPath) Then GoTo Escape
-    CreateFolderTreeImpl Fso.GetParentFolderName(folderPath)
-    Fso.CreateFolder folderPath
+    If fso.FolderExists(folderPath) Then GoTo Escape
+    CreateFolderTreeImpl fso.GetParentFolderName(folderPath)
+    fso.CreateFolder folderPath
     
 Escape:
 End Sub
@@ -374,7 +374,7 @@ End Sub
 '* ・Drivesオブジェクトを取得する。
 '*-----------------------------------------------------------------------------
 Public Property Get Drives() As Object
-    Set Drives = Fso.Drives
+    Set Drives = fso.Drives
 End Property
 
 '******************************************************************************
@@ -387,8 +387,8 @@ End Property
 '* @return パス
 '*
 '******************************************************************************
-Public Function BuildPath(ByVal path As String, ByVal name As String) As String
-    BuildPath = Fso.BuildPath(path, name)
+Public Function BuildPath(ByVal Path As String, ByVal name As String) As String
+    BuildPath = fso.BuildPath(Path, name)
 End Function
 
 '******************************************************************************
@@ -402,7 +402,7 @@ End Function
 '*
 '******************************************************************************
 Public Sub CopyFile(ByVal source As String, ByVal destination As String, Optional ByVal overWriteFiles As Boolean = True)
-    Call Fso.CopyFile(source, destination, overWriteFiles)
+    Call fso.CopyFile(source, destination, overWriteFiles)
 End Sub
 
 '******************************************************************************
@@ -416,7 +416,7 @@ End Sub
 '*
 '******************************************************************************
 Public Sub CopyFolder(ByVal source As String, ByVal destination As String, Optional ByVal overWriteFiles As Boolean = True)
-    Call Fso.CopyFolder(source, destination, overWriteFiles)
+    Call fso.CopyFolder(source, destination, overWriteFiles)
 End Sub
 
 '******************************************************************************
@@ -428,8 +428,8 @@ End Sub
 '* @return Folder
 '*
 '******************************************************************************
-Public Function CreateFolder(ByVal path As String) As Object
-    Set CreateFolder = Fso.CreateFolder(path)
+Public Function CreateFolder(ByVal Path As String) As Object
+    Set CreateFolder = fso.CreateFolder(Path)
 End Function
 
 '******************************************************************************
@@ -444,7 +444,7 @@ End Function
 '*
 '******************************************************************************
 Public Function CreateTextFile(ByVal fileName As String, Optional ByVal overwrite As Boolean = True, Optional ByVal unicode As Boolean = False) As Object
-    Set CreateTextFile = Fso.CreateTextFile(fileName, overwrite, unicode)
+    Set CreateTextFile = fso.CreateTextFile(fileName, overwrite, unicode)
 End Function
 
 '******************************************************************************
@@ -457,7 +457,7 @@ End Function
 '*
 '******************************************************************************
 Public Sub DeleteFile(ByVal fileSpec As String, Optional ByVal force As Boolean = False)
-    Call Fso.DeleteFile(fileSpec, force)
+    Call fso.DeleteFile(fileSpec, force)
 End Sub
 
 '******************************************************************************
@@ -470,7 +470,7 @@ End Sub
 '*
 '******************************************************************************
 Public Sub DeleteFolder(ByVal folderSpec As String, Optional ByVal force As Boolean = False)
-    Call Fso.DeleteFolder(folderSpec, force)
+    Call fso.DeleteFolder(folderSpec, force)
 End Sub
 
 
@@ -485,7 +485,7 @@ End Sub
 '*
 '******************************************************************************
 Public Function DriveExists(ByVal driveSpec As String) As Boolean
-    DriveExists = Fso.DriveExists(driveSpec)
+    DriveExists = fso.DriveExists(driveSpec)
 End Function
 
 '******************************************************************************
@@ -498,7 +498,7 @@ End Function
 '*
 '******************************************************************************
 Public Function FileExists(ByVal fileSpec As String) As Boolean
-    FileExists = Fso.FileExists(fileSpec)
+    FileExists = fso.FileExists(fileSpec)
 End Function
 
 '******************************************************************************
@@ -511,7 +511,7 @@ End Function
 '*
 '******************************************************************************
 Public Function FolderExists(ByVal folderSpec As String) As Boolean
-    FolderExists = Fso.FolderExists(folderSpec)
+    FolderExists = fso.FolderExists(folderSpec)
 End Function
 
 '******************************************************************************
@@ -523,8 +523,8 @@ End Function
 '* @return 絶対パス
 '*
 '******************************************************************************
-Public Function GetAbsolutePathName(ByVal path As String) As String
-    GetAbsolutePathName = Fso.GetAbsolutePathName(path)
+Public Function GetAbsolutePathName(ByVal Path As String) As String
+    GetAbsolutePathName = fso.GetAbsolutePathName(Path)
 End Function
 
 '******************************************************************************
@@ -536,8 +536,8 @@ End Function
 '* @return パスのベース名
 '*
 '******************************************************************************
-Public Function GetBaseName(ByVal path As String) As String
-    GetBaseName = Fso.GetBaseName(path)
+Public Function GetBaseName(ByVal Path As String) As String
+    GetBaseName = fso.GetBaseName(Path)
 End Function
 
 '******************************************************************************
@@ -550,7 +550,7 @@ End Function
 '*
 '******************************************************************************
 Public Function GetDrive(ByVal driveSpec As String) As Object
-    Set GetDrive = Fso.GetDrive(driveSpec)
+    Set GetDrive = fso.GetDrive(driveSpec)
 End Function
 
 
@@ -563,8 +563,8 @@ End Function
 '* @return パスのドライブ名
 '*
 '******************************************************************************
-Public Function GetDriveName(ByVal path As String) As String
-    GetDriveName = Fso.GetDriveName(path)
+Public Function GetDriveName(ByVal Path As String) As String
+    GetDriveName = fso.GetDriveName(Path)
 End Function
 
 
@@ -577,8 +577,8 @@ End Function
 '* @return パスの拡張子
 '*
 '******************************************************************************
-Public Function GetExtensionName(ByVal path As String) As String
-    GetExtensionName = Fso.GetExtensionName(path)
+Public Function GetExtensionName(ByVal Path As String) As String
+    GetExtensionName = fso.GetExtensionName(Path)
 End Function
 
 '******************************************************************************
@@ -591,7 +591,7 @@ End Function
 '*
 '******************************************************************************
 Public Function GetFile(ByVal filePath As String) As Object
-    Set GetFile = Fso.GetFile(filePath)
+    Set GetFile = fso.GetFile(filePath)
 End Function
 
 '******************************************************************************
@@ -603,8 +603,8 @@ End Function
 '* @return ファイル名
 '*
 '******************************************************************************
-Public Function GetFileName(ByVal path As String) As String
-    GetFileName = Fso.GetFileName(path)
+Public Function GetFileName(ByVal Path As String) As String
+    GetFileName = fso.GetFileName(Path)
 End Function
 
 '******************************************************************************
@@ -617,7 +617,7 @@ End Function
 '*
 '******************************************************************************
 Public Function GetFileVersion(ByVal fileName As String) As String
-    GetFileVersion = Fso.GetFileVersion(fileName)
+    GetFileVersion = fso.GetFileVersion(fileName)
 End Function
 
 '******************************************************************************
@@ -630,7 +630,7 @@ End Function
 '*
 '******************************************************************************
 Public Function GetFolder(ByVal folderPath As String) As Object
-    Set GetFolder = Fso.GetFolder(folderPath)
+    Set GetFolder = fso.GetFolder(folderPath)
 End Function
 
 '******************************************************************************
@@ -642,8 +642,8 @@ End Function
 '* @return 1つ上のフォルダパス
 '*
 '******************************************************************************
-Public Function GetParentFolderName(ByVal path As String) As String
-    GetParentFolderName = Fso.GetParentFolderName(path)
+Public Function GetParentFolderName(ByVal Path As String) As String
+    GetParentFolderName = fso.GetParentFolderName(Path)
 End Function
 
 '重複のためコメントアウト
@@ -671,7 +671,7 @@ End Function
 '*
 '******************************************************************************
 Public Function GetStandardStream(ByVal standardStreamType As StandardStreamTypes, Optional ByVal unicode As Boolean = False) As Object
-    Set GetStandardStream = Fso.GetStandardStream(standardStreamType, unicode)
+    Set GetStandardStream = fso.GetStandardStream(standardStreamType, unicode)
 End Function
 
 '******************************************************************************
@@ -683,7 +683,7 @@ End Function
 '*
 '******************************************************************************
 Public Function GetTempName() As String
-    GetTempName = Fso.GetTempName()
+    GetTempName = fso.GetTempName()
 End Function
 
 '******************************************************************************
@@ -696,7 +696,7 @@ End Function
 '*
 '******************************************************************************
 Public Sub MoveFile(ByVal source As String, ByVal destination As String)
-    Call Fso.MoveFile(source, destination)
+    Call fso.MoveFile(source, destination)
 End Sub
 
 '******************************************************************************
@@ -709,7 +709,7 @@ End Sub
 '*
 '******************************************************************************
 Public Sub MoveFolder(ByVal source As String, ByVal destination As String)
-    Call Fso.MoveFolder(source, destination)
+    Call fso.MoveFolder(source, destination)
 End Sub
 
 '******************************************************************************
@@ -728,5 +728,5 @@ Public Function OpenTextFile(ByVal fileName As String, _
                       Optional ByVal IOMode As OpenFileEnum = ForReading, _
                       Optional ByVal create As Boolean = False, _
                       Optional ByVal format As TristateEnum = False_) As Object
-    Set OpenTextFile = Fso.OpenTextFile(fileName, IOMode, create, format)
+    Set OpenTextFile = fso.OpenTextFile(fileName, IOMode, create, format)
 End Function

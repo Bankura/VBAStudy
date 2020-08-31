@@ -13068,7 +13068,7 @@ Public Type JOB_INFO_2
 End Type
 
 Public Type ADDJOB_INFO_1
-        path As String
+        Path As String
         JobId As Long
 End Type
 
@@ -13294,7 +13294,7 @@ Public Type USER_INFO_3
    ' Level 0 starts here
    name As LongPtr
    ' Level 1 starts here
-   Password As LongPtr
+   password As LongPtr
    PasswordAge As Long
    Privilege As Long
    HomeDir As LongPtr
@@ -13319,7 +13319,7 @@ Public Type USER_INFO_3
    CountryCode As Long
    CodePage As Long
    ' Level 3 starts here
-   UserID As Long
+   userId As Long
    PrimaryGroupID As Long
    Profile As LongPtr
    HomeDirDrive As LongPtr

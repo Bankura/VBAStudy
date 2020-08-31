@@ -438,7 +438,7 @@ Public Function EnumeratorToArray(ByVal enumr As Object) As Variant
 End Function
 
 '******************************************************************************
-'* [概  要] ArrayRange
+'* [概  要] Range
 '* [詳  細] 指定した範囲の数値の配列を作成する。
 '*          AriawaseのExtモジュールラッパーメソッド。
 '*
@@ -745,9 +745,9 @@ End Function
 '* @param itm 項目
 '* @return Boolean チェック結果（True：含む）
 '******************************************************************************
-Public Function Contains(ByRef varr As Variant, ByVal itm As Variant) As Boolean
+Public Function Contains(ByRef vArr As Variant, ByVal itm As Variant) As Boolean
     Dim v As Variant
-    For Each v In varr
+    For Each v In vArr
         If Core.Eq(v, itm) Then
             Contains = True
             Exit Function
@@ -764,27 +764,27 @@ End Function
 '* @param itm 項目
 '* @return Variant 追加後1次元配列
 '******************************************************************************
-Public Function Insert(ByRef varr As Variant, ByVal idx As Long, ByVal itm As Variant) As Variant
-    If idx < LBound(varr) Or UBound(varr) + 1 < idx Then
-        Insert = varr
+Public Function Insert(ByRef vArr As Variant, ByVal idx As Long, ByVal itm As Variant) As Variant
+    If idx < LBound(vArr) Or UBound(vArr) + 1 < idx Then
+        Insert = vArr
         Exit Function
-    ElseIf idx = LBound(varr) Then
-        If LBound(varr) = UBound(varr) Then
+    ElseIf idx = LBound(vArr) Then
+        If LBound(vArr) = UBound(vArr) Then
             Dim ax As New ArrayEx
             Insert = ax.Add(itm).ToArray
             Exit Function
         End If
         Dim ax1 As New ArrayEx
-        Insert = ax1.AddAll(itm, varr).ToArray
+        Insert = ax1.AddAll(itm, vArr).ToArray
         Exit Function
-    ElseIf idx = UBound(varr) + 1 Then
+    ElseIf idx = UBound(vArr) + 1 Then
         Dim ax2 As New ArrayEx
-        Insert = ax2.AddAll(varr, itm).ToArray
+        Insert = ax2.AddAll(vArr, itm).ToArray
         Exit Function
     End If
 
-    Dim arr1: arr1 = Core.ArrSlice(varr, LBound(varr), idx - 1)
-    Dim arr2: arr2 = Core.ArrSlice(varr, idx, UBound(varr))
+    Dim arr1: arr1 = Core.ArrSlice(vArr, LBound(vArr), idx - 1)
+    Dim arr2: arr2 = Core.ArrSlice(vArr, idx, UBound(vArr))
     Dim ax3 As New ArrayEx
     Insert = ax3.AddAll(arr1, itm, arr2).ToArray
 End Function
@@ -797,32 +797,32 @@ End Function
 '* @param itms 項目
 '* @return Variant 追加後1次元配列
 '******************************************************************************
-Public Function InsertAll(ByRef varr As Variant, ByVal idx As Long, ParamArray itms() As Variant) As Variant
+Public Function InsertAll(ByRef vArr As Variant, ByVal idx As Long, ParamArray itms() As Variant) As Variant
     If IsMissing(itms) Then
-        InsertAll = varr
+        InsertAll = vArr
         Exit Function
     End If
     Dim tmp: tmp = itms
-    If idx < LBound(varr) Or UBound(varr) + 1 < idx Then
-        InsertAll = varr
+    If idx < LBound(vArr) Or UBound(vArr) + 1 < idx Then
+        InsertAll = vArr
         Exit Function
-    ElseIf idx = LBound(varr) Then
-        If LBound(varr) = UBound(varr) Then
+    ElseIf idx = LBound(vArr) Then
+        If LBound(vArr) = UBound(vArr) Then
             Dim ax1 As New ArrayEx
             InsertAll = ax1.AddAll(tmp).ToArray
             Exit Function
         End If
         Dim ax2 As New ArrayEx
-        InsertAll = ax2.AddAll(tmp, varr).ToArray
+        InsertAll = ax2.AddAll(tmp, vArr).ToArray
         Exit Function
-    ElseIf idx = UBound(varr) + 1 Then
+    ElseIf idx = UBound(vArr) + 1 Then
         Dim ax3 As New ArrayEx
-        InsertAll = ax3.AddAll(varr, tmp).ToArray
+        InsertAll = ax3.AddAll(vArr, tmp).ToArray
         Exit Function
     End If
     
-    Dim arr1: arr1 = Core.ArrSlice(varr, LBound(varr), idx - 1)
-    Dim arr2: arr2 = Core.ArrSlice(varr, idx, UBound(varr))
+    Dim arr1: arr1 = Core.ArrSlice(vArr, LBound(vArr), idx - 1)
+    Dim arr2: arr2 = Core.ArrSlice(vArr, idx, UBound(vArr))
     Dim ax As New ArrayEx
     
     InsertAll = ax.AddAll(arr1, tmp, arr2).ToArray
@@ -876,9 +876,9 @@ End Function
 '* @param itm 項目
 '* @return Variant 削除後1次元配列
 '******************************************************************************
-Public Function Remove(ByRef varr As Variant, ByVal itm As Variant) As Variant
-    Dim idx As Long: idx = IndexOf(varr, itm)
-    Remove = RemoveAt(varr, idx)
+Public Function Remove(ByRef vArr As Variant, ByVal itm As Variant) As Variant
+    Dim idx As Long: idx = IndexOf(vArr, itm)
+    Remove = RemoveAt(vArr, idx)
 End Function
 
 '******************************************************************************
@@ -889,24 +889,24 @@ End Function
 '* @param idx インデックス
 '* @return Variant 削除後1次元配列
 '******************************************************************************
-Public Function RemoveAt(ByRef varr As Variant, ByVal idx As Long) As Variant
-    If idx < LBound(varr) Or UBound(varr) < idx Then
-        RemoveAt = varr
+Public Function RemoveAt(ByRef vArr As Variant, ByVal idx As Long) As Variant
+    If idx < LBound(vArr) Or UBound(vArr) < idx Then
+        RemoveAt = vArr
         Exit Function
-    ElseIf idx = LBound(varr) Then
-        If LBound(varr) = UBound(varr) Then
+    ElseIf idx = LBound(vArr) Then
+        If LBound(vArr) = UBound(vArr) Then
             RemoveAt = Me.EmptyVariantArray
             Exit Function
         End If
-        RemoveAt = Core.ArrSlice(varr, idx + 1, UBound(varr))
+        RemoveAt = Core.ArrSlice(vArr, idx + 1, UBound(vArr))
         Exit Function
-    ElseIf idx = UBound(varr) Then
-        RemoveAt = Core.ArrSlice(varr, LBound(varr), idx - 1)
+    ElseIf idx = UBound(vArr) Then
+        RemoveAt = Core.ArrSlice(vArr, LBound(vArr), idx - 1)
         Exit Function
     End If
     
-    Dim arr1: arr1 = Core.ArrSlice(varr, LBound(varr), idx - 1)
-    Dim arr2: arr2 = Core.ArrSlice(varr, idx + 1, UBound(varr))
+    Dim arr1: arr1 = Core.ArrSlice(vArr, LBound(vArr), idx - 1)
+    Dim arr2: arr2 = Core.ArrSlice(vArr, idx + 1, UBound(vArr))
     Dim ax As New ArrayEx
     RemoveAt = ax.AddAll(arr1, arr2).ToArray
 End Function
@@ -920,31 +920,31 @@ End Function
 '* @param idx2 終了インデックス
 '* @return Variant 削除後1次元配列
 '******************************************************************************
-Public Function RemoveRange(ByRef varr As Variant, ByVal idx1 As Long, ByVal idx2 As Long) As Variant
-    If idx1 < LBound(varr) Or UBound(varr) < idx1 Or idx2 < LBound(varr) Or UBound(varr) < idx2 Or idx1 > idx2 Then
-        RemoveRange = varr
+Public Function RemoveRange(ByRef vArr As Variant, ByVal idx1 As Long, ByVal idx2 As Long) As Variant
+    If idx1 < LBound(vArr) Or UBound(vArr) < idx1 Or idx2 < LBound(vArr) Or UBound(vArr) < idx2 Or idx1 > idx2 Then
+        RemoveRange = vArr
         Exit Function
-    ElseIf idx1 = LBound(varr) Then
-        If LBound(varr) = UBound(varr) Then
+    ElseIf idx1 = LBound(vArr) Then
+        If LBound(vArr) = UBound(vArr) Then
             RemoveRange = Me.EmptyVariantArray
             Exit Function
         End If
-        If idx2 = UBound(varr) Then
+        If idx2 = UBound(vArr) Then
             RemoveRange = Me.EmptyVariantArray
             Exit Function
         End If
-        RemoveRange = Core.ArrSlice(varr, idx2 + 1, UBound(varr))
+        RemoveRange = Core.ArrSlice(vArr, idx2 + 1, UBound(vArr))
         Exit Function
-    ElseIf idx1 = UBound(varr) Then
-        RemoveRange = Core.ArrSlice(varr, LBound(varr), UBound(varr) - 1)
+    ElseIf idx1 = UBound(vArr) Then
+        RemoveRange = Core.ArrSlice(vArr, LBound(vArr), UBound(vArr) - 1)
         Exit Function
-    ElseIf idx2 = UBound(varr) Then
-        RemoveRange = Core.ArrSlice(varr, LBound(varr), idx1 - 1)
+    ElseIf idx2 = UBound(vArr) Then
+        RemoveRange = Core.ArrSlice(vArr, LBound(vArr), idx1 - 1)
         Exit Function
     End If
     
-    Dim arr1: arr1 = Core.ArrSlice(varr, LBound(varr), idx1 - 1)
-    Dim arr2: arr2 = Core.ArrSlice(varr, idx2 + 1, UBound(varr))
+    Dim arr1: arr1 = Core.ArrSlice(vArr, LBound(vArr), idx1 - 1)
+    Dim arr2: arr2 = Core.ArrSlice(vArr, idx2 + 1, UBound(vArr))
     Dim ax As New ArrayEx
     RemoveRange = ax.AddAll(arr1, arr2).ToArray
 End Function
@@ -962,17 +962,17 @@ Public Function Repeat(ByVal itm As Variant, ByVal Count As Long) As Variant
         Repeat = EmptyVariantArray
         Exit Function
     End If
-    Dim varr
-    ReDim varr(0 To Count - 1)
+    Dim vArr
+    ReDim vArr(0 To Count - 1)
     Dim i As Long
     For i = 0 To Count - 1
         If IsObject(itm) Then
-            Set varr(i) = itm
+            Set vArr(i) = itm
         Else
-            varr(i) = itm
+            vArr(i) = itm
         End If
     Next
-    Repeat = varr
+    Repeat = vArr
 End Function
 
 '******************************************************************************
@@ -983,14 +983,14 @@ End Function
 '* @param count 項目
 '* @return String 1次元配列
 '******************************************************************************
-Public Function ToString(ByRef varr As Variant) As String
+Public Function ToString(ByRef vArr As Variant) As String
     Dim strx As StringEx: Set strx = New StringEx
 
     strx.Append "["
     Dim i As Long
-    For i = LBound(varr) To UBound(varr)
-        strx.Append VariantUtils.ToString(varr(i))
-        If i < UBound(varr) Then
+    For i = LBound(vArr) To UBound(vArr)
+        strx.Append VariantUtils.ToString(vArr(i))
+        If i < UBound(vArr) Then
             strx.Append ", "
         End If
     Next
@@ -1005,15 +1005,15 @@ End Function
 '* @param varr 1次元配列
 '* @return Variant 最初の要素
 '******************************************************************************
-Public Function GetFirst(ByRef varr As Variant) As Variant
-    If Not IsArray(varr) Then
+Public Function GetFirst(ByRef vArr As Variant) As Variant
+    If Not IsArray(vArr) Then
         GetFirst = Empty
         Exit Function
     End If
-    If IsObject(varr(UBound(varr))) Then
-        Set GetFirst = varr(LBound(varr))
+    If IsObject(vArr(UBound(vArr))) Then
+        Set GetFirst = vArr(LBound(vArr))
     Else
-        GetFirst = varr(LBound(varr))
+        GetFirst = vArr(LBound(vArr))
     End If
 End Function
 
@@ -1024,15 +1024,15 @@ End Function
 '* @param varr 1次元配列
 '* @return Variant 最後の要素
 '******************************************************************************
-Public Function GetLast(ByRef varr As Variant) As Variant
-    If Not IsArray(varr) Then
+Public Function GetLast(ByRef vArr As Variant) As Variant
+    If Not IsArray(vArr) Then
         GetLast = Empty
         Exit Function
     End If
-    If IsObject(varr(UBound(varr))) Then
-        Set GetLast = varr(UBound(varr))
+    If IsObject(vArr(UBound(vArr))) Then
+        Set GetLast = vArr(UBound(vArr))
     Else
-        GetLast = varr(UBound(varr))
+        GetLast = vArr(UBound(vArr))
     End If
 End Function
 
@@ -1046,19 +1046,19 @@ End Function
 '* @param rmLineSeparator 改行を除去するか
 '* @return String 連結文字列
 '******************************************************************************
-Public Function Join(ByRef varr As Variant, Optional ByVal delimiter As String, Optional ByVal wrapChar As String, Optional ByVal rmLineSeparator As Boolean = True) As String
-    If Not IsArray(varr) Then
+Public Function Join(ByRef vArr As Variant, Optional ByVal delimiter As String, Optional ByVal wrapChar As String, Optional ByVal rmLineSeparator As Boolean = True) As String
+    If Not IsArray(vArr) Then
         Join = ""
         Exit Function
     End If
     If wrapChar = "" And rmLineSeparator = False Then
-        Join = VBA.Join(varr, delimiter)
+        Join = VBA.Join(vArr, delimiter)
         Exit Function
     End If
     Dim tmpItm As String
     Dim v, sbuf As StringEx: Set sbuf = New StringEx
     Dim firstAct As Boolean: firstAct = True
-    For Each v In varr
+    For Each v In vArr
         If firstAct Then
             sbuf.Append wrapChar
             sbuf.Append IIf(rmLineSeparator, StringUtils.RemoveLineSeparator(CStr(v)), CStr(v))
@@ -1074,3 +1074,24 @@ Public Function Join(ByRef varr As Variant, Optional ByVal delimiter As String, 
     Join = sbuf.ToString
 End Function
 
+'******************************************************************************
+'* [概  要] Search
+'* [詳  細] 配列（文字列）から指定した文字列と部分一致する項目を
+'*          取得し、1次元配列で返却する。
+'*
+'* @param varr 配列
+'* @param itm 項目
+'* @return Variant 検索結果（1次元配列）
+'******************************************************************************
+Public Function Search(ByRef vArr As Variant, ByVal searchStr As String) As Variant
+    Dim arrx As ArrayEx: Set arrx = New ArrayEx
+    Dim v As Variant
+    For Each v In vArr
+        If ValidateUtils.IsString(v) Then
+            If v Like "*" & searchStr & "*" Then
+                arrx.Add CStr(v)
+            End If
+        End If
+    Next
+    Search = arrx.ToArray
+End Function
