@@ -502,7 +502,7 @@ Public Function Unescape(ByVal v As String) As String
             Case "\u"
 
                 If i + 6 - 1 > Len(v) Then
-                    err.Raise 512 + 1, TypeName(Me) & ".Unescape", "format error"
+                    Err.Raise 512 + 1, TypeName(Me) & ".Unescape", "format error"
                 End If
 
                 sb.Append ChrW$(val("&H" & Mid$(v, i + 2, 4)))
@@ -3683,7 +3683,7 @@ End Function
 '******************************************************************************
 Public Function Truncate(ByVal str As String, ByVal maxWidth As Long) As String
     If maxWidth < 0 Then
-        Call err.Raise(9999, "StringUtils#Truncate", "maxWith cannot be negative")
+        Call Err.Raise(9999, "StringUtils#Truncate", "maxWith cannot be negative")
     End If
     If Me.IsEmpty(str) Then
         Truncate = str

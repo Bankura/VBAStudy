@@ -201,9 +201,9 @@ Public FollowRedirects As Boolean
 Public Property Get ProxyServer() As String
     ProxyServer = web_pProxyServer
 End Property
-Public Property Let ProxyServer(value As String)
+Public Property Let ProxyServer(Value As String)
     Me.EnableAutoProxy = False
-    web_pProxyServer = value
+    web_pProxyServer = Value
 End Property
 
 ' ============================================= '
@@ -266,13 +266,13 @@ Public Function Execute(Request As WebRequest) As WebResponse
         Case 1
             ' 1 = CURLE_UNSUPPORTED_PROTOCOL
             ' 12006 = ERROR_WINHTTP_UNRECOGNIZED_SCHEME
-            err.Raise 12006 + &H30000 + vbObjectError, "The URL does not use a recognized protocol (1: CURLE_UNSUPPORTED_PROTOCOL)" & vbNewLine & _
+            Err.Raise 12006 + &H30000 + vbObjectError, "The URL does not use a recognized protocol (1: CURLE_UNSUPPORTED_PROTOCOL)" & vbNewLine & _
                 "URL: " & Me.GetFullUrl(Request) & vbNewLine & _
                 "Protocol: " & WebHelpers.GetUrlParts(Me.GetFullUrl(Request))("Protocol")
         Case 3
             ' 3 = CURLE_URL_MALFORMAT
             ' 12005 = ERROR_WINHTTP_INVALID_URL
-            err.Raise 12005 + &H30000 + vbObjectError, "The URL is invalid (3: CURLE_URL_MALFORMAT)" & _
+            Err.Raise 12005 + &H30000 + vbObjectError, "The URL is invalid (3: CURLE_URL_MALFORMAT)" & _
                 "URL: " & Me.GetFullUrl(Request)
         Case 5, 6
             ' 5 = CURLE_COULDNT_RESOLVE_PROXY
@@ -284,11 +284,11 @@ Public Function Execute(Request As WebRequest) As WebResponse
                 web_ErrorDetails = "(6: CURLE_COULDNT_RESOLVE_HOST)"
             End If
 
-            err.Raise 12007 + &H30000 + vbObjectError, "WebClient.Execute", "The server name or address could not be resolved " & web_ErrorDetails
+            Err.Raise 12007 + &H30000 + vbObjectError, "WebClient.Execute", "The server name or address could not be resolved " & web_ErrorDetails
         Case 7
             ' 7 = CURLE_COULDNT_CONNECT
             ' 12029 = ERROR_WINHTTP_CANNOT_CONNECT
-            err.Raise 12029 + &H30000 + vbObjectError, "WebClient.Execute", "A connection with the server could not be established (7: CURLE_COULDNT_CONNECT)"
+            Err.Raise 12029 + &H30000 + vbObjectError, "WebClient.Execute", "A connection with the server could not be established (7: CURLE_COULDNT_CONNECT)"
         Case 12, 28
             ' 12 = CURLE_FTP_ACCEPT_TIMEOUT
             ' 28 = CURLE_OPERATION_TIMEDOUT
@@ -299,13 +299,13 @@ Public Function Execute(Request As WebRequest) As WebResponse
                 web_ErrorDetails = "(28: CURLE_OPERATION_TIMEDOUT)"
             End If
 
-            err.Raise 12002 + &H30000 + vbObjectError, "WebClient.Execute", "The operation timed out " & web_ErrorDetails
+            Err.Raise 12002 + &H30000 + vbObjectError, "WebClient.Execute", "The operation timed out " & web_ErrorDetails
         Case 47
             ' 47 = CURLE_TOO_MANY_REDIRECTS
             ' 12156 = ERROR_WINHTTP_REDIRECT_FAILED
-            err.Raise 12156 + &H30000 + vbObjectError, "WebClient.Execute", "Too many redirects (47: CURLE_TOO_MANY_REDIRECTS)"
+            Err.Raise 12156 + &H30000 + vbObjectError, "WebClient.Execute", "Too many redirects (47: CURLE_TOO_MANY_REDIRECTS)"
         Case Else
-            err.Raise 11010 + vbObjectError, "WebClient.Execute", "An unknown cURL error occured, #" & web_ErrorNumber & vbNewLine & _
+            Err.Raise 11010 + vbObjectError, "WebClient.Execute", "An unknown cURL error occured, #" & web_ErrorNumber & vbNewLine & _
                 "Find details at http://curl.haxx.se/libcurl/c/libcurl-errors.html"
         End Select
     End If
@@ -341,22 +341,22 @@ web_ErrorHandling:
 
     ' Check lower 16 bits from error
     ' (e.g. 80072EE2 -> 2EE2 -> 12002)
-    Select Case err.Number And 65535
+    Select Case Err.Number And 65535
     Case 12002, 12007, 12029
         ' Treat timeout-related errors as 408: timeout, name not resolved, cannot connect
         web_Response.StatusCode = WebStatusCode.RequestTimeout
-        web_Response.StatusDescription = "Request Timeout: " & err.Description
+        web_Response.StatusDescription = "Request Timeout: " & Err.Description
 
         WebHelpers.LogResponse Me, Request, web_Response
         Set Execute = web_Response
-        err.Clear
+        Err.Clear
     Case Else
         ' Error
         web_ErrorDescription = "An error occurred during execute" & vbNewLine & _
-            err.Number & VBA.IIf(err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(err.Number)) & ")", "") & ": " & err.Description
+            Err.Number & VBA.IIf(Err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(Err.Number)) & ")", "") & ": " & Err.Description
 
         WebHelpers.LogError web_ErrorDescription, "WebClient.Execute", 11011 + vbObjectError
-        err.Raise 11011 + vbObjectError, "WebClient.Execute", web_ErrorDescription
+        Err.Raise 11011 + vbObjectError, "WebClient.Execute", web_ErrorDescription
     End Select
 End Function
 
@@ -590,9 +590,9 @@ Public Function PrepareHttpRequest(Request As WebRequest, Optional Async As Bool
 web_ErrorHandling:
 
     Set web_Http = Nothing
-    err.Raise 11012 + vbObjectError, "WebClient.PrepareHttpRequest", _
+    Err.Raise 11012 + vbObjectError, "WebClient.PrepareHttpRequest", _
         "An error occurred while preparing http request" & vbNewLine & _
-        err.Number & VBA.IIf(err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(err.Number)) & ")", "") & ": " & err.Description
+        Err.Number & VBA.IIf(Err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(Err.Number)) & ")", "") & ": " & Err.Description
 End Function
 
 ''
@@ -672,9 +672,9 @@ Public Function PrepareCurlRequest(Request As WebRequest) As String
 
 web_ErrorHandling:
 
-    err.Raise 11013 + vbObjectError, "WebClient.PrepareCURLRequest", _
+    Err.Raise 11013 + vbObjectError, "WebClient.PrepareCURLRequest", _
         "An error occurred while preparing cURL request" & vbNewLine & _
-        err.Number & VBA.IIf(err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(err.Number)) & ")", "") & ": " & err.Description
+        Err.Number & VBA.IIf(Err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(Err.Number)) & ")", "") & ": " & Err.Description
 End Function
 
 ''
@@ -745,8 +745,8 @@ Private Sub web_LoadAutoProxy(web_Request As WebRequest)
 web_ErrorHandling:
 
     WebHelpers.LogError "An error occurred while loading auto-proxy" & vbNewLine & _
-        err.Number & VBA.IIf(err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(err.Number)) & ")", "") & ": " & err.Description, _
-        "WebClient.LoadAutoProxy", err.Number
+        Err.Number & VBA.IIf(Err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(Err.Number)) & ")", "") & ": " & Err.Description, _
+        "WebClient.LoadAutoProxy", Err.Number
 #End If
 End Sub
 

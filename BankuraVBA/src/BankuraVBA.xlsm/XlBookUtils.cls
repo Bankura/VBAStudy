@@ -139,7 +139,7 @@ Public Function ExtractKeyData(inputSheetName As String, StartRow As Integer, St
     
     ' 入力情報を取得
     With Worksheets(inputSheetName)
-        varData = .Range(.Cells(StartRow, StartCol), .Cells(Rows.Count, StartCol).End(xlUp)).value
+        varData = .Range(.Cells(StartRow, StartCol), .Cells(Rows.Count, StartCol).End(xlUp)).Value
     End With
 
     '空データ、重複データを除外
@@ -193,7 +193,7 @@ Public Function ExtractKeyData2(inputSheet As Workbook, StartRow As Integer, Sta
     
     ' 入力情報を取得
     With inputSheet
-        varData = .Range(.Cells(StartRow, StartCol), .Cells(Rows.Count, StartCol).End(xlUp)).value
+        varData = .Range(.Cells(StartRow, StartCol), .Cells(Rows.Count, StartCol).End(xlUp)).Value
     End With
 
     '空データ、重複データを除外

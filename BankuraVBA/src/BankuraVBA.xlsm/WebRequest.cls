@@ -213,9 +213,9 @@ Public UserAgent As String
 Public Property Get format() As WebFormat
     format = RequestFormat
 End Property
-Public Property Let format(value As WebFormat)
-    Me.RequestFormat = value
-    Me.ResponseFormat = value
+Public Property Let format(Value As WebFormat)
+    Me.RequestFormat = Value
+    Me.ResponseFormat = Value
 End Property
 
 ''
@@ -242,9 +242,9 @@ End Property
 Public Property Get RequestFormat() As WebFormat
     RequestFormat = web_pRequestFormat
 End Property
-Public Property Let RequestFormat(value As WebFormat)
-    If value <> web_pRequestFormat Then
-        web_pRequestFormat = value
+Public Property Let RequestFormat(Value As WebFormat)
+    If Value <> web_pRequestFormat Then
+        web_pRequestFormat = Value
 
         ' Clear cached converted body
         web_pConvertedBody = Empty
@@ -278,9 +278,9 @@ End Property
 Public Property Get ResponseFormat() As WebFormat
     ResponseFormat = web_pResponseFormat
 End Property
-Public Property Let ResponseFormat(value As WebFormat)
-    If value <> web_pResponseFormat Then
-        web_pResponseFormat = value
+Public Property Let ResponseFormat(Value As WebFormat)
+    If Value <> web_pResponseFormat Then
+        web_pResponseFormat = Value
 
         ' Clear cached converted body
         web_pConvertedBody = Empty
@@ -310,14 +310,14 @@ End Property
 Public Property Get CustomRequestFormat() As String
     CustomRequestFormat = web_pCustomRequestFormat
 End Property
-Public Property Let CustomRequestFormat(value As String)
-    If value <> web_pCustomRequestFormat Then
-        web_pCustomRequestFormat = value
+Public Property Let CustomRequestFormat(Value As String)
+    If Value <> web_pCustomRequestFormat Then
+        web_pCustomRequestFormat = Value
 
         ' Clear cached converted body
         web_pConvertedBody = Empty
 
-        If value <> "" Then
+        If Value <> "" Then
             web_pRequestFormat = WebFormat.Custom
         End If
     End If
@@ -346,14 +346,14 @@ End Property
 Public Property Get CustomResponseFormat() As String
     CustomResponseFormat = web_pCustomResponseFormat
 End Property
-Public Property Let CustomResponseFormat(value As String)
-    If value <> web_pCustomResponseFormat Then
-        web_pCustomResponseFormat = value
+Public Property Let CustomResponseFormat(Value As String)
+    If Value <> web_pCustomResponseFormat Then
+        web_pCustomResponseFormat = Value
 
         ' Clear cached converted body
         web_pConvertedBody = Empty
 
-        If value <> "" Then
+        If Value <> "" Then
             ResponseFormat = WebFormat.Custom
         End If
     End If
@@ -382,8 +382,8 @@ Public Property Get ContentType() As String
         ContentType = WebHelpers.FormatToMediaType(Me.RequestFormat, Me.CustomRequestFormat)
     End If
 End Property
-Public Property Let ContentType(value As String)
-    web_pContentType = value
+Public Property Let ContentType(Value As String)
+    web_pContentType = Value
 End Property
 
 ''
@@ -409,8 +409,8 @@ Public Property Get Accept() As String
         Accept = WebHelpers.FormatToMediaType(Me.ResponseFormat, Me.CustomResponseFormat)
     End If
 End Property
-Public Property Let Accept(value As String)
-    web_pAccept = value
+Public Property Let Accept(Value As String)
+    web_pAccept = Value
 End Property
 
 ''
@@ -436,8 +436,8 @@ Public Property Get ContentLength() As Long
         ContentLength = Len(Me.Body)
     End If
 End Property
-Public Property Let ContentLength(value As Long)
-    web_pContentLength = value
+Public Property Let ContentLength(Value As Long)
+    web_pContentLength = Value
 End Property
 
 ''
@@ -487,13 +487,13 @@ Public Property Get Body() As Variant
         End If
     End If
 End Property
-Public Property Let Body(value As Variant)
+Public Property Let Body(Value As Variant)
     web_pConvertedBody = Empty
-    web_pBody = value
+    web_pBody = Value
 End Property
-Public Property Set Body(value As Variant)
+Public Property Set Body(Value As Variant)
     web_pConvertedBody = Empty
-    Set web_pBody = value
+    Set web_pBody = Value
 End Property
 
 ''
@@ -574,8 +574,8 @@ End Property
 ' @param {String} Key
 ' @param {Variant} Value
 ''
-Public Sub AddHeader(Key As String, value As Variant)
-    Me.Headers.Add WebHelpers.CreateKeyValue(Key, value)
+Public Sub AddHeader(Key As String, Value As Variant)
+    Me.Headers.Add WebHelpers.CreateKeyValue(Key, Value)
 End Sub
 
 ''
@@ -603,8 +603,8 @@ End Sub
 ' @param {String} Key
 ' @param {Variant} Value
 ''
-Public Sub SetHeader(Key As String, value As Variant)
-    WebHelpers.AddOrReplaceInKeyValues Me.Headers, Key, value
+Public Sub SetHeader(Key As String, Value As Variant)
+    WebHelpers.AddOrReplaceInKeyValues Me.Headers, Key, Value
 End Sub
 
 ''
@@ -636,8 +636,8 @@ End Sub
 ' @param {String} Key
 ' @param {String} Value
 ''
-Public Sub AddUrlSegment(Segment As String, value As Variant)
-    Me.UrlSegments.Item(Segment) = value
+Public Sub AddUrlSegment(Segment As String, Value As Variant)
+    Me.UrlSegments.Item(Segment) = Value
 End Sub
 
 ''
@@ -656,8 +656,8 @@ End Sub
 ' @param {String} Key
 ' @param {Variant} Value
 ''
-Public Sub AddQuerystringParam(Key As String, value As Variant)
-    Me.QuerystringParams.Add WebHelpers.CreateKeyValue(Key, value)
+Public Sub AddQuerystringParam(Key As String, Value As Variant)
+    Me.QuerystringParams.Add WebHelpers.CreateKeyValue(Key, Value)
 End Sub
 
 ''
@@ -676,10 +676,10 @@ End Sub
 ' @param {String} Key
 ' @param {Variant} Value
 ''
-Public Sub AddCookie(Key As String, value As Variant)
+Public Sub AddCookie(Key As String, Value As Variant)
     Me.Cookies.Add WebHelpers.CreateKeyValue( _
         web_EncodeCookieName(Key), _
-        WebHelpers.UrlEncode(value, EncodingMode:=UrlEncodingMode.CookieUrlEncoding) _
+        WebHelpers.UrlEncode(Value, EncodingMode:=UrlEncodingMode.CookieUrlEncoding) _
     )
 End Sub
 
@@ -710,7 +710,7 @@ End Sub
 ' @param {Variant} Value
 ' @throws 11020 / 80042b0c / -2147210484 - Cannot add body parameter to non-Dictionary
 ''
-Public Sub AddBodyParameter(Key As Variant, value As Variant)
+Public Sub AddBodyParameter(Key As Variant, Value As Variant)
     If VBA.IsEmpty(web_pBody) Then
         Set web_pBody = New DictionaryEx
     ElseIf Not TypeOf web_pBody Is DictionaryEx Then
@@ -718,13 +718,13 @@ Public Sub AddBodyParameter(Key As Variant, value As Variant)
         web_ErrorDescription = "Cannot add body parameter to non-Dictionary Body (existing Body must be of type Dictionary)"
 
         WebHelpers.LogError web_ErrorDescription, "WebRequest.AddBodyParameter", 11020 + vbObjectError
-        err.Raise 11020 + vbObjectError, "WebRequest.AddBodyParameter", web_ErrorDescription
+        Err.Raise 11020 + vbObjectError, "WebRequest.AddBodyParameter", web_ErrorDescription
     End If
 
-    If VBA.IsObject(value) Then
-        Set web_pBody(Key) = value
+    If VBA.IsObject(Value) Then
+        Set web_pBody(Key) = Value
     Else
-        web_pBody(Key) = value
+        web_pBody(Key) = Value
     End If
 
     ' Clear cached converted body

@@ -34,8 +34,10 @@ Option Explicit
 '******************************************************************************
 '* 定数定義
 '******************************************************************************
-'Oracle ODBC接続(Microsoft製Driver Oracle製は{Oracle in OraHomexx} xxはバージョンにより変わる)
+'Oracle ODBC接続(Microsoft製Drive)
 Private Const CONN_STR_ODBC_ORACLE As String = "Driver={Microsoft ODBC for Oracle};Server={0}"
+'Oracle ODBC接続(Oracle製Driver)
+Private Const CONN_STR_ODBC_ORACLE_ORA As String = "Driver={Oracle in OraHome{0}} ;Server={1}"
 'Microsoft SQL Server ODBC接続
 Private Const CONN_STR_ODBC_SQLSERVER As String = "Driver={SQL Server};Server={0};Database={1}"
 'Microsoft SQL Server LocalDB ODBC接続
@@ -49,8 +51,10 @@ Private Const CONN_STR_ODBC_ACCESS As String = "Driver={Microsoft Access Driver 
 'SQLite3 ODBC接続
 Private Const CONN_STR_ODBC_SQLITE3 As String = "Driver=SQLite3 ODBC Driver;Database={0}"
 
-'Oracle OLE接続(Microsoft製Provider Oracle製はOraOLEDB.Oracle)
+'Oracle OLE接続(Microsoft製Provider)
 Private Const CONN_STR_OLE_ORACLE As String = "Provider= MSDAORA;Data Source={0}"
+'Oracle OLE接続(Oracle製Provider)
+Private Const CONN_STR_OLE_ORACLE_ORA As String = "Provider= OraOLEDB.Oracle;Data Source={0}"
 'Microsoft SQL Server OLE接続
 Private Const CONN_STR_OLE_SQLSERVER As String = "Provider=SQLOLEDB;Data Source={0};Initial Catalog={1}"
 'PostgreSQL OLE接続
@@ -75,7 +79,6 @@ Private mConn As Object
 '******************************************************************************
 '* プロパティ定義
 '******************************************************************************
-
 
 '******************************************************************************
 '* コンストラクタ・デストラクタ
@@ -138,7 +141,7 @@ Private Function GetAceOleDbProviderName() As String
     If UBound(vMsAceArr) > 0 Then
         GetAceOleDbProviderName = vMsAceArr(UBound(vMsAceArr))
     Else
-        err.Raise 9999, "GetAceOleDbProviderName", "Microsoft.ACE.OLEDB Not Found"
+        Err.Raise 9999, "GetAceOleDbProviderName", "Microsoft.ACE.OLEDB Not Found"
     End If
 End Function
 

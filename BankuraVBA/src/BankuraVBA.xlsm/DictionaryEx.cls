@@ -63,17 +63,17 @@ Attribute CompareMode.VB_Description = "Set or get the string comparison method.
     CompareMode = dict_pDictionary.CompareMode
 #End If
 End Property
-Public Property Let CompareMode(value As CompareMethod)
+Public Property Let CompareMode(Value As CompareMethod)
 #If Mac Or Not UseScriptingDictionaryIfAvailable Then
     If Me.Count > 0 Then
         ' Can't change CompareMode for Dictionary that contains data
         ' http://msdn.microsoft.com/en-us/library/office/gg278481(v=office.15).aspx
-        err.Raise 5 ' Invalid procedure call or argument
+        Err.Raise 5 ' Invalid procedure call or argument
     End If
 
-    dict_pCompareMode = value
+    dict_pCompareMode = Value
 #Else
-    dict_pDictionary.CompareMode = value
+    dict_pDictionary.CompareMode = Value
 #End If
 End Property
 
@@ -110,26 +110,26 @@ Attribute Item.VB_UserMemId = 0
     End If
 #End If
 End Property
-Public Property Let Item(Key As Variant, value As Variant)
+Public Property Let Item(Key As Variant, Value As Variant)
 #If Mac Or Not UseScriptingDictionaryIfAvailable Then
     If Me.Exists(Key) Then
-        dict_ReplaceKeyValue dict_GetKeyValue(Key), Key, value
+        dict_ReplaceKeyValue dict_GetKeyValue(Key), Key, Value
     Else
-        dict_AddKeyValue Key, value
+        dict_AddKeyValue Key, Value
     End If
 #Else
-    dict_pDictionary.Item(Key) = value
+    dict_pDictionary.Item(Key) = Value
 #End If
 End Property
-Public Property Set Item(Key As Variant, value As Variant)
+Public Property Set Item(Key As Variant, Value As Variant)
 #If Mac Or Not UseScriptingDictionaryIfAvailable Then
     If Me.Exists(Key) Then
-        dict_ReplaceKeyValue dict_GetKeyValue(Key), Key, value
+        dict_ReplaceKeyValue dict_GetKeyValue(Key), Key, Value
     Else
-        dict_AddKeyValue Key, value
+        dict_AddKeyValue Key, Value
     End If
 #Else
-    Set dict_pDictionary.Item(Key) = value
+    Set dict_pDictionary.Item(Key) = Value
 #End If
 End Property
 
@@ -164,7 +164,7 @@ Attribute Add.VB_Description = "Add a new key and item to the dictionary."
         dict_AddKeyValue Key, Item
     Else
         ' This key is already associated with an element of this collection
-        err.Raise 457
+        Err.Raise 457
     End If
 #Else
     dict_pDictionary.Add Key, Item
@@ -239,7 +239,7 @@ Attribute Remove.VB_Description = "Remove a given key from the dictionary."
         dict_RemoveKeyValue dict_KeyValue
     Else
         ' Application-defined or object-defined error
-        err.Raise 32811
+        Err.Raise 32811
     End If
 #Else
     dict_pDictionary.Remove Key
@@ -270,7 +270,7 @@ End Sub
 Private Function dict_GetKeyValue(dict_Key As Variant) As Variant
     On Error Resume Next
     dict_GetKeyValue = dict_pKeyValues(dict_GetFormattedKey(dict_Key))
-    err.Clear
+    Err.Clear
 End Function
 
 Private Sub dict_AddKeyValue(dict_Key As Variant, dict_Value As Variant, Optional dict_Index As Long = -1)

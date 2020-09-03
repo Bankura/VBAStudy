@@ -165,7 +165,7 @@ Public Function Exec(commandString As String) As CommandResult
         vArr.Add oExec.StdOut.ReadLine
     Wend
     res.StdOutList = vArr.ToArray
-    res.RowMax = vArr.Length
+    res.RowMax = vArr.length
 
     Set Exec = res
 
@@ -359,4 +359,3 @@ End Sub
 Public Sub RunVSCode()
     Core.Wsh.Run "code"
 End Sub
-

@@ -172,8 +172,8 @@ Public Function HasKey(ByRef col As Collection, ByVal keyName As String) As Bool
     Dim var As Variant
     On Error Resume Next
     var = col(keyName)
-    HasKey = (err.Number = 0)
-    err.Clear
+    HasKey = (Err.Number = 0)
+    Err.Clear
 End Function
 
 '******************************************************************************
@@ -192,11 +192,11 @@ Public Function GetCollectionKeyByIndex(ByVal Index As Long, col As Collection) 
     Dim i As LongPtr
     Dim sKey As String
     If col Is Nothing Then
-        err.Raise 91
+        Err.Raise 91
     Else
         Select Case Index
             Case Is > col.Count
-                err.Raise 9
+                Err.Raise 9
             Case Is <= col.Count / 2
                 Call mWinApi.CopyMemoryByRef(ptr, ObjPtr(col) + FOWARD_SHIFT, LONGPTR_SIZE, False, True)
                 For i = 2 To Index
@@ -232,7 +232,7 @@ Public Function GetCollectionIndexByKey(ByVal Key As String, col As Collection, 
     Dim aKey  As LongPtr
  
     If col Is Nothing Then
-        err.Raise 91
+        Err.Raise 91
     Else
         If col.Count Then
             'save StrPtr

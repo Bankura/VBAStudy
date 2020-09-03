@@ -97,10 +97,10 @@ End Property
 '*-----------------------------------------------------------------------------
 '* Value プロパティ
 '*-----------------------------------------------------------------------------
-Property Get value() As String
-    value = mValue
+Property Get Value() As String
+    Value = mValue
 End Property
-Property Let value(arg As String)
+Property Let Value(arg As String)
     mValue = arg
 End Property
 

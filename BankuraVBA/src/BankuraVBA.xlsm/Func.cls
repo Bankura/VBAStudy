@@ -142,7 +142,7 @@ Public Sub CallByPtr(ByRef returnVal As Variant, ByVal Params As Variant)
     stat = DispCallFunc( _
         0, xAddr, tagCALLCONV.CC_STDCALL, xreturnTyp, _
         xUbParam + 1, xParamTypes(0), lpParams(0), ret)
-    If stat <> S_OK Then err.Raise 5
+    If stat <> S_OK Then Err.Raise 5
     
     If IsObject(ret) Then Set returnVal = ret Else Let returnVal = ret
 End Sub
@@ -158,7 +158,7 @@ Public Function Apply(ParamArray Params() As Variant) As Variant
     If Not xParamTypeBinding Then
         LateBindParamTypes Params
     Else
-        If xUbParam <> UBound(Params) Then err.Raise 5
+        If xUbParam <> UBound(Params) Then Err.Raise 5
     End If
     CallByPtr Apply, Params
 End Function

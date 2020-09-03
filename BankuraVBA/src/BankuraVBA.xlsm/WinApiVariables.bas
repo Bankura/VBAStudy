@@ -9972,7 +9972,7 @@ Public Type msg
 End Type
 
 Public Type SID_IDENTIFIER_AUTHORITY
-        value(0 To 5) As Byte
+        Value(0 To 5) As Byte
 End Type
 
 Public Type SID_AND_ATTRIBUTES
@@ -10405,7 +10405,7 @@ Public Type MEMORY_BASIC_INFORMATION
 End Type
 
 Public Type EVENTLOGRECORD
-     Length As Long     '  Length of full record
+     length As Long     '  Length of full record
      Reserved As Long     '  Used by the service
      RecordNumber As Long     '  Absolute record number
      TimeGenerated As Long     '  Seconds since 1-1-1970
@@ -11125,7 +11125,7 @@ End Type
 
 Public Type Fixed
         fract As Integer
-        value As Integer
+        Value As Integer
 End Type
 
 Public Type MAT2
@@ -12068,7 +12068,7 @@ Public Type CBT_CREATEWND
 End Type
 
 Public Type WINDOWPLACEMENT
-        Length As Long
+        length As Long
         Flags As Long
         showCmd As Long
         ptMinPosition As POINTAPI
@@ -12262,7 +12262,7 @@ Public Type DDEDATA
         Reserved As Integer
         fAckReq As Integer
         cfFormat As Integer
-        value(1) As Byte
+        Value(1) As Byte
 End Type
 
 
@@ -12280,7 +12280,7 @@ Public Type DDEPOKE
         fRelease As Integer
         fReserved As Integer
         cfFormat As Integer
-        value(1) As Byte
+        Value(1) As Byte
 End Type
 
 ' ----------------------------------------------------------------------------
@@ -12321,7 +12321,7 @@ End Type
 '//
 
 Public Type SECURITY_QUALITY_OF_SERVICE
-    Length As Long
+    length As Long
     ImpersonationLevel As Integer
     ContextTrackingMode As Integer
     EffectiveOnly As Long
@@ -13262,7 +13262,7 @@ End Type
 
 
 Public Type LANA_ENUM
-        Length As Byte
+        length As Byte
         lana(0 To MAX_LANA) As Byte
 End Type
 
@@ -13273,7 +13273,7 @@ Public Type FIND_NAME_HEADER
 End Type
 
 Public Type FIND_NAME_BUFFER
-        Length As Byte
+        length As Byte
         access_control As Byte
         frame_control As Byte
         destination_addr(0 To 5) As Byte

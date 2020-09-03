@@ -76,7 +76,7 @@ Private Property Get VBProject() As Object
         Case "Microsoft Word":   Set VBProject = app.MacroContainer.VBProject
         Case "Microsoft Excel":  Set VBProject = app.ThisWorkbook.VBProject
         Case "Microsoft Access": Set VBProject = app.VBE.ActiveVBProject
-        Case Else: err.Raise 17
+        Case Else: Err.Raise 17
     End Select
 End Property
 
@@ -156,7 +156,7 @@ End Sub
 
 Public Sub RunTestOf(ByVal clsObj As Object)
     Dim clsName As String: clsName = TypeName(clsObj)
-    If Not CheckTestClassName(clsName) Then err.Raise 5
+    If Not CheckTestClassName(clsName) Then Err.Raise 5
     
     Dim proc As Variant, procs As Collection
     Set procs = ProcNames(VBProject.VBComponents(clsName))
@@ -293,9 +293,9 @@ Public Sub Fail(Optional ByVal msg As String = "")
     xAssertMsg = msg
     
     If Len(msg) > 0 Then
-        err.Raise 1004, AssertModule, xAssertMsg
+        Err.Raise 1004, AssertModule, xAssertMsg
     Else
-        err.Raise 1004, AssertModule
+        Err.Raise 1004, AssertModule
     End If
 End Sub
 
@@ -307,8 +307,8 @@ Public Sub IsErrFunc( _
     
     xAssertMsg = msg
     
-    If Not (IsEmpty(errNum) Or IsNumeric(errNum)) Then err.Raise 5
-    If Not IsArray(Params) Then err.Raise 5
+    If Not (IsEmpty(errNum) Or IsNumeric(errNum)) Then Err.Raise 5
+    If Not IsArray(Params) Then Err.Raise 5
     
     On Error GoTo Catch
     
@@ -320,7 +320,7 @@ Public Sub IsErrFunc( _
     GoTo Escape
     
 Catch:
-    act = err.Number
+    act = Err.Number
     ret = IsEmpty(errNum) Or act = errNum
     Resume Next
     
@@ -335,9 +335,9 @@ Public Sub IsErrMethod( _
     
     xAssertMsg = msg
     
-    If Not (IsEmpty(errNum) Or IsNumeric(errNum)) Then err.Raise 5
-    If Not IsArray(Params) Then err.Raise 5
-    If LBound(Params) <> 0 Then err.Raise 5
+    If Not (IsEmpty(errNum) Or IsNumeric(errNum)) Then Err.Raise 5
+    If Not IsArray(Params) Then Err.Raise 5
+    If LBound(Params) <> 0 Then Err.Raise 5
     
     On Error GoTo Catch
     
@@ -359,7 +359,7 @@ Public Sub IsErrMethod( _
     GoTo Escape
     
 Catch:
-    act = err.Number
+    act = Err.Number
     ret = IsEmpty(errNum) Or act = errNum
     Resume Next
     

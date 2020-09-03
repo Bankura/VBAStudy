@@ -38,13 +38,13 @@ Private mLength As Long
 '* プロパティ定義
 '******************************************************************************
 '*-----------------------------------------------------------------------------
-'* オリジナルString プロパティ
+'* Value プロパティ
 '*-----------------------------------------------------------------------------
-Public Property Get value() As String
-Attribute value.VB_UserMemId = 0
-    value = Me.ToString
+Public Property Get Value() As String
+Attribute Value.VB_UserMemId = 0
+    Value = Me.ToString
 End Property
-Public Property Let value(ByVal arg As String)
+Public Property Let Value(ByVal arg As String)
     mBuffer = String$(mCapacity, vbNullChar)
     mLength = 0
     Me.Append arg
@@ -53,8 +53,8 @@ End Property
 '*-----------------------------------------------------------------------------
 '* Length プロパティ
 '*-----------------------------------------------------------------------------
-Public Property Get Length() As Long
-    Length = mLength
+Public Property Get length() As Long
+    length = mLength
 End Property
 
 '******************************************************************************
@@ -80,7 +80,7 @@ End Sub
 '******************************************************************************
 Public Function Init(ByVal val, Optional cap As Long = 32768) As StringEx
     mCapacity = cap
-    Me.value = val
+    Me.Value = val
     Set Init = Me
 End Function
 

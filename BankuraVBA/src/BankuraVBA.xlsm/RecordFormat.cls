@@ -263,7 +263,7 @@ Public Function Validate(vArr)
             
         For j = LBound(vArr, 2) To UBound(vArr, 2)
             Set itm = mCol(Index)
-            itm.value = vArr(i, j)
+            itm.Value = vArr(i, j)
             If Not itm.Validate Then
                 Validate = False
                 Call SetErrorMessage(itm, i, j)
@@ -337,7 +337,7 @@ Public Function SetDataItems(vArr) As Boolean
         For j = LBound(vArr, 2) To UBound(vArr, 2)
             Set itm = CopyItem(mCol(Index))
             itm.ForOutput = True
-            itm.value = vArr(i, j)
+            itm.Value = vArr(i, j)
             
             If Not itm.Validate Then
                 SetDataItems = False
@@ -363,7 +363,7 @@ End Function
 Public Function CopyItem(itm As Item) As Item
     Dim newItem As Item: Set newItem = New Item
     newItem.name = itm.name
-    newItem.value = itm.value
+    newItem.Value = itm.Value
     newItem.required = itm.required
     newItem.Attr = itm.Attr
     newItem.KindOfDigits = itm.KindOfDigits

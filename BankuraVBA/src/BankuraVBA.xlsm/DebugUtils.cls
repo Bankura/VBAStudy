@@ -133,7 +133,7 @@ Public Sub PrintRecordSet(rf As RecordFormat)
     Dim record As Collection, itm As Item, tmp As String
     For Each record In rf.RecordSet
         For Each itm In record
-            tmp = tmp & itm.value & " | "
+            tmp = tmp & itm.Value & " | "
         Next
         Debug.Print tmp
         tmp = ""

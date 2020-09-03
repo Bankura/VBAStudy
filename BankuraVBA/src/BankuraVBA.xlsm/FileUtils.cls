@@ -1875,8 +1875,8 @@ Private Function TryReadText(ByVal stream As Object, _
                      ByVal separator As LineSeparatorsEnum) As String
     On Error Resume Next
     TryReadText = stream.ReadText(adReadLine)
-    If err.Number <> 0 Then
-        err.Clear
+    If Err.Number <> 0 Then
+        Err.Clear
         Select Case LCase(cSet)
             Case "iso-2022-jp"
                 cSet = "euc-jp"
@@ -1925,7 +1925,7 @@ Public Function GetFileLineSeparator(ByVal fileName As String) As LineSeparators
     Open fileName For Binary As fNo
     Get fNo, , buf
     Close #fNo
-    If (err.Number <> 0) Then
+    If (Err.Number <> 0) Then
         Exit Function
     End If
     On Error Resume Next
@@ -2007,7 +2007,7 @@ Public Function GetFileCharset(ByVal fileName As String, Optional ByRef bomInclu
     Open fileName For Binary As #hdlFile
     Get #hdlFile, , bytFile
     Close #hdlFile
-    If (err.Number <> 0) Then
+    If (Err.Number <> 0) Then
         Exit Function
     End If
     

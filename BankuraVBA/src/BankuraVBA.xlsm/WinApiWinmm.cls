@@ -74,7 +74,7 @@ Private Declare PtrSafe Function waveOutGetDevCaps Lib "winmm.dll" Alias "waveOu
 Private Declare PtrSafe Function waveOutGetVolume Lib "winmm.dll" (ByVal uDeviceID As LongPtr, lpdwVolume As Long) As Long
 Private Declare PtrSafe Function waveOutSetVolume Lib "winmm.dll" (ByVal uDeviceID As LongPtr, ByVal dwVolume As Long) As Long
 
-Private Declare PtrSafe Function waveOutGetErrorText Lib "winmm.dll" Alias "waveOutGetErrorTextA" (ByVal err As Long, ByVal lpText As String, ByVal uSize As Long) As Long
+Private Declare PtrSafe Function waveOutGetErrorText Lib "winmm.dll" Alias "waveOutGetErrorTextA" (ByVal Err As Long, ByVal lpText As String, ByVal uSize As Long) As Long
 
 Private Declare PtrSafe Function waveOutOpen Lib "winmm.dll" (lphWaveOut As LongPtr, ByVal uDeviceID As Long, lpFormat As WAVEFORMATEX, ByVal dwCallback As LongPtr, ByVal dwInstance As LongPtr, ByVal dwFlags As Long) As Long
 Private Declare PtrSafe Function waveOutClose Lib "winmm.dll" (ByVal hWaveOut As LongPtr) As Long
@@ -96,7 +96,7 @@ Private Declare PtrSafe Function waveInGetNumDevs Lib "winmm.dll" () As Long
 
 Private Declare PtrSafe Function waveInGetDevCaps Lib "winmm.dll" Alias "waveInGetDevCapsA" (ByVal uDeviceID As LongPtr, lpCaps As WAVEINCAPS, ByVal uSize As Long) As Long
 
-Private Declare PtrSafe Function waveInGetErrorText Lib "winmm.dll" Alias "waveInGetErrorTextA" (ByVal err As Long, ByVal lpText As String, ByVal uSize As Long) As Long
+Private Declare PtrSafe Function waveInGetErrorText Lib "winmm.dll" Alias "waveInGetErrorTextA" (ByVal Err As Long, ByVal lpText As String, ByVal uSize As Long) As Long
 
 Private Declare PtrSafe Function waveInOpen Lib "winmm.dll" (lphWaveIn As LongPtr, ByVal uDeviceID As Long, lpFormat As WAVEFORMATEX, ByVal dwCallback As LongPtr, ByVal dwInstance As LongPtr, ByVal dwFlags As Long) As Long
 Private Declare PtrSafe Function waveInClose Lib "winmm.dll" (ByVal hWaveIn As LongPtr) As Long
@@ -116,7 +116,7 @@ Private Declare PtrSafe Function midiOutGetDevCaps Lib "winmm.dll" Alias "midiOu
 Private Declare PtrSafe Function midiOutGetVolume Lib "winmm.dll" (ByVal uDeviceID As LongPtr, lpdwVolume As Long) As Long
 Private Declare PtrSafe Function midiOutSetVolume Lib "winmm.dll" (ByVal uDeviceID As LongPtr, ByVal dwVolume As Long) As Long
 
-Private Declare PtrSafe Function midiOutGetErrorText Lib "winmm.dll" Alias "midiOutGetErrorTextA" (ByVal err As Long, ByVal lpText As String, ByVal uSize As Long) As Long
+Private Declare PtrSafe Function midiOutGetErrorText Lib "winmm.dll" Alias "midiOutGetErrorTextA" (ByVal Err As Long, ByVal lpText As String, ByVal uSize As Long) As Long
 
 Private Declare PtrSafe Function midiOutOpen Lib "winmm.dll" (lphMidiOut As LongPtr, ByVal uDeviceID As Long, ByVal dwCallback As LongPtr, ByVal dwInstance As LongPtr, ByVal dwFlags As Long) As Long
 Private Declare PtrSafe Function midiOutClose Lib "winmm.dll" (ByVal hMidiOut As LongPtr) As Long
@@ -133,7 +133,7 @@ Private Declare PtrSafe Function midiInGetNumDevs Lib "winmm.dll" () As Long
 
 Private Declare PtrSafe Function midiInGetDevCaps Lib "winmm.dll" Alias "midiInGetDevCapsA" (ByVal uDeviceID As LongPtr, lpCaps As MIDIINCAPS, ByVal uSize As Long) As Long
 
-Private Declare PtrSafe Function midiInGetErrorText Lib "winmm.dll" Alias "midiInGetErrorTextA" (ByVal err As Long, ByVal lpText As String, ByVal uSize As Long) As Long
+Private Declare PtrSafe Function midiInGetErrorText Lib "winmm.dll" Alias "midiInGetErrorTextA" (ByVal Err As Long, ByVal lpText As String, ByVal uSize As Long) As Long
 
 Private Declare PtrSafe Function midiInOpen Lib "winmm.dll" (lphMidiIn As LongPtr, ByVal uDeviceID As Long, ByVal dwCallback As LongPtr, ByVal dwInstance As LongPtr, ByVal dwFlags As Long) As Long
 Private Declare PtrSafe Function midiInClose Lib "winmm.dll" (ByVal hMidiIn As LongPtr) As Long

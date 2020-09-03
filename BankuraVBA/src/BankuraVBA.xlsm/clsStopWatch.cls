@@ -88,7 +88,7 @@ End Sub
 
 'ポーズ：一時停止し停止時間を記憶
 Public Sub Pause()
-    If StartNum = 0 Then err.Raise NOSTART_ERROR_CODE, class_name, NOSTART_ERROR_MESSAGE
+    If StartNum = 0 Then Err.Raise NOSTART_ERROR_CODE, class_name, NOSTART_ERROR_MESSAGE
     
     PauseNum = GetTime
 
@@ -96,7 +96,7 @@ End Sub
 
 'スプリット：開始からの経過時間
 Public Function SplitTime(Optional ByVal timeFormat As String = "") As Variant
-    If StartNum = 0 Then err.Raise NOSTART_ERROR_CODE, class_name, NOSTART_ERROR_MESSAGE
+    If StartNum = 0 Then Err.Raise NOSTART_ERROR_CODE, class_name, NOSTART_ERROR_MESSAGE
     Dim tm As Long
     
     tm = (GetTime - StartNum)
@@ -112,7 +112,7 @@ End Function
 
 'ラップ：直前の計測からの経過時間
 Public Function LapTime(Optional ByVal timeFormat As String = "") As Variant
-    If StartNum = 0 Then err.Raise NOSTART_ERROR_CODE, class_name, NOSTART_ERROR_MESSAGE
+    If StartNum = 0 Then Err.Raise NOSTART_ERROR_CODE, class_name, NOSTART_ERROR_MESSAGE
     Dim tm As Long
     
     tm = (GetTime - LapNum)
@@ -130,7 +130,7 @@ End Function
 
 'ラップタイムのコレクションを返す
 Public Property Get Laps() As Variant
-    If StartNum = 0 Then err.Raise NOSTART_ERROR_CODE, class_name, NOSTART_ERROR_MESSAGE
+    If StartNum = 0 Then Err.Raise NOSTART_ERROR_CODE, class_name, NOSTART_ERROR_MESSAGE
     
     If LapTimes.Count = 0 Then
         Laps = Split(vbNullString)

@@ -103,7 +103,7 @@ Public Function ShowOpenFileDialog(Optional sheetName As String, Optional pos As
     If fileName <> False Then
         ShowOpenFileDialog = fileName
         If sheetName <> "" Then
-            ThisWorkbook.Worksheets(sheetName).Range(pos).value = fileName
+            ThisWorkbook.Worksheets(sheetName).Range(pos).Value = fileName
         End If
     End If
 End Function
@@ -164,7 +164,7 @@ Public Function ShowFolderDialog(Optional sheetName As String, Optional pos As S
     If Not objPath Is Nothing Then
         ShowFolderDialog = CStr(objPath.items.Item.Path)
         If sheetName <> "" Then
-            ThisWorkbook.Worksheets(sheetName).Range(pos).value = CStr(objPath.items.Item.Path)
+            ThisWorkbook.Worksheets(sheetName).Range(pos).Value = CStr(objPath.items.Item.Path)
         End If
     End If
     Exit Function

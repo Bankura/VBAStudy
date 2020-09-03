@@ -125,7 +125,7 @@ Public Property Get ExecPath() As String
         Case "Microsoft Word":   ExecPath = app.MacroContainer.Path
         Case "Microsoft Excel":  ExecPath = app.ThisWorkbook.Path
         Case "Microsoft Access": ExecPath = app.CurrentProject.Path
-        Case Else: err.Raise 17
+        Case Else: Err.Raise 17
     End Select
 End Property
 
@@ -168,8 +168,8 @@ Public Sub SaveToFileWithoutBom( _
     ByVal strm As Object, ByVal fPath As String, ByVal opSave As SaveOptionsEnum _
     )
     
-    If TypeName(strm) <> "Stream" Then err.Raise 13
-    If strm.Type <> adTypeText Then err.Raise 5
+    If TypeName(strm) <> "Stream" Then Err.Raise 13
+    If strm.Type <> adTypeText Then Err.Raise 5
     
     Dim strmZ As Object: Set strmZ = CreateADODBStream(adTypeBinary)
     strmZ.Open
@@ -202,8 +202,8 @@ Public Sub RemoveBom( _
 End Sub
 
 Public Function ChangeCharset(ByVal strm As Object, ByVal chrset As String) As Object
-    If TypeName(strm) <> "Stream" Then err.Raise 13
-    If strm.Type <> adTypeText Then err.Raise 5
+    If TypeName(strm) <> "Stream" Then Err.Raise 13
+    If strm.Type <> adTypeText Then Err.Raise 5
     
     Dim strmZ As Object: Set strmZ = CreateADODBStream(adTypeText, chrset, strm.lineSeparator)
     strmZ.Open
@@ -232,8 +232,8 @@ Public Function ChangeLineSeparator( _
     ByVal strm As Object, ByVal linsep As LineSeparatorsEnum _
     ) As Object
     
-    If TypeName(strm) <> "Stream" Then err.Raise 13
-    If strm.Type <> adTypeText Then err.Raise 5
+    If TypeName(strm) <> "Stream" Then Err.Raise 13
+    If strm.Type <> adTypeText Then Err.Raise 5
     
     Dim strmZ As Object: Set strmZ = CreateADODBStream(strm.charSet, linsep)
     strmZ.Open
@@ -283,7 +283,7 @@ Public Function GetSpecialFolder(ByVal spFolder As Variant) As String
     ElseIf VarType(spFolder) = vbString Then
         GetSpecialFolder = Wsh.SpecialFolders(spFolder)
     Else
-        err.Raise 13
+        Err.Raise 13
     End If
 End Function
 
@@ -344,7 +344,7 @@ Private Sub GetAllFilesImpl(ByVal folderPath As String, ByVal ret As Collection)
 End Sub
 
 Public Sub CreateFolderTree(ByVal folderPath As String)
-    If Not fso.DriveExists(fso.GetDriveName(folderPath)) Then err.Raise 5
+    If Not fso.DriveExists(fso.GetDriveName(folderPath)) Then Err.Raise 5
     CreateFolderTreeImpl folderPath
 End Sub
 Private Sub CreateFolderTreeImpl(ByVal folderPath As String)

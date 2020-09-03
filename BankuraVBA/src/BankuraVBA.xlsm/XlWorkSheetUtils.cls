@@ -61,7 +61,7 @@ End Sub
 '*
 '******************************************************************************
 Public Sub InjectVariantArrayToCells(ByVal dataSheet As Worksheet, ByVal vArray, lStartRow As Long, lStartCol As Long)
-    dataSheet.Cells(lStartRow, lStartCol).Resize(UBound(vArray, 1) + 1, UBound(vArray, 2) + 1).value = vArray
+    dataSheet.Cells(lStartRow, lStartCol).Resize(UBound(vArray, 1) + 1, UBound(vArray, 2) + 1).Value = vArray
 End Sub
 
 '******************************************************************************
@@ -570,8 +570,8 @@ Public Sub ClearBookAuthor(Optional ByRef wb As Workbook)
     If wb Is Nothing Then
         Set wb = ThisWorkbook
     End If
-    wb.BuiltinDocumentProperties("Author").value = " "
-    wb.BuiltinDocumentProperties("Last Author").value = " "
+    wb.BuiltinDocumentProperties("Author").Value = " "
+    wb.BuiltinDocumentProperties("Last Author").Value = " "
 End Sub
 
 Public Sub RemoveBookInformationAndSave(Optional ByRef wb As Workbook)
@@ -591,7 +591,7 @@ Public Sub RemoveBookInformationAndSave(Optional ByRef wb As Workbook)
         Application.UserName = "unknown"
          For Each dp In .BuiltinDocumentProperties
             If dp.Type = msoPropertyTypeString Then
-                dp.value = ""
+                dp.Value = ""
             End If
         Next
         .Save

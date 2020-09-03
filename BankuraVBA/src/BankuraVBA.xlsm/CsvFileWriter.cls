@@ -308,11 +308,11 @@ Private Function EditRecord(record As Collection) As String
     For Each itm In record
         If itm.OutputTarget Then
             If itm.OutputEditKind = "マスタ変換（Code→Value）" Then
-                val = sInfo.GetMasterValueByCode(itm.OutputEditValue, itm.value)
+                val = sInfo.GetMasterValueByCode(itm.OutputEditValue, itm.Value)
             ElseIf itm.OutputEditKind = "マスタ変換（Value→Code）" Then
-                val = sInfo.GetMasterCodeByValue(itm.OutputEditValue, itm.value)
+                val = sInfo.GetMasterCodeByValue(itm.OutputEditValue, itm.Value)
             Else
-                val = itm.value
+                val = itm.Value
             End If
         
             If first Then

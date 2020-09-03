@@ -149,7 +149,7 @@ End Sub
 '*
 '******************************************************************************
 Public Sub ErrorProcess()
-    Debug.Print "エラー発生 Number: " & err.Number & " Source: " & err.source & " Description: " & err.Description
+    Debug.Print "エラー発生 Number: " & Err.Number & " Source: " & Err.source & " Description: " & Err.Description
 End Sub
 
 '******************************************************************************

@@ -137,8 +137,8 @@ End Function
 '* @return Long óvëfêî
 '*
 '******************************************************************************
-Property Get Length() As Long
-    Length = xIndex + 1
+Property Get length() As Long
+    length = xIndex + 1
 End Property
 
 '******************************************************************************

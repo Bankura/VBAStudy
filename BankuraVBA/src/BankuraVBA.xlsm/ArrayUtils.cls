@@ -47,7 +47,7 @@ Public Property Get EmptyLongArray() As Long()
 
     Dim apiResult As Long
     apiResult = mWinApi.SafeArrayAllocDescriptor(1, EmptyLongArray)
-    If apiResult <> 0 Then err.Raise 5
+    If apiResult <> 0 Then Err.Raise 5
 End Property
 
 Public Property Get EmptyVariantArray() As Variant()
@@ -158,9 +158,9 @@ End Function
 '******************************************************************************
 Public Function IsRedim(ByRef vArray As Variant) As Boolean
     On Error Resume Next
-    err.Clear
+    Err.Clear
     IsRedim = CBool(UBound(vArray))
-    IsRedim = (err.Number = 0)
+    IsRedim = (Err.Number = 0)
 End Function
 
 '******************************************************************************
@@ -844,15 +844,15 @@ Public Function LastIndexOf(ByVal arr As Variant, ByVal val As Variant, _
     Optional ByVal ixStart As Variant, Optional ByVal cnt As Variant _
     ) As Long
     
-    If Not IsArray(arr) Then err.Raise 13
+    If Not IsArray(arr) Then Err.Raise 13
     
     Dim ixLast As Long:  ixLast = UBound(arr)
     Dim aLen As Long: aLen = Core.ArrLen(arr)
     If IsMissing(ixStart) Then ixStart = ixLast
-    If IsNumeric(ixStart) Then ixStart = CLng(ixStart) Else err.Raise 13
-    If ixStart < 0 Or ixStart > ixLast Then err.Raise 5
+    If IsNumeric(ixStart) Then ixStart = CLng(ixStart) Else Err.Raise 13
+    If ixStart < 0 Or ixStart > ixLast Then Err.Raise 5
     If IsMissing(cnt) Then cnt = aLen
-    If IsNumeric(cnt) Then cnt = CLng(cnt) Else err.Raise 13
+    If IsNumeric(cnt) Then cnt = CLng(cnt) Else Err.Raise 13
     cnt = Min(cnt, aLen)
     
     LastIndexOf = -1

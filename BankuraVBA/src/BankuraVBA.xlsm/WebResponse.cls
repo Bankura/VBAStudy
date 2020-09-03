@@ -149,10 +149,10 @@ web_ErrorHandling:
 
     Dim web_ErrorDescription As String
     web_ErrorDescription = "An error occurred while creating response from http" & vbNewLine & _
-        err.Number & VBA.IIf(err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(err.Number)) & ")", "") & ": " & err.Description
+        Err.Number & VBA.IIf(Err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(Err.Number)) & ")", "") & ": " & Err.Description
 
     WebHelpers.LogError web_ErrorDescription, "WebResponse.CreateFromHttp", 11030 + vbObjectError
-    err.Raise 11030 + vbObjectError, "WebResponse.CreateFromHttp", web_ErrorDescription
+    Err.Raise 11030 + vbObjectError, "WebResponse.CreateFromHttp", web_ErrorDescription
 End Sub
 
 ''
@@ -185,10 +185,10 @@ web_ErrorHandling:
 
     Dim web_ErrorDescription As String
     web_ErrorDescription = "An error occurred while creating response from cURL" & vbNewLine & _
-        err.Number & VBA.IIf(err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(err.Number)) & ")", "") & ": " & err.Description
+        Err.Number & VBA.IIf(Err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(Err.Number)) & ")", "") & ": " & Err.Description
 
     WebHelpers.LogError web_ErrorDescription, "WebResponse.CreateFromCurl", 11031 + vbObjectError
-    err.Raise 11031 + vbObjectError, "WebResponse.CreateFromCurl", web_ErrorDescription
+    Err.Raise 11031 + vbObjectError, "WebResponse.CreateFromCurl", web_ErrorDescription
 End Sub
 
 ''
@@ -232,7 +232,7 @@ Public Function ExtractHeaders(ResponseHeaders As String) As Collection
             If Not web_Multiline Then
                 Set web_Header = WebHelpers.CreateKeyValue( _
                     Key:=VBA.Trim(VBA.Mid$(web_Lines(web_i), 1, web_ColonPosition - 1)), _
-                    value:=VBA.Trim(VBA.Mid$(web_Lines(web_i), web_ColonPosition + 1, VBA.Len(web_Lines(web_i)))) _
+                    Value:=VBA.Trim(VBA.Mid$(web_Lines(web_i), web_ColonPosition + 1, VBA.Len(web_Lines(web_i)))) _
                 )
             Else
                 web_Header("Value") = web_Header("Value") & web_CrLf & web_Lines(web_i)
@@ -247,10 +247,10 @@ web_ErrorHandling:
 
     Dim web_ErrorDescription As String
     web_ErrorDescription = "An error occurred while extracting headers" & vbNewLine & _
-        err.Number & VBA.IIf(err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(err.Number)) & ")", "") & ": " & err.Description
+        Err.Number & VBA.IIf(Err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(Err.Number)) & ")", "") & ": " & Err.Description
 
     WebHelpers.LogError web_ErrorDescription, "WebResponse.CreateFromCurl", 11032 + vbObjectError
-    err.Raise 11032 + vbObjectError, "WebResponse.CreateFromCurl", web_ErrorDescription
+    Err.Raise 11032 + vbObjectError, "WebResponse.CreateFromCurl", web_ErrorDescription
 End Function
 
 ''
@@ -307,9 +307,9 @@ Private Sub web_LoadValues(web_Headers As String, web_Content As String, web_Bod
         Set Me.data = _
             WebHelpers.ParseByFormat(web_Content, web_Request.ResponseFormat, web_Request.CustomResponseFormat, web_Body)
 
-        If err.Number <> 0 Then
-            WebHelpers.LogError err.Description, err.source, err.Number
-            err.Clear
+        If Err.Number <> 0 Then
+            WebHelpers.LogError Err.Description, Err.source, Err.Number
+            Err.Clear
         End If
         On Error GoTo 0
     End If

@@ -697,7 +697,7 @@ Public Function ParseXml(Encoded As String) As Object
         "https://github.com/VBA-tools/VBA-Web/wiki/XML-Support-in-4.0"
 
     LogError web_ErrorMsg, "WebHelpers.ParseXml", 11099
-    err.Raise 11099, "WebHeleprs.ParseXml", web_ErrorMsg
+    Err.Raise 11099, "WebHeleprs.ParseXml", web_ErrorMsg
 End Function
 
 ''
@@ -722,7 +722,7 @@ Public Function ConvertToXml(obj As Variant) As String
         "https://github.com/VBA-tools/VBA-Web/wiki/XML-Support-in-4.0"
 
     LogError web_ErrorMsg, "WebHelpers.ParseXml", 11099 + vbObjectError
-    err.Raise 11099 + vbObjectError, "WebHeleprs.ParseXml", web_ErrorMsg
+    Err.Raise 11099 + vbObjectError, "WebHeleprs.ParseXml", web_ErrorMsg
 End Function
 
 ''
@@ -737,23 +737,23 @@ End Function
 ' @return {Dictionary|Collection|Object}
 ' @throws 11000 - Error during parsing
 ''
-Public Function ParseByFormat(value As String, format As WebFormat, _
+Public Function ParseByFormat(Value As String, format As WebFormat, _
     Optional CustomFormat As String = "", Optional Bytes As Variant) As Object
 
     On Error GoTo web_ErrorHandling
 
     ' Don't attempt to parse blank values
-    If value = "" And CustomFormat = "" Then
+    If Value = "" And CustomFormat = "" Then
         Exit Function
     End If
 
     Select Case format
     Case WebFormat.Json
-        Set ParseByFormat = ParseJson(value)
+        Set ParseByFormat = ParseJson(Value)
     Case WebFormat.FormUrlEncoded
-        Set ParseByFormat = ParseUrlEncoded(value)
+        Set ParseByFormat = ParseUrlEncoded(Value)
     Case WebFormat.Xml
-        Set ParseByFormat = ParseXml(value)
+        Set ParseByFormat = ParseXml(Value)
     Case WebFormat.Custom
 #If EnableCustomFormatting Then
         Dim web_Converter As DictionaryEx
@@ -769,13 +769,13 @@ Public Function ParseByFormat(value As String, format As WebFormat, _
             If web_Converter("ParseType") = "Binary" Then
                 Set ParseByFormat = VBA.CallByName(web_Instance, web_Callback, VBA.vbMethod, Bytes)
             Else
-                Set ParseByFormat = VBA.CallByName(web_Instance, web_Callback, VBA.vbMethod, value)
+                Set ParseByFormat = VBA.CallByName(web_Instance, web_Callback, VBA.vbMethod, Value)
             End If
         Else
             If web_Converter("ParseType") = "Binary" Then
                 Set ParseByFormat = Application.Run(web_Callback, Bytes)
             Else
-                Set ParseByFormat = Application.Run(web_Callback, value)
+                Set ParseByFormat = Application.Run(web_Callback, Value)
             End If
         End If
 #Else
@@ -788,10 +788,10 @@ web_ErrorHandling:
 
     Dim web_ErrorDescription As String
     web_ErrorDescription = "An error occurred during parsing" & vbNewLine & _
-        err.Number & VBA.IIf(err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(err.Number)) & ")", "") & ": " & err.Description
+        Err.Number & VBA.IIf(Err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(Err.Number)) & ")", "") & ": " & Err.Description
 
     LogError web_ErrorDescription, "WebHelpers.ParseByFormat", 11000
-    err.Raise 11000, "WebHelpers.ParseByFormat", web_ErrorDescription
+    Err.Raise 11000, "WebHelpers.ParseByFormat", web_ErrorDescription
 End Function
 
 ''
@@ -846,10 +846,10 @@ web_ErrorHandling:
 
     Dim web_ErrorDescription As String
     web_ErrorDescription = "An error occurred during conversion" & vbNewLine & _
-        err.Number & VBA.IIf(err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(err.Number)) & ")", "") & ": " & err.Description
+        Err.Number & VBA.IIf(Err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(Err.Number)) & ")", "") & ": " & Err.Description
 
     LogError web_ErrorDescription, "WebHelpers.ConvertToFormat", 11001
-    err.Raise 11001, "WebHelpers.ConvertToFormat", web_ErrorDescription
+    Err.Raise 11001, "WebHelpers.ConvertToFormat", web_ErrorDescription
 End Function
 
 ''
@@ -1201,7 +1201,7 @@ Private Function web_GetConverter(web_CustomFormat As String) As DictionaryEx
     Else
         LogError "No matching converter has been registered for custom format: " & web_CustomFormat, _
             "WebHelpers.web_GetConverter", 11002
-        err.Raise 11002, "WebHelpers.web_GetConverter", _
+        Err.Raise 11002, "WebHelpers.web_GetConverter", _
             "No matching converter has been registered for custom format: " & web_CustomFormat
     End If
 End Function
@@ -1369,10 +1369,10 @@ web_ErrorHandling:
 
     Dim web_ErrorDescription As String
     web_ErrorDescription = "An error occurred while getting url parts" & vbNewLine & _
-        err.Number & VBA.IIf(err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(err.Number)) & ")", "") & ": " & err.Description
+        Err.Number & VBA.IIf(Err.Number < 0, " (" & VBA.LCase$(VBA.Hex$(Err.Number)) & ")", "") & ": " & Err.Description
 
     LogError web_ErrorDescription, "WebHelpers.GetUrlParts", 11003
-    err.Raise 11003, "WebHelpers.GetUrlParts", web_ErrorDescription
+    Err.Raise 11003, "WebHelpers.GetUrlParts", web_ErrorDescription
 End Function
 
 ' ============================================= '
@@ -1430,11 +1430,11 @@ End Function
 ' @param {Variant} Value
 ' @return {Dictionary}
 ''
-Public Function CreateKeyValue(Key As String, value As Variant) As DictionaryEx
+Public Function CreateKeyValue(Key As String, Value As Variant) As DictionaryEx
     Dim web_KeyValue As New DictionaryEx
 
     web_KeyValue("Key") = Key
-    web_KeyValue("Value") = value
+    web_KeyValue("Value") = Value
     Set CreateKeyValue = web_KeyValue
 End Function
 
@@ -1498,12 +1498,12 @@ End Function
 ' @param {Variant} Value
 ' @return {Variant}
 ''
-Public Sub AddOrReplaceInKeyValues(KeyValues As Collection, Key As Variant, value As Variant)
+Public Sub AddOrReplaceInKeyValues(KeyValues As Collection, Key As Variant, Value As Variant)
     Dim web_KeyValue As DictionaryEx
     Dim web_Index As Long
     Dim web_NewKeyValue As DictionaryEx
 
-    Set web_NewKeyValue = CreateKeyValue(CStr(Key), value)
+    Set web_NewKeyValue = CreateKeyValue(CStr(Key), Value)
 
     web_Index = 1
     For Each web_KeyValue In KeyValues
@@ -1958,25 +1958,25 @@ End Function
 ' ============================================= '
 
 ' Helper for url-encoded to create key=value pair
-Private Function web_GetUrlEncodedKeyValue(Key As Variant, value As Variant, Optional EncodingMode As UrlEncodingMode = UrlEncodingMode.FormUrlEncoding) As String
-    Select Case VBA.VarType(value)
+Private Function web_GetUrlEncodedKeyValue(Key As Variant, Value As Variant, Optional EncodingMode As UrlEncodingMode = UrlEncodingMode.FormUrlEncoding) As String
+    Select Case VBA.VarType(Value)
     Case VBA.vbBoolean
         ' Convert boolean to lowercase
-        If value Then
-            value = "true"
+        If Value Then
+            Value = "true"
         Else
-            value = "false"
+            Value = "false"
         End If
     Case VBA.vbDate
         ' Use region invariant date (ISO-8601)
-        value = WebHelpers.ConvertToIso(CDate(value))
+        Value = WebHelpers.ConvertToIso(CDate(Value))
     Case VBA.vbDecimal, VBA.vbSingle, VBA.vbDouble, VBA.vbCurrency
         ' Use region invariant number encoding ("." for decimal separator)
-        value = VBA.Replace(VBA.CStr(value), ",", ".")
+        Value = VBA.Replace(VBA.CStr(Value), ",", ".")
     End Select
 
     ' Url encode key and value (using + for spaces)
-    web_GetUrlEncodedKeyValue = UrlEncode(Key, EncodingMode:=EncodingMode) & "=" & UrlEncode(value, EncodingMode:=EncodingMode)
+    web_GetUrlEncodedKeyValue = UrlEncode(Key, EncodingMode:=EncodingMode) & "=" & UrlEncode(Value, EncodingMode:=EncodingMode)
 End Function
 
 ''
@@ -2053,7 +2053,7 @@ Public Function ParseJson(ByVal JsonString As String) As Object
         Set ParseJson = json_ParseArray(JsonString, json_Index)
     Case Else
         ' Error: Invalid JSON string
-        err.Raise 10001, "JSONConverter", json_ParseErrorMessage(JsonString, json_Index, "Expecting '{' or '['")
+        Err.Raise 10001, "JSONConverter", json_ParseErrorMessage(JsonString, json_Index, "Expecting '{' or '['")
     End Select
 End Function
 
@@ -2339,7 +2339,7 @@ Private Function json_ParseObject(json_String As String, ByRef json_Index As Lon
     Set json_ParseObject = New DictionaryEx
     json_SkipSpaces json_String, json_Index
     If VBA.Mid$(json_String, json_Index, 1) <> "{" Then
-        err.Raise 10001, "JSONConverter", json_ParseErrorMessage(json_String, json_Index, "Expecting '{'")
+        Err.Raise 10001, "JSONConverter", json_ParseErrorMessage(json_String, json_Index, "Expecting '{'")
     Else
         json_Index = json_Index + 1
 
@@ -2369,7 +2369,7 @@ Private Function json_ParseArray(json_String As String, ByRef json_Index As Long
 
     json_SkipSpaces json_String, json_Index
     If VBA.Mid$(json_String, json_Index, 1) <> "[" Then
-        err.Raise 10001, "JSONConverter", json_ParseErrorMessage(json_String, json_Index, "Expecting '['")
+        Err.Raise 10001, "JSONConverter", json_ParseErrorMessage(json_String, json_Index, "Expecting '['")
     Else
         json_Index = json_Index + 1
 
@@ -2410,7 +2410,7 @@ Private Function json_ParseValue(json_String As String, ByRef json_Index As Long
         ElseIf VBA.InStr("+-0123456789", VBA.Mid$(json_String, json_Index, 1)) Then
             json_ParseValue = json_ParseNumber(json_String, json_Index)
         Else
-            err.Raise 10001, "JSONConverter", json_ParseErrorMessage(json_String, json_Index, "Expecting 'STRING', 'NUMBER', null, true, false, '{', or '['")
+            Err.Raise 10001, "JSONConverter", json_ParseErrorMessage(json_String, json_Index, "Expecting 'STRING', 'NUMBER', null, true, false, '{', or '['")
         End If
     End Select
 End Function
@@ -2524,13 +2524,13 @@ Private Function json_ParseKey(json_String As String, ByRef json_Index As Long) 
             End If
         Loop
     Else
-        err.Raise 10001, "JSONConverter", json_ParseErrorMessage(json_String, json_Index, "Expecting '""' or '''")
+        Err.Raise 10001, "JSONConverter", json_ParseErrorMessage(json_String, json_Index, "Expecting '""' or '''")
     End If
 
     ' Check for colon and skip if present or throw if not present
     json_SkipSpaces json_String, json_Index
     If VBA.Mid$(json_String, json_Index, 1) <> ":" Then
-        err.Raise 10001, "JSONConverter", json_ParseErrorMessage(json_String, json_Index, "Expecting ':'")
+        Err.Raise 10001, "JSONConverter", json_ParseErrorMessage(json_String, json_Index, "Expecting ':'")
     Else
         json_Index = json_Index + 1
     End If
@@ -2782,7 +2782,7 @@ Public Function ParseUtc(utc_UtcDate As Date) As Date
     Exit Function
 
 utc_ErrorHandling:
-    err.Raise 10011, "UtcConverter.ParseUtc", "UTC parsing error: " & err.Number & " - " & err.Description
+    Err.Raise 10011, "UtcConverter.ParseUtc", "UTC parsing error: " & Err.Number & " - " & Err.Description
 End Function
 
 ''
@@ -2811,7 +2811,7 @@ Public Function ConvertToUtc(utc_LocalDate As Date) As Date
     Exit Function
 
 utc_ErrorHandling:
-    err.Raise 10012, "UtcConverter.ConvertToUtc", "UTC conversion error: " & err.Number & " - " & err.Description
+    Err.Raise 10012, "UtcConverter.ConvertToUtc", "UTC conversion error: " & Err.Number & " - " & Err.Description
 End Function
 
 ''
@@ -2889,7 +2889,7 @@ Public Function ParseIso(utc_IsoString As String) As Date
     Exit Function
 
 utc_ErrorHandling:
-    err.Raise 10013, "UtcConverter.ParseIso", "ISO 8601 parsing error for " & utc_IsoString & ": " & err.Number & " - " & err.Description
+    Err.Raise 10013, "UtcConverter.ParseIso", "ISO 8601 parsing error for " & utc_IsoString & ": " & Err.Number & " - " & Err.Description
 End Function
 
 ''
@@ -2908,7 +2908,7 @@ Public Function ConvertToIso(utc_LocalDate As Date) As String
     Exit Function
 
 utc_ErrorHandling:
-    err.Raise 10014, "UtcConverter.ConvertToIso", "ISO 8601 conversion error: " & err.Number & " - " & err.Description
+    Err.Raise 10014, "UtcConverter.ConvertToIso", "ISO 8601 conversion error: " & Err.Number & " - " & Err.Description
 End Function
 
 ' ============================================= '
@@ -2937,7 +2937,7 @@ Private Function utc_ConvertDate(utc_Value As Date, Optional utc_ConvertToUtc As
     utc_Result = utc_ExecuteInShell(utc_ShellCommand)
 
     If utc_Result.utc_Output = "" Then
-        err.Raise 10015, "UtcConverter.utc_ConvertDate", "'date' command failed"
+        Err.Raise 10015, "UtcConverter.utc_ConvertDate", "'date' command failed"
     Else
         utc_Parts = Split(utc_Result.utc_Output, " ")
         utc_DateParts = Split(utc_Parts(0), "-")
@@ -3096,7 +3096,7 @@ Public Sub GetAutoProxy(ByVal Url As String, ByRef ProxyServer As String, ByRef 
 
             AutoProxy_ProxyStringPtr = AutoProxy_ProxyInfo.AutoProxy_lpszProxy
         Else
-            AutoProxy_Error = err.LastDllError
+            AutoProxy_Error = Err.LastDllError
             Select Case AutoProxy_Error
             Case 12180
                 AutoProxy_ErrorMsg = "WPAD detection failed"
@@ -3175,11 +3175,11 @@ AutoProxy_Cleanup:
     End If
 
     ' Error handling
-    If err.Number <> 0 Then
+    If Err.Number <> 0 Then
         ' Unmanaged error
-        err.Raise err.Number, "AutoProxy:" & err.source, err.Description, err.HelpFile, err.HelpContext
+        Err.Raise Err.Number, "AutoProxy:" & Err.source, Err.Description, Err.HelpFile, Err.HelpContext
     ElseIf AutoProxy_Error <> 0 Then
-        err.Raise AutoProxy_Error, "AutoProxy", AutoProxy_ErrorMsg
+        Err.Raise AutoProxy_Error, "AutoProxy", AutoProxy_ErrorMsg
     End If
 #End If
 End Sub

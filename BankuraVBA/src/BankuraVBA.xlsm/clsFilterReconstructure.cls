@@ -124,7 +124,7 @@ Private Function IsEmptyArray(arr) As Boolean
     On Error Resume Next
     
     itemCnt = UBound(arr)
-    errNum = err.Number
+    errNum = Err.Number
     
     On Error GoTo 0
     
@@ -142,7 +142,7 @@ Private Function HasKey(Coll As Collection, strKey As String) As Boolean
     Dim var As Variant
     On Error Resume Next
     var = Coll(strKey)
-    HasKey = (err.Number = 0)
-    err.Clear
+    HasKey = (Err.Number = 0)
+    Err.Clear
 End Function
 
