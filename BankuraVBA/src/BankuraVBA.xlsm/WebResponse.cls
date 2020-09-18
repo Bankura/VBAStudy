@@ -133,15 +133,15 @@ End Sub
 ' @param {WinHttpRequest} Http
 ' @throws 11030 / 80042b16 / -2147210474 - Error creating from http
 ''
-Public Sub CreateFromHttp(Client As WebClient, Request As WebRequest, Http As Object)
+Public Sub CreateFromHttp(Client As WebClient, Request As WebRequest, http As Object)
     On Error GoTo web_ErrorHandling
 
-    Me.StatusCode = Http.Status
-    Me.StatusDescription = Http.StatusText
-    Me.Content = Http.responseText
-    Me.Body = Http.ResponseBody
+    Me.StatusCode = http.Status
+    Me.StatusDescription = http.StatusText
+    Me.Content = http.responseText
+    Me.Body = http.ResponseBody
 
-    web_LoadValues Http.GetAllResponseHeaders, Me.Content, Me.Body, Request
+    web_LoadValues http.GetAllResponseHeaders, Me.Content, Me.Body, Request
 
     Exit Sub
 

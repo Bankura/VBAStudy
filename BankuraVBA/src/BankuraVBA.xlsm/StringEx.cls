@@ -336,7 +336,7 @@ Public Function GetBytes(Optional encode As String) As Byte()
     End If
     
     With IO.CreateADODBStream(adTypeText, encode)
-        .Mode = adModeReadWrite
+        .mode = adModeReadWrite
         .Open
         .WriteText Me.ToString
         .Position = 0

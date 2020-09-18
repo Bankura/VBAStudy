@@ -666,7 +666,7 @@ Public Function IsDateString(ByVal val As String, Optional ByVal separator As St
             IsDateString = False
             Exit Function
         End If
-        tmpDate = format(tmpDate, "####/##/##")
+        tmpDate = Format(tmpDate, "####/##/##")
         IsDateString = VBA.IsDate(tmpDate)
         Exit Function
     ElseIf required Then
@@ -736,7 +736,7 @@ Public Function IsDateTimeString(ByVal val As String, Optional ByVal separator A
             IsDateTimeString = False
             Exit Function
         End If
-        tmpDate = format(tmpDate, "####/##/## ##:##:##")
+        tmpDate = Format(tmpDate, "####/##/## ##:##:##")
         IsDateTimeString = VBA.IsDate(tmpDate)
         Exit Function
     ElseIf required Then

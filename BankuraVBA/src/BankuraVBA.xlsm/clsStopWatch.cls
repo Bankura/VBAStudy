@@ -157,13 +157,13 @@ Private Function GetTimeFormat(tm As Long, timeFormat As String) As Variant
             GetTimeFormat = tm
             
         Case timeFormat Like "*ms"
-            GetTimeFormat = Right(String(10, " ") & format(tm, timeFormat), 10)
+            GetTimeFormat = Right(String(10, " ") & Format(tm, timeFormat), 10)
         
         Case timeFormat Like "*s"
-            GetTimeFormat = Right(String(10, " ") & format(CDbl(tm) / 1000, timeFormat), 10)
+            GetTimeFormat = Right(String(10, " ") & Format(CDbl(tm) / 1000, timeFormat), 10)
         
         Case Else
-            GetTimeFormat = format(tm, timeFormat)
+            GetTimeFormat = Format(tm, timeFormat)
     End Select
             
 End Function

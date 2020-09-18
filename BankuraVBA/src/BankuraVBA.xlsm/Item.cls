@@ -603,7 +603,7 @@ Private Function IsDate() As Boolean
             IsDate = False
             Exit Function
         End If
-        tmpDate = format(tmpDate, "####/##/##")
+        tmpDate = Format(tmpDate, "####/##/##")
         IsDate = VBA.IsDate(tmpDate)
         Exit Function
     End If

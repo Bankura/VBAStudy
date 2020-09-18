@@ -358,7 +358,7 @@ Private Function GetFileTime(ByVal dtSetting As Date) As FILETIME
         .wDayOfWeek = Weekday(dtSetting)
         .wDay = Day(dtSetting)
         .wHour = hour(dtSetting)
-        .wMinute = Minute(dtSetting)
+        .wMinute = minute(dtSetting)
         .wSecond = second(dtSetting)
     End With
 
@@ -655,7 +655,7 @@ End Function
 Public Function ReadTextFile(filePath As String, Optional cSet As String = "_autodetect_all") As String
     Dim data As String
     With IO.CreateADODBStream(adTypeText, cSet)
-        .Mode = adModeReadWrite
+        .mode = adModeReadWrite
         .Open
         .LoadFromFile filePath 'ファイル指定
         .Position = 0
@@ -697,7 +697,7 @@ Public Function ReadTextFileToVArray(filePath As String, _
     Dim vArr(), lineCount As Long, cnt As Long
     Dim stream As Object: Set stream = IO.CreateADODBStream(adTypeText, cSet, separator)
     With stream
-        .Mode = adModeReadWrite
+        .mode = adModeReadWrite
         .Open
         .LoadFromFile filePath 'ファイル指定
         lineCount = CountLine(stream)
@@ -733,7 +733,7 @@ Public Function ReadCsvFile(ByVal filePath As String, _
     Dim lSize As Long, lCount As Long, i As Long, vRow, vArr()
     Dim stream As Object: Set stream = IO.CreateADODBStream(adTypeText, cSet, separator)
     With stream
-        .Mode = adModeReadWrite
+        .mode = adModeReadWrite
         .Open
         .LoadFromFile filePath
         lSize = Me.CountLine(stream)
@@ -801,7 +801,7 @@ Public Function SelectCsvCol(ByVal filePath As String, _
     Dim lSize As Long, lCount As Long, i As Long, vRow, vArr()
     Dim stream As Object: Set stream = IO.CreateADODBStream(adTypeText, cSet, separator)
     With stream
-        .Mode = adModeReadWrite
+        .mode = adModeReadWrite
         .Open
         .LoadFromFile filePath
         lSize = Me.CountLine(stream)
@@ -931,7 +931,7 @@ Public Function GetTextFileLineCount(filePath As String, _
     Dim lineCount As Long
     Dim stream As Object: Set stream = IO.CreateADODBStream(adTypeText, cSet, separator)
     With stream
-        .Mode = adModeReadWrite
+        .mode = adModeReadWrite
         .Open
         .LoadFromFile filePath 'ファイル指定
         lineCount = .CountLine(stream)
@@ -960,7 +960,7 @@ Public Sub WriteTextFile(filePath As String, data As String, cSet As String, _
                          
     Dim stream As Object: Set stream = IO.CreateADODBStream(adTypeText, cSet)
     With stream
-        .Mode = adModeReadWrite
+        .mode = adModeReadWrite
         .Open
         If willAppend Then
             AppendMode stream, filePath
@@ -1009,7 +1009,7 @@ Public Sub WriteTextFileFromVArray(filePath As String, vArray As Variant, cSet A
     Dim tmp
     Dim stream As Object: Set stream = IO.CreateADODBStream(adTypeText, cSet, separator)
     With stream
-        .Mode = adModeReadWrite
+        .mode = adModeReadWrite
         .Open
         If willAppend Then
             AppendMode stream, filePath
@@ -1067,7 +1067,7 @@ Public Sub WriteCsvFileFromVArray(ByVal filePath As String, _
                                   Optional bomInclude As Boolean = False)
     Dim stream As Object: Set stream = IO.CreateADODBStream(adTypeText, cSet, separator)
     With stream
-        .Mode = adModeReadWrite
+        .mode = adModeReadWrite
         .Open
         If willAppend Then
             AppendMode stream, filePath
@@ -1206,7 +1206,7 @@ Public Function ReadFileToDump(filePath As String) As String
     Set ret = New StringEx
     Dim stream As Object: Set stream = IO.CreateADODBStream(adTypeBinary)
     With stream
-        .Mode = adModeReadWrite
+        .mode = adModeReadWrite
         .Open
         .LoadFromFile filePath 'ファイル指定
         Do While Not .EOS
@@ -1837,7 +1837,7 @@ Private Sub GrepTextFile(ByVal filePath As String, _
     Dim stream As Object: Set stream = IO.CreateADODBStream(adTypeText, cSet, separator)
 
     With stream
-        .Mode = adModeReadWrite
+        .mode = adModeReadWrite
         .Open
         .LoadFromFile filePath
 
@@ -1893,7 +1893,7 @@ Private Function TryReadText(ByVal stream As Object, _
         End Select
         With stream
             .Close
-            .Mode = adModeReadWrite
+            .mode = adModeReadWrite
             .charSet = cSet
             .lineSeparator = separator
             .Type = adTypeText
@@ -2345,12 +2345,12 @@ Private Sub GrepAndReplaceTextFile(ByVal filePath As String, _
     Dim ostream As Object: Set ostream = IO.CreateADODBStream(adTypeText, cSet, separator)
     
     With ostream
-        .Mode = adModeReadWrite
+        .mode = adModeReadWrite
         .Open
     End With
     
     With istream
-        .Mode = adModeReadWrite
+        .mode = adModeReadWrite
         .Open
         .LoadFromFile filePath
 

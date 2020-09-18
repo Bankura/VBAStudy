@@ -48,12 +48,7 @@ Public Function ExecPsql(psql As String, host As String, port As String, _
         Set oExec = .Exec(cmd)
     End With
     
-    ' コマンド実行中待機
-    Do While (oExec.Status = 0)
-        Application.Wait [Now()] + 100 / 86400000
-        DoEvents
-    Loop
-    
+
     ' 実行結果設定
     Dim res As Result: Set res = New Result
     res.ExitCd = oExec.ExitCode

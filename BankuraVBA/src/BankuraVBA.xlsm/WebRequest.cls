@@ -210,10 +210,10 @@ Public UserAgent As String
 ' @property Format
 ' @type WebFormat
 ''
-Public Property Get format() As WebFormat
-    format = RequestFormat
+Public Property Get Format() As WebFormat
+    Format = RequestFormat
 End Property
-Public Property Let format(Value As WebFormat)
+Public Property Let Format(Value As WebFormat)
     Me.RequestFormat = Value
     Me.ResponseFormat = Value
 End Property

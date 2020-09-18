@@ -69,10 +69,10 @@ Public Property Set Headers(arg As Object)
 End Property
 
 ' Params
-Public Property Get Params() As Object
+Public Property Get params() As Object
     Set Headers = mParams
 End Property
-Public Property Set Params(arg As Object)
+Public Property Set params(arg As Object)
     Set mParams = arg
 End Property
 
@@ -281,7 +281,7 @@ Private Function EncodeUrl(Target As String) As String
     Dim buf() As Byte, s As String, i As Long
     
     With CreateObject("ADODB.Stream")
-        .Mode = 3 'adModeReadWrite
+        .mode = 3 'adModeReadWrite
         .Open
         .Type = 2 'adTypeText
         .charSet = "UTF-8"

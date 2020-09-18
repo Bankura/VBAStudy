@@ -231,7 +231,7 @@ Public Function ReadTextFileToVArray() As Variant
 
     Dim lSize As Long, lCount As Long, i As Long, vRow, vArr()
     With mAdoStream
-        .Mode = adModeReadWrite
+        .mode = adModeReadWrite
         .Type = adTypeText
         .charSet = mCharSet
         .lineSeparator = mLineSeparator

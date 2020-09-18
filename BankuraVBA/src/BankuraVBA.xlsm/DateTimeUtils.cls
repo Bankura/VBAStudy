@@ -162,7 +162,7 @@ End Function
 '* @return String 日付文字列
 '******************************************************************************
 Public Function ToString(ByVal dt As Date, Optional ByVal dateStrFormat As String = DATE_FORMAT_YYYYMMDDHHNNSS_SLASH) As String
-    ToString = format(dt, dateStrFormat)
+    ToString = Format(dt, dateStrFormat)
 End Function
 
 '******************************************************************************
@@ -173,7 +173,7 @@ End Function
 '* @return String 日付文字列
 '******************************************************************************
 Public Function ToStringOfYYYYMMDD(ByVal dt As Date) As String
-    ToStringOfYYYYMMDD = format(dt, DATE_FORMAT_YYYYMMDD)
+    ToStringOfYYYYMMDD = Format(dt, DATE_FORMAT_YYYYMMDD)
 End Function
 
 '******************************************************************************
@@ -184,7 +184,7 @@ End Function
 '* @return String 日付文字列
 '******************************************************************************
 Public Function ToStringOfYYYYMMDDSlash(ByVal dt As Date) As String
-    ToStringOfYYYYMMDDSlash = format(dt, DATE_FORMAT_YYYYMMDD_SLASH)
+    ToStringOfYYYYMMDDSlash = Format(dt, DATE_FORMAT_YYYYMMDD_SLASH)
 End Function
 
 '******************************************************************************
@@ -195,7 +195,7 @@ End Function
 '* @return String 日付文字列
 '******************************************************************************
 Public Function ToStringOfYYYYMMDDHyphen(ByVal dt As Date) As String
-    ToStringOfYYYYMMDDHyphen = format(dt, DATE_FORMAT_YYYYMMDD_HYPHEN)
+    ToStringOfYYYYMMDDHyphen = Format(dt, DATE_FORMAT_YYYYMMDD_HYPHEN)
 End Function
 
 '******************************************************************************
@@ -206,7 +206,7 @@ End Function
 '* @return String 日付文字列
 '******************************************************************************
 Public Function ToStringOfYYYYMMDDDot(ByVal dt As Date) As String
-    ToStringOfYYYYMMDDDot = format(dt, DATE_FORMAT_YYYYMMDD_DOT)
+    ToStringOfYYYYMMDDDot = Format(dt, DATE_FORMAT_YYYYMMDD_DOT)
 End Function
 
 '******************************************************************************
@@ -217,7 +217,7 @@ End Function
 '* @return String 日付文字列
 '******************************************************************************
 Public Function ToStringOfYYYYMMDDHHNNSS(ByVal dt As Date) As String
-    ToStringOfYYYYMMDDHHNNSS = format(dt, DATE_FORMAT_YYYYMMDDHHNNSS)
+    ToStringOfYYYYMMDDHHNNSS = Format(dt, DATE_FORMAT_YYYYMMDDHHNNSS)
 End Function
 
 '******************************************************************************
@@ -228,7 +228,7 @@ End Function
 '* @return String 日付文字列
 '******************************************************************************
 Public Function ToStringOfYYYYMMDDHHNNSSSlash(ByVal dt As Date) As String
-    ToStringOfYYYYMMDDHHNNSSSlash = format(dt, DATE_FORMAT_YYYYMMDDHHNNSS_SLASH)
+    ToStringOfYYYYMMDDHHNNSSSlash = Format(dt, DATE_FORMAT_YYYYMMDDHHNNSS_SLASH)
 End Function
 
 '******************************************************************************
@@ -239,7 +239,7 @@ End Function
 '* @return String 日付文字列
 '******************************************************************************
 Public Function ToStringOfYYYYMMDDHHNNSSHyphen(ByVal dt As Date) As String
-    ToStringOfYYYYMMDDHHNNSSHyphen = format(dt, DATE_FORMAT_YYYYMMDDHHNNSS_HYPHEN)
+    ToStringOfYYYYMMDDHHNNSSHyphen = Format(dt, DATE_FORMAT_YYYYMMDDHHNNSS_HYPHEN)
 End Function
 
 '******************************************************************************
@@ -250,7 +250,7 @@ End Function
 '* @return String 日付文字列
 '******************************************************************************
 Public Function ToStringOfYYYYMMDDHHNNSSDot(ByVal dt As Date) As String
-    ToStringOfYYYYMMDDHHNNSSDot = format(dt, DATE_FORMAT_YYYYMMDDHHNNSS_DOT)
+    ToStringOfYYYYMMDDHHNNSSDot = Format(dt, DATE_FORMAT_YYYYMMDDHHNNSS_DOT)
 End Function
 
 '******************************************************************************
@@ -261,7 +261,7 @@ End Function
 '* @return String 日付文字列
 '******************************************************************************
 Public Function ToStringOfWareki(ByVal dt As Date) As String
-    ToStringOfWareki = format(dt, DATE_FORMAT_WAREKI)
+    ToStringOfWareki = Format(dt, DATE_FORMAT_WAREKI)
 End Function
 
 '******************************************************************************
@@ -272,7 +272,7 @@ End Function
 '* @return String 日付文字列
 '******************************************************************************
 Public Function ToStringOfWarekiYoubi(ByVal dt As Date) As String
-    ToStringOfWarekiYoubi = format(dt, DATE_FORMAT_WAREKI_YOUBI)
+    ToStringOfWarekiYoubi = Format(dt, DATE_FORMAT_WAREKI_YOUBI)
 End Function
 
 '******************************************************************************
@@ -287,9 +287,9 @@ Public Function ParseDate(ByVal dateString As String) As Date
     Dim tmpDateStr As String
     tmpDateStr = StringUtils.RemoveEach(dateString, Array(".", "/", "-", " "))
     If Len(tmpDateStr) = 8 Then
-        ParseDate = CDate(format(tmpDateStr, "####/##/##"))
+        ParseDate = CDate(Format(tmpDateStr, "####/##/##"))
     ElseIf Len(tmpDateStr) = 14 Then
-        ParseDate = CDate(format(tmpDateStr, "####/##/## ##:##:##"))
+        ParseDate = CDate(Format(tmpDateStr, "####/##/## ##:##:##"))
     Else
         ParseDate = CDate(tmpDateStr)
     End If

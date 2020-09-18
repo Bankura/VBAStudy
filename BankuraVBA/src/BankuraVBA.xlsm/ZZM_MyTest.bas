@@ -7,7 +7,7 @@ Function FizzBuzz(ByVal n As Long) As String
         Case 1: FizzBuzz = "Fizz"
         Case 2: FizzBuzz = "Buzz"
         Case 3: FizzBuzz = "FizzBuzz"
-        Case Else: err.Raise 51 'UNREACHABLE
+        Case Else: Err.Raise 51 'UNREACHABLE
     End Select
 End Function
 
@@ -604,9 +604,8 @@ End Sub
 
 Sub Commander_Test001()
     Dim cmdr As New Commander
-    cmdr.RunVSCode
-
 End Sub
+
 Sub DosCommander_Test001()
     Dim cmdr As New DosCommander
     Dim v
@@ -694,14 +693,208 @@ Sub ObjectCreate_Test001()
     
 End Sub
 
-Sub AccessDriverExists_Test001()
+Sub OleDBProviderExists_Test001()
 
     Dim vArr, v
     Dim stdRegProv As Object: Set stdRegProv = CreateStdRegProv()
-    stdRegProv.EnumKey HKEY_LOCAL_MACHINE, "SOFTWARE\Classes", vArr
+    ' 32bit
+    stdRegProv.EnumKey HKEY_LOCAL_MACHINE, "SOFTWARE\WOW6432Node\Classes", vArr
     
-    For Each v In ArrayUtils.Search(vArr, "Microsoft.ACE.OLEDB")
+    For Each v In ArrayUtils.Search(vArr, "PostgreSQL")
         Debug.Print v
     Next
 
+    ' 64bit
+    stdRegProv.EnumKey HKEY_LOCAL_MACHINE, "SOFTWARE\Classes", vArr
+    
+    For Each v In ArrayUtils.Search(vArr, "PostgreSQL")
+        Debug.Print v
+    Next
+End Sub
+
+Sub OdbcDriverList_Test001()
+
+    Dim vArr, v
+    Dim stdRegProv As Object: Set stdRegProv = CreateStdRegProv()
+    ' 32bit
+'    stdRegProv.EnumKey HKEY_LOCAL_MACHINE, "SOFTWARE\WOW6432Node\ODBC\ODBCINST.INI", vArr
+'
+'    For Each v In ArrayUtils.Search(vArr, "Ora")
+'        Debug.Print v
+'    Next
+
+    ' 64bit
+    stdRegProv.EnumKey HKEY_LOCAL_MACHINE, "SOFTWARE\ODBC\ODBCINST.INI", vArr
+    
+    For Each v In ArrayUtils.Search(vArr, "Ora")
+        Debug.Print v
+    Next
+    
+End Sub
+
+Sub AccessDBConnect_Test001()
+    Call DatabaseUtils.Disconnect
+    'Call DatabaseUtils.OpenAccess("C:\develop\mydb_pass.accdb", "pass")
+    Call DatabaseUtils.OpenAccess("C:\develop\mydb_pass.accdb", "pass", "odbc")
+    Dim strSQL As String: strSQL = "select * from 消費税率マスタ"
+    
+    strSQL = "select 適用開始日 from 消費税率マスタ"
+    Dim vArr, v
+    
+    vArr = DatabaseUtils.SelectList(strSQL)
+    
+    For Each v In vArr
+        Debug.Print v
+    Next
+    Call DatabaseUtils.Disconnect
+End Sub
+
+Sub SQLServerDBConnect_Test001()
+    Call DatabaseUtils.Disconnect
+    ' Call DatabaseUtils.OpenSqlServer("localhost\SQLExpress", "TestDB2", 1433, "sa", "xxxx")
+    Call DatabaseUtils.OpenSqlServer("localhost\SQLExpress", "TestDB2", 1433, "sa", "xxxx", "oledb")
+    Dim strSQL As String: strSQL = "select * from LocationMst"
+    
+    strSQL = "select LocationCd, LocationName from LocationMst"
+    Dim vArr, v
+    
+    vArr = DatabaseUtils.SelectList(strSQL)
+    
+    For Each v In vArr
+        Debug.Print v
+    Next
+    Call DatabaseUtils.Disconnect
+End Sub
+
+Sub SQLServerLocalDBConnect_Test001()
+    Call DatabaseUtils.Disconnect
+    Call DatabaseUtils.OpenSqlServerLocalDB("C:\Users\bankura\TestDB.mdf", "TestDB")
+    Dim strSQL As String: strSQL = "select * from table1"
+    
+    strSQL = "select id, name from table1"
+    Dim vArr, v
+    
+    vArr = DatabaseUtils.SelectList(strSQL)
+    
+    For Each v In vArr
+        Debug.Print v
+    Next
+    Call DatabaseUtils.Disconnect
+End Sub
+
+Sub SQLiteConnect_Test001()
+    Call DatabaseUtils.Disconnect
+    Call DatabaseUtils.OpenSQLite("C:\SQLite\test.db")
+    Dim strSQL As String: strSQL = "select * from table1"
+    
+    Dim vArr, v
+    
+    vArr = DatabaseUtils.SelectList(strSQL)
+    
+    For Each v In vArr
+        Debug.Print v
+    Next
+    Call DatabaseUtils.Disconnect
+End Sub
+
+Sub MySqlConnect_Test001()
+    Call DatabaseUtils.Disconnect
+    Call DatabaseUtils.OpenMySql("localhost", 3306, "sakila", "root", "bankura")
+    Dim strSQL As String: strSQL = "select * from country where country like 'United%'"
+
+    Dim vArr, v
+    
+    vArr = DatabaseUtils.SelectList(strSQL)
+    
+    For Each v In vArr
+        Debug.Print v
+    Next
+    Call DatabaseUtils.Disconnect
+End Sub
+
+
+Sub PostgreDBConnect_Test001()
+    Call DatabaseUtils.Disconnect
+    Call DatabaseUtils.OpenPostgreSql("localhost", 5433, "ban", "ban", "ban", "odbc")
+    Dim strSQL As String: strSQL = "select * from table1"
+    
+    strSQL = "select name from table1"
+    Dim vArr, v
+    
+    vArr = DatabaseUtils.SelectList(strSQL)
+    
+    For Each v In vArr
+        Debug.Print v
+    Next
+    Call DatabaseUtils.Disconnect
+End Sub
+
+Sub OracleDBConnect_Test001()
+    Call DatabaseUtils.Disconnect
+    Call DatabaseUtils.OpenOracle("localhost", 1521, "XEPDB1", "bankura", "bankura", "oledb")
+    Dim strSQL As String: strSQL = "select * from table1"
+
+    Dim vArr, v
+    
+    vArr = DatabaseUtils.SelectList(strSQL)
+    
+    For Each v In vArr
+        Debug.Print v
+    Next
+    Call DatabaseUtils.Disconnect
+End Sub
+
+
+Sub ExcelDBConnect_Test001()
+    Call DatabaseUtils.Disconnect
+
+    Call DatabaseUtils.OpenExcel("C:\develop\myxldb.xlsb", True, 2, "oledb")
+    'Call DatabaseUtils.OpenExcel("C:\develop\myxldb.xlsb", , , "odbc")
+    Dim strSQL As String: strSQL = "select * from [table1$]"
+    
+    'strSQL = "select name from [table1$]"
+    Dim vArr, v
+    
+    vArr = DatabaseUtils.SelectList(strSQL)
+    
+    For Each v In vArr
+        Debug.Print v
+    Next
+    Call DatabaseUtils.Disconnect
+End Sub
+
+Sub CsvDBConnect_Test001()
+    Call DatabaseUtils.Disconnect
+
+    Call DatabaseUtils.OpenCsv("C:\develop\", False, "oledb")
+    'Call DatabaseUtils.OpenCsv("C:\develop\", , "odbc")
+    Dim strSQL As String: strSQL = "select * from [myxldb.csv]"
+    
+    'strSQL = "select name from [myxldb.csv]"
+    Dim vArr, v
+    
+    vArr = DatabaseUtils.SelectList(strSQL)
+    
+    For Each v In vArr
+        Debug.Print v
+    Next
+    Call DatabaseUtils.Disconnect
+End Sub
+
+Sub TextDBConnect_Test001()
+    Call DatabaseUtils.Disconnect
+
+    Call DatabaseUtils.OpenText("C:\develop\", True, "oledb")
+    'Call DatabaseUtils.OpenText("C:\develop\", , "odbc")
+    Dim strSQL As String: strSQL = "select * from [myxldb.csv]"
+    
+
+    Dim vArr, v
+    
+    vArr = DatabaseUtils.SelectList(strSQL)
+    
+    For Each v In vArr
+        Debug.Print v
+    Next
+    Call DatabaseUtils.Disconnect
 End Sub

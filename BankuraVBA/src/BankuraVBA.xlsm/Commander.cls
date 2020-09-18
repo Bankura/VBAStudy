@@ -142,12 +142,7 @@ Public Function Exec(commandString As String) As CommandResult
     ' コマンド実行
     Dim oExec: Set oExec = Core.Wsh.Exec(commandString)
     
-    ' コマンド実行中待機
-    Do While (oExec.Status = 0)
-        Application.Wait [Now()] + 100 / 86400000
-        DoEvents
-    Loop
-    
+
     ' 実行結果設定
     Dim res As CommandResult: Set res = New CommandResult
     res.ExitCd = oExec.ExitCode

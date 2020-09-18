@@ -703,7 +703,7 @@ End Function
 
 '******************************************************************************
 '* [概  要] Copy2DArray
-'* [詳  細] 2次元配列ををコピーして新しい2次元配列を作成する。
+'* [詳  細] 2次元配列をコピーして新しい2次元配列を作成する。
 '*          開始インデックスは0固定。
 '*
 '* @param source2DArr コピー元2次元配列
@@ -1079,19 +1079,42 @@ End Function
 '* [詳  細] 配列（文字列）から指定した文字列と部分一致する項目を
 '*          取得し、1次元配列で返却する。
 '*
-'* @param varr 配列
-'* @param itm 項目
+'* @param vArr 配列
+'* @param searchVal 検索文字列（配列で複数指定可）
 '* @return Variant 検索結果（1次元配列）
 '******************************************************************************
-Public Function Search(ByRef vArr As Variant, ByVal searchStr As String) As Variant
+Public Function Search(ByRef vArr As Variant, ByVal searchVal As Variant) As Variant
     Dim arrx As ArrayEx: Set arrx = New ArrayEx
     Dim v As Variant
     For Each v In vArr
         If ValidateUtils.IsString(v) Then
-            If v Like "*" & searchStr & "*" Then
+            If StringUtils.ContainsAll(v, searchVal) Then
                 arrx.Add CStr(v)
             End If
         End If
     Next
     Search = arrx.ToArray
+End Function
+
+'******************************************************************************
+'* [概  要] RegexSearch
+'* [詳  細] 配列（文字列）から指定した文字列と正規表現が一致する項目を
+'*          取得し、1次元配列で返却する。
+'*
+'* @param vArr 配列
+'* @param searchStr 検索文字列（正規表現）
+'* @param igCase 大文字小文字の区別
+'* @return Variant 検索結果（1次元配列）
+'******************************************************************************
+Public Function RegexSearch(ByRef vArr As Variant, ByVal searchStr As String, Optional ByVal igCase As Boolean = False) As Variant
+    Dim arrx As ArrayEx: Set arrx = New ArrayEx
+    Dim v As Variant
+    For Each v In vArr
+        If ValidateUtils.IsString(v) Then
+            If ValidateUtils.ValidatePattern(v, searchStr, igCase) Then
+                arrx.Add CStr(v)
+            End If
+        End If
+    Next
+    RegexSearch = arrx.ToArray
 End Function

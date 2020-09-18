@@ -53,9 +53,24 @@ Private mWshNetwork As Object
 Private mSc As Object
 Private mSettingInfo As SettingInfo
 Private mWinApi As WinAPI
+Private mLogger As Logger
 
 '******************************************************************************
-'* プロシージャ定義
+'* プロパティ定義
+'******************************************************************************
+'*-----------------------------------------------------------------------------
+'* Logger プロパティ
+'*-----------------------------------------------------------------------------
+Public Property Get Logger() As Logger
+    If mLogger Is Nothing Then
+        Set mLogger = New Logger
+        Call mLogger.Init(LogLevelEnum.lvTrace, True, IO.ExecPath, "bankuravba.log")
+    End If
+    Set Logger = mLogger
+End Property
+
+'******************************************************************************
+'* メソッド定義
 '******************************************************************************
 
 '******************************************************************************

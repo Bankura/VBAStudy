@@ -221,7 +221,7 @@ End Function
 Public Sub WriteTextFileFromVArray(vArray As Variant)
     Dim tmp
     With mAdoStream
-        .Mode = adModeReadWrite
+        .mode = adModeReadWrite
         .Type = adTypeText
         .charSet = mCharSet
         .lineSeparator = mLineSeparator
@@ -245,7 +245,7 @@ End Sub
 '******************************************************************************
 Public Sub WriteTextFileFromRecordSet(records As RecordFormat)
     With mAdoStream
-        .Mode = adModeReadWrite
+        .mode = adModeReadWrite
         .Type = adTypeText
         .charSet = mCharSet
         .lineSeparator = mLineSeparator

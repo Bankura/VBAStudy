@@ -54,7 +54,7 @@ End Sub
 ' @param {WebRequest} Request
 ' @param in|out {WinHttpRequest} Http
 ''
-Public Sub PrepareHttp(ByVal Client As WebClient, ByVal Request As WebRequest, ByRef Http As Object)
+Public Sub PrepareHttp(ByVal Client As WebClient, ByVal Request As WebRequest, ByRef http As Object)
     ' e.g. Update option, headers, etc.
 End Sub
 

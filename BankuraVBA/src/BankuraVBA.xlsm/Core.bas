@@ -210,7 +210,7 @@ Public Function Formats(ByVal strTemplate As String, ParamArray vals() As Varian
         
         ret(i + 0) = Replace(Replace(s, "{{", "{"), "}}", "}") 'FIXME: check non-escape brace
         If Len(brcs) Mod 2 = 0 Then
-            ret(i + 1) = format$(vals(m.SubMatches(1)), m.SubMatches(3))
+            ret(i + 1) = Format$(vals(m.SubMatches(1)), m.SubMatches(3))
         Else
             ret(i + 1) = m.SubMatches(1)
         End If
@@ -297,7 +297,7 @@ Public Function Dump(ByVal x As Variant) As String
     Case "Date":
         Dim d As String, t As String
         If Abs(x) >= 1 Then d = Month(x) & "/" & Day(x) & "/" & Year(x)
-        If Not IsInt(x) Then t = format(x, "h:nn:ss AM/PM")
+        If Not IsInt(x) Then t = Format(x, "h:nn:ss AM/PM")
         Dump = "#" & Trim(d & " " & t) & "#"
     Case "String"
         If StrPtr(x) = 0 Then

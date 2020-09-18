@@ -727,6 +727,6 @@ End Sub
 Public Function OpenTextFile(ByVal fileName As String, _
                       Optional ByVal IOMode As OpenFileEnum = ForReading, _
                       Optional ByVal create As Boolean = False, _
-                      Optional ByVal format As TristateEnum = False_) As Object
-    Set OpenTextFile = fso.OpenTextFile(fileName, IOMode, create, format)
+                      Optional ByVal Format As TristateEnum = False_) As Object
+    Set OpenTextFile = fso.OpenTextFile(fileName, IOMode, create, Format)
 End Function

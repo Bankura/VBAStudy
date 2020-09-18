@@ -116,7 +116,7 @@ Private Sub TestEnd()
     WriteResult String$(ResultLineLen, "=")
     WriteResult _
           xSuccSubCount & " succeeded, " & xFailSubCount & " failed," _
-        & " took " & format$(xEndTime - xStartTime, "0.00") & " seconds."
+        & " took " & Format$(xEndTime - xStartTime, "0.00") & " seconds."
 End Sub
 
 Private Function CheckTestProcName(ByVal proc As String) As Boolean
@@ -301,21 +301,21 @@ End Sub
 
 Public Sub IsErrFunc( _
     ByVal errNum As Variant, _
-    ByVal fun As Func, ByVal Params As Variant, _
+    ByVal fun As Func, ByVal params As Variant, _
     Optional ByVal msg As String = "" _
     )
     
     xAssertMsg = msg
     
     If Not (IsEmpty(errNum) Or IsNumeric(errNum)) Then Err.Raise 5
-    If Not IsArray(Params) Then Err.Raise 5
+    If Not IsArray(params) Then Err.Raise 5
     
     On Error GoTo Catch
     
     Dim act As Variant: act = Empty
     
     Dim buf As Variant, ret As Boolean
-    fun.CallByPtr buf, Params
+    fun.CallByPtr buf, params
     AssertDone True, ret, errNum, act
     GoTo Escape
     
@@ -329,28 +329,28 @@ End Sub
 
 Public Sub IsErrMethod( _
     ByVal errNum As Variant, _
-    ByVal obj As Object, ByVal proc As String, ByVal Params As Variant, _
+    ByVal obj As Object, ByVal proc As String, ByVal params As Variant, _
     Optional ByVal msg As String = "" _
     )
     
     xAssertMsg = msg
     
     If Not (IsEmpty(errNum) Or IsNumeric(errNum)) Then Err.Raise 5
-    If Not IsArray(Params) Then Err.Raise 5
-    If LBound(Params) <> 0 Then Err.Raise 5
+    If Not IsArray(params) Then Err.Raise 5
+    If LBound(params) <> 0 Then Err.Raise 5
     
     On Error GoTo Catch
     
     Dim act As Variant: act = Empty
     
     Dim i As Long, ret As Boolean
-    Dim ubParam As Long: ubParam = UBound(Params)
+    Dim ubParam As Long: ubParam = UBound(params)
     Dim ps() As Variant: ReDim ps(ubParam)
     For i = 0 To ubParam
-        If IsObject(Params(i)) Then
-            Set ps(i) = Params(i)
+        If IsObject(params(i)) Then
+            Set ps(i) = params(i)
         Else
-            Let ps(i) = Params(i)
+            Let ps(i) = params(i)
         End If
     Next
     rtcCallByName obj, StrPtr(proc), vbMethod, ps

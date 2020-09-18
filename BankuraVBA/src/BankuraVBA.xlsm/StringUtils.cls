@@ -1137,6 +1137,34 @@ Public Function Contains(ByVal str As String, ByVal searchStr As String) As Bool
     Contains = (InStr(str, searchStr) <> 0)
 End Function
 
+
+'******************************************************************************
+'* [概  要] ContainsAll
+'* [詳  細] 指定した文字列のすべてが含まれているかチェック｡
+'*          空文字の文字列はFalseを返す｡
+'*          空文字または長さがゼロの検索配列はFalseを返す｡
+'*
+'* @param str 文字列
+'* @param searchStr 検索文字配列（複数指定）
+'* @return Boolean チェック結果（True:該当）
+'*
+'******************************************************************************
+Public Function ContainsAll(ByVal str As String, ParamArray searchStr()) As Boolean
+    If Me.IsEmpty(str) Or VBA.IsMissing(searchStr) Then
+        ContainsAll = False
+        Exit Function
+    End If
+    Dim tmp: tmp = searchStr ' ParamArrayを別関数に渡すための対応
+    Dim v
+    For Each v In ArrayUtils.ToVArrayFlattened(tmp)
+        If Not Me.Contains(str, CStr(v)) Then
+            ContainsAll = False
+            Exit Function
+        End If
+    Next
+    ContainsAll = True
+End Function
+
 '******************************************************************************
 '* [概  要] ContainsAny
 '* [詳  細] 指定した文字列のどれかが含まれているかどうかをチェック｡
@@ -1635,7 +1663,7 @@ Public Function GetBytes(ByVal str As String, Optional ByVal encode As String) A
     End If
     
     With IO.CreateADODBStream(adTypeText, encode)
-        .Mode = adModeReadWrite
+        .mode = adModeReadWrite
         .Open
         .WriteText str
         .Position = 0
@@ -3655,7 +3683,7 @@ End Function
 '******************************************************************************
 Public Function ToEncodedString(Bytes() As Byte, ByVal charSet As String) As String
     With IO.CreateADODBStream(adTypeBinary, charSet)
-        .Mode = adModeReadWrite
+        .mode = adModeReadWrite
         .Open
         .Write Bytes
         .Position = 0

@@ -1005,8 +1005,8 @@ Public Function MMult(arg1, arg2)
     MMult = mXlWsFunc.MMult(arg1, arg2)
 End Function
 
-Public Function Mode(arg1, Optional arg2, Optional arg3, Optional arg4, Optional arg5, Optional arg6, Optional arg7, Optional arg8, Optional arg9, Optional arg10, Optional arg11, Optional arg12, Optional arg13, Optional arg14, Optional arg15, Optional arg16, Optional arg17, Optional arg18, Optional arg19, Optional arg20, Optional arg21, Optional arg22, Optional arg23, Optional arg24, Optional arg25, Optional arg26, Optional arg27, Optional arg28, Optional arg29, Optional arg30) As Double
-    Mode = mXlWsFunc.Mode(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30)
+Public Function mode(arg1, Optional arg2, Optional arg3, Optional arg4, Optional arg5, Optional arg6, Optional arg7, Optional arg8, Optional arg9, Optional arg10, Optional arg11, Optional arg12, Optional arg13, Optional arg14, Optional arg15, Optional arg16, Optional arg17, Optional arg18, Optional arg19, Optional arg20, Optional arg21, Optional arg22, Optional arg23, Optional arg24, Optional arg25, Optional arg26, Optional arg27, Optional arg28, Optional arg29, Optional arg30) As Double
+    mode = mXlWsFunc.mode(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19, arg20, arg21, arg22, arg23, arg24, arg25, arg26, arg27, arg28, arg29, arg30)
 End Function
 
 Public Function Mode_Mult(arg1, Optional arg2, Optional arg3, Optional arg4, Optional arg5, Optional arg6, Optional arg7, Optional arg8, Optional arg9, Optional arg10, Optional arg11, Optional arg12, Optional arg13, Optional arg14, Optional arg15, Optional arg16, Optional arg17, Optional arg18, Optional arg19, Optional arg20, Optional arg21, Optional arg22, Optional arg23, Optional arg24, Optional arg25, Optional arg26, Optional arg27, Optional arg28, Optional arg29, Optional arg30)
