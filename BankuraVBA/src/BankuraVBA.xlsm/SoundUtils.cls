@@ -170,8 +170,8 @@ End Sub
 '* @param length âπÇÃí∑Ç≥ÅimillisecondsÅj
 '*
 '******************************************************************************
-Public Sub BeepSound(pitch As Long, length As Long)
-    Call Beep(pitch, length)
+Public Sub BeepSound(pitch As Long, Length As Long)
+    Call Beep(pitch, Length)
 End Sub
 
 Public Sub ErrorMessageBeep()

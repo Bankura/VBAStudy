@@ -1137,7 +1137,6 @@ Public Function Contains(ByVal str As String, ByVal searchStr As String) As Bool
     Contains = (InStr(str, searchStr) <> 0)
 End Function
 
-
 '******************************************************************************
 '* [概  要] ContainsAll
 '* [詳  細] 指定した文字列のすべてが含まれているかチェック｡

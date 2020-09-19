@@ -68,6 +68,7 @@ End Function
 '* Item プロパティ
 '*-----------------------------------------------------------------------------
 Public Property Get Item(idx As Long) As Variant
+Attribute Value.VB_UserMemId = 0
     If IsInvalidIndex(idx) Then
         Item = Empty
         Exit Property
@@ -137,8 +138,8 @@ End Function
 '* @return Long 要素数
 '*
 '******************************************************************************
-Property Get length() As Long
-    length = xIndex + 1
+Property Get Length() As Long
+    Length = xIndex + 1
 End Property
 
 '******************************************************************************
@@ -590,7 +591,6 @@ Public Function Repeat(ByVal itm As Variant, ByVal Count As Long) As ArrayEx
     Set Repeat = Init(ArrayUtils.Repeat(itm, Count))
 End Function
 
-
 '******************************************************************************
 '* [概  要] Join
 '* [詳  細] 配列を連結して文字列にする。
@@ -603,3 +603,31 @@ End Function
 Public Function Join(Optional ByVal delimiter As String, Optional ByVal wrapChar As String, Optional ByVal rmLineSeparator As Boolean = True) As String
     Join = ArrayUtils.Join(Me.ToArray, delimiter, wrapChar, rmLineSeparator)
 End Function
+
+'******************************************************************************
+'* [概  要] Search
+'* [詳  細] 配列（文字列）から指定した文字列と部分一致する項目を
+'*          取得し、1次元配列で返却する。
+'*
+'* @param vArr 配列
+'* @param searchVal 検索文字列（配列で複数指定可）
+'* @return Variant 検索結果（1次元配列）
+'******************************************************************************
+Public Function Search(ByRef vArr As Variant, ByVal searchVal As Variant) As ArrayEx
+    Set Search = Core.Init(New ArrayEx, ArrayUtils.Search(Me.ToArray, searchVal))
+End Function
+
+'******************************************************************************
+'* [概  要] RegexSearch
+'* [詳  細] 配列（文字列）から指定した文字列と正規表現が一致する項目を
+'*          取得し、1次元配列で返却する。
+'*
+'* @param vArr 配列
+'* @param searchStr 検索文字列（正規表現）
+'* @param igCase 大文字小文字の区別
+'* @return Variant 検索結果（1次元配列）
+'******************************************************************************
+Public Function RegexSearch(ByRef vArr As Variant, ByVal searchStr As String, Optional ByVal igCase As Boolean = False) As ArrayEx
+    Set RegexSearch = Core.Init(New ArrayEx, ArrayUtils.RegexSearch(Me.ToArray, searchStr, igCase))
+End Function
+

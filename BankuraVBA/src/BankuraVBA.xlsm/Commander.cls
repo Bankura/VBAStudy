@@ -160,7 +160,7 @@ Public Function Exec(commandString As String) As CommandResult
         vArr.Add oExec.StdOut.ReadLine
     Wend
     res.StdOutList = vArr.ToArray
-    res.RowMax = vArr.length
+    res.RowMax = vArr.Length
 
     Set Exec = res
 

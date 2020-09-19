@@ -24,8 +24,8 @@ Option Explicit
 '******************************************************************************
 '* WindowsAPI’è‹`
 '******************************************************************************
-Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByVal destination As Any, ByVal source As Any, ByVal length As LongPtr)
-Private Declare PtrSafe Sub CopyMemoryByRef Lib "kernel32" Alias "RtlMoveMemory" (ByRef destination As Any, ByRef source As Any, ByVal length As LongPtr)
+Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByVal destination As Any, ByVal source As Any, ByVal Length As LongPtr)
+Private Declare PtrSafe Sub CopyMemoryByRef Lib "kernel32" Alias "RtlMoveMemory" (ByRef destination As Any, ByRef source As Any, ByVal Length As LongPtr)
 
 Private Declare PtrSafe Function InterlockedIncrement64 Lib "kernel32" (lpAddend As LongPtr) As LongPtr
 Private Declare PtrSafe Function InterlockedDecrement64 Lib "kernel32" (lpAddend As LongPtr) As LongPtr
@@ -568,8 +568,8 @@ End Sub
 '*          Lib "kernel32"
 '*
 '******************************************************************************
-Friend Sub WinApi_CopyMemory(ByVal destination As LongPtr, ByVal source As LongPtr, ByVal length As LongPtr)
-    Call CopyMemory(destination, source, length)
+Friend Sub WinApi_CopyMemory(ByVal destination As LongPtr, ByVal source As LongPtr, ByVal Length As LongPtr)
+    Call CopyMemory(destination, source, Length)
 End Sub
 
 '******************************************************************************
@@ -578,16 +578,16 @@ End Sub
 '*          Lib "kernel32"
 '*
 '******************************************************************************
-Friend Sub WinApi_CopyMemoryByRef(ByRef destination As LongPtr, ByRef source As LongPtr, ByVal length As LongPtr, _
+Friend Sub WinApi_CopyMemoryByRef(ByRef destination As LongPtr, ByRef source As LongPtr, ByVal Length As LongPtr, _
                                 Optional destByVal As Boolean = False, Optional sourceByVal As Boolean = False)
     If destByVal And sourceByVal Then
-        Call CopyMemoryByRef(ByVal destination, ByVal source, length)
+        Call CopyMemoryByRef(ByVal destination, ByVal source, Length)
     ElseIf destByVal Then
-        Call CopyMemoryByRef(ByVal destination, source, length)
+        Call CopyMemoryByRef(ByVal destination, source, Length)
     ElseIf sourceByVal Then
-        Call CopyMemoryByRef(destination, ByVal source, length)
+        Call CopyMemoryByRef(destination, ByVal source, Length)
     Else
-        Call CopyMemoryByRef(destination, source, length)
+        Call CopyMemoryByRef(destination, source, Length)
     End If
 End Sub
 

@@ -532,7 +532,7 @@ Private Declare PtrSafe Function TrackPopupMenuEx Lib "user32" (ByVal hMenu As L
 Private Declare PtrSafe Function UnhookWindowsHook Lib "user32" (ByVal nCode As Long, ByVal pfnFilterProc As LongPtr) As Long
 Private Declare PtrSafe Function VkKeyScanEx Lib "user32" Alias "VkKeyScanExA" (ByVal ch As Byte, ByVal dwhkl As LongPtr) As Integer
 
-Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (destination As Any, source As Any, ByVal length As LongPtr)
+Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (destination As Any, source As Any, ByVal Length As LongPtr)
 ' Copies a POINTAPI into a LongPtr.  For an API requiring a ByVal POINTAPI parameter,
 ' this LongPtr can be passed in instead.  Example API's include WindowFromPoint,
 ' ChildWindowFromPoint, ChildWindowFromPointEx, DragDetect, and MenuItemFromPoint.

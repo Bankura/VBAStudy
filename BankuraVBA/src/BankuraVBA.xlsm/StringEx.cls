@@ -53,8 +53,8 @@ End Property
 '*-----------------------------------------------------------------------------
 '* Length プロパティ
 '*-----------------------------------------------------------------------------
-Public Property Get length() As Long
-    length = mLength
+Public Property Get Length() As Long
+    Length = mLength
 End Property
 
 '******************************************************************************
@@ -478,6 +478,25 @@ End Function
 '******************************************************************************
 Public Function Contains(searchStr As String) As Boolean
     Contains = StringUtils.Contains(Me.ToString, searchStr)
+End Function
+
+'******************************************************************************
+'* [概  要] ContainsAll
+'* [詳  細] 指定した文字列のすべてが含まれているかチェック｡
+'*          空文字の文字列はFalseを返す｡
+'*          空文字または長さがゼロの検索配列はFalseを返す｡
+'*
+'* @param searchStr 検索文字配列（複数指定）
+'* @return Boolean チェック結果（True:該当）
+'*
+'******************************************************************************
+Public Function ContainsAll(ParamArray searchStr()) As Boolean
+    If VBA.IsMissing(searchStr) Then
+        ContainsAll = False
+        Exit Function
+    End If
+    Dim tmp: tmp = searchStr ' ParamArrayを別関数に渡すための対応
+    ContainsAll = StringUtils.ContainsAll(Me.ToString, searchStr)
 End Function
 
 '******************************************************************************
@@ -1488,12 +1507,107 @@ End Function
 '* [概  要] CharAt
 '* [詳  細] 文字列から指定したインデックス位置の文字を取得する｡
 '*
-'* @param index インデックス
+'* @param idx インデックス
 '* @return StringEx 文字
 '*
 '******************************************************************************
-Public Function CharAt(Index As Long) As StringEx
-    Set CharAt = Me.Init(StringUtils.CharAt(Me.ToString, Index))
+Public Function CharAt(idx As Long) As StringEx
+    Set CharAt = Me.Init(StringUtils.CharAt(Me.ToString, idx))
 End Function
 
+
+'*******************************************************************************
+'* [概  要] LeftPad0 左ゼロ埋め処理
+'* [詳  細] 指定した桁数になる範囲で左ゼロ埋め編集を行う。
+'*
+'* @param size 桁数
+'* @return StringEx 左ゼロ埋めした値
+'*
+'*******************************************************************************
+Public Function LeftPad0(ByVal size As Long) As StringEx
+    Set LeftPad0 = Me.Init(StringUtils.LeftPad0(Me.ToString, size))
+End Function
+
+'*******************************************************************************
+'* [概  要] RightPad0 右ゼロ埋め処理
+'* [詳  細] 指定した桁数になる範囲で右ゼロ埋め編集を行う。
+'*
+'* @param size 桁数
+'* @return StringEx 右ゼロ埋めした値
+'*
+'*******************************************************************************
+Public Function RightPad0(ByVal size As Long) As StringEx
+    Set RightPad0 = Me.Init(StringUtils.RightPad0(Me.ToString, size))
+End Function
+
+'*******************************************************************************
+'* [概  要] EscapeSqlQuot シングルクォーテーションエスケープ処理
+'* [詳  細] SQLに埋め込む文字列にシングルクォーテーションがある場合にエスケープ
+'*          を行うための処理。
+'*
+'* @return StringEx エスケープ後文字列
+'*
+'*******************************************************************************
+Public Function EscapeSqlQuot() As StringEx
+    Set EscapeSqlQuot = Me.Init(StringUtils.EscapeSqlQuot(Me.ToString))
+End Function
+
+'*******************************************************************************
+'* [概  要] SplitByLength
+'* [詳  細] 指定した文字数で文字列を分割する。
+'*
+'* @param str Variant型データ
+'* @param cutLength 文字数
+'* @return Variant Variant文字配列
+'*
+'*******************************************************************************
+Public Function SplitByLength(ByVal cutLength) As Variant
+    SplitByLength = StringUtils.SplitByLength(Me.ToString, cutLength)
+End Function
+
+'*******************************************************************************
+'* [概  要] EditTextByFunc
+'* [詳  細] FuncオブジェクトまたはFunction名を指定して、テキストを編集する。
+'*
+'* @param fun FuncオブジェクトまたはFunction名
+'* @return StringEx 結果文字列
+'*
+'*******************************************************************************
+Public Function EditTextByFunc(ByRef fun As Variant) As StringEx
+    Set EditTextByFunc = Me.Init(StringUtils.EditTextByFunc(Me.ToString, fun))
+End Function
+
+'******************************************************************************
+'* [概  要] SplitCsvRow CSV行分割処理。
+'* [詳  細] CSV文字列をカンマごとに分割してVariant配列に格納し、返却する。
+'*          項目両端の「"」を削除する。
+'*
+'* @param quotExists ダブルクォート存在有無（True：あり）。省略可能。
+'* @param delimiter デリミタ。省略可能。
+'* @return 分割後Variant配列
+'******************************************************************************
+Public Function SplitCsvRow(Optional ByVal quotExists As Boolean = False, Optional delimiter As String = ",") As Variant
+    SplitCsvRow = StringUtils.SplitCsvRow(Me.ToString, quotExists, delimiter)
+End Function
+
+'******************************************************************************
+'* [概  要] RemoveLineSeparator
+'* [詳  細] 改行コード除去処理。
+'*
+'* @param val 文字列
+'* @return StringEx 編集後文字列
+'******************************************************************************
+Public Function RemoveLineSeparator() As StringEx
+    Set RemoveLineSeparator = Me.Init(StringUtils.RemoveLineSeparator(Me.ToString))
+End Function
+
+'******************************************************************************
+'* [概  要] EscapeDoubleQuote
+'* [詳  細] ダブルクォーテーションエスケープ処理。
+'*
+'* @return StringEx 編集後文字列
+'******************************************************************************
+Public Function EscapeDoubleQuote() As StringEx
+    Set EscapeDoubleQuote = Me.Init(StringUtils.EscapeDoubleQuote(Me.ToString))
+End Function
 

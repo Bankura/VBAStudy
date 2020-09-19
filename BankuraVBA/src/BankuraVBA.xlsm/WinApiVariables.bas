@@ -10405,7 +10405,7 @@ Public Type MEMORY_BASIC_INFORMATION
 End Type
 
 Public Type EVENTLOGRECORD
-     length As Long     '  Length of full record
+     Length As Long     '  Length of full record
      Reserved As Long     '  Used by the service
      RecordNumber As Long     '  Absolute record number
      TimeGenerated As Long     '  Seconds since 1-1-1970
@@ -12068,7 +12068,7 @@ Public Type CBT_CREATEWND
 End Type
 
 Public Type WINDOWPLACEMENT
-        length As Long
+        Length As Long
         Flags As Long
         showCmd As Long
         ptMinPosition As POINTAPI
@@ -12321,7 +12321,7 @@ End Type
 '//
 
 Public Type SECURITY_QUALITY_OF_SERVICE
-    length As Long
+    Length As Long
     ImpersonationLevel As Integer
     ContextTrackingMode As Integer
     EffectiveOnly As Long
@@ -13262,7 +13262,7 @@ End Type
 
 
 Public Type LANA_ENUM
-        length As Byte
+        Length As Byte
         lana(0 To MAX_LANA) As Byte
 End Type
 
@@ -13273,7 +13273,7 @@ Public Type FIND_NAME_HEADER
 End Type
 
 Public Type FIND_NAME_BUFFER
-        length As Byte
+        Length As Byte
         access_control As Byte
         frame_control As Byte
         destination_addr(0 To 5) As Byte
