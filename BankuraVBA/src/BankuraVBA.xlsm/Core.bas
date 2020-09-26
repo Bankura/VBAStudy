@@ -538,15 +538,20 @@ Public Function ArrIndexOf( _
     Dim aLen As Long: aLen = ArrLen(arr)
     If IsMissing(ixStart) Then ixStart = ix0
     If IsNumeric(ixStart) Then ixStart = CLng(ixStart) Else Err.Raise 13
-    If ixStart < ix0 Then Err.Raise 5
+    If ixStart < ix0 Or UBound(arr) < ix0 Then Err.Raise 5
     If IsMissing(cnt) Then cnt = aLen
     If IsNumeric(cnt) Then cnt = CLng(cnt) Else Err.Raise 13
     cnt = Min(cnt, aLen)
     
     ArrIndexOf = ixStart - 1
+
+    Dim ixEnd As Long: ixEnd = ixStart + cnt - 1
+    If ixEnd > UBound(arr) Then
+        ixEnd = UBound(arr)
+    End If
     
     Dim i As Long
-    For i = ixStart To ixStart + cnt - 1
+    For i = ixStart To ixEnd
         If Equals(arr(i), val, True) Then
             ArrIndexOf = i
             GoTo Escape
@@ -881,7 +886,7 @@ End Function
 ''' @param jagArr As Variant(Of Array(Of Array(Of T))
 ''' @return As Variant(Of Array(Of T, T))
 Public Function JagArrToArr2D(ByVal jagArr As Variant) As Variant
-    Dim arr2D As Variant: arr2D = Array()
+    Dim arr2d As Variant: arr2d = Array()
     
     Dim ixOut As Long, ixInn As Long
     Dim lbOut As Long, lbInn As Long, lbInnFst As Long
@@ -903,49 +908,49 @@ Public Function JagArrToArr2D(ByVal jagArr As Variant) As Variant
         GoTo Ending
     End If
     
-    ReDim arr2D(lbOut To ubOut, lbInnFst To ubInnFst)
+    ReDim arr2d(lbOut To ubOut, lbInnFst To ubInnFst)
     If IsObject(jagArr(lbOut)(lbInnFst)) Then
         For ixOut = lbOut To ubOut
             lbInn = LBound(jagArr(ixOut))
             ubInn = UBound(jagArr(ixOut))
             If lbInn <> lbInnFst Or ubInn <> ubInnFst Then Err.Raise 5
-            For ixInn = lbInn To ubInn: Set arr2D(ixOut, ixInn) = jagArr(ixOut)(ixInn): Next
+            For ixInn = lbInn To ubInn: Set arr2d(ixOut, ixInn) = jagArr(ixOut)(ixInn): Next
         Next
     Else
         For ixOut = lbOut To ubOut
             lbInn = LBound(jagArr(ixOut))
             ubInn = UBound(jagArr(ixOut))
             If lbInn <> lbInnFst Or ubInn <> ubInnFst Then Err.Raise 5
-            For ixInn = lbInn To ubInn: Let arr2D(ixOut, ixInn) = jagArr(ixOut)(ixInn): Next
+            For ixInn = lbInn To ubInn: Let arr2d(ixOut, ixInn) = jagArr(ixOut)(ixInn): Next
         Next
     End If
     
 Ending:
-    JagArrToArr2D = arr2D
+    JagArrToArr2D = arr2d
 End Function
 
 ''' @param arr2D As Variant(Of Array(Of T, T))
 ''' @return As Variant(Of Array(Of Array(Of T))
-Public Function Arr2DToJagArr(ByVal arr2D As Variant) As Variant
+Public Function Arr2DToJagArr(ByVal arr2d As Variant) As Variant
     Dim jagArr As Variant: jagArr = Array()
     
-    Dim lb1 As Long, ub1 As Long: lb1 = LBound(arr2D, 1): ub1 = UBound(arr2D, 1)
+    Dim lb1 As Long, ub1 As Long: lb1 = LBound(arr2d, 1): ub1 = UBound(arr2d, 1)
     If ub1 - lb1 < 0 Then GoTo Ending
     ReDim jagArr(lb1 To ub1)
     
-    Dim lb2 As Long, ub2 As Long: lb2 = LBound(arr2D, 2): ub2 = UBound(arr2D, 2)
+    Dim lb2 As Long, ub2 As Long: lb2 = LBound(arr2d, 2): ub2 = UBound(arr2d, 2)
     Dim ix1 As Long, ix2 As Long
     Dim arr As Variant: ReDim arr(lb2 To ub2)
     
-    If IsObject(arr2D(lb1, lb2)) Then
+    If IsObject(arr2d(lb1, lb2)) Then
         For ix1 = lb1 To ub1
             jagArr(ix1) = arr
-            For ix2 = lb2 To ub2: Set jagArr(ix1)(ix2) = arr2D(ix1, ix2): Next
+            For ix2 = lb2 To ub2: Set jagArr(ix1)(ix2) = arr2d(ix1, ix2): Next
         Next
     Else
         For ix1 = lb1 To ub1
             jagArr(ix1) = arr
-            For ix2 = lb2 To ub2: Let jagArr(ix1)(ix2) = arr2D(ix1, ix2): Next
+            For ix2 = lb2 To ub2: Let jagArr(ix1)(ix2) = arr2d(ix1, ix2): Next
         Next
     End If
     

@@ -357,6 +357,28 @@ Public Function IsNotFunc(obj) As Boolean
     IsNotFunc = Not IsFunc(obj)
 End Function
 
+Public Function IsArray2DEx(obj) As Boolean
+    IsArray2DEx = (TypeName(obj) = "Array2DEx")
+End Function
+
+Public Function IsNotArray2DEx(obj) As Boolean
+    IsNotArray2DEx = Not IsArray2DEx(obj)
+End Function
+
+Public Function IsArrayExOfArrayEx(obj) As Boolean
+    IsArrayExOfArrayEx = False
+    If IsArrayEx(obj) Then
+        If obj.IsEmptyArray Then
+            IsArrayExOfArrayEx = True
+        Else
+            IsArrayExOfArrayEx = IsArrayEx(obj.Item(0))
+        End If
+    End If
+End Function
+
+Public Function IsNotArrayExOfArrayEx(obj) As Boolean
+    IsNotArrayExOfArrayEx = Not IsArrayExOfArrayEx(obj)
+End Function
 
 '******************************************************************************
 '* [概  要] パターンチェック処理。

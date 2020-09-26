@@ -98,8 +98,8 @@ Public Sub CoreAbst_Test()
     Assert.AreEqual "Nothing", Dump(Nothing)
     Assert.AreEqual "Tuple`2 { Item1 = ""A"", Item2 = 4% }", Dump(Init(New Tuple, "A", 4))
     Assert.AreEqual "Array(1%, 2%, 3%, 4%, 5%, 6%, 7%, 8%, ...)", Dump(Array(1, 2, 3, 4, 5, 6, 7, 8, 9))
-    Dim arr2D(0, 0) As Integer
-    Assert.AreEqual "Integer(,)", Dump(arr2D)
+    Dim arr2d(0, 0) As Integer
+    Assert.AreEqual "Integer(,)", Dump(arr2d)
     Dim arr3D(0, 0, 0) As Long
     Assert.AreEqual "Long(,,)", Dump(arr3D)
     
@@ -141,10 +141,10 @@ Public Sub CoreAbst_Test()
 End Sub
 
 Public Sub CoreEnumr_Test()
-    Dim arr2D(0, 0) As Integer
+    Dim arr2d(0, 0) As Integer
     Dim arr3D(0, 0, 0) As Long
     Assert.AreEqual 1, ArrRank(Array())
-    Assert.AreEqual 2, ArrRank(arr2D)
+    Assert.AreEqual 2, ArrRank(arr2d)
     Assert.AreEqual 3, ArrRank(arr3D)
     
     Assert.AreEqual 3&, ArrLen(Array("V", "B", "A"))

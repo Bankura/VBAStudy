@@ -150,7 +150,7 @@ End Function
 '* [詳  細] WindowsAPI「 SafeArrayAllocDescriptor 」ラッパーメソッド。
 '*
 '******************************************************************************
-Friend Function SafeArrayAllocDescriptor(ByVal cDims As Long, ByRef ppsaOut() As Long) As Long
+Friend Function SafeArrayAllocDescriptor(ByVal cDims As Long, ByRef ppsaOut() As Variant) As Long
     SafeArrayAllocDescriptor = mWinApiOleaut.WinApi_SafeArrayAllocDescriptor(cDims, ppsaOut)
 End Function
 

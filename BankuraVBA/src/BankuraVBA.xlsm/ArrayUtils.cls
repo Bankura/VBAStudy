@@ -28,6 +28,11 @@ Option Explicit
 
 
 '******************************************************************************
+'* WindowsAPI定義
+'******************************************************************************
+Private Declare PtrSafe Function SafeArrayAllocDescriptor Lib "oleaut32" (ByVal cDims As Long, ByRef ppsaOut() As Any) As Long
+
+'******************************************************************************
 '* Enum定義
 '******************************************************************************
 
@@ -38,7 +43,6 @@ Option Explicit
 '******************************************************************************
 '* 変数定義
 '******************************************************************************
-Private mWinApi As WinAPI
 
 '******************************************************************************
 '* プロパティ定義
@@ -46,12 +50,18 @@ Private mWinApi As WinAPI
 Public Property Get EmptyLongArray() As Long()
 
     Dim apiResult As Long
-    apiResult = mWinApi.SafeArrayAllocDescriptor(1, EmptyLongArray)
+    apiResult = SafeArrayAllocDescriptor(1, EmptyLongArray)
     If apiResult <> 0 Then Err.Raise 5
 End Property
 
 Public Property Get EmptyVariantArray() As Variant()
     Let EmptyVariantArray = VBA.Array()
+End Property
+
+Public Property Get EmptyVariant2DArray() As Variant()
+    Dim apiResult As Long
+    apiResult = SafeArrayAllocDescriptor(2, EmptyVariant2DArray)
+    If apiResult <> 0 Then Err.Raise 5
 End Property
 
 Public Property Get EmptyStringArray() As String()
@@ -66,12 +76,7 @@ End Property
 '* コンストラクタ・デストラクタ
 '******************************************************************************
 Private Sub Class_Initialize()
-    Set mWinApi = Base.GetWinAPI()
 End Sub
-Private Sub Class_Terminate()
-    Set mWinApi = Nothing
-End Sub
-
 '******************************************************************************
 '* メソッド定義
 '******************************************************************************
@@ -183,6 +188,22 @@ Public Function IsEmptyArray(ByRef vArray As Variant) As Boolean
 End Function
 
 '******************************************************************************
+'* [概  要] Is1DArray
+'* [詳  細] 指定された配列が1次元配列か判定する｡
+'*
+'* @param vArray 検査する配列
+'* @return Boolean 判定結果(True:1次元配列)
+'*
+'******************************************************************************
+Public Function Is1DArray(ByRef vArray As Variant) As Boolean
+    If GetDimension(vArray) = 1 Then
+        Is1DArray = True
+        Exit Function
+    End If
+    Is1DArray = False
+End Function
+
+'******************************************************************************
 '* [概  要] Is2DArray
 '* [詳  細] 指定された配列が2次元配列か判定する｡
 '*
@@ -196,6 +217,26 @@ Public Function Is2DArray(ByRef vArray As Variant) As Boolean
         Exit Function
     End If
     Is2DArray = False
+End Function
+
+'******************************************************************************
+'* [概  要] IsJagArray
+'* [詳  細] 指定された配列がジャグ配列（2次元まで）か判定する｡
+'*
+'* @param vArray 検査する配列
+'* @return Boolean 判定結果(True:ジャグ配列)
+'*
+'******************************************************************************
+Public Function IsJagArray(ByRef vArray As Variant) As Boolean
+    If Not VBA.IsArray(vArray) Then Exit Function
+    If Me.IsEmptyArray(vArray) Then Exit Function
+    If Not Me.Is1DArray(vArray) Then Exit Function
+
+    Dim v
+    For Each v In vArray
+        If Not Me.Is1DArray(v) Then Exit Function
+    Next
+    IsJagArray = True
 End Function
 
 '******************************************************************************
@@ -397,8 +438,8 @@ End Function
 '* @param arr2D As Variant(Of Array(Of T, T))
 '* @return As Variant(Of Array(Of Array(Of T))
 '******************************************************************************
-Public Function Array2DToJagArray(ByVal arr2D As Variant) As Variant
-    Array2DToJagArray = Core.Arr2DToJagArr(arr2D)
+Public Function Array2DToJagArray(ByVal arr2d As Variant) As Variant
+    Array2DToJagArray = Core.Arr2DToJagArr(arr2d)
 End Function
 
 '******************************************************************************
@@ -769,7 +810,7 @@ Public Function Insert(ByRef vArr As Variant, ByVal idx As Long, ByVal itm As Va
         Insert = vArr
         Exit Function
     ElseIf idx = LBound(vArr) Then
-        If LBound(vArr) = UBound(vArr) Then
+        If Me.IsEmptyArray(vArr) Then
             Dim ax As New ArrayEx
             Insert = ax.Add(itm).ToArray
             Exit Function
@@ -850,22 +891,74 @@ Public Function LastIndexOf(ByVal arr As Variant, ByVal val As Variant, _
     Dim aLen As Long: aLen = Core.ArrLen(arr)
     If IsMissing(ixStart) Then ixStart = ixLast
     If IsNumeric(ixStart) Then ixStart = CLng(ixStart) Else Err.Raise 13
-    If ixStart < 0 Or ixStart > ixLast Then Err.Raise 5
+    If ixStart < LBound(arr) Or ixStart > ixLast Then Err.Raise 5
     If IsMissing(cnt) Then cnt = aLen
     If IsNumeric(cnt) Then cnt = CLng(cnt) Else Err.Raise 13
     cnt = Min(cnt, aLen)
     
     LastIndexOf = -1
-    
+    Dim ixEnd As Long: ixEnd = ixStart - cnt + 1
+    If ixEnd < LBound(arr) Then
+        ixEnd = LBound(arr)
+    End If
+
     Dim i As Long
-    For i = ixStart To ixStart - cnt + 1 Step -1
-        If Equals(arr(i), val, True) Then
+    For i = ixStart To ixEnd Step -1
+        If Core.Equals(arr(i), val, True) Then
             LastIndexOf = i
             GoTo Escape
         End If
     Next
     
 Escape:
+End Function
+
+'******************************************************************************
+'* [概  要] IndexListOf
+'* [詳  細] 1次元配列から指定した値と一致する要素のインデックスリストを返却する。
+'*
+'* @param arr 1次元配列
+'* @param val 値
+'* @param reverseOrder リストの並びを逆順にするか
+'* @return Variant インデックスリスト（1次元配列）
+'******************************************************************************
+Public Function IndexListOf(ByVal arr As Variant, ByVal val As Variant, Optional ByVal reverseOrder As Boolean = False) As Variant
+    Dim arrex As ArrayEx: Set arrex = New ArrayEx
+    If Not Me.Is1DArray(arr) Or Me.IsEmptyArray(arr) Then
+        IndexListOf = arrex.ToArray
+        Exit Function
+    End If
+    Dim uIdx As Long, lIdx As Long
+    uIdx = UBound(arr)
+    lIdx = LBound(arr)
+
+    Dim idx As Long, ret As Long
+    If Not reverseOrder Then
+        idx = lIdx
+        Do
+            ret = Me.IndexOf(arr, val, idx)
+            If idx <= ret Then
+                arrex.Add ret
+                If ret = uIdx Then Exit Do
+                idx = ret + 1
+            Else
+                Exit Do
+            End If
+        Loop
+    Else
+        idx = uIdx
+        Do
+            ret = Me.LastIndexOf(arr, val, idx)
+            If ret >= 0 Then
+                arrex.Add ret
+                If ret = lIdx Then Exit Do
+                idx = ret - 1
+            Else
+                Exit Do
+            End If
+        Loop
+    End If
+    IndexListOf = arrex.ToArray
 End Function
 
 '******************************************************************************
@@ -980,7 +1073,6 @@ End Function
 '* [詳  細] JSON文字列に変換する。
 '*
 '* @param varr 1次元配列
-'* @param count 項目
 '* @return String 1次元配列
 '******************************************************************************
 Public Function ToString(ByRef vArr As Variant) As String
@@ -1117,4 +1209,109 @@ Public Function RegexSearch(ByRef vArr As Variant, ByVal searchStr As String, Op
         End If
     Next
     RegexSearch = arrx.ToArray
+End Function
+
+'******************************************************************************
+'* [概  要] Array2DExTo2DArray
+'* [詳  細] Array2DExを2次元配列に変換する。
+'*
+'* @param arr2dex Array2DExオブジェクト
+'* @return Variant 2次元配列
+'******************************************************************************
+Public Function Array2DExTo2DArray(ByVal arr2dex As Array2DEx) As Variant
+    Dim arr2d As Variant: arr2d = ArrayUtils.EmptyVariant2DArray
+    
+    Dim ixOut As Long, ixInn As Long
+    Dim lbOut As Long, lbInn As Long, lbInnFst As Long
+    Dim ubOut As Long, ubInn As Long, ubInnFst As Long
+    
+    lbOut = 0
+    ubOut = arr2dex.RowMaxIndex
+    If ubOut < 0 Then GoTo Ending
+    
+    lbInnFst = 0
+    ubInnFst = arr2dex(lbOut).LastIndex
+    
+    ReDim arr2d(lbOut To ubOut, lbInnFst To ubInnFst)
+    If IsObject(arr2dex(lbOut)(lbInnFst)) Then
+        For ixOut = lbOut To ubOut
+            lbInn = 0
+            ubInn = arr2dex.ColMaxIndex
+            For ixInn = lbInn To ubInn: Set arr2d(ixOut, ixInn) = arr2dex(ixOut)(ixInn): Next
+        Next
+    Else
+        For ixOut = lbOut To ubOut
+            lbInn = 0
+            ubInn = arr2dex.ColMaxIndex
+            For ixInn = lbInn To ubInn: arr2d(ixOut, ixInn) = arr2dex(ixOut)(ixInn): Next
+        Next
+    End If
+
+Ending:
+    Array2DExTo2DArray = arr2d
+End Function
+
+Public Function Array2DToArray2DEx(ByVal arr2d As Variant) As Array2DEx
+    Dim arr2dex As Array2DEx: Set arr2dex = New Array2DEx
+    Array2DToArray2DEx = arr2dex.Init(arr2d)
+End Function
+
+'******************************************************************************
+'* [概  要] CreateArrayEx
+'* [詳  細] ArrayExオブジェクトを作成する。
+'*
+'* @param itemCount 項目数
+'* @return ArrayEx オブジェクト
+'******************************************************************************
+Public Function CreateArrayEx(Optional ByVal itemCount) As ArrayEx
+    Set CreateArrayEx = New ArrayEx
+    If Not VBA.IsMissing(itemCount) Then
+        CreateArrayEx.Expend itemCount
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] CreateArray2DEx
+'* [詳  細] Array2DExオブジェクトを作成する。
+'*
+'* @param rowCount 行数
+'* @param colCount 列数
+'* @return Array2DEx オブジェクト
+'******************************************************************************
+Public Function CreateArray2DEx(Optional ByVal rowCount, Optional ByVal colCount) As Array2DEx
+    Set CreateArray2DEx = New Array2DEx
+    If Not VBA.IsMissing(rowCount) And Not VBA.IsMissing(colCount) Then
+        CreateArray2DEx.Expand rowCount, colCount
+    ElseIf Not VBA.IsMissing(rowCount) Then
+        CreateArray2DEx.ExpandRows rowCount
+    ElseIf Not VBA.IsMissing(colCount) Then
+        CreateArray2DEx.ExpandColumns colCount
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] Create1DArray
+'* [詳  細] 新しい1次元配列を作成する。
+'*
+'* @param lower 開始インデックス
+'* @param upper 終了インデックス
+'* @return Variant 1次元配列
+'******************************************************************************
+Public Function Create1DArray(ByVal lower As Long, ByVal upper As Long) As Variant
+    Dim vNewArr As Variant
+    ReDim vNewArr(lower To upper) As Variant
+    Create1DArray = vNewArr
+End Function
+
+'******************************************************************************
+'* [概  要] Create1DArrayEasy
+'* [詳  細] 新しい1次元配列を作成する。開始インデックスは0固定
+'*
+'* @param upper 終了インデックス
+'* @return Variant 1次元配列
+'******************************************************************************
+Public Function Create1DArrayEasy(ByVal upper As Long) As Variant
+    Dim vNewArr As Variant
+    ReDim vNewArr(0 To upper) As Variant
+    Create1DArrayEasy = vNewArr
 End Function

@@ -346,7 +346,7 @@ End Property
 Private Property Get IEnumerator_CurrentReportCount() As Long
     IEnumerator_CurrentReportCount = mCurrentReportCount
 End Property
-Public Property Let IEnumerator_CurrentReportCount(arg As Long)
+Private Property Let IEnumerator_CurrentReportCount(arg As Long)
     mCurrentReportCount = arg
 End Property
 
@@ -357,7 +357,7 @@ End Property
 Private Property Get IEnumerator_MaxReportCount() As Long
     IEnumerator_MaxReportCount = mMaxReportCount
 End Property
-Public Property Let IEnumerator_MaxReportCount(arg As Long)
+Private Property Let IEnumerator_MaxReportCount(arg As Long)
     mMaxReportCount = arg
 End Property
 

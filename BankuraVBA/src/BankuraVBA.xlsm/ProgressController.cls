@@ -17,7 +17,7 @@ Option Explicit
 '*          進捗状況を、プレゼンテーション用のIProgressReporterインタフェース
 '*          を実装したクラスで表示させる。
 '*
-'* [参  考]　https://thom.hateblo.jp/entry/2017/01/31/012913
+'* [参  考] https://qiita.com/kazu3516/items/1223ce0838dd4a8d2629
 '*
 '* @author Bankura
 '* Copyright (c) 2020 Bankura

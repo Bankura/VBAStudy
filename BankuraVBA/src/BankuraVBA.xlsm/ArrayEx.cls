@@ -67,8 +67,8 @@ End Function
 '*-----------------------------------------------------------------------------
 '* Item プロパティ
 '*-----------------------------------------------------------------------------
-Public Property Get Item(idx As Long) As Variant
-Attribute Value.VB_UserMemId = 0
+Public Property Get Item(ByVal idx As Long) As Variant
+Attribute Item.VB_UserMemId = 0
     If IsInvalidIndex(idx) Then
         Item = Empty
         Exit Property
@@ -80,7 +80,7 @@ Attribute Value.VB_UserMemId = 0
         Item = xItems(idx)
     End If
 End Property
-Public Property Let Item(idx As Long, arg As Variant)
+Public Property Let Item(ByVal idx As Long, ByVal arg As Variant)
     If IsInvalidIndex(idx) Then
         Exit Property
     End If
@@ -92,7 +92,7 @@ Public Property Let Item(idx As Long, arg As Variant)
     End If
 End Property
 
-Private Function IsInvalidIndex(idx As Long) As Boolean
+Private Function IsInvalidIndex(ByVal idx As Long) As Boolean
     IsInvalidIndex = (idx < 0 Or xIndex < idx)
 End Function
 
@@ -188,6 +188,20 @@ Public Function AddAll(ParamArray vars() As Variant) As ArrayEx
 End Function
 
 '******************************************************************************
+'* [概  要] Expend
+'* [詳  細] 配列領域を拡張する｡
+'*
+'* @param xAddCount 追加項目数
+'* @return ArrayEx
+'*
+'******************************************************************************
+Public Function Expend(ByVal xAddCount As Long) As ArrayEx
+    xIndex = xIndex + xAddCount
+    Call Extend
+    Set Expend = Me
+End Function
+
+'******************************************************************************
 '* [概  要] IsEmptyArray
 '* [詳  細] 配列が未初期化・空配列か判定する｡
 '*
@@ -278,7 +292,7 @@ End Function
 
 '******************************************************************************
 '* [概  要] Concat
-'* [詳  細] 一次元配列toと合体（マージ）して返却する。
+'* [詳  細] 一次元配列と合体（マージ）して返却する。
 '*          AriawaseのCoreモジュールラッパーメソッド。
 '*
 '* @param arr1 As Variant(Of Array(Of T))
@@ -434,11 +448,10 @@ End Function
 '*
 '* @param fun As Func(Of U, T, U)
 '* @param seedv As Variant(Of U)
-'* @return ArrayEx(Of Array(Of U))
+'* @return Variant(Of U)
 '******************************************************************************
-Public Function Fold(ByVal fun As Func, Optional ByVal seedv As Variant) As ArrayEx
-    Dim arr: arr = Ext.ArrFold(fun, Me.ToArray, seedv)
-    Set Fold = Init(arr)
+Public Function Fold(ByVal fun As Func, Optional ByVal seedv As Variant) As Variant
+    Fold = Ext.ArrFold(fun, Me.ToArray, seedv)
 End Function
 
 '******************************************************************************
@@ -546,6 +559,18 @@ Public Function LastIndexOf(ByVal val As Variant, _
 End Function
 
 '******************************************************************************
+'* [概  要] IndexListOf
+'* [詳  細] 1次元配列から指定した値と一致する要素のインデックスリストを返却する。
+'*
+'* @param val 値
+'* @param reverseOrder リストの並びを逆順にするか
+'* @return Variant インデックスリスト（1次元配列）
+'******************************************************************************
+Public Function IndexListOf(ByVal val As Variant, Optional ByVal reverseOrder As Boolean = False) As Variant
+    IndexListOf = ArrayUtils.IndexListOf(Me.ToArray, val, reverseOrder)
+End Function
+
+'******************************************************************************
 '* [概  要] Remove
 '* [詳  細] 1次元配列の最初に見つかった特定の要素を削除する。
 '*
@@ -592,6 +617,36 @@ Public Function Repeat(ByVal itm As Variant, ByVal Count As Long) As ArrayEx
 End Function
 
 '******************************************************************************
+'* [概  要] GetFirst
+'* [詳  細] 最初の要素を取得する。
+'*
+'* @return Variant 最初の要素
+'******************************************************************************
+Public Function GetFirst() As Variant
+    If IsEmptyArray Then Exit Function
+    If IsObject(xItems(0)) Then
+        Set GetFirst = xItems(0)
+    Else
+        GetFirst = xItems(0)
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] GetLast
+'* [詳  細] 最後の要素を取得する。
+'*
+'* @return Variant 最後の要素
+'******************************************************************************
+Public Function GetLast(ByRef vArr As Variant) As Variant
+    If IsEmptyArray Then Exit Function
+    If IsObject(xItems(xIndex)) Then
+        Set GetLast = xItems(xIndex)
+    Else
+        GetLast = xItems(xIndex)
+    End If
+End Function
+
+'******************************************************************************
 '* [概  要] Join
 '* [詳  細] 配列を連結して文字列にする。
 '*
@@ -609,11 +664,10 @@ End Function
 '* [詳  細] 配列（文字列）から指定した文字列と部分一致する項目を
 '*          取得し、1次元配列で返却する。
 '*
-'* @param vArr 配列
 '* @param searchVal 検索文字列（配列で複数指定可）
 '* @return Variant 検索結果（1次元配列）
 '******************************************************************************
-Public Function Search(ByRef vArr As Variant, ByVal searchVal As Variant) As ArrayEx
+Public Function Search(ByVal searchVal As Variant) As ArrayEx
     Set Search = Core.Init(New ArrayEx, ArrayUtils.Search(Me.ToArray, searchVal))
 End Function
 
@@ -622,12 +676,20 @@ End Function
 '* [詳  細] 配列（文字列）から指定した文字列と正規表現が一致する項目を
 '*          取得し、1次元配列で返却する。
 '*
-'* @param vArr 配列
 '* @param searchStr 検索文字列（正規表現）
 '* @param igCase 大文字小文字の区別
 '* @return Variant 検索結果（1次元配列）
 '******************************************************************************
-Public Function RegexSearch(ByRef vArr As Variant, ByVal searchStr As String, Optional ByVal igCase As Boolean = False) As ArrayEx
+Public Function RegexSearch(ByVal searchStr As String, Optional ByVal igCase As Boolean = False) As ArrayEx
     Set RegexSearch = Core.Init(New ArrayEx, ArrayUtils.RegexSearch(Me.ToArray, searchStr, igCase))
 End Function
 
+'******************************************************************************
+'* [概  要] ToString
+'* [詳  細] JSON文字列に変換する。
+'*
+'* @return String 1次元配列
+'******************************************************************************
+Public Function ToString() As String
+    ToString = ArrayUtils.ToString(Me.ToArray)
+End Function

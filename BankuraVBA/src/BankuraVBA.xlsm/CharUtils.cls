@@ -146,7 +146,7 @@ End Function
 '*
 '******************************************************************************
 Public Function ToIntValue(ByVal char As String, Optional ByVal defaultValue As Long = 0) As Long
-    If IsAsciiNumeric(char) Then
+    If Not IsAsciiNumeric(char) Then
         ToIntValue = defaultValue
         Exit Function
     End If

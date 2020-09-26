@@ -316,8 +316,8 @@ Public Function GetFinalRow(ByVal dataSheet As Worksheet, Optional ignoreColnum 
     Dim ret As Long
     Dim i As Long, cnta As Long
     With dataSheet.UsedRange
-        For i = .Rows.Count To 1 Step -1
-            cnta = WorksheetFunction.CountA(.Rows(i))
+        For i = .rows.Count To 1 Step -1
+            cnta = WorksheetFunction.CountA(.rows(i))
             If cnta > 0 Then
                 If cnta <> 1 Then
                     ret = i
@@ -377,7 +377,7 @@ End Function
 '*
 '******************************************************************************
 Public Function GetFinalKeyRow(ByVal dataSheet As Worksheet, StartCol As Long) As Long
-    GetFinalKeyRow = dataSheet.Cells(Rows.Count, StartCol).End(xlUp).row
+    GetFinalKeyRow = dataSheet.Cells(rows.Count, StartCol).End(xlUp).row
 End Function
 
 '******************************************************************************
@@ -472,7 +472,7 @@ Public Sub DeleteNoUsedRange(dataSheet As Worksheet, lStartRow As Long)
         Exit Sub
     End If
     With dataSheet
-        .Range(.Rows(delStartRow), .Rows(delEndRow)).Delete
+        .Range(.rows(delStartRow), .rows(delEndRow)).Delete
     End With
 End Sub
 

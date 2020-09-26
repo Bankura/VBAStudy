@@ -313,8 +313,8 @@ Private Declare PtrSafe Function ScreenToClient Lib "user32" (ByVal hWnd As Long
 
 Private Declare PtrSafe Function MapWindowPoints Lib "user32" (ByVal hwndFrom As LongPtr, ByVal hwndTo As LongPtr, lppt As Any, ByVal cPoints As Long) As Long
 
-Private Declare PtrSafe Function WindowFromPoint Lib "user32" (ByVal point As LongPtr) As LongPtr
-Private Declare PtrSafe Function ChildWindowFromPoint Lib "user32" (ByVal hWnd As LongPtr, ByVal point As LongPtr) As LongPtr
+Private Declare PtrSafe Function WindowFromPoint Lib "user32" (ByVal Point As LongPtr) As LongPtr
+Private Declare PtrSafe Function ChildWindowFromPoint Lib "user32" (ByVal hWnd As LongPtr, ByVal Point As LongPtr) As LongPtr
 Private Declare PtrSafe Function ChildWindowFromPointEx Lib "user32" (ByVal hWnd As LongPtr, ByVal pt As LongPtr, ByVal un As Long) As LongPtr
 Private Declare PtrSafe Function DragDetect Lib "user32" (ByVal hWnd As LongPtr, ByVal pt As LongPtr) As Long
 Private Declare PtrSafe Function MenuItemFromPoint Lib "user32" (ByVal hWnd As LongPtr, ByVal hMenu As LongPtr, ByVal ptScreen As LongPtr) As Long
@@ -536,15 +536,15 @@ Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (des
 ' Copies a POINTAPI into a LongPtr.  For an API requiring a ByVal POINTAPI parameter,
 ' this LongPtr can be passed in instead.  Example API's include WindowFromPoint,
 ' ChildWindowFromPoint, ChildWindowFromPointEx, DragDetect, and MenuItemFromPoint.
-Friend Function PointToLongPtr(point As POINTAPI) As LongPtr
+Friend Function PointToLongPtr(Point As POINTAPI) As LongPtr
     Dim ll As LongPtr
     Dim cbLongPtr As LongPtr
     
     cbLongPtr = LenB(ll)
     
     ' make sure the contents will fit
-    If LenB(point) = cbLongPtr Then
-        CopyMemory ll, point, cbLongPtr
+    If LenB(Point) = cbLongPtr Then
+        CopyMemory ll, Point, cbLongPtr
     End If
     
     PointToLongPtr = ll
