@@ -779,369 +779,406 @@ Public Function Init(ByVal sheetName As String, Optional ByVal wb As Workbook) A
     Set Init = Me
 End Function
 
-''******************************************************************************
-''* [概  要] Activate メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] Activate メソッド
+'* [詳  細] 現在のシートを作業中のシートにします。
+'*
+'******************************************************************************
 Sub Activate()
     Call mOrigin.Activate
 End Sub
 
-''******************************************************************************
-''* [概  要] Calculate メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] Calculate メソッド
+'* [詳  細] 計算を実行します。計算の対象となるのは、ブック内の特定のワークシートです。
+'*
+'******************************************************************************
 Sub Calculate()
     Call mOrigin.Calculate
 End Sub
 
-''******************************************************************************
-''* [概  要] ChartObjects メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param Index xxxx。省略可能。
-''* @return Object
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] ChartObjects メソッド
+'* [詳  細] 単一の埋め込みグラフ ( ChartObject オブジェクト)、またはシート上のすべての埋め込みグラフ ( ChartObjects オブジェクト) のコレクションを表すオブジェクトを返します。
+'*
+'* @param Index グラフの名前またはインデックス番号を指定します。 この引数には、複数のグラフを指定する配列を指定できます。。省略可能。
+'* @return Object ChartObject / ChartObjects オブジェクト
+'*
+'******************************************************************************
 Function ChartObjects(Optional Index) As Object
     Set ChartObjects = mOrigin.ChartObjects(Index)
 End Function
 
-''******************************************************************************
-''* [概  要] CheckSpelling メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param CustomDictionary xxxxx。省略可能。
-''* @param IgnoreUppercase xxxxx。省略可能。
-''* @param AlwaysSuggest xxxxx。省略可能。
-''* @param SpellLang xxxxx。省略可能。
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] CheckSpelling メソッド
+'* [詳  細] オブジェクトのスペルをチェックする [スペルチェック] ダイアログ
+'*           ボックスが表示される。
+'*
+'* @param CustomDictionary メイン辞書に単語が見つからない場合に調べるユーザー辞書のファイル名を示す文字列。省略可能。
+'* @param IgnoreUppercase すべて大文字の単語を無視するには、 True を指定します。省略可能。
+'* @param AlwaysSuggest Trueを設定すると、スペルミスが検出されたときに修正候補の一覧を表示することができます。省略可能。
+'* @param SpellLang 辞書に使用した言語を指定します。省略可能。
+'*
+'******************************************************************************
 Sub CheckSpelling(Optional CustomDictionary, Optional IgnoreUppercase, Optional AlwaysSuggest, Optional SpellLang)
     Call mOrigin.CheckSpelling(CustomDictionary, IgnoreUppercase, AlwaysSuggest, SpellLang)
 End Sub
 
-''******************************************************************************
-''* [概  要] CircleInvalid メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] CircleInvalid メソッド
+'* [詳  細] ワークシートの [入力規則] で設定された制限外の値が入力されているセルに丸印を付けます。
+'*
+'******************************************************************************
 Sub CircleInvalid()
     Call mOrigin.CircleInvalid
 End Sub
 
-''******************************************************************************
-''* [概  要] ClearArrows メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] ClearArrows メソッド
+'* [詳  細] ワークシートからトレース矢印を削除します。 なお、トレース矢印とは使用したワークシート分析機能によって追加される矢印です。
+'*
+'******************************************************************************
 Sub ClearArrows()
     Call mOrigin.ClearArrows
 End Sub
 
-''******************************************************************************
-''* [概  要] ClearCircles メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] ClearCircles メソッド
+'* [詳  細] ワークシートの [入力規則] で設定された制限外の値が入力されているセルに付けられた丸印を消去します。
+'*
+'******************************************************************************
 Sub ClearCircles()
     Call mOrigin.ClearCircles
 End Sub
 
-''******************************************************************************
-''* [概  要] Copy メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param Before xxxxx。省略可能。
-''* @param After xxxxx。省略可能。
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] Copy メソッド
+'* [詳  細] シートを現在のブックか新しいブック内の他の場所にコピーします。
+'*
+'* @param Before コピーしたシートを特定のシートの直前の位置に挿入するときに、
+'*              そのシートを指定｡省略可能｡
+'*              引数 Before を指定すると、引数 After を指定することはできません。
+'* @param After コピーしたシートを特定のシートの直後の位置に挿入するときに、
+'*              そのシートを指定｡省略可能｡
+'*              引数 After を指定すると、引数 Before を指定することはできません。
+'*
+'******************************************************************************
 Sub Copy(Optional Before, Optional After)
     Call mOrigin.Copy(Before, After)
 End Sub
 
-''******************************************************************************
-''* [概  要] Delete メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] Delete メソッド
+'* [詳  細] シートを削除します。このメソッドは、削除を確認するダイアログボックスを表示します。ダイアログボックスを表示せずにワークシートを削除するには、 DisplayAlerts プロパティをFalseに設定します。
+'*
+'******************************************************************************
 Sub Delete()
     Call mOrigin.Delete
 End Sub
 
-''******************************************************************************
-''* [概  要] Evaluate メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param Name xxxx
-''* @return Variant xxx
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] Evaluate メソッド
+'* [詳  細] 使用する名前を、オブジェクトまたは値に変換します。Evaluate メソッドの代わりに角かっこを使っても、同じ結果が得られます ([A1:C5] など)。
+'*
+'* @param Name Excel の名前付け規則を使用して、オブジェクトの名前を指定します。
+'* @return Variant オブジェクトまたは値
+'*
+'******************************************************************************
 Function Evaluate(Name)
     Evaluate = mOrigin.Evaluate(Name)
 End Function
 
-''******************************************************************************
-''* [概  要] ExportAsFixedFormat メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param Type_ xxxx
-''* @param fileName xxxxx。省略可能。
-''* @param Quality xxxxx。省略可能。
-''* @param IncludeDocProperties xxxxx。省略可能。
-''* @param IgnorePrintAreas xxxxx。省略可能。
-''* @param From xxxxx。省略可能。
-''* @param To_ xxxxx。省略可能。
-''* @param OpenAfterPublish xxxxx。省略可能。
-''* @param FixedFormatExtClassPtr xxxxx。省略可能。
-''* @param WorkIdentity xxxxx。省略可能。
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] ExportAsFixedFormat メソッド
+'* [詳  細] 指定された形式のファイルにエクスポートします。
+'*
+'* @param Type_ エクスポート後のファイル形式を指定します。
+'* @param fileName 保存されるファイルの名前。省略可能。
+'* @param Quality ファイルの品質を指定。省略可能。
+'* @param IncludeDocProperties ドキュメントプロパティを含める場合は True。省略可能。
+'* @param IgnorePrintAreas 発行時に設定を無視する場合はTrue 。省略可能。
+'* @param From 開始するページのページ番号を指定。省略可能。
+'* @param To_ 終了するページの番号を指定。省略可能。
+'* @param OpenAfterPublish 発行後にビューアーにファイルを表示する場合は True。省略可能。
+'* @param FixedFormatExtClassPtr FixedFormatExt クラスへのポインター。省略可能。
+'* @param WorkIdentity xxxxx。省略可能。
+'*
+'******************************************************************************
 Sub ExportAsFixedFormat(Type_ As XlFixedFormatType, Optional fileName, Optional Quality, Optional IncludeDocProperties, Optional IgnorePrintAreas, Optional From, Optional To_, Optional OpenAfterPublish, Optional FixedFormatExtClassPtr, Optional WorkIdentity)
     Call mOrigin.ExportAsFixedFormat(Type_, fileName, Quality, IncludeDocProperties, IgnorePrintAreas, From, To_, OpenAfterPublish, FixedFormatExtClassPtr, WorkIdentity)
 End Sub
 
-''******************************************************************************
-''* [概  要] Move メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param Before xxxx。省略可能。
-''* @param After  xxxx。省略可能。
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] Move メソッド
+'* [詳  細] シートをブック内の他の場所に移動します。
+'*          引数 Before と引数 After を共に省略した場合は、新規ブックが自動的に作成され、シートはそのブック内に移動します。
+'*
+'* @param Before 移動したシートを特定のシートの直前の位置に挿入するときに、そのシートを指定します。省略可能。
+'* @param After  移動したシートを特定のシートの直後の位置に挿入するときに、そのシートを指定します。省略可能。
+'*
+'******************************************************************************
 Sub Move(Optional Before, Optional After)
     Call mOrigin.Move(Before, After)
 End Sub
-''******************************************************************************
-''* [概  要] OLEObjects メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param Index xxxx。省略可能。
-''* @return Object xxxx
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] OLEObjects メソッド
+'* [詳  細] 1つの OLE オブジェクト ( OLEObject)、または、グラフまたはシート上のすべての ole オブジェクト ( OLEObjects コレクション) のコレクションを表すオブジェクトを返します。
+'*
+'* @param Index OLE オブジェクトの名前またはインデックス番号を指定。省略可能。
+'* @return Object OLEObject / OLEObjects オブジェクト
+'*
+'******************************************************************************
 Function OLEObjects(Optional Index) As Object
     Set OLEObjects = mOrigin.OLEObjects(Index)
 End Function
     
-''******************************************************************************
-''* [概  要] Paste メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param Destination xxxx。省略可能。
-''* @param Link xxxx。省略可能。
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] Paste メソッド
+'* [詳  細] クリップボードの内容をシートに貼り付けます。
+'*
+'* @param Destination クリップボードのコンテンツを貼り付ける場所を指定する Range オブジェクト。省略可能。
+'* @param Link 貼り付けたデータと元のデータの間にリンクを設定するには、 True を指定。省略可能。
+'*
+'******************************************************************************
 Sub Paste(Optional Destination, Optional Link)
     Call mOrigin.Paste(Destination, Link)
 End Sub
 
-''******************************************************************************
-''* [概  要] PasteSpecial メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param Format xxxx。省略可能。
-''* @param Link xxxx。省略可能。
-''* @param DisplayAsIcon xxxx。省略可能。
-''* @param IconFileName xxxx。省略可能。
-''* @param IconIndex xxxx。省略可能。
-''* @param IconLabel xxxx。省略可能。
-''* @param NoHTMLFormatting xxxx。省略可能。
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] PasteSpecial メソッド
+'* [詳  細] 指定された形式で、クリップボードの内容をシートに貼り付けます。 他のアプリケーションからデータを貼り付けるときや、あるいは特別な形式でデータを貼り付ける場合に使います。
+'*
+'* @param Format クリップボードのデータの形式を文字列で指定。省略可能。
+'* @param Link 元のデータと貼り付けたデータの間にリンクを設定するには、 True を指定。省略可能。既定値は False。
+'* @param DisplayAsIcon True の場合は、貼り付けられたデータがアイコンとして表示。省略可能。既定値は False。
+'* @param IconFileName DisplayAsIcon がTrueの場合に使用するアイコンを含むファイルの名前を指定。省略可能。
+'* @param IconIndex アイコン ファイルのどのアイコンを使うかを示すインデックス番号を指定。省略可能。
+'* @param IconLabel アイコンのラベルを文字列で指定。省略可能。
+'* @param NoHTMLFormatting True を設定すると、HTML から書式設定、ハイパーリンク、およびイメージを削除。省略可能。既定値は False。
+'*
+'******************************************************************************
 Sub PasteSpecial(Optional Format, Optional Link, Optional DisplayAsIcon, Optional IconFileName, Optional IconIndex, Optional IconLabel, Optional NoHTMLFormatting)
     Call mOrigin.PasteSpecial(Format, Link, DisplayAsIcon, IconFileName, IconIndex, IconLabel, NoHTMLFormatting)
 End Sub
 
-''******************************************************************************
-''* [概  要] PivotTables メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param Index xxxx。省略可能。
-''* @return Object xxxx
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] PivotTables メソッド
+'* [詳  細] ワークシートの1つのピボットテーブルレポート ( PivotTable オブジェクト)、またはすべてのピボットテーブルレポート (PivotTables オブジェクト) のコレクションを表すオブジェクトを返します。
+'*
+'* @param Index ピボットテーブル レポートの名前またはインデックス番号を指定。省略可能。
+'* @return Object PivotTable / PivotTables オブジェクト
+'*
+'******************************************************************************
 Function PivotTables(Optional Index) As Object
     Set PivotTables = mOrigin.PivotTables(Index)
+    mOrigin.PivotTableWizard
 End Function
 
-''******************************************************************************
-''* [概  要] PrintOut メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param From xxxx。省略可能。
-''* @param To_ xxxx。省略可能。
-''* @param Copies xxxx。省略可能。
-''* @param Preview xxxx。省略可能。
-''* @param ActivePrinter xxxx。省略可能。
-''* @param PrintToFile xxxx。省略可能。
-''* @param Collate xxxx。省略可能。
-''* @param PrToFileName xxxx。省略可能。
-''* @param IgnorePrintAreas xxxx。省略可能。
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] PivotTableWizard メソッド
+'* [詳  細] ピボットテーブル レポートを新規作成します。 このメソッドは、ピボットテーブルウィザードを表示しません。 このメソッドは、OLE DB データソースでは使用できません。 Add メソッドを使用してピボットテーブル キャッシュを作成した後、そのキャッシュを基にピボットテーブル レポートを作成します。
+'*
+'* @param SourceType レポートデータのソースを表す Xlpivotwhere Ourcetype 値。省略可能。
+'* @param SourceData レポートの作成に使うデータを指定 。省略可能。
+'* @param TableDestination レポートの配置場所を表す Range オブジェクトを指定 。省略可能。
+'* @param TableName 新しいレポートの名前 。省略可能。
+'* @param RowGrand レポートに行の総計を表示するには、 True を指定 。省略可能。
+'* @param ColumnGrand レポートに列の総計を表示するには、 True を指定 。省略可能。
+'* @param SaveData レポートと共にデータを保存するには、 True を指定 。省略可能。
+'* @param HasAutoFormat Trueの場合、レポートが更新されたとき、またはフィールドが移動されたときに、自動的に書式を設定 。省略可能。
+'* @param AutoPage SourceType_がxlconsolidationの場合にのみ有効です。 Trueを設定すると、統合するページフィールドが作成されます。 。省略可能。
+'* @param Reserved 使用されません 。省略可能。
+'* @param BackgroundQuery True の場合、Excel はレポートのクエリをバック グラウンド (非同期) で実行します。 既定値は False です。 。省略可能。
+'* @param OptimizeCache True の場合、ピボットテーブルのキャッシュの構成時に最適化を行います。 既定値は False です。 。省略可能。
+'* @param PageFieldOrder ピボットテーブルレポートのレイアウトにページフィールドを追加する順序を指定します。 。省略可能。
+'* @param PageFieldWrapCount ピボットテーブルの各列または各行のページ フィールドの数を指定します。 既定値は 0 (ゼロ) です。 。省略可能。
+'* @param ReadData True の場合は、外部データベースのすべてのレコードを含むピボットテーブルキャッシュを作成します。 。省略可能。
+'* @param Connection ExcelがODBCデータソースに接続できるようにするODBC設定を含む文字列 。省略可能。
+'* @return PivotTable PivotTableオブジェクト
+'*
+'******************************************************************************
+Function PivotTableWizard(Optional SourceType, Optional SourceData, Optional TableDestination, Optional TableName, Optional RowGrand, Optional ColumnGrand, Optional SaveData, Optional HasAutoFormat, Optional AutoPage, Optional Reserved, Optional BackgroundQuery, Optional OptimizeCache, Optional PageFieldOrder, Optional PageFieldWrapCount, Optional ReadData, Optional Connection) As PivotTable
+    Set PivotTableWizard = mOrigin.PivotTableWizard(SourceType, SourceData, TableDestination, TableName, RowGrand, ColumnGrand, SaveData, HasAutoFormat, AutoPage, Reserved, BackgroundQuery, OptimizeCache, PageFieldOrder, PageFieldWrapCount, ReadData, Connection)
+End Function
+
+'******************************************************************************
+'* [概  要] PrintOut メソッド
+'* [詳  細] シートを印刷します。
+'*
+'* @param From 印刷を開始するページの番号を指定。省略可能。
+'* @param To_ 印刷を終了するページの番号を指定。省略可能。
+'* @param Copies 印刷部数を指定。省略可能。
+'* @param Preview True の場合、印刷をする前に印刷プレビューを実行。省略可能。
+'* @param ActivePrinter アクティブなプリンターの名前を指定。省略可能。
+'* @param PrintToFile True の場合、ファイルへ出力。省略可能。
+'* @param Collate True の場合、部単位で印刷。省略可能。
+'* @param PrToFileName PrintToFileがTrueに設定されている場合、印刷先のファイル名を指定。省略可能。
+'* @param IgnorePrintAreas True の場合、印刷範囲を無視してシート全体を印刷。省略可能。
+'*
+'******************************************************************************
 Sub PrintOut(Optional From, Optional To_, Optional Copies, Optional Preview, Optional ActivePrinter, Optional PrintToFile, Optional Collate, Optional PrToFileName, Optional IgnorePrintAreas)
     Call mOrigin.PrintOut(From, To_, Copies, Preview, ActivePrinter, PrintToFile, Collate, PrToFileName, IgnorePrintAreas)
 End Sub
 
-''******************************************************************************
-''* [概  要] PrintPreview メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param EnableChanges xxxx。省略可能。
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] PrintPreview メソッド
+'* [詳  細] 印刷プレビュー (印刷時のイメージ) を表示します。
+'*
+'* @param EnableChanges ユーザーが印刷プレビューで余白などのページ設定オプションを変更できるかどうかを指定。省略可能。
+'*
+'******************************************************************************
 Sub PrintPreview(Optional EnableChanges)
     Call mOrigin.PrintPreview(EnableChanges)
 End Sub
 
-''******************************************************************************
-''* [概  要] Protect メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param Password xxxx。省略可能。
-''* @param DrawingObjects xxxx。省略可能。
-''* @param Contents xxxx。省略可能。
-''* @param Scenarios xxxx。省略可能。
-''* @param UserInterfaceOnly xxxx。省略可能。
-''* @param AllowFormattingCells xxxx。省略可能。
-''* @param AllowFormattingColumns xxxx。省略可能。
-''* @param AllowFormattingRows xxxx。省略可能。
-''* @param AllowInsertingColumns xxxx。省略可能。
-''* @param AllowInsertingRows xxxx。省略可能。
-''* @param AllowInsertingHyperlinks xxxx。省略可能。
-''* @param AllowDeletingColumns xxxx。省略可能。
-''* @param AllowDeletingRows xxxx。省略可能。
-''* @param AllowSorting xxxx。省略可能。
-''* @param AllowFiltering xxxx。省略可能。
-''* @param AllowUsingPivotTables xxxx。省略可能。
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] Protect メソッド
+'* [詳  細] ワークシートを保護し、変更できないようにします。
+'*
+'* @param Password ワークシートまたはブックのパスワード文字列を指定。省略可能。
+'* @param DrawingObjects 描画オブジェクトを保護するには、 True を指定します。 既定値は True です。省略可能。
+'* @param Contents Trueの内容を保護します。 グラフの場合は、グラフ全体が保護されます。 ワークシートの場合は、ロックされたセルを保護します。 既定値は True です。省略可能。
+'* @param Scenarios シナリオを保護するには、 True を指定します。 この引数はワークシートの場合のみ有効です。 既定値は True です。省略可能。
+'* @param UserInterfaceOnly True を指定すると、画面上からの変更は保護されますが、マクロからの変更は保護されません。 この引数を省略すると、マクロからも、画面上からも変更することができなくなります。省略可能。
+'* @param AllowFormattingCells True を指定すると、ユーザーは保護されたワークシートのセルを書式化することができます。 既定値は False です。省略可能。
+'* @param AllowFormattingColumns True を指定すると、ユーザーは保護されたワークシートの列を書式化することができます。 既定値は False です。省略可能。
+'* @param AllowFormattingRows Trueを指定すると、ユーザーは保護されたワークシートの任意の行を書式設定できます。 既定値は False です。省略可能。
+'* @param AllowInsertingColumns True を指定すると、ユーザーは保護されたワークシートに列を挿入することができます。 既定値は False です。省略可能。
+'* @param AllowInsertingRows True を指定すると、ユーザーは保護されたワークシートに行を挿入することができます。 既定値は False です。省略可能。
+'* @param AllowInsertingHyperlinks Trueは、保護されたワークシートにハイパーリンクを挿入することをユーザーに許可します。 既定値は False です。省略可能。
+'* @param AllowDeletingColumns True を指定すると、ユーザーは保護されたワークシートの列を削除することができ、削除される列のセルはすべてロック解除されます。 既定値は False です。省略可能。
+'* @param AllowDeletingRows True を指定すると、ユーザーは保護されたワークシートの行を削除することができ、削除される行のセルはすべてロック解除されます。 既定値は False です。省略可能。
+'* @param AllowSorting True を指定すると、ユーザーは保護されたワークシートで並べ替えを行うことができます。 並べ替え範囲内のセルは、ロックと保護が解除されている必要があります。 既定値は False です。省略可能。
+'* @param AllowFiltering True を指定すると、ユーザーは保護されたワークシートにフィルターを設定することができます。 ユーザーは、フィルター条件を変更できますが、オートフィルターの有効と無効を切り替えることはできません。 ユーザーは、既存のオート フィルターにフィルターを設定できます。 既定値は False です。省略可能。
+'* @param AllowUsingPivotTables Trueは、保護されたワークシートでピボットテーブルレポートを使用することをユーザーに許可します。 既定値は False です。省略可能。
+'*
+'******************************************************************************
 Sub Protect(Optional Password, Optional DrawingObjects, Optional Contents, Optional Scenarios, Optional UserInterfaceOnly, Optional AllowFormattingCells, Optional AllowFormattingColumns, Optional AllowFormattingRows, Optional AllowInsertingColumns, Optional AllowInsertingRows, Optional AllowInsertingHyperlinks, Optional AllowDeletingColumns, Optional AllowDeletingRows, Optional AllowSorting, Optional AllowFiltering, Optional AllowUsingPivotTables)
     Call mOrigin.Protect(Password, DrawingObjects, Contents, Scenarios, UserInterfaceOnly, AllowFormattingCells, AllowFormattingColumns, AllowFormattingRows, AllowInsertingColumns, AllowInsertingRows, AllowInsertingHyperlinks, AllowDeletingColumns, AllowDeletingRows, AllowSorting, AllowFiltering, AllowUsingPivotTables)
 End Sub
 
-''******************************************************************************
-''* [概  要] ResetAllPageBreaks メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] ResetAllPageBreaks メソッド
+'* [詳  細] 指定したワークシートのすべての改ページをリセットします。
+'*
+'******************************************************************************
 Sub ResetAllPageBreaks()
     Call mOrigin.ResetAllPageBreaks
 End Sub
 
-''******************************************************************************
-''* [概  要] SaveAs メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param fileName xxxx。省略可能。
-''* @param FileFormat xxxx。省略可能。
-''* @param Password xxxx。省略可能。
-''* @param WriteResPassword xxxx。省略可能。
-''* @param ReadOnlyRecommended xxxx。省略可能。
-''* @param CreateBackup xxxx。省略可能。
-''* @param AddToMru xxxx。省略可能。
-''* @param TextCodepage xxxx。省略可能。
-''* @param TextVisualLayout xxxx。省略可能。
-''* @param Local_ xxxx。省略可能。
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] SaveAs メソッド
+'* [詳  細] グラフまたはワークシートへの変更を別のファイルに保存します。
+'*
+'* @param fileName 保存するファイルの名前。省略可能。
+'* @param FileFormat ファイルを保存するときに使用するファイル形式を指定。省略可能。
+'* @param Password ファイルを保護するためのパスワードを表す 15 文字以内の文字列を指定。省略可能。
+'* @param WriteResPassword ファイルの書き込みパスワードを表す文字列を指定。省略可能。
+'* @param ReadOnlyRecommended ファイルを開くとき、ファイルを読み取り専用として開くように勧めるメッセージを表示するには、 True を指定。省略可能。
+'* @param CreateBackup バックアップ ファイルを作成するには、 True を指定。省略可能。
+'* @param AddToMru 最近使用したファイルの一覧にブックを追加するには、 True を指定します。 既定値は False です。省略可能。
+'* @param TextCodepage 英語の Excel では使用できません。省略可能。
+'* @param TextVisualLayout 英語の Excel では使用できません。省略可能。
+'* @param Local_ Trueは、Excel の言語 (コントロールパネルの設定を含む) に対してファイルを保存します。省略可能。
+'*
+'******************************************************************************
 Sub SaveAs(fileName As String, Optional FileFormat, Optional Password, Optional WriteResPassword, Optional ReadOnlyRecommended, Optional CreateBackup, Optional AddToMru, Optional TextCodepage, Optional TextVisualLayout, Optional Local_)
     Call mOrigin.SaveAs(fileName, FileFormat, Password, WriteResPassword, ReadOnlyRecommended, CreateBackup, AddToMru, TextCodepage, TextVisualLayout, Local_)
 End Sub
 
-''******************************************************************************
-''* [概  要] Scenarios メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param Index xxxx。省略可能。
-''* @return Object xxxx
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] Scenarios メソッド
+'* [詳  細] ワークシートの単一のシナリオ (Scenario オブジェクト)、またはシナリオのコレクション ( Scenarios オブジェクト) を表すオブジェクトを返します。
+'*
+'* @param Index シナリオの名前またはインデックス番号を指定。省略可能。
+'* @return Object Scenario / Scenarios オブジェクト
+'*
+'******************************************************************************
 Function Scenarios(Optional Index) As Object
     Set Scenarios = mOrigin.Scenarios(Index)
 End Function
 
-''******************************************************************************
-''* [概  要] Select_ メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param rep xxxx。省略可能。
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] Select_ メソッド
+'* [詳  細] オブジェクトを選択します。単一のシートをアクティブシートにするには、 Activate メソッドを使用します。
+'*
+'* @param rep 複数シートでのみ使用。省略可能。
+'*
+'******************************************************************************
 Sub Select_(Optional rep)
     Call mOrigin.Select(rep)
 End Sub
 
-''******************************************************************************
-''* [概  要] SetBackgroundPicture メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param fileName xxxxx
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] SetBackgroundPicture メソッド
+'* [詳  細] ワークシートの背景のグラフィックスを設定します。
+'*
+'* @param fileName 表示するグラフィック ファイルを指定
+'*
+'******************************************************************************
 Sub SetBackgroundPicture(fileName As String)
     Call mOrigin.SetBackgroundPicture(fileName)
 End Sub
 
-''******************************************************************************
-''* [概  要] ShowAllData メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] ShowAllData メソッド
+'* [詳  細] 現在フィルターがかけられているリストに対して、すべての行を表示します。 オートフィルターを使っているときにこのメソッドを使うと、下向き矢印が青から黒に変わります。
+'*
+'******************************************************************************
 Sub ShowAllData()
     Call mOrigin.ShowAllData
 End Sub
 
-''******************************************************************************
-''* [概  要] ShowDataForm メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] ShowDataForm メソッド
+'* [詳  細] 対象ワークシートに関連付けられたデータ フォームを表示します。
+'*
+'******************************************************************************
 Sub ShowDataForm()
     Call mOrigin.ShowDataForm
 End Sub
 
-''******************************************************************************
-''* [概  要] Unprotect メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param Password xxxx。省略可能。
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] Unprotect メソッド
+'* [詳  細] シートまたはブックの保護を解除します。 保護されていないシートやブックに対しては、このメソッドは無効です。
+'*
+'* @param Password パスワード。省略可能。
+'*
+'******************************************************************************
 Sub Unprotect(Optional Password)
     Call mOrigin.Unprotect(Password)
 End Sub
 
-''******************************************************************************
-''* [概  要] XmlDataQuery メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param XPath xxxx
-''* @param SelectionNamespaces ファイルパス。省略可能。
-''* @param Map ファイルパス。省略可能。
-''* @return Range xxxx
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] XmlDataQuery メソッド
+'* [詳  細] 特定の XPath にマップされたセルを表す Range オブジェクトを返します。 指定した XPath がワークシートにマッピングされていない場合、またはマッピングされた範囲が空の場合は、Nothing を返します。
+'*
+'* @param XPath 対象となる XPath を指定。
+'* @param SelectionNamespaces XPath パラメーターで参照される名前空間を含む、スペースで区切られた文字列。省略可能。
+'* @param Map 特定のマップ内の XPath を照会する場合は、 XmlMap を指定。省略可能。
+'* @return Range 特定のXPathにマップされたセルを表すRangeオブジェクト
+'*
+'******************************************************************************
 Function XmlDataQuery(XPath As String, Optional SelectionNamespaces, Optional Map) As Range
     Set XmlDataQuery = mOrigin.XmlDataQuery(XPath, SelectionNamespaces, Map)
 End Function
 
-''******************************************************************************
-''* [概  要] XmlMapQuery メソッド
-''* [詳  細] ファイルが存在するかどうか判定します｡
-''*
-''* @param XPath xxxx
-''* @param SelectionNamespaces ファイルパス。省略可能。
-''* @param Map ファイルパス。省略可能。
-''* @return Range xxxx
-''*
-''******************************************************************************
+'******************************************************************************
+'* [概  要] XmlMapQuery メソッド
+'* [詳  細] 特定の XPath にマップされたセルを表す Range オブジェクトを返します。 指定した XPath がワークシートにマッピングされていない場合、またはマッピングされた範囲が空の場合は、Nothing を返します。
+'*          XmlDataQuery メソッドとは異なり、ヘッダー行を含む XML リストの列全体を返します。
+'*
+'* @param XPath 対象となる XPath を指定。
+'* @param SelectionNamespaces XPath パラメーターで参照される名前空間を含む、スペースで区切られた文字列。省略可能。
+'* @param Map 特定のマップ内の XPath を照会する場合は、 XmlMap を指定。省略可能。
+'* @return Range 特定のXPathにマップされたセルを表すRangeオブジェクト
+'*
+'******************************************************************************
 Function XmlMapQuery(XPath As String, Optional SelectionNamespaces, Optional Map) As Range
     Set XmlMapQuery = mOrigin.XmlMapQuery(XPath, SelectionNamespaces, Map)
 End Function
 
-
+'*-----------------------------------------------------------------------------
+'* 拡張メソッド/プロパティ
+'*-----------------------------------------------------------------------------
 
