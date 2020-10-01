@@ -175,7 +175,7 @@ End Sub
 Private Sub AddItem(vArr, rownum As Long)
     Dim itm As Item
     Set itm = New Item
-    itm.name = vArr(rownum, 1)
+    itm.Name = vArr(rownum, 1)
     If vArr(rownum, 2) = "Åõ" Then
         itm.required = True
     End If
@@ -286,7 +286,7 @@ End Function
 '*
 '******************************************************************************
 Private Sub SetErrorMessage(ByVal itm As Item, ByVal rownum As Long, ByVal colnum As Long)
-    mErrMessage = "[çs" + CStr(rownum) + " óÒ" + CStr(colnum) + "]  " + itm.name + vbNewLine + vbNewLine + _
+    mErrMessage = "[çs" + CStr(rownum) + " óÒ" + CStr(colnum) + "]  " + itm.Name + vbNewLine + vbNewLine + _
           itm.GetErrorMessage
     mErrRowNo = rownum
     mErrColNo = colnum
@@ -362,7 +362,7 @@ End Function
 '******************************************************************************
 Public Function CopyItem(itm As Item) As Item
     Dim newItem As Item: Set newItem = New Item
-    newItem.name = itm.name
+    newItem.Name = itm.Name
     newItem.Value = itm.Value
     newItem.required = itm.required
     newItem.Attr = itm.Attr

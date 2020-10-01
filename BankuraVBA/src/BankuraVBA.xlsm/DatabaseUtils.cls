@@ -191,7 +191,7 @@ Public Sub OpenOracle(ByVal serverName As String, _
                           ByVal portNo As Integer, _
                           ByVal serviceName As String, _
                           Optional ByVal userId As String, _
-                          Optional ByVal password As String, _
+                          Optional ByVal Password As String, _
                           Optional ByVal connectType As String = "oledb")
     Dim cnnStr As String
     If LCase(connectType) = "odbc" Then
@@ -199,7 +199,7 @@ Public Sub OpenOracle(ByVal serverName As String, _
     Else
         cnnStr = StringUtils.PlaceHolder(CONN_STR_OLE_ORACLE_ORA, serverName, portNo, serviceName)
     End If
-    Call mConn.Open(cnnStr, userId, password)
+    Call mConn.Open(cnnStr, userId, Password)
 End Sub
 
 '******************************************************************************
@@ -229,7 +229,7 @@ Public Sub OpenPostgreSql(ByVal serverName As String, _
                           ByVal portNo As Integer, _
                           ByVal databaseName As String, _
                           Optional ByVal userId As String, _
-                          Optional ByVal password As String, _
+                          Optional ByVal Password As String, _
                           Optional ByVal connectType As String = "odbc")
     Dim cnnStr As String
     If LCase(connectType) = "odbc" Then
@@ -238,7 +238,7 @@ Public Sub OpenPostgreSql(ByVal serverName As String, _
         ' OLEDB接続（ポート指定不可）
         cnnStr = StringUtils.PlaceHolder(CONN_STR_OLE_POSTGRESQL, serverName, databaseName)
     End If
-    Call mConn.Open(cnnStr, userId, password)
+    Call mConn.Open(cnnStr, userId, Password)
 End Sub
 
 '******************************************************************************
@@ -273,7 +273,7 @@ Public Sub OpenSqlServer(ByVal serverName As String, _
                          ByVal databaseName As String, _
                          Optional ByVal portNo, _
                          Optional ByVal userId As String, _
-                         Optional ByVal password As String, _
+                         Optional ByVal Password As String, _
                          Optional ByVal connectType As String = "odbc")
     Dim cnnStr As String
     If Not IsMissing(portNo) Then
@@ -284,7 +284,7 @@ Public Sub OpenSqlServer(ByVal serverName As String, _
     Else
         cnnStr = StringUtils.PlaceHolder(CONN_STR_OLE_SQLSERVER, serverName, databaseName)
     End If
-    Call mConn.Open(cnnStr, userId, password)
+    Call mConn.Open(cnnStr, userId, Password)
 End Sub
 
 '******************************************************************************
@@ -326,10 +326,10 @@ Public Sub OpenMySql(ByVal serverName As String, _
                      ByVal portNo As Integer, _
                      ByVal databaseName As String, _
                      Optional ByVal userId As String, _
-                     Optional ByVal password As String)
+                     Optional ByVal Password As String)
     Dim cnnStr As String
     cnnStr = StringUtils.PlaceHolder(CONN_STR_ODBC_MYSQL, GetODBCDriverName(Array("MySQL ODBC", "Unicode")), serverName, portNo, databaseName)
-    Call mConn.Open(cnnStr, userId, password)
+    Call mConn.Open(cnnStr, userId, Password)
 End Sub
 
 '******************************************************************************
@@ -359,20 +359,20 @@ End Sub
 '*
 '******************************************************************************
 Public Sub OpenAccess(ByVal databaseFileName As String, _
-                      Optional ByVal password As String, _
+                      Optional ByVal Password As String, _
                       Optional ByVal connectType As String = "oledb")
     Dim cnnStr As String
     If LCase(connectType) = "odbc" Then
-        If password = "" Then
+        If Password = "" Then
             cnnStr = StringUtils.PlaceHolder(CONN_STR_ODBC_ACCESS, GetAccessODBCDriverName(), databaseFileName)
         Else
-            cnnStr = StringUtils.PlaceHolder(CONN_STR_ODBC_ACCESS_PASS, GetAccessODBCDriverName(), databaseFileName, password)
+            cnnStr = StringUtils.PlaceHolder(CONN_STR_ODBC_ACCESS_PASS, GetAccessODBCDriverName(), databaseFileName, Password)
         End If
     Else
-        If password = "" Then
+        If Password = "" Then
             cnnStr = StringUtils.PlaceHolder(CONN_STR_OLE_ACCESS, GetAccessOLEDBProviderName(), databaseFileName)
         Else
-            cnnStr = StringUtils.PlaceHolder(CONN_STR_OLE_ACCESS_PASS, GetAccessOLEDBProviderName(), databaseFileName, password)
+            cnnStr = StringUtils.PlaceHolder(CONN_STR_OLE_ACCESS_PASS, GetAccessOLEDBProviderName(), databaseFileName, Password)
         End If
     End If
     Call mConn.Open(cnnStr)

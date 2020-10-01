@@ -496,7 +496,7 @@ Public Sub ChangeFilesEncode(targetFolderName As String, srcEncode As String, de
     
     For Each oFile In oFiles
         Dim filePath As String
-        filePath = fso.GetAbsolutePathName(AddPathSeparator(targetFolderName) & oFile.name)
+        filePath = fso.GetAbsolutePathName(AddPathSeparator(targetFolderName) & oFile.Name)
          
         ' ファイルエンコード変換
         Call ChangeFileEncode(filePath, srcEncode, destEncode, bomInclude)
@@ -1377,7 +1377,7 @@ Public Function DeleteFiles(ByVal dirPath As String, Optional ByVal filterStr As
     On Error GoTo ErrorHandler
     Dim f As Object
     For Each f In IO.GetFolder(dirPath).Files
-        If filterStr = "" Or (f.name Like "*" & filterStr & "*") Then
+        If filterStr = "" Or (f.Name Like "*" & filterStr & "*") Then
             f.Delete
         End If
     Next
@@ -1780,7 +1780,7 @@ Private Sub GrepImpl(ByVal folder As Object, _
                      Optional ByVal separator As Long)
     Dim f As Object
     For Each f In folder.Files
-        If f.name Like wildCards Then
+        If f.Name Like wildCards Then
             
             Dim tmpSep As LineSeparatorsEnum: tmpSep = LineSeparatorsEnum.adCRLF
             If separator = LineSeparatorsEnum.adCRLF Or _
@@ -2283,7 +2283,7 @@ Private Sub GrepAndReplaceImpl(ByVal folder As Object, _
                      Optional ByVal separator As Long)
     Dim f As Object
     For Each f In folder.Files
-        If f.name Like wildCards Then
+        If f.Name Like wildCards Then
             Dim bomInclude As Boolean: bomInclude = False
             Dim tmpSep As LineSeparatorsEnum: tmpSep = LineSeparatorsEnum.adCRLF
             If separator = LineSeparatorsEnum.adCRLF Or _
@@ -2445,8 +2445,8 @@ Private Sub SearchFileImpl(ByVal folder As Object, _
                            ByRef arr As ArrayEx)
     Dim f As Object
     For Each f In folder.Files
-        If f.name Like wildCards Then
-            If reg.Test(f.name) Then
+        If f.Name Like wildCards Then
+            If reg.Test(f.Name) Then
                 arr.Add f.Path
             End If
         End If

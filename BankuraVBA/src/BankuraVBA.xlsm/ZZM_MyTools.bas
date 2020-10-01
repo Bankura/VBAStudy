@@ -58,7 +58,7 @@ Sub Add_Image_Name() 'アクティブシート上にある全ての画像に連番を振る
     For Each objShape In ActiveSheet.Shapes
         If objShape.Type = msoPicture Then
             c = c + 1
-            objShape.name = conName & c
+            objShape.Name = conName & c
         End If
     Next
 End Sub

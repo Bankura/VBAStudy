@@ -17,8 +17,8 @@ Sub Main()
 End Sub
 
 Sub TestWorksheetEx001()
-    Dim Wsh As WorkSheetEx
-    Set Wsh = New WorkSheetEx
+    Dim Wsh As WorksheetEx
+    Set Wsh = New WorksheetEx
     Set Wsh.Origin = ThisWorkbook.ActiveSheet
     
     Dim sx As StringEx
@@ -108,7 +108,7 @@ Sub TestHoge()
     Debug.Print GetExcelBookProc
     Dim i As Long
     For i = 0 To UBound(WinApiFunctions.wD)
-        Debug.Print WinApiFunctions.wD(i).wkb.name
+        Debug.Print WinApiFunctions.wD(i).wkb.Name
     Next
     
 End Sub
@@ -898,3 +898,6 @@ Sub TextDBConnect_Test001()
     Next
     Call DatabaseUtils.Disconnect
 End Sub
+
+
+

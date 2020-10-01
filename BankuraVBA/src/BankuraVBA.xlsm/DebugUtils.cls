@@ -105,6 +105,16 @@ Public Sub PrintVariantArray(vArr)
     Next
 End Sub
 
+Public Sub PrintEnumerator(obj)
+    On Error Resume Next
+    Dim v
+    For Each v In obj
+        Debug.Print v.Name
+        Debug.Print v.Value
+    Next
+End Sub
+
+
 '******************************************************************************
 '* [概  要] Print2DArrayRow
 '* [詳  細] Variant2次元配列の指定した行（1次元インデックス）の内容を

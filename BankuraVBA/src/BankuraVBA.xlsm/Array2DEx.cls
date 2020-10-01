@@ -1354,7 +1354,7 @@ End Function
 '* @param rows 追加行（複数:2次元Variant配列 or Array2DEx）
 '* @return Array2DEx
 '******************************************************************************
-Public Function RowsInsert(ByVal idx As Long, ByVal rows As Variant, ParamArray rows2() As Variant) As Array2DEx
+Public Function RowsInsert(ByVal idx As Long, ByVal Rows As Variant, ParamArray rows2() As Variant) As Array2DEx
     If idx < 0 Or idx > mRowMaxIndex + 1 Then
         Err.Raise 9999, "Array2DEx#RowsInsert", "Invalid argument."
     End If
@@ -1364,9 +1364,9 @@ Public Function RowsInsert(ByVal idx As Long, ByVal rows As Variant, ParamArray 
     If Not VBA.IsMissing(rows2) Then
         Dim tmp: tmp = rows2
         Set arr2dex = New Array2DEx
-        arr2dex.AddRows rows, tmp
+        arr2dex.AddRows Rows, tmp
     Else
-        Set arr2dex = Core.Init(New Array2DEx, rows)
+        Set arr2dex = Core.Init(New Array2DEx, Rows)
     End If
     colLen = arr2dex.ColLength
 

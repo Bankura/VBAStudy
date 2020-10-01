@@ -1176,7 +1176,7 @@ End Function
 '   "String"` (default) or `"Binary"` to pass raw binary response to `ParseCallback`
 ''
 Public Sub RegisterConverter( _
-    name As String, MediaType As String, ConvertCallback As String, ParseCallback As String, _
+    Name As String, MediaType As String, ConvertCallback As String, ParseCallback As String, _
     Optional Instance As Object, Optional ParseType As String = "String")
 
     Dim web_Converter As New DictionaryEx
@@ -1190,7 +1190,7 @@ Public Sub RegisterConverter( _
     End If
 
     If web_pConverters Is Nothing Then: Set web_pConverters = New DictionaryEx
-    Set web_pConverters(name) = web_Converter
+    Set web_pConverters(Name) = web_Converter
 End Sub
 
 ' Helper for getting custom converter

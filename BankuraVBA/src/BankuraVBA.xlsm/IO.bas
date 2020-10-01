@@ -121,7 +121,7 @@ End Property
 ''' @return As String
 Public Property Get ExecPath() As String
     Dim app As Object: Set app = Application
-    Select Case app.name
+    Select Case app.Name
         Case "Microsoft Word":   ExecPath = app.MacroContainer.Path
         Case "Microsoft Excel":  ExecPath = app.ThisWorkbook.Path
         Case "Microsoft Access": ExecPath = app.CurrentProject.Path
@@ -387,8 +387,8 @@ End Property
 '* @return パス
 '*
 '******************************************************************************
-Public Function BuildPath(ByVal Path As String, ByVal name As String) As String
-    BuildPath = fso.BuildPath(Path, name)
+Public Function BuildPath(ByVal Path As String, ByVal Name As String) As String
+    BuildPath = fso.BuildPath(Path, Name)
 End Function
 
 '******************************************************************************
@@ -401,8 +401,8 @@ End Function
 '* @param OverWriteFiles 省略可能。
 '*
 '******************************************************************************
-Public Sub CopyFile(ByVal source As String, ByVal destination As String, Optional ByVal overWriteFiles As Boolean = True)
-    Call fso.CopyFile(source, destination, overWriteFiles)
+Public Sub CopyFile(ByVal source As String, ByVal Destination As String, Optional ByVal overWriteFiles As Boolean = True)
+    Call fso.CopyFile(source, Destination, overWriteFiles)
 End Sub
 
 '******************************************************************************
@@ -415,8 +415,8 @@ End Sub
 '* @param OverWriteFiles 省略可能。
 '*
 '******************************************************************************
-Public Sub CopyFolder(ByVal source As String, ByVal destination As String, Optional ByVal overWriteFiles As Boolean = True)
-    Call fso.CopyFolder(source, destination, overWriteFiles)
+Public Sub CopyFolder(ByVal source As String, ByVal Destination As String, Optional ByVal overWriteFiles As Boolean = True)
+    Call fso.CopyFolder(source, Destination, overWriteFiles)
 End Sub
 
 '******************************************************************************
@@ -695,8 +695,8 @@ End Function
 '* @param Destination
 '*
 '******************************************************************************
-Public Sub MoveFile(ByVal source As String, ByVal destination As String)
-    Call fso.MoveFile(source, destination)
+Public Sub MoveFile(ByVal source As String, ByVal Destination As String)
+    Call fso.MoveFile(source, Destination)
 End Sub
 
 '******************************************************************************
@@ -708,8 +708,8 @@ End Sub
 '* @param Destination
 '*
 '******************************************************************************
-Public Sub MoveFolder(ByVal source As String, ByVal destination As String)
-    Call fso.MoveFolder(source, destination)
+Public Sub MoveFolder(ByVal source As String, ByVal Destination As String)
+    Call fso.MoveFolder(source, Destination)
 End Sub
 
 '******************************************************************************

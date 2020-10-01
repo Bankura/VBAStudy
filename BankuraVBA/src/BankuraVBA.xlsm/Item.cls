@@ -87,10 +87,10 @@ Private mRegExp As Object
 '*-----------------------------------------------------------------------------
 '* Name プロパティ
 '*-----------------------------------------------------------------------------
-Property Get name() As String
-    name = mName
+Property Get Name() As String
+    Name = mName
 End Property
-Property Let name(arg As String)
+Property Let Name(arg As String)
     mName = arg
 End Property
 

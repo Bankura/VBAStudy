@@ -318,7 +318,7 @@ End Function
 '*
 '******************************************************************************
 Public Function CheckXlApplication() As Boolean
-    CheckXlApplication = InStr(Application.name, "Excel") > 0
+    CheckXlApplication = InStr(Application.Name, "Excel") > 0
 End Function
 
 '******************************************************************************

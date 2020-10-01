@@ -41,7 +41,7 @@ Private Declare PtrSafe Function GetComputerNameW Lib "kernel32" (lpBuffer As An
 Private Declare PtrSafe Function GetCurrentProcess Lib "kernel32" () As LongPtr
 Private Declare PtrSafe Function OpenProcessToken Lib "advapi32.dll" (ByVal ProcessHandle As LongPtr, ByVal DesiredAccess As Long, TokenHandle As LongPtr) As Long
 Private Declare PtrSafe Function GetTokenInformation Lib "advapi32.dll" (ByVal TokenHandle As LongPtr, ByVal TokenInformationClass As Long, TokenInformation As Any, ByVal TokenInformationLength As Long, ReturnLength As Long) As Long
-Private Declare PtrSafe Function LookupAccountSid Lib "advapi32.dll" Alias "LookupAccountSidW" (ByVal lpSystemName As Any, Sid As Any, name As Any, cbName As Long, ReferencedDomainName As Any, cbReferencedDomainName As Long, peUse As Integer) As Long
+Private Declare PtrSafe Function LookupAccountSid Lib "advapi32.dll" Alias "LookupAccountSidW" (ByVal lpSystemName As Any, Sid As Any, Name As Any, cbName As Long, ReferencedDomainName As Any, cbReferencedDomainName As Long, peUse As Integer) As Long
 Private Declare PtrSafe Function NetLocalGroupDelMembers Lib "netapi32.dll" (ByVal psServer As LongPtr, ByVal psLocalGroup As LongPtr, ByVal lLevel As Long, uMember As LOCALGROUP_MEMBERS_INFO_0, ByVal lMemberCount As Long) As Long
 Private Declare PtrSafe Function NetLocalGroupGetMembers Lib "netapi32.dll" (ByVal psServer As LongPtr, ByVal psLocalGroup As LongPtr, ByVal lLevel As Long, pBuffer As LongPtr, ByVal lMaxLength As Long, plEntriesRead As Long, plTotalEntries As Long, phResume As LongPtr) As Long
 Private Declare PtrSafe Function Netbios Lib "netapi32.dll" (pncb As NCB) As Byte

@@ -139,7 +139,7 @@ Public Function ExtractKeyData(inputSheetName As String, StartRow As Integer, St
     
     ' 入力情報を取得
     With Worksheets(inputSheetName)
-        varData = .Range(.Cells(StartRow, StartCol), .Cells(rows.Count, StartCol).End(xlUp)).Value
+        varData = .Range(.Cells(StartRow, StartCol), .Cells(Rows.Count, StartCol).End(xlUp)).Value
     End With
 
     '空データ、重複データを除外
@@ -193,7 +193,7 @@ Public Function ExtractKeyData2(inputSheet As Workbook, StartRow As Integer, Sta
     
     ' 入力情報を取得
     With inputSheet
-        varData = .Range(.Cells(StartRow, StartCol), .Cells(rows.Count, StartCol).End(xlUp)).Value
+        varData = .Range(.Cells(StartRow, StartCol), .Cells(Rows.Count, StartCol).End(xlUp)).Value
     End With
 
     '空データ、重複データを除外
@@ -230,7 +230,7 @@ Public Function IsBookOpened(bookName As String) As Boolean
 
     ' Excel起動チェック
     For Each wb In Application.Workbooks
-        If wb.name = Dir(bookName) Then
+        If wb.Name = Dir(bookName) Then
             IsBookOpened = False
             Exit Function
         End If

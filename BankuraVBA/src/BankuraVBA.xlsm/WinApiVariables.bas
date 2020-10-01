@@ -13292,9 +13292,9 @@ End Type
 '
 Public Type USER_INFO_3
    ' Level 0 starts here
-   name As LongPtr
+   Name As LongPtr
    ' Level 1 starts here
-   password As LongPtr
+   Password As LongPtr
    PasswordAge As Long
    Privilege As Long
    HomeDir As LongPtr
@@ -13327,7 +13327,7 @@ Public Type USER_INFO_3
 End Type
 
 Public Type GROUP_INFO_2
-   name As LongPtr
+   Name As LongPtr
    Comment As LongPtr
    GroupID As Long
    Attributes As Long

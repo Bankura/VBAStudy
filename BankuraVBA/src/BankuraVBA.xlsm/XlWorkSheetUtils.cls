@@ -11,8 +11,8 @@ Option Explicit
 
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 '*
-'* [機能名] Excel Cell/Rangeユーティリティクラス
-'* [詳  細] Excel Cell/Rangeに関するユーティリティを提供する。
+'* [機能名] Excel WorkSheet Cell/Rangeユーティリティクラス
+'* [詳  細] Excel WorkSheet Cell/Rangeに関するユーティリティを提供する。
 '*          Staticクラス（Attribute VB_PredeclaredId = True）とする。
 '* [参  考]
 '*
@@ -82,7 +82,7 @@ Private Sub InjectNumbersToIndexCells(ByVal dataSheet As Worksheet, lStartRow As
         .Cells(lStartRow, lStartCol) = 1
         If rownum > 1 Then
             .Cells(lStartRow, lStartCol).AutoFill _
-              destination:=.Range(.Cells(lStartRow, lStartCol), .Cells(lStartRow + rownum - 1, lStartCol)), Type:=xlLinearTrend
+              Destination:=.Range(.Cells(lStartRow, lStartCol), .Cells(lStartRow + rownum - 1, lStartCol)), Type:=xlLinearTrend
         End If
     End With
 End Sub
@@ -104,7 +104,7 @@ Public Sub UnprotectSheet(sheetName As String, Optional sheetPassword As String,
     If sheetPassword = "" Then
         wb.Sheets(sheetName).Unprotect
     Else
-        wb.Sheets(sheetName).Unprotect password:=sheetPassword
+        wb.Sheets(sheetName).Unprotect Password:=sheetPassword
     End If
 End Sub
 
@@ -129,7 +129,7 @@ Public Sub ProtectSheet(sheetName As String, Optional sheetPassword As String, O
         If sheetPassword = "" Then
             .Protect Contents:=True, UserInterfaceOnly:=True
         Else
-            .Protect Contents:=True, UserInterfaceOnly:=True, password:=sheetPassword
+            .Protect Contents:=True, UserInterfaceOnly:=True, Password:=sheetPassword
         End If
     End With
 End Sub
@@ -172,7 +172,7 @@ Public Function InitializeWorkSheets(varMakeSheets As Variant, _
     If Not IsArray(varMakeSheets) And Not IsArray(varFormSheets) Then
         If DeleteWorkSheet(varMakeSheets) = False Then GoTo ErrorHandler
         ThisWorkbook.Worksheets(varFormSheets).Copy After:=Worksheets(strAfShName)
-        ActiveSheet.name = varMakeSheets
+        ActiveSheet.Name = varMakeSheets
         InitializeWorkSheets = True
         Exit Function
     End If
@@ -186,7 +186,7 @@ Public Function InitializeWorkSheets(varMakeSheets As Variant, _
     Dim i As Long
     For i = LBound(varMakeSheets) To UBound(varMakeSheets)
         ThisWorkbook.Worksheets(varFormSheets(i)).Copy After:=Worksheets(strAfShName)
-        ActiveSheet.name = varMakeSheets(i)
+        ActiveSheet.Name = varMakeSheets(i)
     Next i
 
     InitializeWorkSheets = True
@@ -270,7 +270,7 @@ Public Function SheetExists(ByVal sheetName As String, Optional ByRef wb As Work
     'シートの検索
     Dim ws As Worksheet
     For Each ws In wb.Worksheets
-        If ws.name = sheetName Then
+        If ws.Name = sheetName Then
             SheetExists = True
             Exit Function
         End If
@@ -316,8 +316,8 @@ Public Function GetFinalRow(ByVal dataSheet As Worksheet, Optional ignoreColnum 
     Dim ret As Long
     Dim i As Long, cnta As Long
     With dataSheet.UsedRange
-        For i = .rows.Count To 1 Step -1
-            cnta = WorksheetFunction.CountA(.rows(i))
+        For i = .Rows.Count To 1 Step -1
+            cnta = WorksheetFunction.CountA(.Rows(i))
             If cnta > 0 Then
                 If cnta <> 1 Then
                     ret = i
@@ -377,7 +377,7 @@ End Function
 '*
 '******************************************************************************
 Public Function GetFinalKeyRow(ByVal dataSheet As Worksheet, StartCol As Long) As Long
-    GetFinalKeyRow = dataSheet.Cells(rows.Count, StartCol).End(xlUp).row
+    GetFinalKeyRow = dataSheet.Cells(Rows.Count, StartCol).End(xlUp).row
 End Function
 
 '******************************************************************************
@@ -472,7 +472,7 @@ Public Sub DeleteNoUsedRange(dataSheet As Worksheet, lStartRow As Long)
         Exit Sub
     End If
     With dataSheet
-        .Range(.rows(delStartRow), .rows(delEndRow)).Delete
+        .Range(.Rows(delStartRow), .Rows(delEndRow)).Delete
     End With
 End Sub
 
@@ -520,13 +520,13 @@ Public Sub SetHyperLink(sh As Worksheet, row As Long, col As Long, strLinkAddres
     Dim strFontName As String
     Dim iFontSize As Integer
     With sh
-        strFontName = .Range(.Cells(row, col), .Cells(row, col)).Font.name
+        strFontName = .Range(.Cells(row, col), .Cells(row, col)).Font.Name
         iFontSize = sh.Range(.Cells(row, col), .Cells(row, col)).Font.size
 
         .Hyperlinks.Add Anchor:=.Range(.Cells(row, col), .Cells(row, col)), _
                           Address:=strLinkAddress
                         
-        .Range(.Cells(row, col), .Cells(row, col)).Font.name = strFontName
+        .Range(.Cells(row, col), .Cells(row, col)).Font.Name = strFontName
         .Range(.Cells(row, col), .Cells(row, col)).Font.size = iFontSize
     End With
 End Sub
@@ -539,6 +539,7 @@ End Sub
 '* @param formatSheetName フォーマットとなるコピー元シート
 '* @param destSheetName 作成するシート名
 '* @param wb 対象のワークブック
+'* @param countAppend 番号を付与するか
 '* @return 作成したシートオブジェクト
 '******************************************************************************
 Public Function CopySheet(ByVal formatSheetName As String, ByVal destSheetName As String, _
@@ -560,7 +561,7 @@ Public Function CopySheet(ByVal formatSheetName As String, ByVal destSheetName A
     wb.Worksheets(formatSheetName).Visible = xlSheetVisible
     
     wb.Worksheets(formatSheetName).Copy After:=wb.Worksheets(formatSheetName)
-    wb.ActiveSheet.name = destSheetName & IIf(cnt > 0, CStr(cnt), "")
+    wb.ActiveSheet.Name = destSheetName & IIf(cnt > 0, CStr(cnt), "")
     Set CopySheet = wb.ActiveSheet
     
     wb.Worksheets(formatSheetName).Visible = tmpVisible

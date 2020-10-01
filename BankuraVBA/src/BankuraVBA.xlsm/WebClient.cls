@@ -477,11 +477,11 @@ End Function
 ' @param {String} [BypassList=""] Comma-separated list of servers that should bypass proxy
 ''
 Public Sub SetProxy(ProxyServer As String, _
-    Optional UserName As String = "", Optional password As String = "", Optional BypassList As String = "")
+    Optional UserName As String = "", Optional Password As String = "", Optional BypassList As String = "")
 
     Me.ProxyServer = ProxyServer
     Me.ProxyUsername = UserName
-    Me.ProxyPassword = password
+    Me.ProxyPassword = Password
     Me.ProxyBypassList = BypassList
 End Sub
 

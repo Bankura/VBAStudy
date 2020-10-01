@@ -283,10 +283,10 @@ Private Function EditHeader(record As Collection) As String
     For Each itm In record
         If itm.OutputTarget Then
             If first Then
-                ret = EditItem(itm.name)
+                ret = EditItem(itm.Name)
                 first = False
             Else
-                ret = ret & "," & EditItem(itm.name)
+                ret = ret & "," & EditItem(itm.Name)
             End If
         End If
     Next

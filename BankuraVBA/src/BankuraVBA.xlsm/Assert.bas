@@ -72,7 +72,7 @@ Private xFailMsgs As Collection
 
 Private Property Get VBProject() As Object
     Dim app As Object: Set app = Application
-    Select Case app.name
+    Select Case app.Name
         Case "Microsoft Word":   Set VBProject = app.MacroContainer.VBProject
         Case "Microsoft Excel":  Set VBProject = app.ThisWorkbook.VBProject
         Case "Microsoft Access": Set VBProject = app.VBE.ActiveVBProject
@@ -194,8 +194,8 @@ Public Sub TestRunnerGenerate()
     
     Dim vbcompo As Object, Ln As String
     For Each vbcompo In VBProject.VBComponents
-        If vbcompo.Type = 2 And CheckTestClassName(vbcompo.name) Then
-            Ln = "Assert.RunTestOf New " & vbcompo.name
+        If vbcompo.Type = 2 And CheckTestClassName(vbcompo.Name) Then
+            Ln = "Assert.RunTestOf New " & vbcompo.Name
             asrt.InsertLines pos, vbTab & Ln
             IncrPre pos
         End If
