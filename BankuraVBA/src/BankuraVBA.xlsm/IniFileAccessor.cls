@@ -23,6 +23,7 @@ Option Explicit
 '******************************************************************************
 '* WindowsAPI定義
 '******************************************************************************
+Private Declare PtrSafe Function GetPrivateProfileString Lib "kernel32" Alias "GetPrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As Any, ByVal lpDefault As String, ByVal lpReturnedString As String, ByVal nSize As Long, ByVal lpFileName As String) As Long
 
 '******************************************************************************
 '* Enum定義
@@ -37,7 +38,6 @@ Option Explicit
 '******************************************************************************
 Private mIniFilePath As String
 Private mIniStringMaxSize As Long
-Private mWinApi As WinAPI
 
 '******************************************************************************
 '* プロパティ定義
@@ -49,12 +49,7 @@ Private mWinApi As WinAPI
 '******************************************************************************
 Private Sub Class_Initialize()
     mIniStringMaxSize = 4096
-    Set mWinApi = Base.GetWinAPI()
 End Sub
-Private Sub Class_Terminate()
-    Set mWinApi = Nothing
-End Sub
-
 '******************************************************************************
 '* メソッド定義
 '******************************************************************************
@@ -88,8 +83,8 @@ Public Function GetStringValue(sectionName As String, itmName As String) As Stri
     Dim retString As String: retString = Space$(mIniStringMaxSize)
     On Error Resume Next
     Dim ret As Long
-    ret = mWinApi.GetPrivateProfileString(sectionName, itmName, vbNullString, _
-                                          retString, Len(retString), mIniFilePath)
+    ret = GetPrivateProfileString(sectionName, itmName, vbNullString, _
+                                  retString, Len(retString), mIniFilePath)
     On Error GoTo 0
     If ret = 0 Then
         GetStringValue = ""

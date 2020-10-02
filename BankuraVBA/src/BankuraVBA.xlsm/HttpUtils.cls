@@ -20,6 +20,11 @@ Option Explicit
 '* Copyright (c) 2019-2020 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
+'******************************************************************************
+'* WindowsAPI定義
+'******************************************************************************
+Private Declare PtrSafe Function DeleteUrlCacheEntry Lib "wininet" Alias "DeleteUrlCacheEntryA" (ByVal lpszUrlName As String) As Long
+Private Declare PtrSafe Function URLDownloadToFile Lib "urlmon" Alias "URLDownloadToFileA" (ByVal pCaller As Long, ByVal szURL As String, ByVal szFileName As String, ByVal dwReserved As Long, ByVal lpfnCB As LongPtr) As Long
 
 '******************************************************************************
 '* Enum定義
@@ -32,7 +37,6 @@ Option Explicit
 '******************************************************************************
 '* 内部変数定義
 '******************************************************************************
-Private mWinApi As WinAPI
 Private mWinHttp As Object
 
 '******************************************************************************
@@ -43,11 +47,9 @@ Private mWinHttp As Object
 '* コンストラクタ・デストラクタ
 '******************************************************************************
 Private Sub Class_Initialize()
-    Set mWinApi = Base.GetWinAPI()
     Set mWinHttp = CreateObject("WinHttp.WinHttpRequest.5.1")
 End Sub
 Private Sub Class_Terminate()
-    Set mWinApi = Nothing
     Set mWinHttp = Nothing
 End Sub
 
@@ -70,10 +72,10 @@ Public Function DownloadFileByUrl(strFileUrl As String, strSavePath As String) A
     Dim lngDlRs As Long
 
     ' キャッシュクリア
-    lngCacheDelRs = mWinApi.DeleteUrlCacheEntry(strFileUrl)
+    lngCacheDelRs = DeleteUrlCacheEntry(strFileUrl)
     
     ' URLからファイルをダウンロードして保存
-    lngDlRs = mWinApi.URLDownloadToFile(0, strFileUrl, strSavePath, 0, 0)
+    lngDlRs = URLDownloadToFile(0, strFileUrl, strSavePath, 0, 0)
 
     If lngDlRs <> 0 Then
         DownloadFileByUrl = False

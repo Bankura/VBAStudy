@@ -20,10 +20,10 @@ Option Explicit
 '* Copyright (c) 2020 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-
 '******************************************************************************
 '* WindowsAPI定義
 '******************************************************************************
+Private Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByVal Destination As Any, ByVal source As Any, ByVal Length As LongPtr)
 
 '******************************************************************************
 '* Enum定義
@@ -36,7 +36,6 @@ Option Explicit
 '******************************************************************************
 '* 内部変数定義
 '******************************************************************************
-Private mWinApi As WinAPI
 
 '******************************************************************************
 '* プロパティ定義
@@ -46,12 +45,7 @@ Private mWinApi As WinAPI
 '* コンストラクタ・デストラクタ
 '******************************************************************************
 Private Sub Class_Initialize()
-    Set mWinApi = Base.GetWinAPI()
 End Sub
-Private Sub Class_Terminate()
-    Set mWinApi = Nothing
-End Sub
-
 '******************************************************************************
 '* メソッド定義
 '******************************************************************************
@@ -73,7 +67,7 @@ Public Function CopyMemory2ByteArray(ByVal addr As LongPtr, ByVal size As Long) 
     End If
   
     ReDim bData(1 To size) As Byte
-    Call mWinApi.CopyMemory(VarPtr(bData(1)), addr, size)
+    Call CopyMemory(VarPtr(bData(1)), addr, size)
     CopyMemory2ByteArray = bData
 End Function
 

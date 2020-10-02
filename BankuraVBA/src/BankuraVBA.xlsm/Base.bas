@@ -56,7 +56,6 @@ Private mShell As Object
 Private mWshNetwork As Object
 Private mSc As Object
 Private mSettingInfo As SettingInfo
-Private mWinApi As WinAPI
 Private mLogger As Logger
 
 '******************************************************************************
@@ -273,18 +272,6 @@ End Function
 '******************************************************************************
 Public Function CreateCDOMessage() As Object
     Set CreateCDOMessage = CreateObject("CDO.Message")
-End Function
-
-'******************************************************************************
-'* [概  要] WinAPIオブジェクト取得処理。
-'* [詳  細] WinAPIオブジェクトを取得する。未生成の場合生成する。
-'*
-'******************************************************************************
-Public Function GetWinAPI() As WinAPI
-    If mWinApi Is Nothing Then
-        Set mWinApi = New WinAPI
-    End If
-    Set GetWinAPI = mWinApi
 End Function
 
 '******************************************************************************

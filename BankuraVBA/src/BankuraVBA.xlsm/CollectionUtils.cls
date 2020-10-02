@@ -24,6 +24,11 @@ Option Explicit
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 '******************************************************************************
+'* WindowsAPI定義
+'******************************************************************************
+Private Declare PtrSafe Sub CopyMemoryByRef Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef source As Any, ByVal Length As LongPtr)
+
+'******************************************************************************
 '* Enum定義
 '******************************************************************************
 
@@ -43,7 +48,6 @@ Option Explicit
 '******************************************************************************
 '* 内部変数定義
 '******************************************************************************
-Private mWinApi As WinAPI
 
 '******************************************************************************
 '* プロパティ定義
@@ -53,12 +57,7 @@ Private mWinApi As WinAPI
 '* コンストラクタ・デストラクタ
 '******************************************************************************
 Private Sub Class_Initialize()
-    Set mWinApi = Base.GetWinAPI()
 End Sub
-Private Sub Class_Terminate()
-    Set mWinApi = Nothing
-End Sub
-
 '******************************************************************************
 '* メソッド定義
 '******************************************************************************
@@ -198,21 +197,21 @@ Public Function GetCollectionKeyByIndex(ByVal Index As Long, col As Collection) 
             Case Is > col.Count
                 Err.Raise 9
             Case Is <= col.Count / 2
-                Call mWinApi.CopyMemoryByRef(ptr, ObjPtr(col) + FOWARD_SHIFT, LONGPTR_SIZE, False, True)
+                Call CopyMemoryByRef(ptr, ByVal (ObjPtr(col) + FOWARD_SHIFT), LONGPTR_SIZE)
                 For i = 2 To Index
-                    Call mWinApi.CopyMemoryByRef(ptr, ptr + FOWARD_SHIFT, LONGPTR_SIZE, False, True)
+                    Call CopyMemoryByRef(ptr, ByVal (ptr + FOWARD_SHIFT), LONGPTR_SIZE)
                 Next i
             Case Else
-                Call mWinApi.CopyMemoryByRef(ptr, ObjPtr(col) + BACKWARD_SHIFT, LONGPTR_SIZE, False, True)
+                Call CopyMemoryByRef(ptr, ByVal (ObjPtr(col) + BACKWARD_SHIFT), LONGPTR_SIZE)
                 For i = col.Count - 1 To Index Step -1
-                    Call mWinApi.CopyMemoryByRef(ptr, ptr + BACKWARD_SHIFT, LONGPTR_SIZE, False, True)
+                    Call CopyMemoryByRef(ptr, ByVal (ptr + BACKWARD_SHIFT), LONGPTR_SIZE)
                 Next i
         End Select
         i = StrPtr(sKey)
-        Call mWinApi.CopyMemoryByRef(VarPtr(sKey), ptr + KEY_POS, LONGPTR_SIZE, True, True)
+        Call CopyMemoryByRef(ByVal VarPtr(sKey), ByVal (ptr + KEY_POS), LONGPTR_SIZE)
         
         GetCollectionKeyByIndex = sKey
-        Call mWinApi.CopyMemoryByRef(VarPtr(sKey), i, LONGPTR_SIZE, True, False)
+        Call CopyMemoryByRef(ByVal VarPtr(sKey), i, LONGPTR_SIZE)
     End If
 End Function
 
@@ -238,12 +237,12 @@ Public Function GetCollectionIndexByKey(ByVal Key As String, col As Collection, 
             'save StrPtr
             aKey = StrPtr(sKey)
             'first Ptr
-            Call mWinApi.CopyMemoryByRef(ptr, ObjPtr(col) + FOWARD_SHIFT, LONGPTR_SIZE, False, True)
+            Call CopyMemoryByRef(ptr, ByVal (ObjPtr(col) + FOWARD_SHIFT), LONGPTR_SIZE)
             GetCollectionIndexByKey = 1
             
             ' walk items upwards from first
             Do
-                Call mWinApi.CopyMemoryByRef(VarPtr(sKey), ptr + KEY_POS, LONGPTR_SIZE, True, True)
+                Call CopyMemoryByRef(ByVal VarPtr(sKey), ByVal (ptr + KEY_POS), LONGPTR_SIZE)
                 If StrComp(Key, sKey, comp) = 0 Then
                     'found
                     Exit Do
@@ -258,11 +257,11 @@ Public Function GetCollectionIndexByKey(ByVal Key As String, col As Collection, 
                 End If
                 
                 ' next Ptr
-                Call mWinApi.CopyMemoryByRef(ptr, ptr + FOWARD_SHIFT, LONGPTR_SIZE, False, True)
+                Call CopyMemoryByRef(ptr, ByVal (ptr + FOWARD_SHIFT), LONGPTR_SIZE)
             Loop Until ptr = 0
             
             ' restore original StrPtr
-            Call mWinApi.CopyMemoryByRef(VarPtr(sKey), aKey, LONGPTR_SIZE, True, False)
+            Call CopyMemoryByRef(ByVal VarPtr(sKey), aKey, LONGPTR_SIZE)
         End If
         If ptr = 0 Then
             'key not found

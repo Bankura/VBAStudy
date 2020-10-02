@@ -20,6 +20,21 @@ Option Explicit
 '* Copyright (c) 2019-2020 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
+'******************************************************************************
+'* WindowsAPI定義
+'******************************************************************************
+Private Declare PtrSafe Function GetInputState Lib "user32" () As Long
+Private Declare PtrSafe Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
+Private Declare PtrSafe Function IsIconic Lib "user32" (ByVal hWnd As LongPtr) As Long
+Private Declare PtrSafe Function ShowWindowAsync Lib "user32" (ByVal hWnd As LongPtr, ByVal nCmdShow As Long) As Long
+Private Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As LongPtr) As Long
+Private Declare PtrSafe Function PeekMessage Lib "user32" Alias "PeekMessageA" (lpMsg As msg, ByVal hWnd As LongPtr, ByVal wMsgFilterMin As Long, ByVal wMsgFilterMax As Long, ByVal wRemoveMsg As Long) As Long
+Private Declare PtrSafe Function TranslateMessage Lib "user32" (lpMsg As msg) As Long
+Private Declare PtrSafe Function DispatchMessage Lib "user32" Alias "DispatchMessageA" (lpMsg As msg) As LongPtr
+Private Declare PtrSafe Function GetKeyboardState Lib "user32" (pbKeyState As Byte) As Long
+Private Declare PtrSafe Sub keybd_event Lib "user32" (ByVal bVk As Byte, ByVal bScan As Byte, ByVal dwFlags As Long, ByVal dwExtraInfo As LongPtr)
+Private Declare PtrSafe Function SetCursorPos Lib "user32" (ByVal x As Long, ByVal y As Long) As Long
+Private Declare PtrSafe Function GetCursorPos Lib "user32" (lpPoint As POINTAPI) As Long
 
 '******************************************************************************
 '* Enum定義
@@ -37,7 +52,6 @@ Option Explicit
 '* 内部変数定義
 '******************************************************************************
 Private mTime As Variant
-Private mWinApi As WinAPI
 
 '******************************************************************************
 '* プロパティ定義
@@ -47,12 +61,7 @@ Private mWinApi As WinAPI
 '* コンストラクタ・デストラクタ
 '******************************************************************************
 Private Sub Class_Initialize()
-    Set mWinApi = Base.GetWinAPI()
 End Sub
-Private Sub Class_Terminate()
-    Set mWinApi = Nothing
-End Sub
-
 '******************************************************************************
 '* メソッド定義
 '******************************************************************************
@@ -63,7 +72,7 @@ End Sub
 '*
 '******************************************************************************
 Public Sub CheckEvents()
-    If mWinApi.GetInputState() Or (DateDiff("s", mTime, time) > 3) Then
+    If GetInputState() Or (DateDiff("s", mTime, time) > 3) Then
         DoEvents
         mTime = time
     End If
@@ -80,7 +89,7 @@ Public Sub WaitFor(ByVal second As Integer)
     Dim futureTime As Date
     futureTime = DateAdd("s", second, Now)
     While Now < futureTime
-        mWinApi.Sleep 100
+        Sleep 100
         CheckEvents
     Wend
 End Sub
@@ -181,10 +190,10 @@ End Function
 '*
 '******************************************************************************
 Public Sub ShowForeground(ByVal hWnd As LongPtr)
-    If mWinApi.IsIconic(hWnd) Then
-        Call mWinApi.ShowWindowAsync(hWnd, SW_RESTORE)
+    If IsIconic(hWnd) Then
+        Call ShowWindowAsync(hWnd, SW_RESTORE)
     End If
-    Call mWinApi.SetForegroundWindow(hWnd)
+    Call SetForegroundWindow(hWnd)
 End Sub
 
 '******************************************************************************
@@ -195,8 +204,8 @@ End Sub
 '*
 '******************************************************************************
 Public Sub ShowForegroundMax(ByVal hWnd As LongPtr)
-    Call mWinApi.ShowWindowAsync(hWnd, SW_SHOWMAXIMIZED)
-    Call mWinApi.SetForegroundWindow(hWnd)
+    Call ShowWindowAsync(hWnd, SW_SHOWMAXIMIZED)
+    Call SetForegroundWindow(hWnd)
 End Sub
 
 '******************************************************************************
@@ -207,8 +216,8 @@ End Sub
 '*
 '******************************************************************************
 Public Sub ShowMinimizedNoActive(ByVal hWnd As LongPtr)
-    If Not mWinApi.IsIconic(hWnd) Then
-        Call mWinApi.ShowWindowAsync(hWnd, SW_SHOWMINNOACTIVE)
+    If Not IsIconic(hWnd) Then
+        Call ShowWindowAsync(hWnd, SW_SHOWMINNOACTIVE)
     End If
 End Sub
 
@@ -219,9 +228,9 @@ End Sub
 '******************************************************************************
 Public Sub DoEventsForPaint()
     Dim message  As msg
-    If mWinApi.PeekMessage(message, 0, WM_PAINT, WM_PAINT, PM_REMOVE) Then
-        Call mWinApi.TranslateMessage(message)
-        Call mWinApi.DispatchMessage(message)
+    If PeekMessage(message, 0, WM_PAINT, WM_PAINT, PM_REMOVE) Then
+        Call TranslateMessage(message)
+        Call DispatchMessage(message)
     End If
 End Sub
 
@@ -234,12 +243,12 @@ Public Sub ChangeNumLockOn()
     Dim bState  As Boolean
     Dim keys(0 To 255) As Byte
     
-    Call mWinApi.GetKeyboardState(keys(0))
+    Call GetKeyboardState(keys(0))
     bState = keys(VK_NUMLOCK)
     
     If Not bState Then
-        Call mWinApi.keybd_event(VK_NUMLOCK, &H45, KEYEVENTF_EXTENDEDKEY Or 0, 0)
-        Call mWinApi.keybd_event(VK_NUMLOCK, &H45, KEYEVENTF_EXTENDEDKEY Or KEYEVENTF_KEYUP, 0)
+        Call keybd_event(VK_NUMLOCK, &H45, KEYEVENTF_EXTENDEDKEY Or 0, 0)
+        Call keybd_event(VK_NUMLOCK, &H45, KEYEVENTF_EXTENDEDKEY Or KEYEVENTF_KEYUP, 0)
     End If
 End Sub
 
@@ -253,10 +262,10 @@ Public Sub ChangeMousePoint(x As Long, y As Long)
     Dim mousePSet As Long
     
     ' マウスカーソル位置指定
-    mousePSet = mWinApi.SetCursorPos(x, y)
+    mousePSet = SetCursorPos(x, y)
     
 '    ' マウスカーソル位置取得
-'    Call mWinApi.GetCursorPos(mousePoint)
+'    Call GetCursorPos(mousePoint)
 '    With mousePoint
 '        x = .x
 '        y = .y

@@ -12,21 +12,10 @@ Option Explicit
 '* Copyright (c) 2020 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
+
 '******************************************************************************
 '* WindowsAPI定義
 '******************************************************************************
-Private Declare PtrSafe Function IsWindowVisible Lib "user32" (ByVal hWnd As LongPtr) As Long
-Private Declare PtrSafe Function GetClassName Lib "user32" Alias "GetClassNameA" (ByVal hWnd As LongPtr, ByVal lpClassName As String, ByVal nMaxCount As Long) As Long
-Private Declare PtrSafe Function GetWindow Lib "user32" (ByVal hWnd As LongPtr, ByVal wCmd As Long) As LongPtr
-Private Declare PtrSafe Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hWnd As LongPtr, ByVal lpString As String, ByVal cch As Long) As Long
-Private Declare PtrSafe Function GetWindowThreadProcessId Lib "user32" (ByVal hWnd As LongPtr, lpdwProcessId As Long) As Long
-Private Declare PtrSafe Function EnumWindows Lib "user32" (ByVal lpEnumFunc As LongPtr, ByVal lParam As LongPtr) As Long
-Private Declare PtrSafe Function EnumChildWindows Lib "user32" (ByVal hwndParent As LongPtr, ByVal lpEnumFunc As LongPtr, ByVal lParam As LongPtr) As Long
-Private Declare PtrSafe Function GetDesktopWindow Lib "user32" () As LongPtr
-Private Declare PtrSafe Function IsWindow Lib "user32" (ByVal hWnd As LongPtr) As Long
-Private Declare PtrSafe Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As LongPtr, ByVal wMsg As Long, ByVal wParam As LongPtr, lParam As Any) As LongPtr
-Private Declare PtrSafe Function IIDFromString Lib "ole32.dll" (lpsz As Any, lpiid As Any) As Long
-Private Declare PtrSafe Function ObjectFromLresult Lib "oleacc" (ByVal lResult As LongPtr, riid As Any, ByVal wParam As LongPtr, ppvObject As Any) As LongPtr
 
 '******************************************************************************
 '* Enum定義
@@ -67,7 +56,7 @@ Public wD() As WbkDtl
 '******************************************************************************
 Public Function EnumerateWindow(ByVal hWnd As LongPtr, lParam As Long) As Boolean
 
-    If IsWindowVisible(hWnd) Then
+    If GetWinAPI.IsWindowVisible(hWnd) Then
         Call PrintCaptionAndProcess(hWnd)
     End If
     EnumerateWindow = True
@@ -89,15 +78,15 @@ Private Sub PrintCaptionAndProcess(ByVal hWnd As LongPtr)
     Dim lngProcesID  As Long
     
     ' クラス名取得
-    lngRtnCode = GetClassName(hWnd, strClassBuff, Len(strClassBuff))
+    lngRtnCode = GetWinAPI.GetClassName(hWnd, strClassBuff, Len(strClassBuff))
     strClass = Left(strClassBuff, InStr(strClassBuff, vbNullChar) - 1)
     
     ' ウィンドウのキャプションを取得
-    lngRtnCode = GetWindowText(hWnd, strTextBuff, Len(strTextBuff))
+    lngRtnCode = GetWinAPI.GetWindowText(hWnd, strTextBuff, Len(strTextBuff))
     strText = Left(strTextBuff, InStr(strTextBuff, vbNullChar) - 1)
     
     ' プロセスIDを取得
-    lngRtnCode = GetWindowThreadProcessId(hWnd, lngProcesID)
+    lngRtnCode = GetWinAPI.GetWindowThreadProcessId(hWnd, lngProcesID)
 
     Debug.Print "PID:" & lngProcesID, "hwnd:" & hWnd, "クラス名:" & strClass, "Caption:" & strText
 End Sub
@@ -113,9 +102,9 @@ End Sub
 Public Function GetEnumWindowProcessId(ByVal hWnd As LongPtr, lParam As Long) As Boolean
     Dim lngRtnCode  As Long
     Dim lngProcesID  As Long
-    If IsWindowVisible(hWnd) Then
+    If GetWinAPI.IsWindowVisible(hWnd) Then
       '  プロセスIDを取得
-        lngRtnCode = GetWindowThreadProcessId(hWnd, lngProcesID)
+        lngRtnCode = GetWinAPI.GetWindowThreadProcessId(hWnd, lngProcesID)
         ' 指定したプロセスIDと一致する場合はウィンドウハンドルを設定
         If lngProcesID = tmpProcessId Then
             tmpHwnd = hWnd
@@ -133,7 +122,7 @@ End Function
 Public Sub PrintCaptionAndProcessMain()
     Dim lngRtnCode  As Long
 
-    lngRtnCode = EnumWindows(AddressOf EnumerateWindow, 0&)
+    lngRtnCode = GetWinAPI.EnumWindows(AddressOf EnumerateWindow, 0&)
 End Sub
 
 
@@ -151,19 +140,19 @@ Public Function GetHwndByPid(pid As Long) As LongPtr
     GetHwndByPid = 0
     
     'デスクトップWindowの子WindowのうちトップレベルのWindowを取得
-    hWnd = GetDesktopWindow()
-    hWnd = GetWindow(hWnd, 5)
+    hWnd = GetWinAPI.GetDesktopWindow()
+    hWnd = GetWinAPI.GetWindow(hWnd, 5)
 
     Do While (0 <> hWnd)
         pIdLast = 0
-        Call GetWindowThreadProcessId(hWnd, pIdLast)
+        Call GetWinAPI.GetWindowThreadProcessId(hWnd, pIdLast)
 '        Debug.Print "hwnd:" & hwnd & " pIdLast:" & pIdLast & "  pid:" & pid
         If (pid = pIdLast) Then
             GetHwndByPid = hWnd
             Exit Do
         End If
         '次のWindowハンドルを取得
-        hWnd = GetWindow(hWnd, 2)
+        hWnd = GetWinAPI.GetWindow(hWnd, 2)
     Loop
 End Function
 
@@ -180,7 +169,7 @@ Public Function GetHwndByPid2(pid As Long) As LongPtr
     tmpHwnd = 0
     
     tmpProcessId = pid
-    lngRtnCode = EnumWindows(AddressOf GetEnumWindowProcessId, 0)
+    lngRtnCode = GetWinAPI.EnumWindows(AddressOf GetEnumWindowProcessId, 0)
     GetHwndByPid2 = tmpHwnd
 End Function
 
@@ -203,11 +192,11 @@ Public Function EnumChildSubProc(ByVal hWndChild As LongPtr, _
     Dim lngRtnCode   As Long
     
     ' クラス名取得
-    lngRtnCode = GetClassName(hWndChild, strClassBuff, Len(strClassBuff))
+    lngRtnCode = GetWinAPI.GetClassName(hWndChild, strClassBuff, Len(strClassBuff))
     strClass = Left(strClassBuff, InStr(strClassBuff, vbNullChar) - 1)
     If strClass = "EXCEL7" Then
         ' テキストをバッファにする
-        lngRtnCode = GetWindowText(hWndChild, strTextBuff, Len(strTextBuff))
+        lngRtnCode = GetWinAPI.GetWindowText(hWndChild, strTextBuff, Len(strTextBuff))
         strText = Left(strTextBuff, InStr(strTextBuff, vbNullChar) - 1)
         If InStr(1, strText, ".xla") = 0 Then
             If Sgn(wD) = 0 Then
@@ -244,13 +233,13 @@ Public Function EnumWindowsProc(ByVal hWnd As LongPtr, _
     Dim lngProcesID  As Long
     
     ' クラス名取得
-    lngRtnCode = GetClassName(hWnd, strClassBuff, Len(strClassBuff))
+    lngRtnCode = GetWinAPI.GetClassName(hWnd, strClassBuff, Len(strClassBuff))
     strClass = Left(strClassBuff, InStr(strClassBuff, vbNullChar) - 1)
     
     If strClass = "XLMAIN" Then
         tmpParentHwnd = hWnd
         ' 子ウィンドウを列挙
-        lngRtnCode = EnumChildWindows(hWnd, _
+        lngRtnCode = GetWinAPI.EnumChildWindows(hWnd, _
                          AddressOf EnumChildSubProc, lParam)
                         
     End If
@@ -273,7 +262,7 @@ Public Function GetExcelBookProc() As Boolean
 
     Erase wD
     ' ワークブックのウィンドウハンドルを取得
-    lngRtnCode = EnumWindows(AddressOf EnumWindowsProc, 0)
+    lngRtnCode = GetWinAPI.EnumWindows(AddressOf EnumWindowsProc, 0)
     If Sgn(wD) <> 0 Then
         cnt = 0
         For i = 0 To UBound(wD)
@@ -322,13 +311,13 @@ Private Function GetExcelBook(wDl As WbkDtl) As Boolean
     Dim wbw         As Excel.Window
     GetExcelBook = False
     
-    If IsWindow(wDl.hWnd) = 0 Then Exit Function
-    lngResult = SendMessage(wDl.hWnd, WM_GETOBJECT, 0, OBJID_NATIVEOM)
+    If GetWinAPI.IsWindow(wDl.hWnd) = 0 Then Exit Function
+    lngResult = GetWinAPI.SendMessage(wDl.hWnd, WM_GETOBJECT, 0, OBJID_NATIVEOM)
     If lngResult Then
         bytID = IID_IDispatch & vbNullChar
 
-        IIDFromString bytID(0), IID(0)
-        lngRtnCode = ObjectFromLresult(lngResult, IID(0), 0, wbw)
+        GetWinAPI.IIDFromString bytID(0), IID(0)
+        lngRtnCode = GetWinAPI.ObjectFromLresult(lngResult, IID(0), 0, wbw)
         If Not wbw Is Nothing Then Set wDl.wkb = wbw.Parent
         GetExcelBook = True
     End If

@@ -25,7 +25,13 @@ Option Explicit
 '******************************************************************************
 '* WindowsAPI定義
 '******************************************************************************
-Private Declare PtrSafe Function SHFileOperation Lib "shell32.dll" Alias "SHFileOperationA" (lpFileOp As SHFILEOPSTRUCT) As Long
+Private Declare PtrSafe Function SHFileOperation Lib "shell32" Alias "SHFileOperationA" (lpFileOp As SHFILEOPSTRUCT) As Long
+Private Declare PtrSafe Function SHCreateDirectoryEx Lib "shell32" Alias "SHCreateDirectoryExA" (ByVal hWnd As LongPtr, ByVal pszPath As String, ByVal psa As Any) As LongPtr
+Private Declare PtrSafe Function SystemTimeToFileTime Lib "kernel32" (lpSystemTime As SystemTime, lpFileTime As FILETIME) As Long
+Private Declare PtrSafe Function LocalFileTimeToFileTime Lib "kernel32" (lpLocalFileTime As FILETIME, lpFileTime As FILETIME) As Long
+Private Declare PtrSafe Function CreateFile Lib "kernel32" Alias "CreateFileA" (ByVal lpFileName As String, ByVal dwDesiredAccess As Long, ByVal dwShareMode As Long, ByVal lpSecurityAttributes As Long, ByVal dwCreationDisposition As Long, ByVal dwFlagsAndAttributes As Long, ByVal hTemplateFile As LongPtr) As LongPtr
+Private Declare PtrSafe Function SetFileTime Lib "kernel32" (ByVal hFile As LongPtr, lpCreationTime As FILETIME, lpLastAccessTime As FILETIME, lpLastWriteTime As FILETIME) As Long
+Private Declare PtrSafe Function CloseHandle Lib "kernel32" (ByVal hObject As LongPtr) As Long
 
 '******************************************************************************
 '* Enum定義
@@ -56,7 +62,6 @@ End Type
 '******************************************************************************
 '* 内部変数定義
 '******************************************************************************
-Private mWinApi As WinAPI ' TODO:廃止予定
 
 '******************************************************************************
 '* プロパティ定義
@@ -66,12 +71,7 @@ Private mWinApi As WinAPI ' TODO:廃止予定
 '* コンストラクタ・デストラクタ
 '******************************************************************************
 Private Sub Class_Initialize()
-    Set mWinApi = Base.GetWinAPI()
 End Sub
-Private Sub Class_Terminate()
-    Set mWinApi = Nothing
-End Sub
-
 '******************************************************************************
 '* メソッド定義
 '******************************************************************************
@@ -118,7 +118,7 @@ Public Function DirExists(strDirPath As String) As Boolean
         Dim ret As Long: ret = MsgBox("以下のフォルダは存在しません。作成しますか？" & _
                                    vbCrLf & vbCrLf & strDirPath, vbOKCancel, "フォルダ作成")
         If ret = vbOK Then
-            Dim dirRet As LongPtr: dirRet = mWinApi.SHCreateDirectoryEx(0, strDirPath, 0)
+            Dim dirRet As LongPtr: dirRet = SHCreateDirectoryEx(0, strDirPath, 0&)
             If dirRet = 0 Then
                 DirExists = True
                 Exit Function
@@ -363,10 +363,10 @@ Private Function GetFileTime(ByVal dtSetting As Date) As FILETIME
     End With
 
     Dim tLocalTime As FILETIME
-    Call mWinApi.SystemTimeToFileTime(tSystemTime, tLocalTime)
+    Call SystemTimeToFileTime(tSystemTime, tLocalTime)
 
     Dim tFileTime As FILETIME
-    Call mWinApi.LocalFileTimeToFileTime(tLocalTime, tFileTime)
+    Call LocalFileTimeToFileTime(tLocalTime, tFileTime)
 
     GetFileTime = tFileTime
 End Function
@@ -380,10 +380,9 @@ End Function
 '*
 '******************************************************************************
 Private Function GetFileHandle(ByVal stFilePath As String) As LongPtr
-    GetFileHandle = mWinApi.CreateFile( _
-                        stFilePath, GENERIC_READ Or GENERIC_WRITE, _
-                        FILE_SHARE_READ, 0, OPEN_EXISTING, _
-                        FILE_ATTRIBUTE_NORMAL, 0 _
+    GetFileHandle = CreateFile(stFilePath, GENERIC_READ Or GENERIC_WRITE, _
+                               FILE_SHARE_READ, 0, OPEN_EXISTING, _
+                               FILE_ATTRIBUTE_NORMAL, 0 _
                     )
 End Function
 
@@ -421,12 +420,8 @@ Private Sub SetFileTimeProc(ByVal stFilePath As String, ByVal dtCreateTime As Da
         If onLastAccessTime Then tLastAccessTime = tFileTime Else tLastAccessTime = tNullable
         If onLastWriteTime Then tLastWriteTime = tFileTime Else tLastWriteTime = tNullable
 
-        Call mWinApi.SetFileTime(cFileHandle, _
-                                 tCreationTime, _
-                                 tLastAccessTime, _
-                                 tLastWriteTime _
-                        )
-        Call mWinApi.CloseHandle(cFileHandle)
+        Call SetFileTime(cFileHandle, tCreationTime, tLastAccessTime, tLastWriteTime)
+        Call CloseHandle(cFileHandle)
     End If
 End Sub
 
