@@ -771,7 +771,7 @@ End Sub
 '* @return WorkSheetExオブジェクト
 '*
 '******************************************************************************
-Public Function Init(ByVal sheetName As String, Optional ByVal wb As Workbook) As WorksheetEx
+Public Function Init(ByVal sheetName As String, Optional ByVal wb As Workbook) As WorkSheetEx
     If wb Is Nothing Then
         Set wb = ThisWorkbook
     End If

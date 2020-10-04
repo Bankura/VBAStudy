@@ -1,7 +1,12 @@
 Attribute VB_Name = "ZZM_MyTest"
 Option Explicit
 
-Function FizzBuzz(ByVal n As Long) As String
+' Use Ariawase -------------------------------------------------------------------------------------
+''' EntryPoint
+Sub FizzBuzzMain()
+    Debug.Print Join(ArrMap(Init(New Func, vbString, AddressOf FizzBuzz), ArrRange(1&, 100&)))
+End Sub
+Public Function FizzBuzz(ByVal n As Long) As String
     Select Case BitFlag(n Mod 5 = 0, n Mod 3 = 0)
         Case 0: FizzBuzz = CStr(n)
         Case 1: FizzBuzz = "Fizz"
@@ -10,23 +15,225 @@ Function FizzBuzz(ByVal n As Long) As String
         Case Else: Err.Raise 51 'UNREACHABLE
     End Select
 End Function
+' --------------------------------------------------------------------------------------------------
 
-''' EntryPoint
-Sub Main()
-    Debug.Print Join(ArrMap(Init(New Func, vbString, AddressOf FizzBuzz), ArrRange(1&, 100&)))
-End Sub
+' Test Array2DEx -----------------------------------------------------------------------------------
 
-Sub TestWorksheetEx001()
-    Dim Wsh As WorksheetEx
-    Set Wsh = New WorksheetEx
-    Set Wsh.Origin = ThisWorkbook.ActiveSheet
+Sub TestArray2DEx001_Init()
+    Dim arr2d
+    arr2d = ArrayUtils.Create2DArrayWithValue(Array(1, 2, 3), Array(4, 5, 6), Array(7, 8, 9))
+
+    Dim arr2dex As Array2DEx
+    Set arr2dex = Core.Init(New Array2DEx, arr2d)
+    Debug.Print "2次元配列から初期化"
+    DebugUtils.PrintVariantArray arr2dex.To2DArray
     
-    Dim sx As StringEx
-    Set sx = Init(New StringEx, "aaa")
-    Debug.Print sx
+    Dim arr2dex2 As Array2DEx
+    Set arr2dex2 = Core.Init(New Array2DEx, arr2dex)
+    Debug.Print "Array2DExから初期化"
+    DebugUtils.PrintVariantArray arr2dex.To2DArray
 
-
+    Dim arr2dex3 As Array2DEx
+    Set arr2dex3 = Core.Init(New Array2DEx, Array(1, 2, 3))
+    Debug.Print "1次元配列から初期化"
+    DebugUtils.PrintVariantArray arr2dex3.To2DArray
+    
+    Dim arr2dex4 As Array2DEx
+    Set arr2dex4 = Core.Init(New Array2DEx, arr2dex2.ToArrayExOfArrayEx)
+    Debug.Print "ArrayExOfArrayExから初期化"
+    DebugUtils.PrintVariantArray arr2dex4.To2DArray
+    
+    Dim arr2dex5 As Array2DEx
+    Set arr2dex5 = Core.Init(New Array2DEx, Core.Init(New ArrayEx, Array(1, 2, 3)))
+    Debug.Print "ArrayExから初期化"
+    DebugUtils.PrintVariantArray arr2dex5.To2DArray
+    
+    Dim arr2dex6 As Array2DEx
+    Set arr2dex6 = Core.Init(New Array2DEx, "test")
+    Debug.Print "文字列から初期化"
+    DebugUtils.PrintVariantArray arr2dex6.To2DArray
 End Sub
+
+Sub TestArray2DEx002_Add()
+    Dim arr2dex As Array2DEx
+    Set arr2dex = Core.Init(New Array2DEx)
+    arr2dex.DefaultInitValue = 0
+    arr2dex.AddColumn Array(1, 2, 3)
+    arr2dex.AddColumn Array(1, 2, 3)
+    arr2dex.AddColumn Array(1, 2, 3)
+    arr2dex.AddColumn Array(1, 2, 3)
+    arr2dex.AddRow Array(12, 2, 3, 4, 5)
+    
+    Dim arr2d
+    arr2d = ArrayUtils.Create2DArrayWithValue(Array(1, 2, 3), Array(4, 5, 6), Array(7, 8, 9))
+    Dim arr2dex2 As Array2DEx
+    Set arr2dex2 = Core.Init(New Array2DEx, arr2d)
+    arr2dex.AddRows arr2dex2
+    arr2dex(1, 2) = 5
+    arr2dex.AddColumns arr2d
+    arr2dex.Sort 0, False
+    DebugUtils.PrintVariantArray arr2dex.To2DArray
+End Sub
+
+Sub TestArray2DEx003_Add()
+    Dim arr2dex As Array2DEx
+    Set arr2dex = Core.Init(New Array2DEx)
+    arr2dex.DefaultInitValue = 0
+    arr2dex.AddColumns Array(1, 2, 3, 4, 5), Array(1, 2, 3, 4, 5), ArrayUtils.Create2DArrayWithValue(Array(1, 2, 3), Array(4, 5, 6), Array(7, 8, 9))
+    DebugUtils.PrintVariantArray arr2dex.To2DArray
+End Sub
+
+Sub TestArray2DEx004_Expand()
+    Dim arr2dex As Array2DEx
+    Set arr2dex = Core.Init(New Array2DEx)
+    arr2dex.DefaultInitValue = 0
+    arr2dex.Expand 5, 5
+    DebugUtils.PrintVariantArray arr2dex.To2DArray
+End Sub
+
+Sub TestArray2DEx005()
+    Dim arr2dex As Array2DEx
+    Set arr2dex = Core.Init(New Array2DEx).Range(10, 5, 5)
+    DebugUtils.PrintVariantArray arr2dex.To2DArray
+    Debug.Print arr2dex.Contains(9)
+    Debug.Print arr2dex.Contains(10)
+    Debug.Print arr2dex.Contains(11)
+    Debug.Print arr2dex.Contains(45)
+    Debug.Print arr2dex.Contains(46)
+    Debug.Print arr2dex.RowContains(0, 9)
+    Debug.Print arr2dex.RowContains(0, 16)
+    Debug.Print arr2dex.ColContains(0, 10)
+    Debug.Print arr2dex.ColContains(0, 9)
+    
+    Dim arr2dex2 As Array2DEx
+    Set arr2dex2 = Core.Init(New Array2DEx).Range(10, 5, 5)
+    Debug.Print arr2dex.Equals(arr2dex2)
+    arr2dex(0, 0) = 1
+    Debug.Print arr2dex.Equals(arr2dex2)
+    Debug.Print arr2dex.ColIndexOf(1, 35)
+    Debug.Print arr2dex.RowIndexOf(4, 35)
+    
+    Dim xy As Array2DIndex
+    xy = arr2dex.IndexOf(35)
+    Debug.Print xy.x, xy.y
+    
+    Debug.Print arr2dex.EntireRowIndexOf(ArrayUtils.Range(34, 39))
+End Sub
+
+Sub TestArray2DEx006()
+    Dim arr2dex As Array2DEx
+    Set arr2dex = Core.Init(New Array2DEx)
+    arr2dex.DefaultInitValue = 0
+    arr2dex.AddRows Array(1, 2, 3), Array(1, 2, 3), Array(1, 2, 3), Array(1, 4, 6)
+    DebugUtils.PrintVariantArray arr2dex.Uniq.To2DArray
+    
+    Dim arr2dex2 As Array2DEx, arr2dex3 As Array2DEx
+    Set arr2dex2 = Core.Init(New Array2DEx).Range(10, 2, 2)
+    Set arr2dex3 = arr2dex.Concat(arr2dex2)
+    Debug.Print "Concat"
+    DebugUtils.PrintVariantArray arr2dex3.To2DArray
+    
+    Set arr2dex3 = arr2dex.RowSlice(3, 3)
+    Debug.Print "RowSlice"
+    DebugUtils.PrintVariantArray arr2dex3.To2DArray
+    
+    Set arr2dex3 = arr2dex.ColSlice(2, 2)
+    Debug.Print "ColSlice"
+    DebugUtils.PrintVariantArray arr2dex3.To2DArray
+    
+    Debug.Print "Range 0"
+    DebugUtils.PrintVariantArray Core.Init(New Array2DEx).Range(10, 0, 0).To2DArray
+    
+    Debug.Print "Map"
+    Dim fun As Func
+    Set fun = Core.Init(New Func, vbLong, AddressOf TestFuctionSquere)
+    DebugUtils.PrintVariantArray arr2dex.Map(fun).To2DArray
+    
+    Debug.Print "Zip"
+    Set arr2dex3 = arr2dex3.Range(1, 3, 2)
+    Set fun = Core.Init(New Func, vbLong, AddressOf TestFuctionSumUp)
+    DebugUtils.PrintVariantArray arr2dex.Zip(fun, arr2dex3.To2DArray).To2DArray
+    
+    Debug.Print "RowFilter"
+    Set fun = Core.Init(New Func, vbBoolean, AddressOf TestFuctionMyFilter)
+    DebugUtils.PrintVariantArray arr2dex.RowFilter(fun).To2DArray
+    
+    Debug.Print "ColFilter"
+    DebugUtils.PrintVariantArray arr2dex.ColFilter(fun).To2DArray
+
+    Debug.Print "RowFold"
+    Set fun = Core.Init(New Func, vbLong, AddressOf TestFuctionMyFold)
+    DebugUtils.PrintVariantArray arr2dex.RowFold(fun).ToArray
+    
+    Debug.Print "ColFold"
+    DebugUtils.PrintVariantArray arr2dex.ColFold(fun).ToArray
+
+    Debug.Print "RowScan"
+    DebugUtils.PrintVariantArray arr2dex.RowScan(fun).To2DArray
+    
+    Debug.Print "ColScan"
+    DebugUtils.PrintVariantArray arr2dex.ColScan(fun).To2DArray
+End Sub
+Public Function TestFuctionSquere(ByVal source As Long) As Long
+    TestFuctionSquere = source * source
+End Function
+Public Function TestFuctionSumUp(ByVal source1 As Long, ByVal source2 As Long) As Long
+    TestFuctionSumUp = source1 + source2
+End Function
+Public Function TestFuctionMyFilter(ByVal source) As Boolean
+    TestFuctionMyFilter = ArrayUtils.Contains(source, 2)
+End Function
+Public Function TestFuctionMyFold(ByVal basedata As Long, ByVal elem As Long) As Long
+    TestFuctionMyFold = basedata + elem
+End Function
+
+Sub TestArray2DEx007()
+    Dim arr2dex As Array2DEx
+    Set arr2dex = Core.Init(New Array2DEx)
+    arr2dex.DefaultInitValue = 0
+    arr2dex.AddRows Array(1, 2, 3), Array(1, 2, 3), Array(1, 2, 3), Array(1, 4, 6)
+
+    Call arr2dex.RowInsert(1, Array(2, 2, 3))
+    Call arr2dex.ColInsert(1, Array(9, 8, 7, 6, 5))
+    Call arr2dex.RowsInsert(2, Array(3, 2, 3, 2), Array(5, 5, 5, 5), Array(5, 5, 5, 5))
+    Call arr2dex.ColsInsert(2, ArrayUtils.Create2DArrayWithValue(Array(1, 2), Array(3, 4), Array(5, 6), Array(7, 8), Array(1, 2), Array(3, 4), Array(5, 6), Array(7, 8)))
+    Call arr2dex.RowRemove(0, 5)
+    Call arr2dex.ColRemove(2, 5)
+    Call arr2dex.RowRemoveAt(1)
+    Call arr2dex.ColRemoveAt(1)
+    DebugUtils.Show arr2dex.RowLastIndexOf(1, 2)
+    DebugUtils.Show arr2dex.ColLastIndexOf(2, 2)
+    Dim p As Array2DIndex: p = arr2dex.LastIndexOf(2)
+    DebugUtils.Show p.x & " " & p.y
+    DebugUtils.PrintVariantArray arr2dex.To2DArray
+    
+    Debug.Print "Join"
+    Debug.Print arr2dex.Join(",")
+    
+    Call arr2dex.RowRemoveRange(2, 3)
+    Call arr2dex.ColRemoveRange(1, 2)
+    DebugUtils.Show "RemoveRange"
+    Debug.Print arr2dex.Join(",")
+End Sub
+
+Sub TestArray2DEx008()
+    Dim arr2dex As Array2DEx
+    Set arr2dex = Core.Init(New Array2DEx)
+    arr2dex.DefaultInitValue = "none"
+    arr2dex.AddRows Array("山田太郎", "鈴木史郎", "竹田伸二"), Array("舞山記理子", "三原静子", "前山裕次郎"), Array("徳田綾子", "霧島司", "松尾三太夫"), Array("モリソン", "ローゼマイン", "フェルディナンド")
+    DebugUtils.PrintVariantArray arr2dex.To2DArray
+    
+    DebugUtils.PrintVariantArray arr2dex.RowSearch(1, "郎").ToArray
+    DebugUtils.PrintVariantArray arr2dex.ColSearch(0, "子").ToArray
+    DebugUtils.PrintVariantArray arr2dex.Search("郎").ToArray
+    
+    DebugUtils.Show "[正規表現]"
+    DebugUtils.PrintVariantArray arr2dex.RowRegexSearch(0, "^.*田.*$").ToArray
+    DebugUtils.PrintVariantArray arr2dex.ColRegexSearch(0, ".*子$").ToArray
+    DebugUtils.PrintVariantArray arr2dex.RegexSearch(".*子$").ToArray
+End Sub
+
+' Test ValidateUtils -------------------------------------------------------------------------------
 
 Sub TestValidateUtils001()
     Dim dic As Object

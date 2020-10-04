@@ -111,8 +111,10 @@ End Function
 '*
 '******************************************************************************
 Public Function AppendLine(ByVal val As String, Optional ByVal lineSeparator As String = vbNewLine) As StringEx
-    If Mid$(mBuffer, mLength, 1) <> lineSeparator Then
-        Append lineSeparator
+    If mLength > 0 Then
+        If Not StringUtils.Contains(Mid$(mBuffer, mLength - 1, 2), lineSeparator) Then
+            Append lineSeparator
+        End If
     End If
     Set AppendLine = Append(val).Append(lineSeparator)
 End Function

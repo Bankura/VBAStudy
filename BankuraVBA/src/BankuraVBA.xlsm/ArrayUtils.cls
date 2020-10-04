@@ -1230,20 +1230,20 @@ Public Function Array2DExTo2DArray(ByVal arr2dex As Array2DEx) As Variant
     If ubOut < 0 Then GoTo Ending
     
     lbInnFst = 0
-    ubInnFst = arr2dex(lbOut).LastIndex
+    ubInnFst = arr2dex.ColMaxIndex
     
     ReDim arr2d(lbOut To ubOut, lbInnFst To ubInnFst)
-    If IsObject(arr2dex(lbOut)(lbInnFst)) Then
+    If IsObject(arr2dex(lbOut, lbInnFst)) Then
         For ixOut = lbOut To ubOut
             lbInn = 0
             ubInn = arr2dex.ColMaxIndex
-            For ixInn = lbInn To ubInn: Set arr2d(ixOut, ixInn) = arr2dex(ixOut)(ixInn): Next
+            For ixInn = lbInn To ubInn: Set arr2d(ixOut, ixInn) = arr2dex(ixOut, ixInn): Next
         Next
     Else
         For ixOut = lbOut To ubOut
             lbInn = 0
             ubInn = arr2dex.ColMaxIndex
-            For ixInn = lbInn To ubInn: arr2d(ixOut, ixInn) = arr2dex(ixOut)(ixInn): Next
+            For ixInn = lbInn To ubInn: arr2d(ixOut, ixInn) = arr2dex(ixOut, ixInn): Next
         Next
     End If
 

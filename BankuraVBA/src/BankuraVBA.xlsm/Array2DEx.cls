@@ -36,6 +36,7 @@ Private mRowLength As Long
 Private mColLength As Long
 Private mRowMaxIndex As Long
 Private mColMaxIndex As Long
+Private mDefaultInitValue As Variant
 
 '******************************************************************************
 '* プロパティ定義
@@ -69,8 +70,9 @@ End Property
 '* Item プロパティ
 '*-----------------------------------------------------------------------------
 Public Property Get Item(ByVal x As Long, ByVal y As Long) As Variant
+Attribute Item.VB_UserMemId = 0
     If IsInvalidIndex(x, y) Then
-        Item = Empty
+        Item = mDefaultInitValue
         Exit Property
     End If
     If IsObject(m2DItems(x)(y)) Then
@@ -96,7 +98,6 @@ End Property
 '*-----------------------------------------------------------------------------
 Public Property Get XRow(ByVal x As Long) As ArrayEx
     If IsInvalidRowIndex(x) Then
-        Set XRow = Empty
         Exit Property
     End If
     Set XRow = Core.Init(New ArrayEx, m2DItems(x).ToArray)
@@ -143,6 +144,20 @@ Public Property Let YColumn(ByVal y As Long, ByVal arg As ArrayEx)
     Next
 End Property
 
+'*-----------------------------------------------------------------------------
+'* DefaultInitValue プロパティ
+'*-----------------------------------------------------------------------------
+Public Property Get DefaultInitValue() As Variant
+    DefaultInitValue = mDefaultInitValue
+End Property
+Public Property Let DefaultInitValue(ByVal arg)
+    If IsObject(arg) Then
+        Set mDefaultInitValue = arg
+    Else
+        mDefaultInitValue = arg
+    End If
+End Property
+
 '******************************************************************************
 '* コンストラクタ・デストラクタ
 '******************************************************************************
@@ -163,6 +178,11 @@ End Sub
 '*
 '******************************************************************************
 Public Function Init(Optional ByVal val) As Array2DEx
+    If VBA.IsMissing(val) Then
+        Call Clear
+        Set Init = Me
+        Exit Function
+    End If
     If ArrayUtils.Is2DArray(val) Then
         mRowMaxIndex = UBound(val, 1)
         mColMaxIndex = UBound(val, 2)
@@ -171,7 +191,8 @@ Public Function Init(Optional ByVal val) As Array2DEx
         Set m2DItems = New ArrayEx
         Dim i As Long, j As Long
         For i = LBound(val, 1) To UBound(val, 1)
-            Dim row As New ArrayEx
+            Dim row As ArrayEx
+            Set row = New ArrayEx
             For j = LBound(val, 2) To UBound(val, 2)
                 row.Add val(i, j)
             Next
@@ -191,8 +212,14 @@ Public Function Init(Optional ByVal val) As Array2DEx
             mRowMaxIndex = val.LastIndex
             mRowLength = val.Length
             mColMaxIndex = val(0).LastIndex
-            mColLength = val(0).ColLength
+            mColLength = val(0).Length
         End If
+    ElseIf ArrayUtils.IsJagArray(val) Then
+        Call Clear
+        Dim v
+        For Each v In val
+            Me.AddRow v
+        Next
     ElseIf ArrayUtils.Is1DArray(val) Or ValidateUtils.IsArrayEx(val) Then
         Call Clear
         Call Me.AddRow(val)
@@ -215,12 +242,13 @@ Public Function Clear() As Array2DEx
     mColLength = 0
     mRowMaxIndex = -1
     mColMaxIndex = -1
+    mDefaultInitValue = Empty
     Set m2DItems = New ArrayEx
     Set Clear = Me
 End Function
 
 Private Function IsInvalidIndex(ByVal x As Long, ByVal y As Long) As Boolean
-    IsInvalidIndex = IsInvalidRowIndex(x) Or IsInvalidRowIndex(y)
+    IsInvalidIndex = IsInvalidRowIndex(x) Or IsInvalidColIndex(y)
 End Function
 Private Function IsInvalidRowIndex(ByVal idx As Long) As Boolean
     IsInvalidRowIndex = (idx < 0 Or mRowMaxIndex < idx)
@@ -284,9 +312,20 @@ Public Function ToArrayExOfArrayEx() As ArrayEx
 End Function
 
 '******************************************************************************
+'* [概  要] ToArrayOfArrayEx
+'* [詳  細] ArrayExを要素とするVariant配列の形式でデータを返却する｡
+'*
+'* @return Array(Of ArrayEx)
+'*
+'******************************************************************************
+Public Function ToArrayOfArrayEx() As Variant
+    ToArrayOfArrayEx = m2DItems.ToArray
+End Function
+
+'******************************************************************************
 '* [概  要] ExpandRows
 '* [詳  細] 行を追加する｡
-'*          追加した行の値はEmptyを設定する。
+'*          追加した行の値はDefaultInitValueの値を設定する。
 '*
 '* @param xAddRowCount 追加行数
 '*
@@ -296,7 +335,7 @@ Public Sub ExpandRows(ByVal xAddRowCount As Long)
     For i = 1 To xAddRowCount
         Dim row As ArrayEx: Set row = New ArrayEx
         For j = 0 To mColMaxIndex
-            row.Add Empty
+            row.Add mDefaultInitValue
         Next
         m2DItems.Add row
     Next
@@ -307,7 +346,7 @@ End Sub
 '******************************************************************************
 '* [概  要] ExpandColumns
 '* [詳  細] 列を追加する｡
-'*          追加した列の値はEmptyを設定する。
+'*          追加した列の値はDefaultInitValueの値を設定する。
 '*
 '* @param yAddColCount 追加列数
 '*
@@ -317,7 +356,7 @@ Public Sub ExpandColumns(ByVal yAddColCount As Long)
     For i = 0 To mRowMaxIndex
         Dim row As ArrayEx: Set row = m2DItems(i)
         For j = 1 To yAddColCount
-            row.Add Empty
+            row.Add mDefaultInitValue
         Next
     Next
     mColLength = mColLength + yAddColCount
@@ -327,7 +366,7 @@ End Sub
 '******************************************************************************
 '* [概  要] Expand
 '* [詳  細] 行列を追加する｡
-'*          追加した行/列の値はEmptyを設定する。
+'*          追加した行/列の値はDefaultInitValueの値を設定する。
 '*
 '* @param xAddRowCount 追加行数
 '* @param yAddColCount 追加列数
@@ -337,6 +376,7 @@ Public Sub Expand(ByVal xAddRowCount As Long, ByVal yAddColCount As Long)
     Call ExpandRows(xAddRowCount)
     Call ExpandColumns(yAddColCount)
 End Sub
+
 '******************************************************************************
 '* [概  要] AddRow
 '* [詳  細] 行を追加する｡
@@ -353,7 +393,7 @@ Public Function AddRow(ByVal var As Variant) As Array2DEx
         Set arrex = Core.Init(New ArrayEx, var)
     ElseIf ValidateUtils.IsArrayEx(var) Then
         colLen = var.Length
-        Set arrex = var
+        Set arrex = var.Clone
     Else
         Err.Raise 9999, "Array2DEx#AddRow", "Invalid argument."
     End If
@@ -363,6 +403,10 @@ Public Function AddRow(ByVal var As Variant) As Array2DEx
         Call ExpandColumns(addCount)
     End If
     
+    Dim y As Long
+    For y = arrex.LastIndex + 1 To mColMaxIndex
+        arrex.Add mDefaultInitValue
+    Next
     m2DItems.Add arrex
     mRowLength = mRowLength + 1
     mRowMaxIndex = mRowMaxIndex + 1
@@ -380,24 +424,22 @@ End Function
 Public Function AddRows(ByVal var As Variant, ParamArray vars() As Variant) As Array2DEx
     Dim colLen As Long
     Dim arr2dex As Array2DEx
-    If ArrayUtils.Is2DArray(var) Then
-        colLen = ArrayUtils.GetLength(var, 2)
-        Set arr2dex = Core.Init(New Array2DEx, var)
-    ElseIf ValidateUtils.IsArray2DEx(var) Then
-        colLen = var.ColLength
-        Set arr2dex = var
-    Else
-        Err.Raise 9999, "Array2DEx#AddRows", "Invalid argument."
-    End If
+    Set arr2dex = Core.Init(New Array2DEx, var)
+    colLen = arr2dex.ColLength
 
     If mColLength < colLen Then
         Dim addCount As Long: addCount = colLen - mColLength
         Call ExpandColumns(addCount)
     End If
     
-    Dim i As Long
-    For i = 0 To arr2dex.RowMaxIndex
-        m2DItems.Add arr2dex.XRow(i)
+    Dim x As Long
+    For x = 0 To arr2dex.RowMaxIndex
+        Dim y As Long, rowArrex As ArrayEx
+        Set rowArrex = arr2dex.XRow(x)
+        For y = arr2dex.ColMaxIndex + 1 To mColMaxIndex
+            rowArrex.Add mDefaultInitValue
+        Next
+        m2DItems.Add rowArrex
     Next
     mRowLength = mRowLength + arr2dex.RowLength
     mRowMaxIndex = mRowMaxIndex + arr2dex.RowLength
@@ -458,15 +500,8 @@ End Function
 Public Function AddColumns(ByVal var As Variant, ParamArray vars() As Variant) As Array2DEx
     Dim rowLen As Long
     Dim arr2dex As Array2DEx
-    If ArrayUtils.Is2DArray(var) Then
-        rowLen = ArrayUtils.GetLength(var)
-        Set arr2dex = Core.Init(New Array2DEx, var)
-    ElseIf ValidateUtils.IsArray2DEx(var) Then
-        rowLen = var.RowLength
-        Set arr2dex = var
-    Else
-        Err.Raise 9999, "Array2DEx#AddColumns", "Invalid argument."
-    End If
+    Set arr2dex = Core.Init(New Array2DEx, var)
+    rowLen = arr2dex.RowLength
     
     If mRowLength < rowLen Then
         Dim addCount As Long: addCount = rowLen - mRowLength
@@ -474,9 +509,14 @@ Public Function AddColumns(ByVal var As Variant, ParamArray vars() As Variant) A
     End If
     
     Dim x As Long, y As Long
-    For x = 0 To mRowMaxIndex
+    For x = 0 To arr2dex.RowMaxIndex
         For y = 0 To arr2dex.ColMaxIndex
-            m2DItems(x).Add arr2dex(x)(y)
+            m2DItems(x).Add arr2dex(x, y)
+        Next
+    Next
+    For x = arr2dex.RowMaxIndex + 1 To mRowMaxIndex
+        For y = 0 To arr2dex.ColMaxIndex
+            m2DItems(x).Add mDefaultInitValue
         Next
     Next
     mColLength = mColLength + arr2dex.ColLength
@@ -530,7 +570,7 @@ Public Function Equals(ByVal arr2 As Variant) As Boolean
     
     Dim arr2dex As Array2DEx
     If ArrayUtils.Is2DArray(arr2) Then
-        arr2dex = Core.Init(New Array2DEx, arr2)
+        Set arr2dex = Core.Init(New Array2DEx, arr2)
     ElseIf ValidateUtils.IsArray2DEx(arr2) Then
         Set arr2dex = arr2
     End If
@@ -538,7 +578,7 @@ Public Function Equals(ByVal arr2 As Variant) As Boolean
     For x = 0 To mRowMaxIndex
         For y = 0 To mColMaxIndex
             Dim ret As Boolean
-            ret = Core.Eq(m2DItems(x)(y), arr2dex(x)(y))
+            ret = Core.Eq(m2DItems(x)(y), arr2dex(x, y))
             If ret <> True Then
                 Equals = False
                 Exit Function
@@ -560,7 +600,7 @@ End Function
 '* @param cnt 要素数
 '* @return Long 列インデックス（一致なしの場合は-1）
 '******************************************************************************
-Public Function RowIndexOf(ByVal rowidx As Variant, ByVal val As Variant, Optional ByVal ixStart As Variant, Optional ByVal cnt As Variant) As Long
+Public Function RowIndexOf(ByVal rowidx As Variant, ByVal val As Variant, Optional ByVal ixStart As Long = 0, Optional ByVal cnt As Variant) As Long
     If IsInvalidRowIndex(rowidx) Then
         Err.Raise 9999, "Array2DEx#RowIndexOf", "Invalid argument."
     End If
@@ -580,7 +620,7 @@ End Function
 '* @param cnt 要素数
 '* @return Long 行インデックス（一致なしの場合は-1）
 '******************************************************************************
-Public Function ColIndexOf(ByVal colidx As Variant, ByVal val As Variant, Optional ByVal ixStart As Variant, Optional ByVal cnt As Variant) As Long
+Public Function ColIndexOf(ByVal colidx As Variant, ByVal val As Variant, Optional ByVal ixStart As Long = 0, Optional ByVal cnt As Variant) As Long
     If IsInvalidColIndex(colidx) Then
         Err.Raise 9999, "Array2DEx#ColIndexOf", "Invalid argument."
     End If
@@ -627,7 +667,7 @@ End Function
 '* @param ixStart 捜査開始行インデックス
 '* @return Long 行インデックス（一致なしの場合は-1）
 '******************************************************************************
-Public Function EntireRowIndexOf(ByVal rowData As Variant, Optional ByVal ixStart As Variant) As Long
+Public Function EntireRowIndexOf(ByVal rowData As Variant, Optional ByVal ixStart As Long = 0) As Long
     If IsInvalidRowIndex(ixStart) Then
         Err.Raise 9999, "Array2DEx#RowsIndexOf", "Invalid argument."
     End If
@@ -663,7 +703,7 @@ Public Sub ReverseRow()
 
     Dim tmprow As ArrayEx
     While ixL < ixU
-        Set tmprow = m2DItems(ixL): Set m2DItems(ixL) = m2DItems(ixU): Set m2DItems(ixU) = tmprow
+        Set tmprow = m2DItems(ixL): m2DItems(ixL) = m2DItems(ixU): m2DItems(ixU) = tmprow
         ixL = ixL + 1: ixU = ixU - 1
     Wend
 End Sub
@@ -710,7 +750,7 @@ Public Sub Sort(ByVal colidx As Long, Optional ByVal orderAsc As Boolean = True)
     Call arrex.Expend(mRowLength)
     Dim x As Long
     For x = 0 To mRowMaxIndex
-        Set arrex(x) = m2DItems(idxArr(x))
+        arrex(x) = m2DItems(idxArr(x))
     Next
     Set m2DItems = arrex
 End Sub
@@ -928,12 +968,12 @@ Public Function ColSlice(Optional ByVal idxStart As Variant, Optional ByVal idxE
         idxEnd = mColMaxIndex
     End If
     If IsInvalidColIndex(idxStart) Or IsInvalidColIndex(idxEnd) Then
-        Err.Raise 9999, "Array2DEx#SliceColumn", "Invalid argument."
+        Err.Raise 9999, "Array2DEx#ColSlice", "Invalid argument."
     End If
     
     Dim arr2dex As Array2DEx: Set arr2dex = New Array2DEx
     Dim x As Long
-    For x = 0 To mColMaxIndex
+    For x = 0 To mRowMaxIndex
         Dim row As ArrayEx: Set row = m2DItems(x)
         arr2dex.AddRow row.Slice(idxStart, idxEnd)
     Next
@@ -989,7 +1029,7 @@ Public Function Map(ByVal fun As Func) As Array2DEx
     
     Dim x As Long, y As Long
     For x = lb1 To ub1
-        For y = lb2 To lb2
+        For y = lb2 To ub2
             fun.FastApply ret(x, y), arr2d(x, y)
         Next
     Next
@@ -1337,7 +1377,7 @@ Public Function ColInsert(ByVal idx As Long, ByVal col As Variant) As Array2DEx
     End If
     
     Dim x As Long
-    For x = 0 To mRowLength
+    For x = 0 To mRowMaxIndex
         m2DItems(x).Insert idx, arrex(x)
     Next
 
@@ -1374,8 +1414,12 @@ Public Function RowsInsert(ByVal idx As Long, ByVal Rows As Variant, ParamArray 
         Dim addCount As Long: addCount = colLen - mColLength
         Call ExpandColumns(addCount)
     End If
-
-    m2DItems.InsertAll idx, arr2dex
+    
+    Dim v
+    For Each v In arr2dex.ToArrayOfArrayEx
+        m2DItems.Insert idx, v
+        idx = idx + 1
+    Next
     mRowLength = mRowLength + arr2dex.RowLength
     mRowMaxIndex = mRowMaxIndex + arr2dex.RowLength
 
@@ -1412,10 +1456,9 @@ Public Function ColsInsert(ByVal idx As Long, ByVal cols As Variant, ParamArray 
     End If
     
     Dim x As Long
-    For x = 0 To mRowLength
-        m2DItems(x).InsertAll idx, arr2dex.XRow(x)
+    For x = 0 To mRowMaxIndex
+        m2DItems(x).InsertAll idx, arr2dex.XRow(x).ToArray
     Next
-    m2DItems.InsertAll idx, arr2dex
     mColLength = mColLength + arr2dex.ColLength
     mColMaxIndex = mColMaxIndex + arr2dex.ColLength
 
@@ -1661,7 +1704,7 @@ End Function
 Public Function Join(Optional ByVal itemDelimiter As String, Optional ByVal rowDelimiter As String = vbCrLf, Optional ByVal wrapChar As String, Optional ByVal rmLineSeparator As Boolean = True) As String
     Dim x As Long, strex As StringEx: Set strex = New StringEx
     For x = 0 To mRowMaxIndex
-        strex.AppendLine m2DItems(x).Join(itemDelimiter, wrapChar, rmLineSeparator).ToArray, rowDelimiter
+        strex.AppendLine m2DItems(x).Join(itemDelimiter, wrapChar, rmLineSeparator), rowDelimiter
     Next
     Join = strex.ToString
 End Function
@@ -1709,7 +1752,9 @@ End Function
 Public Function Search(ByVal searchVal As Variant) As ArrayEx
     Dim x As Long, arrex As ArrayEx: Set arrex = New ArrayEx
     For x = 0 To mRowMaxIndex
-        arrex.Concat Me.RowSearch(x, searchVal).ToArray
+        Dim retarrex As ArrayEx
+        Set retarrex = Me.RowSearch(x, searchVal)
+        arrex.AddAll retarrex.ToArray
     Next
     Set Search = arrex
 End Function
@@ -1760,7 +1805,9 @@ End Function
 Public Function RegexSearch(ByVal searchStr As String, Optional ByVal igCase As Boolean = False) As ArrayEx
     Dim x As Long, arrex As ArrayEx: Set arrex = New ArrayEx
     For x = 0 To mRowMaxIndex
-        arrex.Concat Me.RowRegexSearch(x, searchStr, igCase).ToArray
+        Dim retarrex As ArrayEx
+        Set retarrex = Me.RowRegexSearch(x, searchStr, igCase)
+        arrex.AddAll retarrex.ToArray
     Next
     Set RegexSearch = arrex
 End Function

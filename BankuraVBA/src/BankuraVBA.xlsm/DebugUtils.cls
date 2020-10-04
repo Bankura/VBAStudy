@@ -51,6 +51,15 @@ End Sub
 '* メソッド定義
 '******************************************************************************
 
+Public Sub Show(var)
+    On Error GoTo ErrorHandler
+    Debug.Print var
+    Exit Sub
+ErrorHandler:
+    Debug.Print Err.Number, Err.source, Err.Description
+End Sub
+
+
 '******************************************************************************
 '* [概  要] Dump
 '* [詳  細] 指定した変数の内容をダンプ文字列に変換する。
@@ -84,6 +93,8 @@ End Sub
 '* @param vArr Variant配列
 '******************************************************************************
 Public Sub PrintVariantArray(vArr)
+    If ArrayUtils.IsEmptyArray(vArr) Then Exit Sub
+    
     Dim i As Long, j As Long, tmp As String
     For i = LBound(vArr, 1) To UBound(vArr, 1)
         If ArrayUtils.Is2DArray(vArr) Then

@@ -106,13 +106,19 @@ End Function
 '*
 '******************************************************************************
 Public Function Init(Optional ByVal val) As ArrayEx
+    If VBA.IsMissing(val) Then
+        Call Clear
+        Set Init = Me
+        Exit Function
+    End If
     If IsArray(val) Then
         xIndex = UBound(val)
         xLength = xIndex + 32
         xItems = val
-        ReDim xItems(xLength - 1)
+        ReDim Preserve xItems(xLength - 1)
     Else
         Call Clear
+        Call Add(val)
     End If
     Set Init = Me
 End Function

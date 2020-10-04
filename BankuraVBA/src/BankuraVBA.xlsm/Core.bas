@@ -364,7 +364,8 @@ End Function
 ''' @return As Variant(Of Boolean Or Null Or Empty)
 Public Function Equals( _
     ByVal x As Variant, ByVal y As Variant, _
-    Optional ByVal swAllowNull As Boolean = False _
+    Optional ByVal swAllowNull As Boolean = False, _
+    Optional ByVal strict As Boolean = False _
     ) As Variant
     
     Dim xIsObj As Boolean: xIsObj = IsObject(x)
@@ -377,7 +378,11 @@ Public Function Equals( _
         If xIsNul Or yIsNul Then
             If swAllowNull Then Equals = xIsNul And yIsNul Else Equals = Null
         Else
-            If TypeName(x) = TypeName(y) Then Equals = x = y Else Equals = Empty
+            If strict Then
+                If TypeName(x) = TypeName(y) Then Equals = x = y Else Equals = Empty
+            Else
+                Equals = x = y
+            End If
         End If
     End If
 End Function
@@ -792,7 +797,7 @@ Public Function ArrSlice( _
     
     Dim ret As Variant: ret = Array()
     Dim ubR As Long: ubR = ixEnd - ixStart
-    If ubR < 1 Then GoTo Ending
+    If ubR < 0 Then GoTo Ending
     
     ReDim ret(ubR)
     Dim isObj As Boolean: isObj = IsObject(arr(ixStart))
