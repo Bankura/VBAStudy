@@ -323,6 +323,23 @@ Public Function ToArrayOfArrayEx() As Variant
 End Function
 
 '******************************************************************************
+'* [概  要] ToJagArray
+'* [詳  細] JagArrayの形式でデータを返却する｡
+'*
+'* @return Array(Of Array)
+'*
+'******************************************************************************
+Public Function ToJagArray() As Variant
+    Dim arrex As ArrayEx: Set arrex = New ArrayEx
+    Dim v, var
+    var = m2DItems.ToArray
+    For Each v In var
+        arrex.Add v.ToArray
+    Next
+    ToJagArray = arrex.ToArray
+End Function
+
+'******************************************************************************
 '* [概  要] ExpandRows
 '* [詳  細] 行を追加する｡
 '*          追加した行の値はDefaultInitValueの値を設定する。
@@ -1811,3 +1828,14 @@ Public Function RegexSearch(ByVal searchStr As String, Optional ByVal igCase As 
     Next
     Set RegexSearch = arrex
 End Function
+
+'******************************************************************************
+'* [概  要] ToString
+'* [詳  細] JSON文字列に変換する。
+'*
+'* @return String JSON文字列
+'******************************************************************************
+Public Function ToString() As String
+    ToString = ArrayUtils.ToString(Me.ToJagArray)
+End Function
+

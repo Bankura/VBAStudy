@@ -232,7 +232,7 @@ Public Function Equals(ByVal arr2 As Variant, Optional ByVal swAllowNull As Bool
 End Function
 
 '******************************************************************************
-'* [概  要] ArrayCompare
+'* [概  要] Compare
 '* [詳  細] 一次元配列（x,y）を比較し、x=yであれば0、x<yであれば-1、x>y
 '*          であれば1を返却する。
 '*          AriawaseのCoreモジュールラッパーメソッド。
@@ -694,7 +694,7 @@ End Function
 '* [概  要] ToString
 '* [詳  細] JSON文字列に変換する。
 '*
-'* @return String 1次元配列
+'* @return String JSON文字列
 '******************************************************************************
 Public Function ToString() As String
     ToString = ArrayUtils.ToString(Me.ToArray)

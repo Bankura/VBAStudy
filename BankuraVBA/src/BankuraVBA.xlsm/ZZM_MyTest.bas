@@ -233,6 +233,22 @@ Sub TestArray2DEx008()
     DebugUtils.PrintVariantArray arr2dex.RegexSearch(".*Žq$").ToArray
 End Sub
 
+Sub TestArray2DEx009()
+    Dim arr2dex As Array2DEx
+    Set arr2dex = Core.Init(New Array2DEx)
+    arr2dex.DefaultInitValue = 0
+    arr2dex.AddRows Array(1, 2, 3), Array(1, 2, 3), Array(1, 2, 3), Array(1, 4, 6)
+
+    DebugUtils.Show arr2dex.ToString
+End Sub
+
+
+' Test ArrayEx -----------------------------------------------------------------------------------
+
+Sub TestArrayEx001_Init()
+
+End Sub
+
 ' Test ValidateUtils -------------------------------------------------------------------------------
 
 Sub TestValidateUtils001()
