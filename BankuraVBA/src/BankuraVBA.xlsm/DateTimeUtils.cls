@@ -625,3 +625,18 @@ Private Function GetHttpResponseText(ByVal Url As String) As String
     Set xmlHttp = Nothing
     GetHttpResponseText = res
 End Function
+
+'******************************************************************************
+'* [概  要] GetNendo
+'* [詳  細] 指定した日付から年度を取得する。
+'*
+'* @param sourceDate 日付
+'* @return Long 年度
+'******************************************************************************
+Public Function GetNendo(ByVal sourceDate As Date) As Long
+    If Month(sourceDate) <= 3 Then
+        GetNendo = Year(sourceDate) - 1
+        Exit Function
+    End If
+    GetNendo = Year(sourceDate)
+End Function
