@@ -52,6 +52,17 @@ Public Enum KindOfDigitsEnum
     digitRange
 End Enum
 
+'*-----------------------------------------------------------------------------
+'* 編集方法の種類。
+'*
+'*-----------------------------------------------------------------------------
+Public Enum EditKindEnum
+    edtNone
+    mstCodeToValue
+    mstValueToCode
+    useDefaultValue
+End Enum
+
 '******************************************************************************
 '* 内部変数定義
 '******************************************************************************
@@ -63,7 +74,7 @@ Private mKindOfDigits As KindOfDigitsEnum
 Private mMinNumOfDigits As Long
 Private mMaxNumOfDigits As Long
 Private mPattern As String
-Private mInputCsvColNo As Long
+Private mInputColNo As Long
 Private mInitValueKind As String
 Private mInitValue As String
 Private mOutputTarget As Boolean
@@ -105,12 +116,40 @@ Property Let Value(arg As String)
 End Property
 
 '*-----------------------------------------------------------------------------
+'* EditedValue プロパティ
+'*-----------------------------------------------------------------------------
+Property Get EditedValue() As String
+    EditedValue = mValue
+    If mForOutput Then
+        If mOutputEditValue <> "" Then
+            If mOutputEditKind = EditKindEnum.useDefaultValue Then
+                EditedValue = mOutputEditValue
+            ElseIf mOutputEditKind = EditKindEnum.mstCodeToValue Then
+                EditedValue = Base.GetMasterValueByCode(mOutputEditValue, mValue)
+            ElseIf mOutputEditKind = EditKindEnum.mstValueToCode Then
+                EditedValue = Base.GetMasterCodeByValue(mOutputEditValue, mValue)
+            End If
+        End If
+    Else
+        If mInitValue <> "" Then
+            If mInitValueKind = EditKindEnum.useDefaultValue Then
+                EditedValue = mInitValue
+            ElseIf mInitValueKind = EditKindEnum.mstCodeToValue Then
+                EditedValue = Base.GetMasterValueByCode(mInitValue, mValue)
+            ElseIf mInitValueKind = EditKindEnum.mstValueToCode Then
+                EditedValue = Base.GetMasterCodeByValue(mInitValue, mValue)
+            End If
+        End If
+    End If
+End Property
+
+'*-----------------------------------------------------------------------------
 '* Required プロパティ
 '*-----------------------------------------------------------------------------
-Property Get Required() As Boolean
-    Required = mRequired
+Property Get required() As Boolean
+    required = mRequired
 End Property
-Property Let Required(arg As Boolean)
+Property Let required(arg As Boolean)
     mRequired = arg
 End Property
 
@@ -165,22 +204,22 @@ Property Let Pattern(arg As String)
 End Property
 
 '*-----------------------------------------------------------------------------
-'* InputCsvColNo プロパティ
+'* InputColNo プロパティ
 '*-----------------------------------------------------------------------------
-Property Get InputCsvColNo() As Long
-    InputCsvColNo = mInputCsvColNo
+Property Get InputColNo() As Long
+    InputColNo = mInputColNo
 End Property
-Property Let InputCsvColNo(arg As Long)
-    mInputCsvColNo = arg
+Property Let InputColNo(arg As Long)
+    mInputColNo = arg
 End Property
 
 '*-----------------------------------------------------------------------------
 '* InitValueKind プロパティ
 '*-----------------------------------------------------------------------------
-Property Get InitValueKind() As String
+Property Get InitValueKind() As EditKindEnum
     InitValueKind = mInitValueKind
 End Property
-Property Let InitValueKind(arg As String)
+Property Let InitValueKind(arg As EditKindEnum)
     mInitValueKind = arg
 End Property
 
@@ -207,10 +246,10 @@ End Property
 '*-----------------------------------------------------------------------------
 '* OutputEditKind プロパティ
 '*-----------------------------------------------------------------------------
-Property Get OutputEditKind() As String
+Property Get OutputEditKind() As EditKindEnum
     OutputEditKind = mOutputEditKind
 End Property
-Property Let OutputEditKind(arg As String)
+Property Let OutputEditKind(arg As EditKindEnum)
     mOutputEditKind = arg
 End Property
 
@@ -227,10 +266,10 @@ End Property
 '*-----------------------------------------------------------------------------
 '* ForOutput プロパティ
 '*-----------------------------------------------------------------------------
-Property Get ForOutput() As Boolean
-    ForOutput = mForOutput
+Property Get forOutput() As Boolean
+    forOutput = mForOutput
 End Property
-Property Let ForOutput(arg As Boolean)
+Property Let forOutput(arg As Boolean)
     mForOutput = arg
 End Property
 
@@ -245,12 +284,7 @@ End Property
 '* コンストラクタ・デストラクタ
 '******************************************************************************
 Private Sub Class_Initialize()
-    On Error Resume Next
-    Set mRegExp = GetRegExp
-    On Error GoTo 0
-    If mRegExp Is Nothing Then
-        Set mRegExp = CreateObject("VBScript.RegExp")
-    End If
+    Set mRegExp = Base.GetRegExp
     mRequired = False
     mValidOk = False
     mRequiredOk = False
@@ -269,7 +303,7 @@ End Sub
 
 '******************************************************************************
 '* [概  要] 設定値バリデート処理。
-'* [詳  細] Valueの値を検証します｡
+'* [詳  細] Valueの値を検証する｡
 '*
 '* @return 検証結果
 '*
@@ -294,7 +328,7 @@ End Function
 
 '******************************************************************************
 '* [概  要] 必須チェック処理。
-'* [詳  細] Valueが必須項目か、設定されているかどうか判定します｡
+'* [詳  細] Valueが必須項目か、設定されているかどうか判定する｡
 '*
 '* @return 判定結果
 '*
@@ -311,7 +345,7 @@ End Function
 
 '******************************************************************************
 '* [概  要] 桁数チェック処理。
-'* [詳  細] Valueの桁数が妥当か判定します｡
+'* [詳  細] Valueの桁数が妥当か判定する｡
 '*
 '* @return 判定結果
 '*
@@ -341,7 +375,7 @@ End Function
 
 '******************************************************************************
 '* [概  要] 属性チェック処理。
-'* [詳  細] Valueの属性が妥当か判定します｡
+'* [詳  細] Valueの属性が妥当か判定する｡
 '*
 '* @return 判定結果
 '*
@@ -364,7 +398,7 @@ Public Function ValidateAttribute() As Boolean
                 Exit Function
             End If
         Case attrNumeric
-            If Not IsNumeric() Then
+            If Not IsNumber() Then
                 ValidateAttribute = False
                 Exit Function
             End If
@@ -404,19 +438,14 @@ End Function
 
 '******************************************************************************
 '* [概  要] パターンチェック処理。
-'* [詳  細] Valueがパターン通りかどうか判定します｡
+'* [詳  細] Valueがパターン通りかどうか判定する｡
 '*
 '* @return 判定結果
 '*
 '******************************************************************************
 Private Function ValidatePattern() As Boolean
     If Len(mValue) > 0 And mPattern <> "" Then
-        With mRegExp
-            .Pattern = mPattern
-            .IgnoreCase = False
-            .Global = True
-            ValidatePattern = .Test(mValue)
-        End With
+        ValidatePattern = ValidateUtils.ValidatePattern(mValue, mPattern)
         Exit Function
     End If
     ValidatePattern = True
@@ -436,14 +465,12 @@ Private Function ValidateMasterExists() As Boolean
     End If
     
     Dim val As String
-    Dim sInfo As SettingInfo: Set sInfo = GetSettingInfo()
-
     If mForOutput Then
         If mOutputEditValue <> "" Then
-            If mOutputEditKind = "マスタ変換（Code→Value）" Then
-                val = sInfo.GetMasterValueByCode(mOutputEditValue, mValue)
-            ElseIf mOutputEditKind = "マスタ変換（Value→Code）" Then
-                val = sInfo.GetMasterCodeByValue(mOutputEditValue, mValue)
+            If mOutputEditKind = EditKindEnum.mstCodeToValue Then
+                val = Base.GetMasterValueByCode(mOutputEditValue, mValue)
+            ElseIf mOutputEditKind = EditKindEnum.mstValueToCode Then
+                val = Base.GetMasterCodeByValue(mOutputEditValue, mValue)
             End If
             If val = "" Then
                 ValidateMasterExists = False
@@ -452,10 +479,10 @@ Private Function ValidateMasterExists() As Boolean
         End If
     Else
         If mInitValue <> "" Then
-            If mInitValueKind = "マスタ変換（Code→Value）" Then
-                val = sInfo.GetMasterValueByCode(mInitValue, mValue)
-            ElseIf mInitValueKind = "マスタ変換（Value→Code）" Then
-                val = sInfo.GetMasterCodeByValue(mInitValue, mValue)
+            If mInitValueKind = EditKindEnum.mstCodeToValue Then
+                val = Base.GetMasterValueByCode(mInitValue, mValue)
+            ElseIf mInitValueKind = EditKindEnum.mstValueToCode Then
+                val = Base.GetMasterCodeByValue(mInitValue, mValue)
             End If
             If val = "" Then
                 ValidateMasterExists = False
@@ -474,15 +501,7 @@ End Function
 '*
 '******************************************************************************
 Private Function IsHalf() As Boolean
-    Dim checkValue As String
-    If Len(mValue) > 0 Then
-        checkValue = StrConv(mValue, vbFromUnicode)
-        If Len(mValue) <> LenB(checkValue) Then
-            IsHalf = False
-            Exit Function
-        End If
-    End If
-    IsHalf = True
+    IsHalf = ValidateUtils.IsHalf(mValue)
 End Function
 
 '******************************************************************************
@@ -493,16 +512,7 @@ End Function
 '*
 '******************************************************************************
 Private Function IsHalfAlphaNumeric() As Boolean
-    Dim i As Long
-    If Len(mValue) > 0 Then
-        For i = 1 To Len(mValue)
-            If Not Mid(mValue, i, 1) Like "[0-9a-zA-Z]" Then
-                IsHalfAlphaNumeric = False
-                Exit Function
-            End If
-        Next
-    End If
-    IsHalfAlphaNumeric = True
+    IsHalfAlphaNumeric = ValidateUtils.IsHalfAlphaNumeric(mValue)
 End Function
 
 '******************************************************************************
@@ -513,16 +523,7 @@ End Function
 '*
 '******************************************************************************
 Private Function IsHalfAlphaNumericSymbol() As Boolean
-    If Len(mValue) > 0 Then
-        With mRegExp
-            .Pattern = "^[a-zA-Z0-9!-/:-@\[-`{-~]*$"
-            .IgnoreCase = False
-            .Global = True
-            IsHalfAlphaNumericSymbol = .Test(mValue)
-        End With
-        Exit Function
-    End If
-    IsHalfAlphaNumericSymbol = True
+    IsHalfAlphaNumericSymbol = ValidateUtils.IsHalfAlphaNumericSymbol(mValue)
 End Function
 
 '******************************************************************************
@@ -532,17 +533,8 @@ End Function
 '* @return 判定結果
 '*
 '******************************************************************************
-Private Function IsNumeric() As Boolean
-    Dim i As Long
-    If Len(mValue) > 0 Then
-        For i = 1 To Len(mValue)
-            If Not Mid(mValue, i, 1) Like "[0-9]" Then
-                IsNumeric = False
-                Exit Function
-            End If
-        Next
-    End If
-    IsNumeric = True
+Private Function IsNumber() As Boolean
+    IsNumber = ValidateUtils.IsNumber(mValue)
 End Function
 
 '******************************************************************************
@@ -553,16 +545,7 @@ End Function
 '*
 '******************************************************************************
 Private Function IsZenKatakana() As Boolean
-    If Len(mValue) > 0 Then
-        With mRegExp
-            .Pattern = "^[ァ-ンヴー]*$"
-            .IgnoreCase = False
-            .Global = True
-            IsZenKatakana = .Test(mValue)
-        End With
-        Exit Function
-    End If
-    IsZenKatakana = True
+    IsZenKatakana = ValidateUtils.IsZenKatakana(mValue)
 End Function
 
 '******************************************************************************
@@ -573,16 +556,7 @@ End Function
 '*
 '******************************************************************************
 Private Function IsZenHiragana() As Boolean
-    If Len(mValue) > 0 Then
-        With mRegExp
-            .Pattern = "^[ぁ-んー]*$"
-            .IgnoreCase = False
-            .Global = True
-            IsZenHiragana = .Test(mValue)
-        End With
-        Exit Function
-    End If
-    IsZenHiragana = True
+    IsZenHiragana = ValidateUtils.IsZenHiragana(mValue)
 End Function
 
 '******************************************************************************
@@ -593,26 +567,7 @@ End Function
 '*
 '******************************************************************************
 Private Function IsDate() As Boolean
-    Dim i As Long, tmp As String, tmpDate As String
-    If Len(mValue) > 0 Then
-        For i = 1 To Len(mValue)
-            tmp = Mid(mValue, i, 1)
-            If i <> 5 And i <> 8 And (tmp Like "[0-9]") Then
-                tmpDate = tmpDate & tmp
-            ElseIf (i = 5 Or i = 8) And (tmp <> "/") Then
-                IsDate = False
-                Exit Function
-            End If
-        Next
-        If Len(tmpDate) <> 8 Then
-            IsDate = False
-            Exit Function
-        End If
-        tmpDate = Format(tmpDate, "####/##/##")
-        IsDate = VBA.IsDate(tmpDate)
-        Exit Function
-    End If
-    IsDate = True
+    IsDate = ValidateUtils.IsDateString(mValue)
 End Function
 
 '******************************************************************************
@@ -623,16 +578,7 @@ End Function
 '*
 '******************************************************************************
 Private Function IsZipCode() As Boolean
-    If Len(mValue) > 0 Then
-        With mRegExp
-            .Pattern = "^\d{7}$|^\d{3}-\d{4}$"
-            .IgnoreCase = False
-            .Global = True
-            IsZipCode = .Test(mValue)
-        End With
-        Exit Function
-    End If
-    IsZipCode = True
+    IsZipCode = ValidateUtils.IsZipCode(mValue)
 End Function
 
 '******************************************************************************
@@ -643,16 +589,7 @@ End Function
 '*
 '******************************************************************************
 Private Function IsTelNo() As Boolean
-    If Len(mValue) > 0 Then
-        With mRegExp
-            .Pattern = "^0\d{9,10}$|^0\d{2,3}-\d{1,4}-\d{4}$"
-            .IgnoreCase = False
-            .Global = True
-            IsTelNo = .Test(mValue)
-        End With
-        Exit Function
-    End If
-    IsTelNo = True
+    IsTelNo = ValidateUtils.IsTelNo(mValue)
 End Function
 
 '******************************************************************************
@@ -663,16 +600,7 @@ End Function
 '*
 '******************************************************************************
 Private Function IsMailAddress() As Boolean
-    If Len(mValue) > 0 Then
-        With mRegExp
-            .Pattern = "^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$"
-            .IgnoreCase = False
-            .Global = True
-            IsMailAddress = .Test(mValue)
-        End With
-        Exit Function
-    End If
-    IsMailAddress = True
+    IsMailAddress = ValidateUtils.IsMailAddress(mValue)
 End Function
 
 '******************************************************************************
@@ -748,11 +676,11 @@ End Function
 '* @return エラーメッセージ
 '*
 '******************************************************************************
-Private Function EditMessage(ByVal body As String, ByVal msg As String, ByVal padVals) As String
-    If body = "" Then
+Private Function EditMessage(ByVal Body As String, ByVal msg As String, ByVal padVals) As String
+    If Body = "" Then
         EditMessage = FormatMessage(msg, padVals)
     Else
-        EditMessage = body + vbNewLine + FormatMessage(msg, padVals)
+        EditMessage = Body + vbNewLine + FormatMessage(msg, padVals)
     End If
 End Function
 
@@ -766,10 +694,31 @@ End Function
 '*
 '*******************************************************************************
 Private Function FormatMessage(msg As String, padVals) As String
-    Dim i As Integer, tmpTxt As String
-    tmpTxt = msg
-    For i = 0 To UBound(padVals)
-        tmpTxt = Replace(tmpTxt, "{" & i & "}", padVals(i))
-    Next i
-    FormatMessage = tmpTxt
+    FormatMessage = StringUtils.PlaceHolder(msg, padVals)
+End Function
+
+'******************************************************************************
+'* [概  要] Itemコピー処理。
+'* [詳  細] Itemオブジェクトのコピーを返却｡
+'*
+'* @return コピーしたItemオブジェクト
+'*
+'******************************************************************************
+Public Function Copy() As Item
+    Dim newItem As Item: Set newItem = New Item
+    newItem.Name = Me.Name
+    newItem.Value = Me.Value
+    newItem.required = Me.required
+    newItem.Attr = Me.Attr
+    newItem.KindOfDigits = Me.KindOfDigits
+    newItem.MinNumOfDigits = Me.MinNumOfDigits
+    newItem.MaxNumOfDigits = Me.MaxNumOfDigits
+    newItem.Pattern = Me.Pattern
+    newItem.InitValueKind = Me.InitValueKind
+    newItem.InitValue = Me.InitValue
+    newItem.InputColNo = Me.InputColNo
+    newItem.OutputTarget = Me.OutputTarget
+    newItem.OutputEditKind = Me.OutputEditKind
+    newItem.OutputEditValue = Me.OutputEditValue
+    Set Copy = newItem
 End Function

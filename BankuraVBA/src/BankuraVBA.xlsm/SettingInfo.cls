@@ -30,20 +30,49 @@ Private Const SETTING_SH_START_COL As Long = 4
 '******************************************************************************
 Private mMasters As Object 'Dictionary
 Private mSetting As Object 'Dictionary
+Private mSettingSheetName As String
+Private mSettingSheetStartRow As Long
+Private mSettingSheetStartCol As Long
 
 '******************************************************************************
 '* プロパティ定義
 '******************************************************************************
-'なし
+'*-----------------------------------------------------------------------------
+'* SettingSheetName プロパティ
+'*-----------------------------------------------------------------------------
+Public Property Get SettingSheetName() As String
+    SettingSheetName = mSettingSheetName
+End Property
+Public Property Let SettingSheetName(ByVal arg As String)
+    mSettingSheetName = arg
+End Property
+
+'*-----------------------------------------------------------------------------
+'* SettingSheetStartRow プロパティ
+'*-----------------------------------------------------------------------------
+Public Property Get SettingSheetStartRow() As Long
+    SettingSheetStartRow = mSettingSheetStartRow
+End Property
+Public Property Let SettingSheetStartRow(ByVal arg As Long)
+    mSettingSheetStartRow = arg
+End Property
+
+'*-----------------------------------------------------------------------------
+'* SettingSheetStartCol プロパティ
+'*-----------------------------------------------------------------------------
+Public Property Get SettingSheetStartCol() As Long
+    SettingSheetStartCol = mSettingSheetStartCol
+End Property
+Public Property Let SettingSheetStartCol(ByVal arg As Long)
+    mSettingSheetStartCol = arg
+End Property
 
 '******************************************************************************
 '* コンストラクタ・デストラクタ
 '******************************************************************************
 Private Sub Class_Initialize()
     Set mSetting = CreateObject("Scripting.Dictionary")
-    Call GetSettingInfo
     Set mMasters = CreateObject("Scripting.Dictionary")
-    Call GetMasterInfo
 End Sub
 Private Sub Class_Terminate()
     Set mMasters = Nothing
@@ -55,6 +84,25 @@ End Sub
 '******************************************************************************
 
 '******************************************************************************
+'* [概  要] Init メソッド
+'* [詳  細] 初期化用メソッド｡
+'*
+'* @param sSheetName 設定シート名
+'* @param sSheetStartRow 初期確保領域（バイト）
+'* @param sSheetStartCol 初期確保領域（バイト）
+'* @return SettingInfoオブジェクト
+'*
+'******************************************************************************
+Public Function Init(ByVal sSheetName As String, ByVal sSheetStartRow As Long, ByVal sSheetStartCol As Long) As SettingInfo
+    mSettingSheetName = sSheetName
+    mSettingSheetStartRow = sSheetStartRow
+    mSettingSheetStartCol = sSheetStartCol
+    Call GetSettingInfo
+    Call GetMasterInfo
+    Set Init = Me
+End Function
+
+'******************************************************************************
 '* [概  要] 設定情報取得処理。
 '* [詳  細] 設定情報を設定シートより取得し、保持します｡
 '*
@@ -62,8 +110,8 @@ End Sub
 Private Sub GetSettingInfo()
     Dim wb As Workbook, ws As Worksheet
     Set wb = Application.ThisWorkbook
-    Set ws = wb.Sheets(SETTING_SHEET_NAME)
-    Set mSetting = GetMasterDataFromSheet(ws, SETTING_SH_START_ROW, SETTING_SH_START_COL, 2)
+    Set ws = wb.Sheets(mSettingSheetName)
+    Set mSetting = GetMasterDataFromSheet(ws, mSettingSheetStartRow, mSettingSheetStartCol, 2)
 End Sub
 
 '******************************************************************************

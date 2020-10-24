@@ -30,20 +30,49 @@ Private Const SETTING_SH_START_COL As Long = 4
 '******************************************************************************
 Private mMasters As Object 'Dictionary
 Private mSetting As Object 'Dictionary
+Private mSettingSheetName As String
+Private mSettingSheetStartRow As Long
+Private mSettingSheetStartCol As Long
 
 '******************************************************************************
 '* プロパティ定義
 '******************************************************************************
-'なし
+'*-----------------------------------------------------------------------------
+'* SettingSheetName プロパティ
+'*-----------------------------------------------------------------------------
+Public Property Get SettingSheetName() As String
+    SettingSheetName = mSettingSheetName
+End Property
+Public Property Let SettingSheetName(ByVal arg As String)
+    mSettingSheetName = arg
+End Property
+
+'*-----------------------------------------------------------------------------
+'* SettingSheetStartRow プロパティ
+'*-----------------------------------------------------------------------------
+Public Property Get SettingSheetStartRow() As Long
+    SettingSheetStartRow = mSettingSheetStartRow
+End Property
+Public Property Let SettingSheetStartRow(ByVal arg As Long)
+    mSettingSheetStartRow = arg
+End Property
+
+'*-----------------------------------------------------------------------------
+'* SettingSheetStartCol プロパティ
+'*-----------------------------------------------------------------------------
+Public Property Get SettingSheetStartCol() As Long
+    SettingSheetStartCol = mSettingSheetStartCol
+End Property
+Public Property Let SettingSheetStartCol(ByVal arg As Long)
+    mSettingSheetStartCol = arg
+End Property
 
 '******************************************************************************
 '* コンストラクタ・デストラクタ
 '******************************************************************************
 Private Sub Class_Initialize()
     Set mSetting = CreateObject("Scripting.Dictionary")
-    Call GetSettingInfo
     Set mMasters = CreateObject("Scripting.Dictionary")
-    Call GetMasterInfo
 End Sub
 Private Sub Class_Terminate()
     Set mMasters = Nothing
@@ -55,6 +84,25 @@ End Sub
 '******************************************************************************
 
 '******************************************************************************
+'* [概  要] Init メソッド
+'* [詳  細] 初期化用メソッド｡
+'*
+'* @param sSheetName 設定シート名
+'* @param sSheetStartRow 初期確保領域（バイト）
+'* @param sSheetStartCol 初期確保領域（バイト）
+'* @return SettingInfoオブジェクト
+'*
+'******************************************************************************
+Public Function Init(ByVal sSheetName As String, ByVal sSheetStartRow As Long, ByVal sSheetStartCol As Long) As SettingInfo
+    mSettingSheetName = sSheetName
+    mSettingSheetStartRow = sSheetStartRow
+    mSettingSheetStartCol = sSheetStartCol
+    Call GetSettingInfo
+    Call GetMasterInfo
+    Set Init = Me
+End Function
+
+'******************************************************************************
 '* [概  要] 設定情報取得処理。
 '* [詳  細] 設定情報を設定シートより取得し、保持します｡
 '*
@@ -62,8 +110,8 @@ End Sub
 Private Sub GetSettingInfo()
     Dim wb As Workbook, ws As Worksheet
     Set wb = Application.ThisWorkbook
-    Set ws = wb.Sheets(SETTING_SHEET_NAME)
-    Set mSetting = GetMasterDataFromSheet(ws, SETTING_SH_START_ROW, SETTING_SH_START_COL, 2)
+    Set ws = wb.Sheets(mSettingSheetName)
+    Set mSetting = GetMasterDataFromSheet(ws, mSettingSheetStartRow, mSettingSheetStartCol, 2)
 End Sub
 
 '******************************************************************************
@@ -73,17 +121,11 @@ End Sub
 '******************************************************************************
 Private Sub GetMasterInfo()
     Dim mstHeadLetters As String: mstHeadLetters = GetSettingValue("MasterHeadLetters")
-    Dim startRow As Long: startRow = GetSettingValue("MasterStartRowNo")
-    Dim startCol As Long: startCol = GetSettingValue("MasterStartColNo")
+    Dim StartRow As Long: StartRow = GetSettingValue("MasterStartRowNo")
+    Dim StartCol As Long: StartCol = GetSettingValue("MasterStartColNo")
     
     Dim reg As Object
-    On Error Resume Next
     Set reg = GetRegExp()
-    On Error GoTo 0
-    If reg Is Nothing Then
-        Set reg = CreateObject("VBScript.RegExp")
-    End If
-    
     With reg
         .Pattern = "^" & mstHeadLetters & ".*"
         .IgnoreCase = True
@@ -95,7 +137,7 @@ Private Sub GetMasterInfo()
     For Each ws In wb.Worksheets
         If reg.Test(ws.Name) Then
             Dim master As Object
-            Set master = GetMasterDataFromSheet(ws, startRow, startCol, 2)
+            Set master = GetMasterDataFromSheet(ws, StartRow, StartCol, 2)
             Call mMasters.Add(ws.Name, master)
         End If
     Next
@@ -112,7 +154,7 @@ End Sub
 '*
 '******************************************************************************
 Private Function GetMasterDataFromSheet(dataSheet As Worksheet, lStartRow As Long, lStartCol As Long, Optional colCount As Long) As Object
-    Dim vArr: vArr = GetVariantDataFromSheet(dataSheet, lStartRow, lStartCol, colCount)
+    Dim vArr: vArr = XlWorkSheetUtils.GetVariantDataFromSheet(dataSheet, lStartRow, lStartCol, colCount)
     If IsEmpty(vArr) Then
         Exit Function
     End If
@@ -134,9 +176,9 @@ End Function
 '* @return 設定値
 '*
 '******************************************************************************
-Public Function GetSettingValue(ByVal key As String) As String
-    If mSetting.Exists(key) Then
-        GetSettingValue = mSetting.Item(key)
+Public Function GetSettingValue(ByVal Key As String) As String
+    If mSetting.Exists(Key) Then
+        GetSettingValue = mSetting.Item(Key)
     Else
         GetSettingValue = ""
     End If
@@ -193,7 +235,7 @@ Public Function GetMasterCodeByValue(ByVal masterName As String, ByVal val As St
     Dim master As Object, vKey
     If mMasters.Exists(masterName) Then
         Set master = mMasters.Item(masterName)
-        For Each vKey In master.Keys
+        For Each vKey In master.keys
             If master.Item(vKey) = val Then
                 GetMasterCodeByValue = CStr(vKey)
                 Exit Function

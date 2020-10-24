@@ -29,7 +29,8 @@ Private mUser As String
 '*
 '******************************************************************************
 Private Sub Workbook_Open()
-    Call GotoSheet(TOOL_SHEET_NAME)
+    Call XlWorkSheetUtils.GotoSheet(TOOL_SHEET_NAME)
+    Call XlWorkSheetUtils.ProtectSheet(TOOL_SHEET_NAME, TOOL_PASSWORD)
 End Sub
 
 '******************************************************************************
@@ -42,7 +43,7 @@ Private Sub Workbook_BeforeSave(ByVal SaveAsUI As Boolean, Cancel As Boolean)
         .ScreenUpdating = False
     End With
     
-    Call GotoSheet("title")
+    Call XlWorkSheetUtils.GotoSheet("title")
 
     'UserName‚ð‘Þ”ð
     mUser = Application.UserName
@@ -71,7 +72,7 @@ Private Sub Workbook_AfterSave(ByVal Success As Boolean)
     'UserName‚ðŒ³‚É–ß‚·
     Application.UserName = mUser
     
-    Call GotoSheet(TOOL_SHEET_NAME)
+    Call XlWorkSheetUtils.GotoSheet(TOOL_SHEET_NAME)
     With Application
         .ScreenUpdating = True
     End With

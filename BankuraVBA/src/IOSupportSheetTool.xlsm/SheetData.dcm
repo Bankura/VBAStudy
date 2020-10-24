@@ -13,16 +13,16 @@ Option Explicit
 Private Sub Worksheet_Change(ByVal Target As Range)
     On Error GoTo ErrorHandler
     If dsKoubanCol = 0 Then
-        Call Init
+        Call MyInit
     End If
-    If Target.Row >= dsStartRow Then
+    If Target.row >= dsStartRow Then
         Call MyUnprotectSheet
         Dim rng As Range
         For Each rng In Target.Rows
-            If WorksheetFunction.counta(Me.Range(Me.Cells(rng.Row, dsStartCol), Me.Cells(rng.Row, dsStartCol + dsItemCount - 2))) > 0 Then
-                Me.Cells(rng.Row, dsKoubanCol).Value = rng.Row - dsStartRow + 1
+            If WorksheetFunction.CountA(Me.Range(Me.Cells(rng.row, dsStartCol), Me.Cells(rng.row, dsStartCol + dsItemCount - 2))) > 0 Then
+                Me.Cells(rng.row, dsKoubanCol).Value = rng.row - dsStartRow + 1
             Else
-                Me.Cells(rng.Row, dsKoubanCol).Value = ""
+                Me.Cells(rng.row, dsKoubanCol).Value = ""
             End If
         Next
         Call MyProtectSheet

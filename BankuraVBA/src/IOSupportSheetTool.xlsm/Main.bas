@@ -11,21 +11,6 @@ Option Explicit
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 '******************************************************************************
-'* WinowsAPI関数定義
-'******************************************************************************
-#If VBA7 Then
-    'プログラムを任意の時間だけ待機させるAPI関数
-    Public Declare PtrSafe Sub Sleep Lib "kernel32" (ByVal ms As LongPtr)
-    'イベントキュー待機中のイベントチェックAPI
-    Public Declare PtrSafe Function GetInputState Lib "user32" () As Long
-#Else
-    'プログラムを任意の時間だけ待機させるAPI関数
-    Public Declare Sub Sleep Lib "kernel32" (ByVal ms As Long)
-    'イベントキュー待機中のイベントチェックAPI
-    Public Declare Function GetInputState Lib "user32" () As Long
-#End If
-
-'******************************************************************************
 '* 定数定義
 '******************************************************************************
 'ツール名
@@ -40,6 +25,10 @@ Public Const INPUTCSV_SHEET_NAME As String = "inputcsv_setting"
 Public Const FORM_SHEET_NAME As String = "form_setting"
 'HELP（使い方）シート名
 Public Const HELP_SHEET_NAME As String = "help"
+'設定シート情報
+Private Const SETTING_SHEET_NAME As String = "setting"
+Private Const SETTING_SH_START_ROW As Long = 4
+Private Const SETTING_SH_START_COL As Long = 4
 
 '******************************************************************************
 '* Enum定義
@@ -49,11 +38,6 @@ Public Const HELP_SHEET_NAME As String = "help"
 '******************************************************************************
 '* 変数定義
 '******************************************************************************
-Private mDisplayAlerts As Boolean
-Private mScreenUpdating As Boolean
-Private mCalculation As Long
-Private mEnableEvents As Boolean
-Private mRegExp As Object
 Private mSettingInfo As SettingInfo
 Private csStartRow As Long
 Private csStartCol As Long
@@ -66,8 +50,6 @@ Public dsStartCol As Long
 Public dsKoubanCol As Long
 Public dsItemCount As Long
 
-Private mTime As Variant
-
 '******************************************************************************
 '* 関数定義
 '******************************************************************************
@@ -77,9 +59,13 @@ Private mTime As Variant
 '* [詳  細] 初期化の処理を行う。
 '*
 '******************************************************************************
-Public Sub Init()
-    Call GetSettingInfo
-    Call SaveApplicationProperties
+Public Sub MyInit()
+    Base.SettingSheetName = SETTING_SHEET_NAME
+    Base.SettingSheetStartRow = SETTING_SH_START_ROW
+    Base.SettingSheetStartCol = SETTING_SH_START_COL
+    
+    Set mSettingInfo = Base.GetSettingInfo
+    Call Base.SaveApplicationProperties
     csStartRow = mSettingInfo.GetSettingValue("InputCsvSettingStartRowNo")
     csStartCol = mSettingInfo.GetSettingValue("InputCsvSettingStartColNo")
     csItemCount = mSettingInfo.GetSettingValue("InputCsvSettingItemCount")
@@ -99,27 +85,33 @@ End Sub
 '******************************************************************************
 Public Sub ReadFileButton_Click()
     On Error GoTo ErrorHandler
-    Call Init
+    Call MyInit
 
-    Dim fReader As FileReader
-    Set fReader = New FileReader
-
-    'ダイアログ表示
+    Dim fReader As CsvFileReader
+    Set fReader = New CsvFileReader
+    fReader.QuotExists = True
+    
+    'Dim myReporter As SBProgressReporter: Set myReporter = New SBProgressReporter
+    Dim myReporter As FormProgressReporter: Set myReporter = New FormProgressReporter
+    myReporter.BaseMessage = "CSV読込処理中"
+    Set fReader.ProgressReporter = myReporter
+    
+    ' ダイアログ表示
     fReader.ShowCsvFileDialog
     
-    'ファイルが選択されていれば読込を実行
+    ' ファイルが選択されていれば読込を実行
     If fReader.FileExists Then
-        Call StartProcess
+        Call MyStartProcess
         
-        '入力CSV定義情報読込
-        Dim rf As RecordFormat: Set rf = New RecordFormat
-        Call rf.GetItemDataFromSheet(ThisWorkbook.Sheets(INPUTCSV_SHEET_NAME), csStartRow, csStartCol, csItemCount)
-        
-        'CSVファイル読込
+        ' 入力CSV定義情報読込
+        Dim rf As RecordFormat
+        Set rf = GetDefinedRecordFormatFromSheet(INPUTCSV_SHEET_NAME, csStartRow, csStartCol, csItemCount)
+
+        ' CSVファイル読込
         fReader.HeaderExists = True
-        Dim vArr: vArr = fReader.ReadTextFileToVArray
+        Dim csvData As Array2DEx: Set csvData = fReader.Read
         
-        If IsEmpty(vArr) Then
+        If csvData.IsEmptyArray() Then
             If fReader.ValidFormat Then
                 Call Err.Raise(9999, "CSVファイル読込処理", "読込ファイルにデータがありません。")
             Else
@@ -127,36 +119,38 @@ Public Sub ReadFileButton_Click()
             End If
         End If
         
-        'デバッグ出力
-        'Call PrintVariantArray(vArr)
-        
-        'データ検証
-        If Not rf.Validate(vArr) Then
+        ' データ検証
+        myReporter.BaseMessage = "CSVデータ検証中"
+        Set rf.ProgressReporter = myReporter
+        If Not rf.Validate(csvData) Then
+            DebugUtils.Show rf.ErrMessage
             Call Err.Raise(9999, "CSVファイル読込処理", "読込ファイルのフォーマットが不正です。")
         End If
         
-        'フォーム項目定義情報読込
-        Dim formRecDef As RecordFormat: Set formRecDef = New RecordFormat
-        Call formRecDef.GetItemDataFromSheet(ThisWorkbook.Sheets(FORM_SHEET_NAME), fmStartRow, fmStartCol, fmItemCount)
+        ' フォーム項目定義情報読込
+        Dim formRecDef As RecordFormat
+        Set formRecDef = GetDefinedRecordFormatFromSheet(FORM_SHEET_NAME, fmStartRow, fmStartCol, fmItemCount)
         
-        'フォーム項目定義に基づきCSVデータをシート出力用フォームデータに変換
-        Dim vFormArr: vFormArr = formRecDef.GetFormVariantData(vArr)
-        Call CheckEvents
+        ' 項目定義に基づきCSVデータをシート出力用フォームデータに変換
+        myReporter.BaseMessage = "シートデータ変換処理中"
+        Set formRecDef.ProgressReporter = myReporter
+        Dim formData As Array2DEx: Set formData = formRecDef.Convert(csvData)
+        Call UXUtils.CheckEvents
 
         'シートをクリア
-        Dim mysheet As Worksheet
-        Set mysheet = ThisWorkbook.Sheets(TOOL_SHEET_NAME)
-        Call ClearActualUsedRangeFromSheet(mysheet, dsStartRow, dsKoubanCol, dsItemCount)
-        Call DeleteNoUsedRange(mysheet, dsStartRow)
-        Call CheckEvents
+        Dim mysheet As WorkSheetEx
+        Set mysheet = Core.Init(New WorkSheetEx, TOOL_SHEET_NAME)
+        Call mysheet.ClearActualUsedRange(dsStartRow, dsKoubanCol, dsItemCount)
+        Call mysheet.DeleteNoUsedRange(dsStartRow)
+        Call UXUtils.CheckEvents
         
         'シートに出力
-        Call InjectVariantArrayToCells(mysheet, vFormArr, dsStartRow, dsStartCol)
-        Call CheckEvents
-        Call InjectNumbersToIndexCells(mysheet, dsStartRow, dsKoubanCol, UBound(vFormArr, 1) - LBound(vFormArr, 1) + 1)
-        Call CheckEvents
+        Call mysheet.ImportArray(formData, dsStartRow, dsStartCol)
+        Call UXUtils.CheckEvents
+        Call mysheet.NumbersToIndexCells(dsStartRow, dsKoubanCol, formData.RowLength)
+        Call UXUtils.CheckEvents
 
-        Call EndProcess
+        Call MyEndProcess
         
         mysheet.Cells(dsStartRow, dsStartCol).Select
         MsgBox "CSVファイルの読込が完了しました｡", vbOKOnly + vbInformation, TOOL_NAME
@@ -164,8 +158,8 @@ Public Sub ReadFileButton_Click()
 
     Exit Sub
 ErrorHandler:
-    Call EndProcess
-    Call ErrorProcess
+    Call MyEndProcess
+    Call MyErrorProcess
 End Sub
 
 '******************************************************************************
@@ -175,38 +169,53 @@ End Sub
 '******************************************************************************
 Public Sub OutputFileButton_Click()
     On Error GoTo ErrorHandler
-    Call Init
+    Call MyInit
     
-    Dim mysheet As Worksheet
-    Set mysheet = ThisWorkbook.Sheets(TOOL_SHEET_NAME)
+    Dim mysheet As WorkSheetEx
+    Set mysheet = Core.Init(New WorkSheetEx, TOOL_SHEET_NAME)
     
-    Dim fWriter As FileWriter
-    Set fWriter = New FileWriter
+    ' 項目定義情報読込
+    Dim rf As RecordFormat
+    Set rf = GetDefinedRecordFormatFromSheet(FORM_SHEET_NAME, fmStartRow, fmStartCol, fmItemCount)
     
-    '項目データ読込・データ検証
-    Dim rf As RecordFormat: Set rf = CheckDataSheet(mysheet)
-    If rf Is Nothing Then
+    ' 項目データ読込・データ検証
+    Dim formData As Array2DEx: Set formData = CheckDataSheet(mysheet, rf)
+    If formData Is Nothing Then
         Exit Sub
     End If
 
-    'デバッグ出力
-    'Call PrintRecordSet(rf)
+    ' ファイル出力準備
+    Dim fWriter As CsvFileWriter
+    Set fWriter = New CsvFileWriter
+    fWriter.EnclosureChar = """"
+    fWriter.WillRemoveNewlineCode = True
 
-    '出力先選択ダイアログ表示
+    ' 出力先選択ダイアログ表示
     If fWriter.ShowCsvSaveFileDialog <> "" Then
         Dim ret As Long: ret = vbYes
         If fWriter.FileExists Then
             ret = MsgBox("既にファイルが存在します。" & vbCrLf & "上書きしてよろしいですか。", vbYesNo + vbQuestion, TOOL_NAME)
         End If
-    
-        If ret = vbYes Then
-            Call StartProcess
-            
-            'ファイル出力
-            fWriter.HeaderExists = True
-            Call fWriter.WriteTextFileFromRecordSet(rf)
 
-            Call EndProcess
+        If ret = vbYes Then
+            Call MyStartProcess
+            
+            ' 項目データ編集
+            Dim myReporter As FormProgressReporter: Set myReporter = New FormProgressReporter
+            myReporter.BaseMessage = "項目データ編集中"
+            Set rf.ProgressReporter = myReporter
+            Dim editedFormData As Array2DEx
+            Set editedFormData = rf.Convert(formData, True)
+            
+            ' ファイル出力
+            'Dim myReporter As SBProgressReporter: Set myReporter = New SBProgressReporter
+            myReporter.BaseMessage = "CSV出力処理中"
+            Set fWriter.ProgressReporter = myReporter
+            fWriter.HeaderExists = True
+            Set fWriter.ItemNames = rf.ItemNames
+            Call fWriter.WriteFile(editedFormData)
+
+            Call MyEndProcess
             
             MsgBox "CSVファイルの出力が完了しました｡", vbOKOnly + vbInformation, TOOL_NAME
         End If
@@ -214,8 +223,8 @@ Public Sub OutputFileButton_Click()
 
     Exit Sub
 ErrorHandler:
-    Call EndProcess
-    Call ErrorProcess
+    Call MyEndProcess
+    Call MyErrorProcess
 End Sub
 
 '******************************************************************************
@@ -225,27 +234,27 @@ End Sub
 '******************************************************************************
 Public Sub DeleteRowButton_Click()
     On Error GoTo ErrorHandler
-    Call Init
-    Dim mysheet As Worksheet
-    Set mysheet = ThisWorkbook.Sheets(TOOL_SHEET_NAME)
+    Call MyInit
+    Dim mysheet As WorkSheetEx
+    Set mysheet = Core.Init(New WorkSheetEx, TOOL_SHEET_NAME)
 
-    If ActiveWindow.RangeSelection.Row >= dsStartRow Then
-        Call StartProcess
+    If ActiveWindow.RangeSelection.row >= dsStartRow Then
+        Call MyStartProcess
         
         '選択範囲の行を削除
         ActiveWindow.RangeSelection.EntireRow.Delete
         
         '項番振り直し
-        Dim lMaxRow As Long: lMaxRow = mysheet.Cells(Rows.Count, dsKoubanCol).End(xlUp).Row
-        Call InjectNumbersToIndexCells(mysheet, dsStartRow, dsKoubanCol, lMaxRow - dsStartRow + 1)
+        Dim lMaxRow As Long: lMaxRow = mysheet.GetFinalKeyRow(dsKoubanCol)
+        Call mysheet.NumbersToIndexCells(dsStartRow, dsKoubanCol, lMaxRow - dsStartRow + 1)
         
-        Call EndProcess
+        Call MyEndProcess
     End If
     Exit Sub
 
 ErrorHandler:
-    Call EndProcess
-    Call ErrorProcess
+    Call MyEndProcess
+    Call MyErrorProcess
 End Sub
 
 
@@ -256,14 +265,18 @@ End Sub
 '******************************************************************************
 Sub CheckButton_Click()
     On Error GoTo ErrorHandler
-    Call Init
+    Call MyInit
     
-    Dim mysheet As Worksheet
-    Set mysheet = ThisWorkbook.Sheets(TOOL_SHEET_NAME)
+    Dim mysheet As WorkSheetEx
+    Set mysheet = Core.Init(New WorkSheetEx, TOOL_SHEET_NAME)
+
+    ' 項目定義情報読込
+    Dim rf As RecordFormat
+    Set rf = GetDefinedRecordFormatFromSheet(FORM_SHEET_NAME, fmStartRow, fmStartCol, fmItemCount)
     
     '項目データ読込・データ検証
-    Dim rf As RecordFormat: Set rf = CheckDataSheet(mysheet)
-    If rf Is Nothing Then
+    Dim formData As Array2DEx: Set formData = CheckDataSheet(mysheet, rf)
+    If formData Is Nothing Then
         Exit Sub
     End If
 
@@ -274,8 +287,8 @@ Sub CheckButton_Click()
     Exit Sub
 
 ErrorHandler:
-    Call EndProcess
-    Call ErrorProcess
+    Call MyEndProcess
+    Call MyErrorProcess
 End Sub
 
 '******************************************************************************
@@ -285,11 +298,11 @@ End Sub
 '******************************************************************************
 Public Sub ClearButton_Click()
     On Error GoTo ErrorHandler
-    Call Init
+    Call MyInit
 
-    Call StartProcess
-    Dim mysheet As Worksheet
-    Set mysheet = ThisWorkbook.Sheets(TOOL_SHEET_NAME)
+    Call MyStartProcess
+    Dim mysheet As WorkSheetEx
+    Set mysheet = Core.Init(New WorkSheetEx, TOOL_SHEET_NAME)
     
     'フィルタ選択解除
     If Not mysheet.AutoFilter Is Nothing Then
@@ -299,16 +312,16 @@ Public Sub ClearButton_Click()
     End If
     
     'シートをクリア
-    Call ClearActualUsedRangeFromSheet(mysheet, dsStartRow, dsKoubanCol, dsItemCount)
-    Call DeleteNoUsedRange(mysheet, dsStartRow)
+    Call mysheet.ClearActualUsedRange(dsStartRow, dsKoubanCol, dsItemCount)
+    Call mysheet.DeleteNoUsedRange(dsStartRow)
     
-    Call EndProcess
+    Call MyEndProcess
     mysheet.Cells(dsStartRow, dsStartCol).Select
 
     Exit Sub
 ErrorHandler:
-    Call EndProcess
-    Call ErrorProcess
+    Call MyEndProcess
+    Call MyErrorProcess
 End Sub
 
 '******************************************************************************
@@ -319,11 +332,11 @@ End Sub
 Sub GotoHelpButton_Click()
     On Error GoTo ErrorHandler
 
-    Call GotoSheet(HELP_SHEET_NAME)
+    Call XlWorkSheetUtils.GotoSheet(HELP_SHEET_NAME)
     Exit Sub
 
 ErrorHandler:
-    Call ErrorProcess
+    Call MyErrorProcess
 End Sub
 
 '******************************************************************************
@@ -333,12 +346,12 @@ End Sub
 '******************************************************************************
 Sub ReturnFromHelpButton_Click()
     On Error GoTo ErrorHandler
-    Call GotoSheet(TOOL_SHEET_NAME)
+    Call XlWorkSheetUtils.GotoSheet(TOOL_SHEET_NAME)
     
     Exit Sub
 
 ErrorHandler:
-    Call ErrorProcess
+    Call MyErrorProcess
 End Sub
 
 '******************************************************************************
@@ -348,97 +361,65 @@ End Sub
 '******************************************************************************
 Sub UpdateSettingButton_Click()
     On Error GoTo ErrorHandler
-    Call Init
+    Call MyInit
     Set mSettingInfo = New SettingInfo
     
     Exit Sub
 
 ErrorHandler:
-    Call ErrorProcess
+    Call MyErrorProcess
 End Sub
 
 '******************************************************************************
 '* [概  要] フォームデータ取得・検証処理。
 '* [詳  細] フォーム（シート）から項目データを取得し項目定義情報をもとに検証を行う。
 '*
-'* @param mysheet ワークシート
-'* @return レコードデータ情報
+'* @param mysheet    ワークシート
+'* @param rf         項目定義情報
+'* @return Array2DEx レコードデータ情報
 '*
 '******************************************************************************
-Function CheckDataSheet(mysheet As Worksheet) As RecordFormat
-    Call Init
-    Call StartProcess
+Function CheckDataSheet(mysheet As WorkSheetEx, rf As RecordFormat) As Array2DEx
+    Call MyInit
+    Call MyStartProcess
     
-    '項目定義情報読込
-    Dim rf As RecordFormat: Set rf = New RecordFormat
-    Call rf.GetItemDataFromSheet(ThisWorkbook.Sheets(FORM_SHEET_NAME), fmStartRow, fmStartCol, fmItemCount)
+    ' 項目データ読込
+    Dim formData As Array2DEx
+    Set formData = mysheet.GetActualUsedRangeToArray2DEx(dsStartRow, dsStartCol, rf.ColumnCount, dsKoubanCol)
+    If formData.IsEmptyArray Then
+        MsgBox "データが入力されていません。", vbOKOnly + vbExclamation, TOOL_NAME
+        Set CheckDataSheet = Nothing
+        Exit Function
+    End If
 
-    '項目データ読込
-    Dim readOk As Boolean: readOk = rf.GetRecordDataFromSheet(mysheet, dsStartRow, dsStartCol, rf.ColumnCount, dsKoubanCol)
+    ' 項番振り直し
+    Call mysheet.ClearActualUsedRange(dsStartRow, dsKoubanCol, 1)
+    Call mysheet.NumbersToIndexCells(dsStartRow, dsKoubanCol, formData.RowLength)
     
-    '項番振り直し
-    Call ClearActualUsedRangeFromSheet(mysheet, dsStartRow, dsKoubanCol, 1)
-    Call InjectNumbersToIndexCells(mysheet, dsStartRow, dsKoubanCol, rf.DataRowCount)
-    
-    'データ検証
-    If Not readOk Then
-        Call EndProcess
-        mysheet.Cells(6 + rf.ErrRowNo - 1, 3 + rf.ErrColNo - 1).Select
+    ' データ検証
+    Dim myReporter As FormProgressReporter: Set myReporter = New FormProgressReporter
+    myReporter.BaseMessage = "データ検証中"
+    Set rf.ProgressReporter = myReporter
+    If Not rf.Validate(formData, True) Then
+        Call MyEndProcess
+        mysheet.Cells(dsStartRow + rf.ErrRowNo - 1, dsStartCol + rf.ErrColNo - 1).Select
         MsgBox rf.ErrMessage, vbOKOnly + vbExclamation, TOOL_NAME
         Set CheckDataSheet = Nothing
         Exit Function
     End If
-    Set CheckDataSheet = rf
+    Set CheckDataSheet = formData
     
-    Call EndProcess
+    Call MyEndProcess
     Exit Function
-
 End Function
-
-'******************************************************************************
-'* [概  要] シート貼り付け処理。
-'* [詳  細] Variant配列データをシートに出力する。
-'*
-'* @param dataSheet ワークシート
-'* @param vArray Variant配列データ
-'* @param lStartRow データ開始行番号
-'* @param lStartCol データ開始列番号
-'*
-'******************************************************************************
-Private Sub InjectVariantArrayToCells(ByVal dataSheet As Worksheet, ByVal vArray, lStartRow As Long, lStartCol As Long)
-    dataSheet.Cells(lStartRow, lStartCol).Resize(UBound(vArray, 1) + 1, UBound(vArray, 2) + 1).Value = vArray
-End Sub
-
-'******************************************************************************
-'* [概  要] 項番設定処理。
-'* [詳  細] 項番に連番を出力する。
-'*
-'* @param dataSheet ワークシート
-'* @param lStartRow データ開始行番号
-'* @param lStartCol データ開始列番号
-'* @param rowNum 番号数
-'*
-'******************************************************************************
-Private Sub InjectNumbersToIndexCells(ByVal dataSheet As Worksheet, lStartRow As Long, lStartCol As Long, rownum As Long)
-    If rownum < 1 Then
-        Exit Sub
-    End If
-    With dataSheet
-        .Cells(lStartRow, lStartCol) = 1
-        If rownum > 1 Then
-            .Cells(lStartRow, lStartCol).AutoFill _
-              Destination:=Range(.Cells(lStartRow, lStartCol), .Cells(lStartRow + rownum - 1, lStartCol)), Type:=xlLinearTrend
-        End If
-    End With
-End Sub
 
 '******************************************************************************
 '* [概  要] エラー処理。
 '* [詳  細] エラー発生時の処理を行う。
 '*
 '******************************************************************************
-Public Sub ErrorProcess()
-    Debug.Print "エラー発生 Number: " & Err.Number & " Source: " & Err.Source & " Description: " & Err.Description
+Public Sub MyErrorProcess()
+    Call ErrorProcess
     
     If Err.Number = 9999 Then
         MsgBox Err.Description, vbOKOnly + vbExclamation, TOOL_NAME
@@ -456,19 +437,11 @@ End Sub
 '* [詳  細] 処理のスピード向上のため、Excelの設定を変更する。
 '*
 '******************************************************************************
-Public Sub StartProcess()
-    Call SaveApplicationProperties
-    
+Public Sub MyStartProcess()
+    Call StartProcess
+
     'シート保護解除
-    Call UnprotectSheet
-    
-    With Application
-        .Cursor = xlWait
-        .DisplayAlerts = False
-        .ScreenUpdating = False
-        .Calculation = xlCalculationManual
-        .EnableEvents = False
-    End With
+    Call XlWorkSheetUtils.UnprotectSheet(TOOL_SHEET_NAME, TOOL_PASSWORD)
 End Sub
 
 '******************************************************************************
@@ -476,327 +449,141 @@ End Sub
 '* [詳  細] 処理のスピード向上のため変更したExcelの設定を元に戻す。
 '*
 '******************************************************************************
-Public Sub EndProcess()
-    With Application
-        .Cursor = xlDefault
-        .DisplayAlerts = mDisplayAlerts
-        .ScreenUpdating = mScreenUpdating
-        .Calculation = mCalculation
-        .EnableEvents = mEnableEvents
-        .StatusBar = False
-    End With
+Public Sub MyEndProcess()
+    Call EndProcess
     
     'シート保護
-    Call ProtectSheet
+    Call XlWorkSheetUtils.ProtectSheet(TOOL_SHEET_NAME, TOOL_PASSWORD)
 End Sub
 
 '******************************************************************************
-'* [概  要] シート保護解除処理。
-'* [詳  細] シートの保護を解除する。
+'* [概  要] 項目表レコード定義情報取得・設定処理。
+'* [詳  細] worksheetの項目表からレコード定義情報を取得する｡
 '*
-'******************************************************************************
-Public Sub UnprotectSheet()
-    'シート保護解除
-    If TOOL_PASSWORD = "" Then
-        ThisWorkbook.Sheets(TOOL_SHEET_NAME).Unprotect
-    Else
-        ThisWorkbook.Sheets(TOOL_SHEET_NAME).Unprotect Password:=TOOL_PASSWORD
-    End If
-End Sub
-
-'******************************************************************************
-'* [概  要] シート保護処理。
-'* [詳  細] シートの保護をする。
-'*
-'******************************************************************************
-Public Sub ProtectSheet()
-    With ThisWorkbook.Sheets(TOOL_SHEET_NAME)
-        .EnableOutlining = True  'アウトライン有効
-        .EnableAutoFilter = True 'オートフィルタ有効
-        
-        'シート保護
-        If TOOL_PASSWORD = "" Then
-            .Protect Contents:=True, UserInterfaceOnly:=True
-        Else
-            .Protect Contents:=True, UserInterfaceOnly:=True, Password:=TOOL_PASSWORD
-        End If
-    End With
-End Sub
-
-'******************************************************************************
-'* [概  要] Application設定退避処理。
-'* [詳  細] Applicationの設定をメンバ変数に退避する。
-'*
-'******************************************************************************
-Public Sub SaveApplicationProperties()
-    With Application
-        mDisplayAlerts = .DisplayAlerts
-        mScreenUpdating = .ScreenUpdating
-        mCalculation = .Calculation
-        mEnableEvents = .EnableEvents
-    End With
-End Sub
-
-'******************************************************************************
-'* [概  要] 正規表現オブジェクト取得処理。
-'* [詳  細] 正規表現オブジェクトを取得する。未生成の場合生成する。
-'*
-'******************************************************************************
-Public Function GetRegExp() As Object
-    If mRegExp Is Nothing Then
-        Set mRegExp = CreateObject("VBScript.RegExp")
-    End If
-    Set GetRegExp = mRegExp
-End Function
-
-'******************************************************************************
-'* [概  要] 設定情報オブジェクト取得処理。
-'* [詳  細] 設定情報オブジェクトを取得する。未生成の場合生成する。
-'*
-'******************************************************************************
-Public Function GetSettingInfo() As SettingInfo
-    If mSettingInfo Is Nothing Then
-        Set mSettingInfo = New SettingInfo
-    End If
-    Set GetSettingInfo = mSettingInfo
-End Function
-
-
-'******************************************************************************
-'* [概  要] GotoSheet
-'* [詳  細] アクティブなブックの指定したシート・アドレスへ移動する。
-'*
-'* @param sheetName 移動先シート名
-'* @param strAddr 移動先セルのアドレス
-'******************************************************************************
-Public Sub GotoSheet(SheetName As String, Optional strAddr As String = "A1")
-    ThisWorkbook.Activate
-    ThisWorkbook.Worksheets(SheetName).Select
-    ThisWorkbook.Worksheets(SheetName).Range(strAddr).Activate
-End Sub
-
-
-'******************************************************************************
-'* [概  要] 表情報取得処理。
-'* [詳  細] worksheetの表から情報を取得し、Variant配列を返却します｡
-'*
-'* @param dataSheet ワークシート
-'* @param lStartRow データ開始行番号
-'* @param lStartCol データ開始列番号
+'* @param defSheetName 項目表ワークシート名
+'* @param lStartRow 項目表データ開始行番号
+'* @param lStartCol 項目表データ開始列番号
 '* @param itemCount 項目列数
+'* @return RecordFormat レコード定義情報
 '*
 '******************************************************************************
-Public Function GetVariantDataFromSheet(dataSheet As Worksheet, lStartRow As Long, lStartCol As Long, Optional colCount As Long)
-    Dim lMaxRow As Long: lMaxRow = dataSheet.Cells(Rows.Count, lStartCol).End(xlUp).Row
-    Dim lMaxCol As Long
-    If colCount = 0 Then
-        lMaxCol = Cells(lStartRow, Columns.Count).End(xlToLeft).Column
-    Else
-        lMaxCol = lStartCol + colCount - 1
-    End If
+Public Function GetDefinedRecordFormatFromSheet(defSheetName As String, lStartRow As Long, lStartCol As Long, Optional colCount As Long) As RecordFormat
+    Dim mysheet As WorkSheetEx
+    Set mysheet = Core.Init(New WorkSheetEx, defSheetName)
     
-    'レコードが存在しない場合
-    If lMaxRow < lStartRow Or lMaxCol < lStartCol Then
-        GetVariantDataFromSheet = Empty
+    Dim vArr: vArr = mysheet.ExportArray(lStartRow, lStartCol, colCount)
+    If IsEmpty(vArr) Then
+        Set GetDefinedRecordFormatFromSheet = Nothing
         Exit Function
     End If
-    
-    Dim vArr: vArr = dataSheet.Range(dataSheet.Cells(lStartRow, lStartCol), dataSheet.Cells(lMaxRow, lMaxCol))
-    
-    GetVariantDataFromSheet = vArr
-End Function
-
-
-'******************************************************************************
-'* [概  要] 使用セル範囲クリア処理。
-'* [詳  細] worksheetのデータ表の使用セル範囲をクリアします｡
-'*
-'* @param dataSheet data表ワークシート
-'* @param lStartRow data表データ開始行番号
-'* @param lStartCol data表データ開始列番号
-'* @param itemCount 項目列数
-'* @param ignoreColnum 走査対象外の列番号
-'*
-'******************************************************************************
-Public Sub ClearActualUsedRangeFromSheet(dataSheet As Worksheet, _
-                                         lStartRow As Long, _
-                                         lStartCol As Long, _
-                                         Optional colCount As Long, _
-                                         Optional ignoreColnum As Long)
-    Dim rng As Range
-    Set rng = GetActualUsedRangeFromSheet(dataSheet, lStartRow, lStartCol, colCount, ignoreColnum)
-    If rng Is Nothing Then
-        Exit Sub
-    End If
-    rng.ClearContents
-End Sub
-
-'******************************************************************************
-'* [概  要] 未使用範囲行削除処理。
-'* [詳  細] worksheetのデータ表の未使用範囲行を削除します（UsedRangeを縮小）｡
-'*
-'* @param dataSheet data表ワークシート
-'* @param lStartRow data表データ開始行番号
-'*
-'******************************************************************************
-Public Sub DeleteNoUsedRange(dataSheet As Worksheet, lStartRow As Long)
-    Dim delStartRow As Long
-    Dim delEndRow As Long
-    
-    Dim rng As Range
-    Set rng = GetActualUsedRangeFromSheet(dataSheet, lStartRow, 1)
-    If rng Is Nothing Then
-        delStartRow = lStartRow
-    Else
-        delStartRow = rng.Item(rng.Count).Row + 1
-    End If
-    delEndRow = dataSheet.UsedRange.Item(dataSheet.UsedRange.Count).Row
-    
-    If delStartRow > delEndRow Then
-        Exit Sub
-    End If
-    With dataSheet
-        .Range(.Rows(delStartRow), .Rows(delEndRow)).Delete
-    End With
-End Sub
-
-'******************************************************************************
-'* [概  要] 使用セル範囲取得処理。
-'* [詳  細] worksheetのデータ表の使用セル範囲を取得する｡
-'*
-'* @param dataSheet data表ワークシート
-'* @param lStartRow data表データ開始行番号
-'* @param lStartCol data表データ開始列番号
-'* @param itemCount 項目列数
-'* @param ignoreColnum 走査対象外の列番号
-'* @return 使用セル範囲
-'*
-'******************************************************************************
-Public Function GetActualUsedRangeFromSheet(dataSheet As Worksheet, lStartRow As Long, lStartCol As Long, Optional colCount As Long, Optional ignoreColnum As Long) As Range
-    Dim lMaxRow As Long: lMaxRow = GetFinalRow(dataSheet, ignoreColnum)
-    Dim lMaxCol As Long
-    If colCount = 0 Then
-        lMaxCol = GetFinalCol(dataSheet)
-    Else
-        lMaxCol = lStartCol + colCount - 1
-    End If
-
-    'レコードが存在しない場合
-    If lMaxRow < lStartRow Or lMaxCol < lStartCol Then
-        Set GetActualUsedRangeFromSheet = Nothing
-        Exit Function
-    End If
-    
-    Set GetActualUsedRangeFromSheet = dataSheet.Range(dataSheet.Cells(lStartRow, lStartCol), dataSheet.Cells(lMaxRow, lMaxCol))
+    Set GetDefinedRecordFormatFromSheet = GetDefinedRecordFormat(vArr)
 End Function
 
 '******************************************************************************
-'* [概  要] 最終行取得処理。
-'* [詳  細] WorksheetのUsedRangeを下から走査し、最終行番号を取得する｡
+'* [概  要] レコード定義情報取得処理。
+'* [詳  細] 項目定義情報（2次元配列）からレコード定義情報を作成・取得する｡
 '*
-'* @param dataSheet ワークシート
-'* @param ignoreColnum 走査対象外の列番号
-'* @return 最終行番号
-'*
-'******************************************************************************
-Public Function GetFinalRow(ByVal dataSheet As Worksheet, Optional ignoreColnum As Long) As Long
-    Dim ret As Long
-    Dim i As Long, cnta As Long
-    With dataSheet.UsedRange
-        For i = .Rows.Count To 1 Step -1
-            cnta = WorksheetFunction.counta(.Rows(i))
-            If cnta > 0 Then
-                If cnta <> 1 Then
-                    ret = i
-                    Exit For
-                Else
-                    If ignoreColnum > 0 Then
-                        If .Cells(i, ignoreColnum) = "" Then
-                            ret = i
-                            Exit For
-                        End If
-                    Else
-                        ret = i
-                        Exit For
-                    End If
-                End If
-            End If
-        Next
-        If ret > 0 Then
-            ret = ret + .Row - 1
-        End If
-    End With
-    GetFinalRow = ret
-End Function
-
-'******************************************************************************
-'* [概  要] 最終列取得処理。
-'* [詳  細] WorksheetのUsedRangeを右から走査し、最終列番号を取得する｡
-'*
-'* @param dataSheet ワークシート
-'* @return 最終列番号
+'* @param vArr Variant型2次元配列（項目表データ）
+'* @return RecordFormat レコード定義情報
 '*
 '******************************************************************************
-Public Function GetFinalCol(ByVal dataSheet As Worksheet) As Long
-    Dim ret As Long
+Private Function GetDefinedRecordFormat(vArr) As RecordFormat
+    Dim rf As RecordFormat
+    Dim itmdefs As Collection: Set itmdefs = New Collection
     Dim i As Long
-    With dataSheet.UsedRange
-        For i = .Columns.Count To 1 Step -1
-            If WorksheetFunction.counta(.Columns(i)) > 0 Then
-                ret = i
-                Exit For
-            End If
-        Next
-        If ret > 0 Then
-            ret = ret + .Column - 1
-        End If
-    End With
-    GetFinalCol = ret
+    For i = LBound(vArr, 1) To UBound(vArr, 1)
+        itmdefs.Add DefineItem(vArr, i)
+    Next
+    Set GetDefinedRecordFormat = Core.Init(New RecordFormat, itmdefs)
 End Function
 
-
 '******************************************************************************
-'* [概  要] Variant配列デバッグ出力処理
-'* [詳  細] Variant配列の内容をイミディエイトウィンドウに出力する。
+'* [概  要] 項目設定処理。
+'* [詳  細] Itemに定義情報を設定する｡
 '*
-'* @param vArr Variant配列
-'******************************************************************************
-Private Sub PrintVariantArray(vArr)
-    Dim i As Long, j As Long, tmp As String
-    For i = LBound(vArr, 1) To UBound(vArr, 1)
-        For j = LBound(vArr, 2) To UBound(vArr, 2)
-            tmp = tmp & " | " & vArr(i, j)
-        Next
-        Debug.Print tmp
-        tmp = ""
-    Next
-End Sub
-
-'******************************************************************************
-'* [概  要] Variant配列デバッグ出力処理
-'* [詳  細] Variant配列の内容をイミディエイトウィンドウに出力する。
-'*
-'* @param vArr Variant配列
-'******************************************************************************
-Private Sub PrintRecordSet(rf As RecordFormat)
-    Dim record As Collection, itm As Item, tmp As String
-    For Each record In rf.RecordSet
-        For Each itm In record
-            tmp = tmp & " | " & itm.Value
-        Next
-        Debug.Print tmp
-        tmp = ""
-    Next
-End Sub
-
-'******************************************************************************
-'* [概  要] DoEvents実行処理
-'* [詳  細] DoEventsを最適なタイミングで実行する。
+'* @param vArr Variant型2次元配列（項目表データ）
+'* @param rownum 配列行（1次元添え字）
+'* @return Item 定義済み項目
 '*
 '******************************************************************************
-Public Sub CheckEvents()
-    If GetInputState() Or (DateDiff("s", mTime, Time) > 3) Then
-        DoEvents
-        mTime = Time
+Private Function DefineItem(vArr, rownum As Long) As Item
+    Dim itm As Item
+    Set itm = New Item
+    itm.Name = vArr(rownum, 1)
+    If vArr(rownum, 2) = "○" Then
+        itm.required = True
     End If
-End Sub
+    Select Case vArr(rownum, 3)
+        Case "半角"
+            itm.Attr = AttributeEnum.attrHalf
+        Case "半角英数"
+            itm.Attr = AttributeEnum.attrHalfAlphaNumeric
+        Case "半角英数記号"
+            itm.Attr = AttributeEnum.attrHalfAlphaNumericSymbol
+        Case "数値"
+            itm.Attr = AttributeEnum.attrNumeric
+        Case "全角カタカナ"
+            itm.Attr = AttributeEnum.attrZenKatakana
+        Case "全角ひらがな"
+            itm.Attr = AttributeEnum.attrZenHiragana
+        Case "日付"
+            itm.Attr = AttributeEnum.attrDate
+        Case "郵便番号"
+            itm.Attr = AttributeEnum.attrZipCode
+        Case "電話番号"
+            itm.Attr = AttributeEnum.attrTelNo
+        Case "メールアドレス"
+            itm.Attr = AttributeEnum.attrMailAddress
+        Case Else
+            itm.Attr = AttributeEnum.attrString
+    End Select
+    Select Case vArr(rownum, 4)
+        Case "固定"
+            itm.KindOfDigits = KindOfDigitsEnum.digitFixed
+        Case "以内"
+            itm.KindOfDigits = KindOfDigitsEnum.digitWithin
+        Case "範囲"
+            itm.KindOfDigits = KindOfDigitsEnum.digitRange
+        Case Else
+            itm.KindOfDigits = KindOfDigitsEnum.digitNone
+    End Select
+    If vArr(rownum, 5) <> "" And VBA.IsNumeric(vArr(rownum, 5)) Then
+        itm.MinNumOfDigits = CLng(vArr(rownum, 5))
+    End If
+    If vArr(rownum, 6) <> "" And VBA.IsNumeric(vArr(rownum, 6)) Then
+        itm.MaxNumOfDigits = CLng(vArr(rownum, 6))
+    End If
+    itm.Pattern = vArr(rownum, 7)
+    If UBound(vArr, 2) = 13 Then
+        If vArr(rownum, 8) <> "" And VBA.IsNumeric(vArr(rownum, 8)) Then
+            itm.InputColNo = vArr(rownum, 8)
+        End If
+        Select Case vArr(rownum, 9)
+            Case "マスタ変換（Code→Value）"
+                itm.InitValueKind = EditKindEnum.mstCodeToValue
+            Case "マスタ変換（Value→Code）"
+                itm.InitValueKind = EditKindEnum.mstValueToCode
+            Case "デフォルト"
+                itm.InitValueKind = EditKindEnum.useDefaultValue
+            Case Else
+                itm.InitValueKind = EditKindEnum.edtNone
+        End Select
+        itm.InitValue = vArr(rownum, 10)
+        If vArr(rownum, 11) = "○" Then
+            itm.OutputTarget = True
+        End If
+        Select Case vArr(rownum, 12)
+            Case "マスタ変換（Code→Value）"
+                itm.OutputEditKind = EditKindEnum.mstCodeToValue
+            Case "マスタ変換（Value→Code）"
+                itm.OutputEditKind = EditKindEnum.mstValueToCode
+            Case "デフォルト"
+                itm.OutputEditKind = EditKindEnum.useDefaultValue
+            Case Else
+                itm.OutputEditKind = EditKindEnum.edtNone
+        End Select
+        itm.OutputEditValue = vArr(rownum, 13)
+    End If
+    Set DefineItem = itm
+End Function
+
