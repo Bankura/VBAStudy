@@ -174,14 +174,14 @@ Sub TestArray2DEx006()
     Debug.Print "ColScan"
     DebugUtils.PrintVariantArray arr2dex.ColScan(fun).To2DArray
 End Sub
-Public Function TestFuctionSquere(ByVal source As Long) As Long
-    TestFuctionSquere = source * source
+Public Function TestFuctionSquere(ByVal Source As Long) As Long
+    TestFuctionSquere = Source * Source
 End Function
 Public Function TestFuctionSumUp(ByVal source1 As Long, ByVal source2 As Long) As Long
     TestFuctionSumUp = source1 + source2
 End Function
-Public Function TestFuctionMyFilter(ByVal source) As Boolean
-    TestFuctionMyFilter = ArrayUtils.Contains(source, 2)
+Public Function TestFuctionMyFilter(ByVal Source) As Boolean
+    TestFuctionMyFilter = ArrayUtils.Contains(Source, 2)
 End Function
 Public Function TestFuctionMyFold(ByVal basedata As Long, ByVal elem As Long) As Long
     TestFuctionMyFold = basedata + elem

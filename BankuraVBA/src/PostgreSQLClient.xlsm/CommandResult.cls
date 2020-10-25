@@ -2,7 +2,7 @@ VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
-Attribute VB_Name = "Result"
+Attribute VB_Name = "CommandResult"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
@@ -11,11 +11,11 @@ Option Explicit
 
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 '*
-'* [機能名] Resultクラス
-'* [詳  細] psqlコマンドのResult情報データクラス。
+'* [機能名] CommandResultクラス
+'* [詳  細] コマンドのResult情報データクラス。
 '*
 '* @author Bankura
-'* Copyright (c) 2019 Bankura
+'* Copyright (c) 2019-2020 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 '******************************************************************************
@@ -69,3 +69,4 @@ End Property
 Public Property Let ColMax(arg As Long)
     mColMax = arg
 End Property
+
