@@ -37,7 +37,7 @@ Option Explicit
 '******************************************************************************
 '* 内部変数定義
 '******************************************************************************
-Private mCommander As commander
+Private mCommander As Commander
 Private mPsqlPath As String
 Private mDbHost As String
 Private mDbPort As String
@@ -140,7 +140,7 @@ End Property
 '* コンストラクタ・デストラクタ
 '******************************************************************************
 Private Sub Class_Initialize()
-    Set mCommander = New commander
+    Set mCommander = New Commander
     mClEncode = "SJIS"
 End Sub
 

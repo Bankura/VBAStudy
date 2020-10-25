@@ -35,7 +35,7 @@ Option Explicit
 '******************************************************************************
 '* 内部変数定義
 '******************************************************************************
-Private mCommander As commander
+Private mCommander As Commander
 
 '******************************************************************************
 '* プロパティ定義
@@ -45,7 +45,7 @@ Private mCommander As commander
 '* コンストラクタ・デストラクタ
 '******************************************************************************
 Private Sub Class_Initialize()
-    Set mCommander = New commander
+    Set mCommander = New Commander
     mCommander.BaseCommand = "cmd.exe /c {0} > {1}"
 End Sub
 '******************************************************************************

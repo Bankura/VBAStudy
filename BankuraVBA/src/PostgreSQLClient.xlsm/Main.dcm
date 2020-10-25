@@ -109,6 +109,8 @@ Private Function ExecSQL(sql As String, ByRef nrow As Long, ws As Worksheet) As 
     
 ErrorHandler:
     Call Base.EndProcess
+    MsgBox "ÉGÉâÅ[Ç™î≠ê∂ÅFNumber=" & Err.Number & " Description=" & Err.Description, vbOKOnly + vbCritical
+
 End Function
 
 
