@@ -403,7 +403,10 @@ End Function
 '******************************************************************************
 Public Function PlaceHolder(ByVal str As String, ParamArray p() As Variant) As String
     Dim strMsg As String
-    strMsg = StringUtils.Unescape(str)
+    '文字化けするのでコメントアウト
+    'strMsg = StringUtils.Unescape(str)
+    strMsg = str
+    
     If UBound(p) >= 0 Then
         Dim tmp: tmp = p
         Dim vArr: vArr = ArrayUtils.ToVArrayFlattened(tmp)
@@ -1248,7 +1251,7 @@ End Function
 '******************************************************************************
 Public Function ContainsNone(ByVal str As String, ByVal searchStr As String) As Boolean
     If Me.IsEmpty(str) Or Me.IsEmpty(searchStr) Then
-        ContainsNone = False
+        ContainsNone = True
         Exit Function
     End If
     ContainsNone = Not ContainsAny(str, Me.ToCharArray(searchStr))

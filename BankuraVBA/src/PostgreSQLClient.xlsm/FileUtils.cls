@@ -919,7 +919,7 @@ Public Function GetTextFileLineCount(FilePath As String, _
     End If
     If Not separator = adCR Then
         ' 追記モードで開き行数をカウント
-        GetTextFileLineCount = IO.fso.OpenTextFile(FilePath, ForAppending).line - 1
+        GetTextFileLineCount = IO.fso.OpenTextFile(FilePath, ForAppending).Line - 1
         Exit Function
     End If
     
