@@ -390,16 +390,16 @@ End Sub
 '* @param connectType   省略可能。接続タイプ（方法）。「odbc」か「oledb」を指定。
 '*
 '******************************************************************************
-Public Sub OpenExcel(ByVal FilePath As String, _
+Public Sub OpenExcel(ByVal filePath As String, _
                      Optional ByVal HeaderExists As Boolean = True, _
                      Optional ByVal readwriteMode As Integer = 1, _
                      Optional ByVal connectType As String = "oledb")
     Dim cnnStr As String
     If LCase(connectType) = "odbc" Then
-        cnnStr = StringUtils.PlaceHolder(CONN_STR_ODBC_ACCESS, GetExcelODBCDriverName(), FilePath)
+        cnnStr = StringUtils.PlaceHolder(CONN_STR_ODBC_ACCESS, GetExcelODBCDriverName(), filePath)
     Else
         Dim exProp As New ArrayEx
-        exProp.Add GetXlIsamType(FilePath)
+        exProp.Add GetXlIsamType(filePath)
         If HeaderExists Then
             exProp.Add "HDR=Yes"
         Else
@@ -413,7 +413,7 @@ Public Sub OpenExcel(ByVal FilePath As String, _
             Case 2
                 exProp.Add "IMEX=2"
         End Select
-        cnnStr = StringUtils.PlaceHolder(CONN_STR_OLE_FILEDATA, GetAccessOLEDBProviderName(), FilePath, exProp.Join(";"))
+        cnnStr = StringUtils.PlaceHolder(CONN_STR_OLE_FILEDATA, GetAccessOLEDBProviderName(), filePath, exProp.Join(";"))
     End If
     Call mConn.Open(cnnStr)
 End Sub
@@ -488,9 +488,9 @@ End Sub
 '* @param filePath Htmlファイルパス
 '*
 '******************************************************************************
-Public Sub OpenHtml(ByVal FilePath As String)
+Public Sub OpenHtml(ByVal filePath As String)
     Dim cnnStr As String
-    cnnStr = StringUtils.PlaceHolder(CONN_STR_OLE_FILEDATA, GetAccessOLEDBProviderName(), FilePath, "HTML Import;HDR=Yes")
+    cnnStr = StringUtils.PlaceHolder(CONN_STR_OLE_FILEDATA, GetAccessOLEDBProviderName(), filePath, "HTML Import;HDR=Yes")
     Call mConn.Open(cnnStr)
 End Sub
 
@@ -501,8 +501,8 @@ End Sub
 '* @param filePath Excelファイルパス
 '* @return String ExcelファイルのISAMタイプ名
 '******************************************************************************
-Private Function GetXlIsamType(ByVal FilePath As String) As String
-    Select Case IO.GetExtensionName(FilePath)
+Private Function GetXlIsamType(ByVal filePath As String) As String
+    Select Case IO.GetExtensionName(filePath)
         Case "xls"
             GetXlIsamType = "Excel 8.0"
         Case "xlsb"

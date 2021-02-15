@@ -42,10 +42,10 @@ Private mReportUnit As Long
 '*-----------------------------------------------------------------------------
 '* FilePath プロパティ
 '*-----------------------------------------------------------------------------
-Property Get FilePath() As String
-    FilePath = mFilePath
+Property Get filePath() As String
+    filePath = mFilePath
 End Property
-Property Let FilePath(arg As String)
+Property Let filePath(arg As String)
     mFilePath = arg
     If FileExists(arg) Then
         mSize = IO.GetFile(mFilePath).size
@@ -132,7 +132,7 @@ End Property
 Private Sub Class_Initialize()
     Set mAdoStream = CreateObject("ADODB.Stream")
     mCharSet = "UTF-8"
-    mLineSeparator = adLF
+    mLineSeparator = adLf
     mHeaderExists = False
     mQuotExists = False
     mValidFormat = True

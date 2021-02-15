@@ -19,7 +19,7 @@ Option Explicit
 '*          https://popozure.info/20190515/14201
 '*
 '* @author Bankura
-'* Copyright (c) 2019-2020 Bankura
+'* Copyright (c) 2019-2021 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 '******************************************************************************
@@ -490,11 +490,11 @@ Public Sub ChangeFilesEncode(targetFolderName As String, srcEncode As String, de
     Set oFiles = oFolder.Files
     
     For Each oFile In oFiles
-        Dim FilePath As String
-        FilePath = fso.GetAbsolutePathName(AddPathSeparator(targetFolderName) & oFile.Name)
+        Dim filePath As String
+        filePath = fso.GetAbsolutePathName(AddPathSeparator(targetFolderName) & oFile.Name)
          
         ' ファイルエンコード変換
-        Call ChangeFileEncode(FilePath, srcEncode, destEncode, bomInclude)
+        Call ChangeFileEncode(filePath, srcEncode, destEncode, bomInclude)
     Next
 End Sub
 
@@ -507,7 +507,7 @@ End Sub
 '* @param destEncode 変更先エンコード
 '* @param bomInclude BOM有無（省略可。規定はFalse:BOM無）
 '******************************************************************************
-Public Sub ChangeFileEncode(FilePath As String, srcEncode As String, destEncode As String, _
+Public Sub ChangeFileEncode(filePath As String, srcEncode As String, destEncode As String, _
                             Optional bomInclude As Boolean = False)
     Dim adoStream1 As Object, adoStream2 As Object
     Set adoStream1 = IO.CreateADODBStream(adTypeText, srcEncode)
@@ -516,7 +516,7 @@ Public Sub ChangeFileEncode(FilePath As String, srcEncode As String, destEncode 
     ' 変更元ファイルStream読込
     With adoStream1
         .Open
-        .LoadFromFile FilePath
+        .LoadFromFile filePath
     End With
      
     ' 変更先ファイルStream読込
@@ -525,7 +525,7 @@ Public Sub ChangeFileEncode(FilePath As String, srcEncode As String, destEncode 
     ' エンコード変換
     adoStream1.copyto adoStream2
     If Not bomInclude Then ExcludeBom adoStream2  ' BOM対応
-    adoStream2.SaveToFile FilePath, adSaveCreateOverWrite 'ファイル上書指定
+    adoStream2.SaveToFile filePath, adSaveCreateOverWrite 'ファイル上書指定
      
     ' Streamクローズ
     adoStream2.Close
@@ -647,12 +647,12 @@ End Function
 '*                 「HKEY_CLASSES_ROOT\MIME\Database\Charset」参照。
 '* @return 読込テキストデータ
 '******************************************************************************
-Public Function ReadTextFile(FilePath As String, Optional cSet As String = "_autodetect_all") As String
+Public Function ReadTextFile(filePath As String, Optional cSet As String = "_autodetect_all") As String
     Dim data As String
     With IO.CreateADODBStream(adTypeText, cSet)
         .mode = adModeReadWrite
         .Open
-        .LoadFromFile FilePath 'ファイル指定
+        .LoadFromFile filePath 'ファイル指定
         .Position = 0
         data = .ReadText()
         .Close
@@ -668,8 +668,8 @@ End Function
 '* @param filePath 対象となるテキストファイルのフルパス
 '* @return 読込テキストデータ
 '******************************************************************************
-Public Function ReadUTF8TextFile(FilePath As String) As String
-    ReadUTF8TextFile = ReadTextFile(FilePath, "UTF-8")
+Public Function ReadUTF8TextFile(filePath As String) As String
+    ReadUTF8TextFile = ReadTextFile(filePath, "UTF-8")
 End Function
 
 '******************************************************************************
@@ -685,7 +685,7 @@ End Function
 '* @param separator 改行コード（省略可。規定はCRLF）
 '* @return 読込テキストデータ（Variant配列）
 '******************************************************************************
-Public Function ReadTextFileToVArray(FilePath As String, _
+Public Function ReadTextFileToVArray(filePath As String, _
                                      Optional cSet As String = "_autodetect_all", _
                                      Optional separator As LineSeparatorsEnum = LineSeparatorsEnum.adCRLF) As Variant
 
@@ -694,7 +694,7 @@ Public Function ReadTextFileToVArray(FilePath As String, _
     With stream
         .mode = adModeReadWrite
         .Open
-        .LoadFromFile FilePath 'ファイル指定
+        .LoadFromFile filePath 'ファイル指定
         lineCount = CountLine(stream)
         ReDim Preserve vArr(lineCount - 1)
         .Position = 0
@@ -719,7 +719,7 @@ End Function
 '* @param separator 改行コード
 '* @return 読込テキストデータ（Variant2次元配列）
 '******************************************************************************
-Public Function ReadCsvFile(ByVal FilePath As String, _
+Public Function ReadCsvFile(ByVal filePath As String, _
                             Optional ByVal HeaderExists As Boolean = True, _
                             Optional ByVal QuotExists As Boolean = False, _
                             Optional ByVal cSet As String = "UTF-8", _
@@ -730,7 +730,7 @@ Public Function ReadCsvFile(ByVal FilePath As String, _
     With stream
         .mode = adModeReadWrite
         .Open
-        .LoadFromFile FilePath
+        .LoadFromFile filePath
         lSize = Me.CountLine(stream)
         
         ' 空ファイルは空Variant配列で返却
@@ -786,7 +786,7 @@ End Function
 '* @param separator 改行コード
 '* @return 読込テキストデータ（Variant2次元配列）
 '******************************************************************************
-Public Function SelectCsvCol(ByVal FilePath As String, _
+Public Function SelectCsvCol(ByVal filePath As String, _
                             ByVal colIndexes As Variant, _
                             Optional ByVal HeaderExists As Boolean = True, _
                             Optional ByVal QuotExists As Boolean = False, _
@@ -798,7 +798,7 @@ Public Function SelectCsvCol(ByVal FilePath As String, _
     With stream
         .mode = adModeReadWrite
         .Open
-        .LoadFromFile FilePath
+        .LoadFromFile filePath
         lSize = Me.CountLine(stream)
         
         ' 空ファイルは空Variant配列で返却
@@ -864,7 +864,7 @@ End Function
 '* @param separator 改行コード
 '* @return 読込テキストデータ（Variant2次元配列）
 '******************************************************************************
-Public Function SelectCsvColByRange(ByVal FilePath As String, _
+Public Function SelectCsvColByRange(ByVal filePath As String, _
                             ByVal startIndex As Long, _
                             ByVal endIndex As Long, _
                             Optional ByVal HeaderExists As Boolean = True, _
@@ -872,7 +872,7 @@ Public Function SelectCsvColByRange(ByVal FilePath As String, _
                             Optional ByVal cSet As String = "UTF-8", _
                             Optional ByVal separator As LineSeparatorsEnum = adCRLF) As Variant
     Dim colIndexes: colIndexes = ArrayUtils.Range(startIndex, endIndex)
-    SelectCsvColByRange = SelectCsvCol(FilePath, colIndexes, HeaderExists, QuotExists, cSet, separator)
+    SelectCsvColByRange = SelectCsvCol(filePath, colIndexes, HeaderExists, QuotExists, cSet, separator)
 End Function
 
 '******************************************************************************
@@ -909,17 +909,17 @@ End Function
 '* @param separator 改行コード（省略可。規定はCRLF）
 '* @return 行数
 '******************************************************************************
-Public Function GetTextFileLineCount(FilePath As String, _
+Public Function GetTextFileLineCount(filePath As String, _
                                       Optional cSet As String = "_autodetect_all", _
                                       Optional separator As LineSeparatorsEnum = adCRLF) As Long
     ' ファイルが存在しない場合は-1返却
-    If (IO.fso.FileExists(FilePath) = False) Then
+    If (IO.fso.FileExists(filePath) = False) Then
         GetTextFileLineCount = -1
         Exit Function
     End If
     If Not separator = adCR Then
         ' 追記モードで開き行数をカウント
-        GetTextFileLineCount = IO.fso.OpenTextFile(FilePath, ForAppending).line - 1
+        GetTextFileLineCount = IO.fso.OpenTextFile(filePath, ForAppending).line - 1
         Exit Function
     End If
     
@@ -928,7 +928,7 @@ Public Function GetTextFileLineCount(FilePath As String, _
     With stream
         .mode = adModeReadWrite
         .Open
-        .LoadFromFile FilePath 'ファイル指定
+        .LoadFromFile filePath 'ファイル指定
         lineCount = .CountLine(stream)
         .Close
     End With
@@ -949,7 +949,7 @@ End Function
 '* @param willAppend 追記有無（省略可。規定はFalse:追記なし）
 '* @param bomInclude BOM有無（省略可。規定はFalse:BOM無）
 '******************************************************************************
-Public Sub WriteTextFile(FilePath As String, data As String, cSet As String, _
+Public Sub WriteTextFile(filePath As String, data As String, cSet As String, _
                          Optional willAppend As Boolean = False, _
                          Optional bomInclude As Boolean = False)
                          
@@ -958,12 +958,12 @@ Public Sub WriteTextFile(FilePath As String, data As String, cSet As String, _
         .mode = adModeReadWrite
         .Open
         If willAppend Then
-            AppendMode stream, FilePath
+            AppendMode stream, filePath
         End If
         .WriteText data, adWriteChar
         If Not bomInclude Then ExcludeBom stream  ' BOM対応
             
-        .SaveToFile FilePath, adSaveCreateOverWrite 'ファイル上書指定
+        .SaveToFile filePath, adSaveCreateOverWrite 'ファイル上書指定
         .Close
     End With
 End Sub
@@ -977,10 +977,10 @@ End Sub
 '* @param willAppend 追記有無（省略可。規定はFalse:追記なし）
 '* @param bomInclude BOM有無（省略可。規定はFalse:BOM無）
 '******************************************************************************
-Public Sub WriteUTF8TextFile(FilePath As String, data As String, _
+Public Sub WriteUTF8TextFile(filePath As String, data As String, _
                              Optional willAppend As Boolean = False, _
                              Optional bomInclude As Boolean = False)
-     Call WriteTextFile(FilePath, data, "UTF-8", willAppend, bomInclude)
+     Call WriteTextFile(filePath, data, "UTF-8", willAppend, bomInclude)
 End Sub
 
 '******************************************************************************
@@ -997,7 +997,7 @@ End Sub
 '* @param willAppend 追記有無（省略可。規定はFalse:追記なし）
 '* @param bomInclude BOM有無（省略可。規定はFalse:BOM無）
 '******************************************************************************
-Public Sub WriteTextFileFromVArray(FilePath As String, vArray As Variant, cSet As String, _
+Public Sub WriteTextFileFromVArray(filePath As String, vArray As Variant, cSet As String, _
                                    Optional separator As LineSeparatorsEnum = adCRLF, _
                                    Optional willAppend As Boolean = False, _
                                    Optional bomInclude As Boolean = False)
@@ -1007,13 +1007,13 @@ Public Sub WriteTextFileFromVArray(FilePath As String, vArray As Variant, cSet A
         .mode = adModeReadWrite
         .Open
         If willAppend Then
-            AppendMode stream, FilePath
+            AppendMode stream, filePath
         End If
         For Each tmp In vArray
             .WriteText CStr(tmp), adWriteLine
         Next
         If Not bomInclude Then ExcludeBom stream  ' BOM対応
-        .SaveToFile FilePath, adSaveCreateOverWrite 'ファイル上書指定
+        .SaveToFile filePath, adSaveCreateOverWrite 'ファイル上書指定
         .Close
     End With
 End Sub
@@ -1027,10 +1027,10 @@ End Sub
 '*
 '* @param filePath 書込み対象となるテキストファイルのフルパス
 '******************************************************************************
-Public Sub AppendMode(stream As Object, FilePath As String)
-    If IO.fso.FileExists(FilePath) Then
+Public Sub AppendMode(stream As Object, filePath As String)
+    If IO.fso.FileExists(filePath) Then
         With stream
-            .LoadFromFile FilePath
+            .LoadFromFile filePath
             .Position = .size 'ポインタを終端へ
         End With
     End If
@@ -1052,7 +1052,7 @@ End Sub
 '* @param willAppend 追記有無（省略可。規定はFalse:追記なし）
 '* @param bomInclude BOM有無（省略可。規定はFalse:BOM無）
 '******************************************************************************
-Public Sub WriteCsvFileFromVArray(ByVal FilePath As String, _
+Public Sub WriteCsvFileFromVArray(ByVal filePath As String, _
                                   ByRef vDataArray As Variant, _
                                   Optional ByRef vHeaderArray As Variant, _
                                   Optional ByVal withQuotWrap As Boolean = False, _
@@ -1065,7 +1065,7 @@ Public Sub WriteCsvFileFromVArray(ByVal FilePath As String, _
         .mode = adModeReadWrite
         .Open
         If willAppend Then
-            AppendMode stream, FilePath
+            AppendMode stream, filePath
         End If
         
         Dim recText As String
@@ -1082,7 +1082,7 @@ Public Sub WriteCsvFileFromVArray(ByVal FilePath As String, _
         Next
 
         If Not bomInclude Then ExcludeBom stream  ' BOM対応
-        .SaveToFile FilePath, adSaveCreateOverWrite 'ファイル上書指定
+        .SaveToFile filePath, adSaveCreateOverWrite 'ファイル上書指定
         .Close
     End With
 End Sub
@@ -1146,7 +1146,7 @@ End Function
 '* @param charSet 文字コード
 '* @param チェック結果（true:BOM有、false:BOM無）
 '******************************************************************************
-Function IsBomIncluded(FilePath As String, CharSet As String) As Boolean
+Function IsBomIncluded(filePath As String, CharSet As String) As Boolean
     If LCase(CharSet) <> "utf-8" And _
        LCase(CharSet) <> "utf-16" And LCase(CharSet) <> "unicode" Then
         IsBomIncluded = False
@@ -1160,7 +1160,7 @@ Function IsBomIncluded(FilePath As String, CharSet As String) As Boolean
     Dim stream As Object: Set stream = IO.CreateADODBStream(adTypeBinary)
     With stream
         .Open
-        .LoadFromFile FilePath
+        .LoadFromFile filePath
         buf = .Read(IO.BomSize(CharSet))
         .Close
     End With
@@ -1185,8 +1185,8 @@ End Function
 '* @param filePath 対象となるテキストファイルのフルパス
 '* @param チェック結果（true:BOM有、false:BOM無）
 '******************************************************************************
-Function IsUTF8BomIncluded(FilePath As String) As Boolean
-    IsUTF8BomIncluded = IsBomIncluded(FilePath, "utf-8")
+Function IsUTF8BomIncluded(filePath As String) As Boolean
+    IsUTF8BomIncluded = IsBomIncluded(filePath, "utf-8")
 End Function
 
 '******************************************************************************
@@ -1196,14 +1196,14 @@ End Function
 '* @param filePath 対象となるテキストファイルのフルパス
 '* @return 16進ダンプ文字データ
 '******************************************************************************
-Public Function ReadFileToDump(FilePath As String) As String
+Public Function ReadFileToDump(filePath As String) As String
     Dim ret As StringEx, buf As String, i As Long
     Set ret = New StringEx
     Dim stream As Object: Set stream = IO.CreateADODBStream(adTypeBinary)
     With stream
         .mode = adModeReadWrite
         .Open
-        .LoadFromFile FilePath 'ファイル指定
+        .LoadFromFile filePath 'ファイル指定
         Do While Not .EOS
             buf = .Read(16)
  
@@ -1233,19 +1233,19 @@ End Function
 '* @param bufSize バッファサイズ（一度に書き込むサイズ）
 '* @return Boolean 実行結果（True:成功）
 '******************************************************************************
-Public Function CreateNullCharFile(ByVal FilePath As String, _
+Public Function CreateNullCharFile(ByVal filePath As String, _
                                    Optional ByVal fileSize As LongPtr = 1024, _
                                    Optional ByVal bufSize As Long = 1024) As Boolean
     If fileSize < 0 Then
         CreateNullCharFile = False
         Exit Function
     End If
-    If Not IsValidFilePath(FilePath) Then
+    If Not IsValidFilePath(filePath) Then
         CreateNullCharFile = False
         Exit Function
     End If
     Dim tStream As Object
-    Set tStream = IO.CreateTextFile(FilePath)
+    Set tStream = IO.CreateTextFile(filePath)
     If fileSize = 0 Then
         Call tStream.Close
         CreateNullCharFile = True
@@ -1427,20 +1427,20 @@ End Function
 '* @param replaceStr 置換文字列
 '* @return Boolean 実行結果（True:成功）
 '******************************************************************************
-Public Function ReplaceFileName(ByVal FilePath As String, ByVal searchStr As String, ByVal replaceStr As String) As Boolean
-    If Not IO.FileExists(FilePath) Then
+Public Function ReplaceFileName(ByVal filePath As String, ByVal searchStr As String, ByVal replaceStr As String) As Boolean
+    If Not IO.FileExists(filePath) Then
         ReplaceFileName = False
         Exit Function
     End If
             
-    Dim dirPath As String:  dirPath = IO.GetParentFolderName(FilePath)
-    Dim fileName As String: fileName = IO.GetBaseName(FilePath)
-    Dim extention As String:  extention = IO.GetExtensionName(FilePath)
+    Dim dirPath As String:  dirPath = IO.GetParentFolderName(filePath)
+    Dim fileName As String: fileName = IO.GetBaseName(filePath)
+    Dim extention As String:  extention = IO.GetExtensionName(filePath)
     
     Dim destFileName As String
     destFileName = IO.BuildPath(dirPath, Replace(fileName, searchStr, replaceStr) & "." & extention)
     
-    IO.GetFile(FilePath).Move destFileName
+    IO.GetFile(filePath).Move destFileName
     
     ReplaceFileName = True
 End Function
@@ -1780,7 +1780,7 @@ Private Sub GrepImpl(ByVal folder As Object, _
             Dim tmpSep As LineSeparatorsEnum: tmpSep = LineSeparatorsEnum.adCRLF
             If separator = LineSeparatorsEnum.adCRLF Or _
                separator = LineSeparatorsEnum.adCR Or _
-               separator = LineSeparatorsEnum.adLF Then
+               separator = LineSeparatorsEnum.adLf Then
                tmpSep = separator
             End If
             
@@ -1822,7 +1822,7 @@ End Sub
 '* @param showConsole イミディエイト出力有無（省略可）
 '* @param separator 改行コード（省略可。規定はCRLF）
 '******************************************************************************
-Private Sub GrepTextFile(ByVal FilePath As String, _
+Private Sub GrepTextFile(ByVal filePath As String, _
                          ByVal reg As Object, _
                          ByRef arr As ArrayEx, _
                          Optional ByVal cSet As String = "_autodetect_all", _
@@ -1834,14 +1834,14 @@ Private Sub GrepTextFile(ByVal FilePath As String, _
     With stream
         .mode = adModeReadWrite
         .Open
-        .LoadFromFile FilePath
+        .LoadFromFile filePath
 
         Do While Not .EOS
             Dim tmpCSet As String: tmpCSet = cSet
-            txt = TryReadText(stream, FilePath, tmpCSet, separator)
+            txt = TryReadText(stream, filePath, tmpCSet, separator)
             If reg.Test(txt) Then
-                If showConsole Then Debug.Print FilePath & "(" & cnt & ")  [" & tmpCSet & "]: " & txt
-                arr.Add Array(FilePath, cnt, txt)
+                If showConsole Then Debug.Print filePath & "(" & cnt & ")  [" & tmpCSet & "]: " & txt
+                arr.Add Array(filePath, cnt, txt)
             End If
             cnt = cnt + 1
         Loop
@@ -1865,7 +1865,7 @@ End Sub
 '* @return String 読込行文字列
 '******************************************************************************
 Private Function TryReadText(ByVal stream As Object, _
-                     ByVal FilePath As String, _
+                     ByVal filePath As String, _
                      ByRef cSet As String, _
                      ByVal separator As LineSeparatorsEnum) As String
     On Error Resume Next
@@ -1893,9 +1893,9 @@ Private Function TryReadText(ByVal stream As Object, _
             .LineSeparator = separator
             .Type = adTypeText
             .Open
-            .LoadFromFile FilePath
+            .LoadFromFile filePath
         End With
-        TryReadText = TryReadText(stream, FilePath, cSet, separator)
+        TryReadText = TryReadText(stream, filePath, cSet, separator)
     End If
 End Function
 
@@ -1951,7 +1951,7 @@ Public Function GetFileLineSeparator(ByVal fileName As String) As LineSeparators
     End If
     
     If cntLf > cntCr Then
-        GetFileLineSeparator = adLF
+        GetFileLineSeparator = adLf
     ElseIf cntLf < cntCr Then
         GetFileLineSeparator = adCR
     End If
@@ -2283,7 +2283,7 @@ Private Sub GrepAndReplaceImpl(ByVal folder As Object, _
             Dim tmpSep As LineSeparatorsEnum: tmpSep = LineSeparatorsEnum.adCRLF
             If separator = LineSeparatorsEnum.adCRLF Or _
                separator = LineSeparatorsEnum.adCR Or _
-               separator = LineSeparatorsEnum.adLF Then
+               separator = LineSeparatorsEnum.adLf Then
                tmpSep = separator
             End If
             
@@ -2325,7 +2325,7 @@ End Sub
 '* @param bomInclude BOM有無（省略可）
 '* @param separator 改行コード（省略可。規定はCRLF）
 '******************************************************************************
-Private Sub GrepAndReplaceTextFile(ByVal FilePath As String, _
+Private Sub GrepAndReplaceTextFile(ByVal filePath As String, _
                                    ByVal reg As Object, _
                                    ByVal replaceString As String, _
                                    ByRef arr As ArrayEx, _
@@ -2347,15 +2347,15 @@ Private Sub GrepAndReplaceTextFile(ByVal FilePath As String, _
     With istream
         .mode = adModeReadWrite
         .Open
-        .LoadFromFile FilePath
+        .LoadFromFile filePath
 
         Do While Not .EOS
             Dim tmpCSet As String: tmpCSet = cSet
             txt = .ReadText(adReadLine)
             If reg.Test(txt) Then
                 wtxt = reg.Replace(txt, replaceString)
-                If showConsole Then Debug.Print FilePath & "(" & cnt & ")  [" & tmpCSet & "]: " & txt & " ⇒ " & wtxt
-                arr.Add Array(FilePath, cnt, txt, wtxt)
+                If showConsole Then Debug.Print filePath & "(" & cnt & ")  [" & tmpCSet & "]: " & txt & " ⇒ " & wtxt
+                arr.Add Array(filePath, cnt, txt, wtxt)
                 hitcnt = hitcnt + 1
             Else
                 wtxt = txt
@@ -2364,7 +2364,7 @@ Private Sub GrepAndReplaceTextFile(ByVal FilePath As String, _
                 Select Case separator
                     Case LineSeparatorsEnum.adCR
                         ostream.WriteText wtxt & Chr(13), adWriteChar
-                    Case LineSeparatorsEnum.adLF
+                    Case LineSeparatorsEnum.adLf
                         ostream.WriteText wtxt & Chr(10), adWriteChar
                     Case LineSeparatorsEnum.adCRLF
                         ostream.WriteText wtxt & Chr(13) & Chr(10), adWriteChar
@@ -2380,7 +2380,7 @@ Private Sub GrepAndReplaceTextFile(ByVal FilePath As String, _
     If hitcnt > 0 Then
         If Not bomInclude Then ExcludeBom ostream  ' BOM対応
         With ostream
-            .SaveToFile FilePath, adSaveCreateOverWrite 'ファイル上書指定
+            .SaveToFile filePath, adSaveCreateOverWrite 'ファイル上書指定
             .Close
         End With
     Else
@@ -2505,19 +2505,19 @@ End Function
 '* @param targetFiles()  対象ファイルパス（複数指定可）
 '* @return Boolean 実行結果
 '******************************************************************************
-Public Function CreateZipFile(FilePath As String, ParamArray targetFiles() As Variant) As Boolean
-    If IsMissing(targetFiles) Or UCase(IO.GetExtensionName(FilePath)) <> "ZIP" Then
+Public Function CreateZipFile(filePath As String, ParamArray targetFiles() As Variant) As Boolean
+    If IsMissing(targetFiles) Or UCase(IO.GetExtensionName(filePath)) <> "ZIP" Then
         CreateZipFile = False
         Exit Function
     End If
-    If IO.FileExists(FilePath) Then
-        IO.DeleteFile FilePath
-        IO.CreateTextFile(FilePath, False).Write "PK" & Chr(5) & Chr(6) & String(18, 0)
+    If IO.FileExists(filePath) Then
+        IO.DeleteFile filePath
+        IO.CreateTextFile(filePath, False).Write "PK" & Chr(5) & Chr(6) & String(18, 0)
     Else
-        IO.CreateTextFile(FilePath, False).Write "PK" & Chr(5) & Chr(6) & String(18, 0)
+        IO.CreateTextFile(filePath, False).Write "PK" & Chr(5) & Chr(6) & String(18, 0)
     End If
     Dim shellObj As Object: Set shellObj = Base.GetShell
-    Dim zipFolder As Object: Set zipFolder = shellObj.Namespace(IO.GetAbsolutePathName(FilePath))
+    Dim zipFolder As Object: Set zipFolder = shellObj.Namespace(IO.GetAbsolutePathName(filePath))
     Dim targetFilePath As Variant
     For Each targetFilePath In targetFiles
         Dim fileName As String: fileName = fso.GetFileName(targetFilePath)
@@ -2599,3 +2599,227 @@ Public Function UnZipFile(zipFilePath As String, targetFolderPath As String) As 
     Loop
     UnZipFile = True
 End Function
+
+
+'******************************************************************************
+'* [概  要] UTF-8テキストファイル高速読込処理。
+'* [詳  細] UTF-8テキストファイルの読込を高速に行う（一括読込）。
+'*
+'* @param filePath 対象となるテキストファイルのフルパス
+'* @return 読込テキストデータ
+'******************************************************************************
+Public Function ReadUTF8FileRapid(ByVal filePath As String) As String
+    If Not IO.FileExists(filePath) Then
+        Err.Raise 9999, "FileUtils#ReadUTF8FileRapid", "File not found. [" & filePath & "]"
+    End If
+    
+    Dim fileNum As Integer: fileNum = FreeFile
+    Open filePath For Binary As fileNum
+    
+    Dim fSize As Long: fSize = VBA.LOF(fileNum)
+    If fSize <> 0 Then
+        Dim buf() As Byte: ReDim buf(0 To fSize - 1)
+        Get fileNum, , buf()
+        
+        If UBound(buf) > 3 Then
+            If buf(0) = &HEF And buf(1) = &HBB And buf(2) = &HBF Then
+                ReadUTF8FileRapid = StringUtils.FromUTF8(MidB$(buf, 4))
+            Else
+                ReadUTF8FileRapid = StringUtils.FromUTF8(buf)
+            End If
+        Else
+            ReadUTF8FileRapid = StringUtils.FromUTF8(buf)
+        End If
+    End If
+    Close fileNum
+ End Function
+ 
+
+'******************************************************************************
+'* [概  要] UTF-8テキストファイル高速読込処理。
+'* [詳  細] UTF-8テキストファイルの読込を高速に行う（一括読込）。
+'*          戻り値をVariant配列で返却する。
+'*
+'* @param filePath 対象となるテキストファイルのフルパス
+'* @param separator 改行コード
+'* @return 読込テキストデータ(Variant配列)
+'******************************************************************************
+Public Function ReadUTF8FileRapidToArray(ByVal filePath As String, _
+                                         Optional ByVal separator As LineSeparatorsEnum = adCRLF) As Variant
+    Dim strData As String: strData = ReadUTF8FileRapid(filePath)
+    Dim sep As String: sep = IO.FromLineSeparatorsEnum(separator)
+    ReadUTF8FileRapidToArray = Split(strData, sep)
+ End Function
+
+'******************************************************************************
+'* [概  要] UTF-8テキストファイル高速読込処理。
+'* [詳  細] UTF-8テキストファイルの読込を高速に行う（一括読込）。
+'*          戻り値をArrayExで返却する。
+'*
+'* @param filePath 対象となるテキストファイルのフルパス
+'* @param separator 改行コード
+'* @return 読込テキストデータ(ArrayEx)
+'******************************************************************************
+Public Function ReadUTF8FileRapidToArrayEx(ByVal filePath As String, _
+                                         Optional ByVal separator As LineSeparatorsEnum = adCRLF) As ArrayEx
+    Set ReadUTF8FileRapidToArrayEx = Core.Init(New ArrayEx, ReadUTF8FileRapidToArray(filePath, separator))
+End Function
+ 
+'******************************************************************************
+'* [概  要] UTF-8 CSVファイル高速読込処理。
+'* [詳  細] UTF-8 CSVファイルの読込を高速に行う（一括読込）。
+'*
+'* @param filePath 対象となるテキストファイルのフルパス
+'* @param separator 改行コード
+'* @return 読込テキストデータ(Variant)
+'******************************************************************************
+Public Function ReadUTF8CsvFileRapid(ByVal filePath As String, _
+                                     Optional ByVal HeaderExists As Boolean = True, _
+                                     Optional ByVal QuotExists As Boolean = False, _
+                                     Optional ByVal separator As LineSeparatorsEnum = adCRLF) As Variant
+                                    
+    ReadUTF8CsvFileRapid = ArrayUtils.CsvStringToArray(ReadUTF8FileRapid(filePath), HeaderExists, QuotExists, separator)
+End Function
+
+'******************************************************************************
+'* [概  要] UTF-8 CSVファイル高速読込処理。
+'* [詳  細] UTF-8 CSVファイルの読込を高速に行う（一括読込）。
+'*
+'* @param filePath 対象となるテキストファイルのフルパス
+'* @param separator 改行コード
+'* @return 読込テキストデータ(Array2DEx)
+'******************************************************************************
+Public Function ReadUTF8CsvFileRapidToArray2DEx(ByVal filePath As String, _
+                                                Optional ByVal HeaderExists As Boolean = True, _
+                                                Optional ByVal QuotExists As Boolean = False, _
+                                                Optional ByVal separator As LineSeparatorsEnum = adCRLF) As Array2DEx
+    Dim arr2dex As Array2DEx: Set arr2dex = New Array2DEx
+    Set ReadUTF8CsvFileRapidToArray2DEx = arr2dex.FromCsvString(ReadUTF8FileRapid(filePath), HeaderExists, QuotExists, separator)
+End Function
+
+'******************************************************************************
+'* [概  要] UTF-8テキストファイル高速書込処理。
+'* [詳  細] UTF-8テキストファイルの書込を高速に行う（一括読込）。
+'*
+'* @param filePath 対象となるテキストファイルのフルパス
+'* @param data 書込テキストデータ
+'* @param willAppend 追記有無（省略可。規定はFalse:追記なし）
+'* @param bomInclude BOM有無（省略可。規定はFalse:BOM無）
+'******************************************************************************
+Public Sub WriteUTF8FileRapid(ByVal filePath As String, _
+                              ByVal data As String, _
+                              Optional willAppend As Boolean = False, _
+                              Optional bomInclude As Boolean = False _
+                             )
+    Dim fileNum As Integer: fileNum = OpenUTF8FileRapid(filePath, willAppend, bomInclude)
+    Put #fileNum, , StringUtils.ToUTF8(data)
+    Close fileNum
+End Sub
+
+'******************************************************************************
+'* [概  要] UTF-8テキストファイル高速書込処理。
+'* [詳  細] UTF-8テキストファイルの書込を高速に行う（一括読込）。
+'*
+'* @param filePath 対象となるテキストファイルのフルパス
+'* @param data 書込テキストデータ
+'* @param willAppend 追記有無（省略可。規定はFalse:追記なし）
+'* @param bomInclude BOM有無（省略可。規定はFalse:BOM無）
+'******************************************************************************
+Public Sub WriteUTF8FileRapidFromArray(ByVal filePath As String, _
+                                       ByVal vDataArray As Variant, _
+                                       Optional separator As LineSeparatorsEnum = adCRLF, _
+                                       Optional willAppend As Boolean = False, _
+                                       Optional bomInclude As Boolean = False _
+                                      )
+    Dim fileNum As Integer: fileNum = OpenUTF8FileRapid(filePath, willAppend, bomInclude)
+    Dim sep As String: sep = IO.FromLineSeparatorsEnum(separator)
+    Dim v
+    For Each v In vDataArray
+        Put #fileNum, , StringUtils.ToUTF8(CStr(v))
+        Put #fileNum, , sep
+    Next
+    Close fileNum
+End Sub
+
+'******************************************************************************
+'* [概  要] UTF-8テキストファイル高速書込処理。
+'* [詳  細] テキストファイルに配列データを行単位で書込を行う。
+'*
+'* @param filePath 対象となるテキストファイルのフルパス
+'* @param vDataArray 書込2次元配列データ（Variant）
+'* @param vHeaderArray ヘッダ行1次元配列データ（Variant）（省略時はヘッダなし）
+'* @param withQuotWrap 項目を""で括るか
+'* @param cSet キャラセット（文字コード指定）
+'*               ※使用可能なCharset例：
+'*                 utf-8、shift_jis、euc-jp、ISO-2022-JP、unicode
+'*                 「HKEY_CLASSES_ROOT\MIME\Database\Charset」参照。
+'* @param separator 改行コード（省略可。規定はCRLF）
+'* @param willAppend 追記有無（省略可。規定はFalse:追記なし）
+'* @param bomInclude BOM有無（省略可。規定はFalse:BOM無）
+'******************************************************************************
+Public Sub WriteUTF8CsvFileRapid(ByVal filePath As String, _
+                                 ByRef vDataArray As Variant, _
+                                 Optional ByRef vHeaderArray As Variant, _
+                                 Optional ByVal withQuotWrap As Boolean = False, _
+                                 Optional cSet As String = "UTF-8", _
+                                 Optional separator As LineSeparatorsEnum = adCRLF, _
+                                 Optional willAppend As Boolean = False, _
+                                 Optional bomInclude As Boolean = False)
+    Dim fileNum As Integer: fileNum = OpenUTF8FileRapid(filePath, willAppend, bomInclude)
+    Dim sep As String: sep = IO.FromLineSeparatorsEnum(separator)
+    
+    Dim recText As String
+    ' ヘッダ行出力
+    If Not IsMissing(vHeaderArray) And IsArray(vHeaderArray) Then
+        recText = EditCsvRecordInArray(vHeaderArray, withQuotWrap)
+        Put #fileNum, , StringUtils.ToUTF8(recText)
+        Put #fileNum, , sep
+    End If
+
+    ' データ行出力
+    Dim i As Long, j As Long
+    For i = LBound(vDataArray, 1) To UBound(vDataArray, 1)
+        recText = EditCsvRecordIn2DArray(vDataArray, i, withQuotWrap)
+        Put #fileNum, , StringUtils.ToUTF8(recText)
+        Put #fileNum, , sep
+    Next
+    Close fileNum
+End Sub
+
+'******************************************************************************
+'* [概  要] UTF-8テキストファイル書込用オープン処理。
+'* [詳  細] UTF-8テキストファイルの高速書込用オープン処理。
+'*
+'* @param filePath 対象となるテキストファイルのフルパス
+'* @param willAppend 追記有無（省略可。規定はFalse:追記なし）
+'* @param bomInclude BOM有無（省略可。規定はFalse:BOM無）
+'* @return ファイル番号
+'******************************************************************************
+Private Function OpenUTF8FileRapid(ByVal filePath As String, _
+                                   ByVal willAppend As Boolean, _
+                                   ByVal bomInclude As Boolean _
+                                   ) As Integer
+
+    If Not IO.FolderExists(IO.GetParentFolderName(filePath)) Then
+        Err.Raise 9999, "FileUtils#PreWriteTextFileRapid", "Folder not found. [" & IO.GetParentFolderName(filePath) & "]"
+    End If
+    
+    Dim fileNum As Integer: fileNum = FreeFile
+    If willAppend Then
+        Open filePath For Binary As fileNum
+        Seek #fileNum, VBA.LOF(fileNum) + 1
+    Else
+        Open filePath For Output As fileNum
+        Close fileNum
+        fileNum = FreeFile
+        Open filePath For Binary As fileNum
+    End If
+
+    If bomInclude Then
+        Put #fileNum, , &HEF
+        Put #fileNum, , &HBB
+        Put #fileNum, , &HBF
+    End If
+    OpenUTF8FileRapid = fileNum
+End Function
+

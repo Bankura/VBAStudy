@@ -1343,3 +1343,60 @@ Public Function Create1DArrayEasy(ByVal upper As Long) As Variant
     ReDim vNewArr(0 To upper) As Variant
     Create1DArrayEasy = vNewArr
 End Function
+
+
+'******************************************************************************
+'* [概  要] ReadCsvFile
+'* [詳  細] CSVファイルを行単位で読込み、Variant配列に設定して返却する。
+'*
+'* @param filePath CSVファイルパス
+'* @param headerExists ヘッダ行の有無
+'* @param quotExists ""で括っているか
+'* @param separator 改行コード
+'* @return 読込テキストデータ（Variant2次元配列）
+'******************************************************************************
+Public Function CsvStringToArray(ByVal csvData As String, _
+                                 Optional ByVal HeaderExists As Boolean = True, _
+                                 Optional ByVal QuotExists As Boolean = False, _
+                                 Optional ByVal separator As LineSeparatorsEnum = adCRLF) As Variant
+    Dim vLine, lCount As Long, i As Long, vRow, vArr()
+    Dim vData As Variant: vData = Split(csvData, IO.FromLineSeparatorsEnum(separator))
+    Dim lSize As Long: lSize = GetLength(vData)
+    
+     ' 空データは空Variant配列で返却
+    If (HeaderExists And lSize <= 1) Or (Not HeaderExists And lSize = 0) Then
+        Exit Function
+    End If
+
+    For Each vLine In vData
+        ' 1行目処理
+        If lCount = 0 Then
+            vRow = StringUtils.SplitCsvRow(CStr(vLine), QuotExists)
+            If Not HeaderExists Then
+                ReDim vArr(0 To lSize - 1, 0 To UBound(vRow))
+                For i = LBound(vRow) To UBound(vRow)
+                    vArr(lCount, i) = vRow(i)
+                Next
+                lCount = lCount + 1
+            Else
+                ReDim vArr(0 To lSize - 2, 0 To UBound(vRow))
+            End If
+            Dim colCount As Long: colCount = UBound(vRow)
+        End If
+
+        ' 2行目以降処理
+        vRow = StringUtils.SplitCsvRow(CStr(vLine), QuotExists)
+        If UBound(vRow) <> colCount Then
+            CsvStringToArray = Empty
+            Exit Function
+        End If
+        
+        For i = LBound(vRow) To UBound(vRow)
+            vArr(lCount, i) = vRow(i)
+        Next
+        lCount = lCount + 1
+    Next
+    CsvStringToArray = vArr
+End Function
+
+

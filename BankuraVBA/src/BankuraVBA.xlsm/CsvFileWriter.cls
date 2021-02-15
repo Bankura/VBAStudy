@@ -45,10 +45,10 @@ Private mItemNames As Collection
 '*-----------------------------------------------------------------------------
 '* FilePath プロパティ
 '*-----------------------------------------------------------------------------
-Property Get FilePath() As String
-    FilePath = mFilePath
+Property Get filePath() As String
+    filePath = mFilePath
 End Property
-Property Let FilePath(arg As String)
+Property Let filePath(arg As String)
     mFilePath = arg
 End Property
 
@@ -165,7 +165,7 @@ End Property
 Private Sub Class_Initialize()
     Set mAdoStream = CreateObject("ADODB.Stream")
     mCharSet = "UTF-8"
-    mLineSeparator = LineSeparatorsEnum.adLF
+    mLineSeparator = LineSeparatorsEnum.adLf
     mHeaderExists = False
     mEnclosureChar = ""
     mDelimiter = ","

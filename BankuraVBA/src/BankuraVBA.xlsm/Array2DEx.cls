@@ -1839,3 +1839,20 @@ Public Function ToString() As String
     ToString = ArrayUtils.ToString(Me.ToJagArray)
 End Function
 
+
+'******************************************************************************
+'* [概  要] FromCsvString
+'* [詳  細] CSVファイルを行単位で読込み、Array2DExに設定して返却する。
+'*
+'* @param filePath CSVファイルパス
+'* @param headerExists ヘッダ行の有無
+'* @param quotExists ""で括っているか
+'* @param separator 改行コード
+'* @return Array2DEx
+'******************************************************************************
+Public Function FromCsvString(ByVal csvData As String, _
+                              Optional ByVal HeaderExists As Boolean = True, _
+                              Optional ByVal QuotExists As Boolean = False, _
+                              Optional ByVal separator As LineSeparatorsEnum = adCRLF) As Array2DEx
+    Set FromCsvString = Init(ArrayUtils.CsvStringToArray(csvData, HeaderExists, QuotExists, separator))
+End Function
