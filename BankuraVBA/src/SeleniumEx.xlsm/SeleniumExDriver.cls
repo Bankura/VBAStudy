@@ -298,8 +298,8 @@ End Property
 '* ・Selenium.Proxy オブジェクトを取得する。
 '*   Selenium.WebDriver のメンバー
 '*-----------------------------------------------------------------------------
-Public Property Get Proxy() As Selenium.Proxy
-    Set Proxy = mDriver.Proxy
+Public Property Get proxy() As Selenium.proxy
+    Set proxy = mDriver.proxy
 End Property
 
 '*-----------------------------------------------------------------------------
@@ -518,7 +518,7 @@ End Function
 
 '******************************************************************************
 '* [概  要] ActiveElement メソッド
-'* [詳  細] Gets the currently active element on the document
+'* [詳  細] ドキュメントで現在アクティブな要素を取得する。
 '*          Selenium.WebDriver のメンバー
 '*
 '* @return Selenium.WebElement オブジェクト
@@ -529,10 +529,10 @@ End Function
 
 '******************************************************************************
 '* [概  要] AddArgument メソッド
-'* [詳  細] Selenium.Table オブジェクトを取得し返却する。
+'* [詳  細] ブラウザ起動時の引数を追加する。
 '*          Selenium.WebDriver のメンバー
 '*
-'* @param argument   xxx
+'* @param argument 引数
 '******************************************************************************
 Public Sub AddArgument(argument As String)
     Call mDriver.AddArgument(argument)
@@ -540,10 +540,10 @@ End Sub
 
 '******************************************************************************
 '* [概  要] AddExtension メソッド
-'* [詳  細] Selenium.Table オブジェクトを取得し返却する。
+'* [詳  細] ブラウザの拡張機能を追加する。
 '*          Selenium.WebDriver のメンバー
 '*
-'* @param extensionPath   xxx
+'* @param extensionPath 拡張機能パス
 '******************************************************************************
 Public Sub AddExtension(extensionPath As String)
     Call mDriver.AddExtension(extensionPath)
@@ -551,7 +551,7 @@ End Sub
 
 '******************************************************************************
 '* [概  要] CacheStatus メソッド
-'* [詳  細] Get the status of the html5 application cache.
+'* [詳  細] html5アプリケーションキャッシュのステータスを取得する。
 '*          Selenium.WebDriver のメンバー
 '*
 '* @return Selenium.CacheState オブジェクト
@@ -562,7 +562,7 @@ End Function
 
 '******************************************************************************
 '* [概  要] CloseWindow メソッド（Close メソッド）
-'* [詳  細] Closes the current window。
+'* [詳  細] 現在のウィンドウを閉じる。
 '*          Selenium.WebDriver のメンバー
 '*
 '******************************************************************************
@@ -572,13 +572,14 @@ End Sub
     
 '******************************************************************************
 '* [概  要] ExecuteAsyncScript メソッド
-'* [詳  細] Execute an asynchronous piece of JavaScript in the current frame or window. Returns the first argument of the callback function.
+'* [詳  細] 現在のフレームまたはウィンドウでJavaScriptの非同期部分を実行する。
+'*          コールバック関数の最初の引数を返す。
 '*          Selenium.WebDriver のメンバー
 '*
-'* @param script   xxx
-'* @param arguments   xxx
-'* @param timeout   xxx
-'* @return Variant
+'* @param script    スクリプト
+'* @param arguments 引数
+'* @param timeout   タイムアウト時間
+'* @return Variant  実行結果
 '******************************************************************************
 Public Function ExecuteAsyncScript(script As String, Optional arguments, Optional timeout As Long = -1)
     ExecuteAsyncScript = mDriver.ExecuteAsyncScript(script, arguments, timeout)
@@ -586,12 +587,13 @@ End Function
     
 '******************************************************************************
 '* [概  要] ExecuteScript メソッド
-'* [詳  細] Execute a piece of JavaScript in the current frame or window. Returns the value specified by the return statement.
+'* [詳  細] 現在のフレームまたはウィンドウでJavaScriptを実行する。
+'*          returnステートメントで指定された値を返す。
 '*          Selenium.WebDriver のメンバー
 '*
-'* @param script   xxx
-'* @param arguments   xxx
-'* @return Variant
+'* @param script    スクリプト
+'* @param arguments 引数
+'* @return Variant  実行結果
 '******************************************************************************
 Public Function ExecuteScript(script As String, Optional arguments)
     ExecuteScript = mDriver.ExecuteScript(script, arguments)
@@ -599,12 +601,12 @@ End Function
     
 '******************************************************************************
 '* [概  要] FindElement メソッド
-'* [詳  細] Find the first WebElement using the given method.
+'* [詳  細] 指定されたメソッドを使用して最初のWebElementを検索する。
 '*          Selenium.WebDriver のメンバー
 '*
-'* @param By   xxx
-'* @param timeout   xxx
-'* @param raise   xxx
+'* @param By      指定メソッド
+'* @param timeout タイムアウト時間
+'* @param raise   エラーを起こすか
 '* @return Selenium.WebElement オブジェクト
 '******************************************************************************
 Public Function FindElement(By As By, Optional timeout As Long = -1, Optional raise As Boolean = True) As Selenium.WebElement
@@ -613,13 +615,13 @@ End Function
     
 '******************************************************************************
 '* [概  要] FindElementBy メソッド
-'* [詳  細] Find the first WebElement for a given strategy and value.
+'* [詳  細] 指定されたストラテジと値の最初のWebElementを検索する。
 '*          Selenium.WebDriver のメンバー
 '*
-'* @param Strategy   xxx
-'* @param value   xxx
-'* @param timeout   xxx
-'* @param raise   xxx
+'* @param Strategy ストラテジ
+'* @param value    値
+'* @param timeout  タイムアウト時間
+'* @param raise    エラーを起こすかどうか
 '* @return Selenium.WebElement オブジェクト
 '******************************************************************************
 Public Function FindElementBy(Strategy As Integer, value As String, Optional timeout As Long = -1, Optional raise As Boolean = True) As Selenium.WebElement
@@ -628,12 +630,12 @@ End Function
     
 '******************************************************************************
 '* [概  要] FindElementByClass メソッド
-'* [詳  細] Finds the first element matching the specified CSS class.
+'* [詳  細] 指定されたCSSクラスに一致する最初の要素を検索する。
 '*          Selenium.WebDriver のメンバー
 '*
-'* @param classname   xxx
-'* @param timeout   xxx
-'* @param raise   xxx
+'* @param classname クラス名
+'* @param timeout   タイムアウト時間
+'* @param raise     エラーを起こすかどうか
 '* @return Selenium.WebElement オブジェクト
 '******************************************************************************
 Public Function FindElementByClass(classname As String, Optional timeout As Long = -1, Optional raise As Boolean = True) As Selenium.WebElement
@@ -642,12 +644,12 @@ End Function
     
 '******************************************************************************
 '* [概  要] FindElementByCss メソッド
-'* [詳  細] Finds the first element matching the specified CSS selector.
+'* [詳  細] 指定されたCSSセレクターに一致する最初の要素を検索する。
 '*          Selenium.WebDriver のメンバー
 '*
-'* @param cssselector   xxx
-'* @param timeout   xxx
-'* @param raise   xxx
+'* @param cssselector CSSセレクター
+'* @param timeout     タイムアウト時間
+'* @param raise       エラーを起こすかどうか
 '* @return Selenium.WebElement オブジェクト
 '******************************************************************************
 Public Function FindElementByCss(cssselector As String, Optional timeout As Long = -1, Optional raise As Boolean = True) As Selenium.WebElement
@@ -656,12 +658,12 @@ End Function
 
 '******************************************************************************
 '* [概  要] FindElementById メソッド
-'* [詳  細] Finds the first element matching the specified id.
+'* [詳  細] 指定されたIDに一致する最初の要素を検索する。
 '*          Selenium.WebDriver のメンバー
 '*
-'* @param id   xxx
-'* @param timeout   xxx
-'* @param raise   xxx
+'* @param id      ID
+'* @param timeout タイムアウト時間
+'* @param raise   エラーを起こすかどうか
 '* @return Selenium.WebElement オブジェクト
 '******************************************************************************
 Public Function FindElementById(id As String, Optional timeout As Long = -1, Optional raise As Boolean = True) As Selenium.WebElement
@@ -670,12 +672,12 @@ End Function
 
 '******************************************************************************
 '* [概  要] FindElementByLinkText メソッド
-'* [詳  細] Finds the first element matching the specified link text.
+'* [詳  細] 指定されたリンクテキストに一致する最初の要素を検索する。
 '*          Selenium.WebDriver のメンバー
 '*
-'* @param linktext   xxx
-'* @param timeout   xxx
-'* @param raise   xxx
+'* @param linktext リンクテキスト
+'* @param timeout  タイムアウト時間
+'* @param raise    エラーを起こすかどうか
 '* @return Selenium.WebElement オブジェクト
 '******************************************************************************
 Public Function FindElementByLinkText(linktext As String, Optional timeout As Long = -1, Optional raise As Boolean = True) As Selenium.WebElement
@@ -684,12 +686,12 @@ End Function
 
 '******************************************************************************
 '* [概  要] FindElementByName メソッド
-'* [詳  細] Finds the first element matching the specified name.
+'* [詳  細] 指定された名前に一致する最初の要素を検索する。
 '*          Selenium.WebDriver のメンバー
 '*
-'* @param name   xxx
-'* @param timeout   xxx
-'* @param raise   xxx
+'* @param name    名前
+'* @param timeout タイムアウト時間
+'* @param raise   エラーを起こすかどうか
 '* @return Selenium.WebElement オブジェクト
 '******************************************************************************
 Public Function FindElementByName(name As String, Optional timeout As Long = -1, Optional raise As Boolean = True) As Selenium.WebElement
@@ -698,12 +700,12 @@ End Function
 
 '******************************************************************************
 '* [概  要] FindElementByPartialLinkText メソッド
-'* [詳  細] Finds the first of elements that match the part of the link text supplied
+'* [詳  細] 指定されたリンクテキストの部分に一致する最初の要素を検索する。
 '*          Selenium.WebDriver のメンバー
 '*
-'* @param partiallinktext   xxx
-'* @param timeout   xxx
-'* @param raise   xxx
+'* @param partiallinktext リンクテキストの部分
+'* @param timeout         タイムアウト時間
+'* @param raise           エラーを起こすかどうか
 '* @return Selenium.WebElement オブジェクト
 '******************************************************************************
 Public Function FindElementByPartialLinkText(partiallinktext As String, Optional timeout As Long = -1, Optional raise As Boolean = True) As Selenium.WebElement
@@ -712,12 +714,12 @@ End Function
 
 '******************************************************************************
 '* [概  要] FindElementByTag メソッド
-'* [詳  細] Finds the first element matching the specified tag name.
+'* [詳  細] 指定されたタグ名に一致する最初の要素を検索する。
 '*          Selenium.WebDriver のメンバー
 '*
-'* @param tagname   xxx
-'* @param timeout   xxx
-'* @param raise   xxx
+'* @param tagname タグ名
+'* @param timeout タイムアウト時間
+'* @param raise   エラーを起こすかどうか
 '* @return Selenium.WebElement オブジェクト
 '******************************************************************************
 Public Function FindElementByTag(tagName As String, Optional timeout As Long = -1, Optional raise As Boolean = True) As Selenium.WebElement
@@ -726,12 +728,12 @@ End Function
 
 '******************************************************************************
 '* [概  要] FindElementByXPath メソッド
-'* [詳  細] Finds the first element matching the specified XPath query.
+'* [詳  細] 指定されたXPathクエリに一致する最初の要素を検索する。
 '*          Selenium.WebDriver のメンバー
 '*
-'* @param xpath   xxx
-'* @param timeout   xxx
-'* @param raise   xxx
+'* @param xpath   XPathクエリ
+'* @param timeout タイムアウト時間
+'* @param raise   エラーを起こすかどうか
 '* @return Selenium.WebElement オブジェクト
 '******************************************************************************
 Public Function FindElementByXPath(xpath As String, Optional timeout As Long = -1, Optional raise As Boolean = True) As Selenium.WebElement
@@ -740,12 +742,12 @@ End Function
 
 '******************************************************************************
 '* [概  要] FindElements メソッド
-'* [詳  細] Find all elements within the current context using the given mechanism.
+'* [詳  細] 指定されたメソッドを使用して、現在のコンテキスト内のすべての要素を検索する。
 '*          Selenium.WebDriver のメンバー
 '*
-'* @param By   xxx
-'* @param minimum   xxx
-'* @param timeout   xxx
+'* @param By      指定メソッド
+'* @param minimum 最小値
+'* @param timeout タイムアウト時間
 '* @return Selenium.WebElements オブジェクト
 '******************************************************************************
 Public Function FindElements(By As By, Optional minimum As Long, Optional timeout As Long) As Selenium.WebElements
@@ -760,7 +762,7 @@ End Function
 '* @param Strategy   xxx
 '* @param value   xxx
 '* @param minimum   xxx
-'* @param timeout   xxx
+'* @param timeout   タイムアウト時間
 '* @return Selenium.WebElements オブジェクト
 '******************************************************************************
 Public Function FindElementsBy(Strategy As Integer, value As String, Optional minimum As Long, Optional timeout As Long) As Selenium.WebElements
@@ -774,7 +776,7 @@ End Function
 '*
 '* @param classname   xxx
 '* @param minimum   xxx
-'* @param timeout   xxx
+'* @param timeout   タイムアウト時間
 '* @return Selenium.WebElements オブジェクト
 '******************************************************************************
 Public Function FindElementsByClass(classname As String, Optional minimum As Long, Optional timeout As Long) As Selenium.WebElements
@@ -788,7 +790,7 @@ End Function
 '*
 '* @param cssselector   xxx
 '* @param minimum   xxx
-'* @param timeout   xxx
+'* @param timeout   タイムアウト時間
 '* @return Selenium.WebElements オブジェクト
 '******************************************************************************
 Public Function FindElementsByCss(cssselector As String, Optional minimum As Long, Optional timeout As Long) As Selenium.WebElements
@@ -802,7 +804,7 @@ End Function
 '*
 '* @param id   xxx
 '* @param minimum   xxx
-'* @param timeout   xxx
+'* @param timeout   タイムアウト時間
 '* @return Selenium.WebElements オブジェクト
 '******************************************************************************
 Public Function FindElementsById(id As String, Optional minimum As Long, Optional timeout As Long) As Selenium.WebElements
@@ -816,7 +818,7 @@ End Function
 '*
 '* @param linktext   xxx
 '* @param minimum   xxx
-'* @param timeout   xxx
+'* @param timeout   タイムアウト時間
 '* @return Selenium.WebElements オブジェクト
 '******************************************************************************
 Public Function FindElementsByLinkText(linktext As String, Optional minimum As Long, Optional timeout As Long) As Selenium.WebElements
@@ -830,7 +832,7 @@ End Function
 '*
 '* @param name   xxx
 '* @param minimum   xxx
-'* @param timeout   xxx
+'* @param timeout   タイムアウト時間
 '* @return Selenium.WebElements オブジェクト
 '******************************************************************************
 Public Function FindElementsByName(name As String, Optional minimum As Long, Optional timeout As Long) As Selenium.WebElements
@@ -844,7 +846,7 @@ End Function
 '*
 '* @param partiallinktext   xxx
 '* @param minimum   xxx
-'* @param timeout   xxx
+'* @param timeout   タイムアウト時間
 '* @return Selenium.WebElements オブジェクト
 '******************************************************************************
 Public Function FindElementsByPartialLinkText(partiallinktext As String, Optional minimum As Long, Optional timeout As Long) As Selenium.WebElements
@@ -858,7 +860,7 @@ End Function
 '*
 '* @param tagname   xxx
 '* @param minimum   xxx
-'* @param timeout   xxx
+'* @param timeout   タイムアウト時間
 '* @return Selenium.WebElements オブジェクト
 '******************************************************************************
 Public Function FindElementsByTag(tagName As String, Optional minimum As Long, Optional timeout As Long) As Selenium.WebElements
@@ -872,7 +874,7 @@ End Function
 '*
 '* @param xpath   xxx
 '* @param minimum   xxx
-'* @param timeout   xxx
+'* @param timeout   タイムアウト時間
 '* @return Selenium.WebElements オブジェクト
 '******************************************************************************
 Public Function FindElementsByXPath(xpath As String, Optional minimum As Long, Optional timeout As Long) As Selenium.WebElements
@@ -885,8 +887,8 @@ End Function
 '*          Selenium.WebDriver のメンバー
 '*
 '* @param url   xxx
-'* @param timeout   xxx
-'* @param raise   xxx
+'* @param timeout   タイムアウト時間
+'* @param raise   エラーを起こすかどうか
 '* @return Selenium.Table オブジェクト
 '******************************************************************************
 Public Function GetPage(url As String, Optional timeout As Long = -1, Optional raise As Boolean = True) As Boolean
@@ -930,7 +932,7 @@ End Sub
 '*          Selenium.WebDriver のメンバー
 '*
 '* @param By   xxx
-'* @param timeout   xxx
+'* @param timeout   タイムアウト時間
 '* @return Boolean
 '******************************************************************************
 Public Function IsElementPresent(By As By, Optional timeout As Long) As Boolean
@@ -1116,8 +1118,8 @@ End Sub
 '* [詳  細] Switch the focus to an alert on the page.
 '*          Selenium.WebDriver のメンバー
 '*
-'* @param timeout   xxx
-'* @param raise   xxx
+'* @param timeout   タイムアウト時間
+'* @param raise   エラーを起こすかどうか
 '* @return Selenium.Alert オブジェクト
 '******************************************************************************
 Public Function SwitchToAlert(Optional timeout As Long = -1, Optional raise As Boolean = True) As Selenium.Alert
@@ -1140,8 +1142,8 @@ End Sub
 '*          Selenium.WebDriver のメンバー
 '*
 '* @param identifier   xxx
-'* @param timeout   xxx
-'* @param raise   xxx
+'* @param timeout   タイムアウト時間
+'* @param raise   エラーを起こすかどうか
 '* @return Boolean
 '******************************************************************************
 Public Function SwitchToFrame(identifier, Optional timeout As Long = -1, Optional raise As Boolean = True) As Boolean
@@ -1153,8 +1155,8 @@ End Function
 '* [詳  細] Switche the focus to the next window.
 '*          Selenium.WebDriver のメンバー
 '*
-'* @param timeout   xxx
-'* @param raise   xxx
+'* @param timeout   タイムアウト時間
+'* @param raise   エラーを起こすかどうか
 '* @return Selenium.Window オブジェクト
 '******************************************************************************
 Public Function SwitchToNextWindow(Optional timeout As Long = -1, Optional raise As Boolean = True) As Selenium.Window
@@ -1188,8 +1190,8 @@ End Function
 '*          Selenium.WebDriver のメンバー
 '*
 '* @param name   xxx
-'* @param timeout   xxx
-'* @param raise   xxx
+'* @param timeout   タイムアウト時間
+'* @param raise   エラーを起こすかどうか
 '* @return Selenium.Window オブジェクト
 '******************************************************************************
 Public Function SwitchToWindowByName(name As String, Optional timeout As Long = -1, Optional raise As Boolean = True) As Selenium.Window
@@ -1202,8 +1204,8 @@ End Function
 '*          Selenium.WebDriver のメンバー
 '*
 '* @param Title   xxx
-'* @param timeout   xxx
-'* @param raise   xxx
+'* @param timeout   タイムアウト時間
+'* @param raise   エラーを起こすかどうか
 '* @return Selenium.Window オブジェクト
 '******************************************************************************
 Public Function SwitchToWindowByTitle(Title As String, Optional timeout As Long = -1, Optional raise As Boolean = True) As Selenium.Window
@@ -1229,7 +1231,7 @@ End Function
 '*
 '* @param procedure   xxx
 '* @param argument   xxx
-'* @param timeout   xxx
+'* @param timeout   タイムアウト時間
 '* @return Variant
 '******************************************************************************
 Public Function WaitUntil(procedure, Optional argument, Optional timeout As Long = -1)
@@ -1254,7 +1256,7 @@ End Sub
 '*
 '* @param script   xxx
 '* @param arguments   xxx
-'* @param timeout   xxx
+'* @param timeout   タイムアウト時間
 '* @return Variant
 '******************************************************************************
 Public Function WaitForScript(script As String, Optional arguments, Optional timeout As Long = -1)
@@ -1267,7 +1269,7 @@ End Function
 '*          Selenium.WebDriver のメンバー
 '*
 '* @param By   xxx
-'* @param timeout   xxx
+'* @param timeout   タイムアウト時間
 '******************************************************************************
 Public Sub WaitNotElement(By As By, Optional timeout As Long = -1)
     Call mDriver.WaitNotElement(By, timeout)
@@ -1378,6 +1380,7 @@ Public Function ChromePreCheck() As Boolean
             If DownloadChromeDriverZipFile(driverLatestVersion, ThisWorkbook.path & "\chromedriver_win32.zip") Then
                 Call UnZipFile(ThisWorkbook.path & "\chromedriver_win32.zip", ThisWorkbook.path)
                 Call CopyChromeDriver(ThisWorkbook.path & "\chromedriver_win32", "\chromedriver.exe")
+                Call mFso.DeleteFile(ThisWorkbook.path & "\chromedriver_win32.zip")
                 Debug.Print "ChromeDriverを更新しました。"
                 Debug.Print
             Else
@@ -1437,6 +1440,10 @@ End Function
 Public Function GetChromeDriverLatestVersion(chromeVersion As String) As String
     Dim winHttp: Set winHttp = CreateObject("WinHttp.WinHttpRequest.5.1")
     winHttp.Open "GET", URL_CHROME_DRIVER_LATEST_RELEASE_VERSION & chromeVersion, False
+    Dim proxyaddr As String: proxyaddr = GetRegProxyServer()
+    If proxyaddr <> "" Then
+        winHttp.setProxy 2, proxyaddr
+    End If
     winHttp.Send
     Dim resBody As Variant
     With CreateObject("ADODB.Stream")
@@ -1466,6 +1473,10 @@ Public Function DownloadChromeDriverZipFile(driverVersion As String, saveFilePat
 
     Dim winHttp: Set winHttp = CreateObject("WinHttp.WinHttpRequest.5.1")
     winHttp.Open "GET", Replace(URL_CHROME_DRIVER_ZIP, "{driver_version}", driverVersion), False
+    Dim proxyaddr As String: proxyaddr = GetRegProxyServer()
+    If proxyaddr <> "" Then
+        winHttp.setProxy 2, proxyaddr
+    End If
     winHttp.Send
     
     If winHttp.Status >= 200 And winHttp.Status < 400 Then
@@ -1480,6 +1491,27 @@ Public Function DownloadChromeDriverZipFile(driverVersion As String, saveFilePat
     Else
         DownloadChromeDriverZipFile = False
     End If
+End Function
+
+'******************************************************************************
+'* [概  要] GetRegProxyServer メソッド
+'* [詳  細] レジストリよりProxyサーバの設定を取得する。
+'*
+'* @return String Proxyサーバアドレス:ポート番号
+'******************************************************************************
+Public Function GetRegProxyServer() As String
+    Dim stdRegProv As Object: Set stdRegProv = CreateStdRegProv()
+    
+    ' Proxyサーバがオフなら空文字返却
+    Dim proxyEnable As Long
+    stdRegProv.GetDWORDValue HKEY_CURRENT_USER, "SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings", "ProxyEnable", proxyEnable
+    If proxyEnable = 0 Then Exit Function
+    
+    ' Proxyサーバアドレス:ポート番号を取得
+    Dim proxyaddr As String
+    stdRegProv.GetStringValue HKEY_CURRENT_USER, "SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings", "ProxyServer", proxyaddr
+
+    GetRegProxyServer = proxyaddr
 End Function
 
 '******************************************************************************
@@ -2879,4 +2911,6 @@ Private Function GetWmiServer() As Object
     Dim wmi As Object: Set wmi = CreateObject("WbemScripting.SWbemLocator")
     Set GetWmiServer = wmi.ConnectServer()
 End Function
+
+
 
