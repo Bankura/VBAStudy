@@ -195,8 +195,15 @@ End Function
 '******************************************************************************
 Public Function Transmit(req As HttpRequest, Optional saveOriginalBody As Boolean = False) As HttpResponse
     Call ReNewWinHttp
-    mWinHttp.Open req.method, req.Url, False
+    mWinHttp.Open req.method, req.url, False
     Call SetRequestHeaders(req)
+    
+    ' プロキシ設定
+    Dim proxyaddr As String: proxyaddr = GetRegProxyServer()
+    If proxyaddr <> "" Then
+        mWinHttp.SetProxy 2, proxyaddr
+    End If
+    
     If req.method = "GET" Or req.method = "DELETE" Or req.method = "HEAD" Or req.method = "OPTIONS" Then
         mWinHttp.Send
     Else
@@ -214,7 +221,7 @@ End Function
 '******************************************************************************
 Public Sub SetRequestHeaders(req As HttpRequest)
     Dim v
-    For Each v In req.Headers.keys
+    For Each v In req.Headers.Keys
         mWinHttp.SetRequestHeader CStr(v), req.Headers(v)
     Next
 End Sub
@@ -277,13 +284,13 @@ End Function
 '* @return Response情報
 '*
 '******************************************************************************
-Public Function SendRequest(method As String, Url As String, reqHdrParams() As String, reqBody As String, _
+Public Function SendRequest(method As String, url As String, reqHdrParams() As String, reqBody As String, _
                             Optional lTimeout As Long = 0, _
                             Optional resEncode As String = "utf-8") As HttpResponse
     Call ReNewWinHttp
     
     ' HTTP リクエスト
-    mWinHttp.Open method, Url, False
+    mWinHttp.Open method, url, False
 
     ' リクエストヘッダ設定
     Dim i As Long
@@ -296,6 +303,12 @@ Public Function SendRequest(method As String, Url As String, reqHdrParams() As S
     ' タイムアウト設定
     If lTimeout > 0 Then
         mWinHttp.SetTimeouts lTimeout, lTimeout, lTimeout, lTimeout
+    End If
+    
+    ' プロキシ設定
+    Dim proxyaddr As String: proxyaddr = GetRegProxyServer()
+    If proxyaddr <> "" Then
+        mWinHttp.SetProxy 2, proxyaddr
     End If
     
     ' リクエスト送信
@@ -334,3 +347,23 @@ Public Function DownloadFile(req As HttpRequest, saveFilePath As String) As Http
     End If
 End Function
 
+'******************************************************************************
+'* [概  要] GetRegProxyServer メソッド
+'* [詳  細] レジストリよりProxyサーバの設定を取得する。
+'*
+'* @return String Proxyサーバアドレス:ポート番号
+'******************************************************************************
+Private Function GetRegProxyServer() As String
+    Dim stdRegProv As Object: Set stdRegProv = Core.CreateStdRegProv()
+    
+    ' Proxyサーバがオフなら空文字返却
+    Dim proxyEnable As Long
+    stdRegProv.GetDWORDValue HKEY_CURRENT_USER, "SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings", "ProxyEnable", proxyEnable
+    If proxyEnable = 0 Then Exit Function
+    
+    ' Proxyサーバアドレス:ポート番号を取得
+    Dim proxyaddr As String
+    stdRegProv.GetStringValue HKEY_CURRENT_USER, "SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings", "ProxyServer", proxyaddr
+
+    GetRegProxyServer = proxyaddr
+End Function

@@ -61,7 +61,7 @@ End Function
 '* 拡張メソッド
 '*
 '* @author Bankura
-'* Copyright (c) 2020 Bankura
+'* Copyright (c) 2020-2021 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 '*-----------------------------------------------------------------------------
@@ -426,9 +426,9 @@ End Function
 '* @param fun As Func(Of T, Boolean)
 '* @return ArrayEx(Of Array(Of T))
 '******************************************************************************
-Public Function Filter(ByVal fun As Func) As ArrayEx
+Public Function filter(ByVal fun As Func) As ArrayEx
     Dim arr: arr = Ext.ArrFilter(fun, Me.ToArray)
-    Set Filter = Init(arr)
+    Set filter = Init(arr)
 End Function
 
 '******************************************************************************
@@ -618,8 +618,8 @@ End Function
 '* @param count 項目
 '* @return Variant 1次元配列
 '******************************************************************************
-Public Function Repeat(ByVal itm As Variant, ByVal Count As Long) As ArrayEx
-    Set Repeat = Init(ArrayUtils.Repeat(itm, Count))
+Public Function Repeat(ByVal itm As Variant, ByVal count As Long) As ArrayEx
+    Set Repeat = Init(ArrayUtils.Repeat(itm, count))
 End Function
 
 '******************************************************************************
@@ -698,4 +698,15 @@ End Function
 '******************************************************************************
 Public Function ToString() As String
     ToString = ArrayUtils.ToString(Me.ToArray)
+End Function
+
+'******************************************************************************
+'* [概  要] To2DArray
+'* [詳  細] 2次元配列に変換する。
+'*
+'* @param transpose Trueにすると1次元配列を列方向に設定する
+'* @return Variant 2次元配列
+'******************************************************************************
+Public Function To2DArray(Optional ByVal transpose As Boolean = False) As Variant
+    To2DArray = ArrayUtils.ArrayTo2DArray(Me, transpose)
 End Function

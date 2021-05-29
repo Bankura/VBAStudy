@@ -19,6 +19,7 @@ Option Explicit
 '* Copyright (c) 2020 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
+#Const XLVERSION = 2013
 
 '******************************************************************************
 '* Enum定義
@@ -144,6 +145,7 @@ Property Get Comments() As Comments
     Set Comments = mOrigin.Comments
 End Property
 
+#If XLVERSION >= 2016 Then
 '*-----------------------------------------------------------------------------
 '* CommentsThreaded プロパティ（読み取り専用）
 '*
@@ -155,6 +157,7 @@ End Property
 Property Get CommentsThreaded() As CommentsThreaded
     Set CommentsThreaded = mOrigin.CommentsThreaded
 End Property
+#End If
 
 '*-----------------------------------------------------------------------------
 '* ConsolidationFunction プロパティ（読み取り専用）
@@ -426,6 +429,7 @@ Property Let Name(arg As String)
     mOrigin.Name = arg
 End Property
 
+#If XLVERSION >= 2016 Then
 '*-----------------------------------------------------------------------------
 '* NamedSheetViews プロパティ（読み取り専用）
 '*
@@ -437,6 +441,7 @@ End Property
 Property Get NamedSheetViews() As NamedSheetViewCollection
     Set NamedSheetViews = mOrigin.NamedSheetViews
 End Property
+#End If
     
 '*-----------------------------------------------------------------------------
 '* Names プロパティ（読み取り専用）
@@ -888,6 +893,7 @@ Function Evaluate(Name)
     Evaluate = mOrigin.Evaluate(Name)
 End Function
 
+#If XLVERSION >= 2016 Then
 '******************************************************************************
 '* [概  要] ExportAsFixedFormat メソッド
 '* [詳  細] 指定された形式のファイルにエクスポートします。
@@ -907,6 +913,7 @@ End Function
 Sub ExportAsFixedFormat(Type_ As XlFixedFormatType, Optional fileName, Optional Quality, Optional IncludeDocProperties, Optional IgnorePrintAreas, Optional From, Optional To_, Optional OpenAfterPublish, Optional FixedFormatExtClassPtr, Optional WorkIdentity)
     Call mOrigin.ExportAsFixedFormat(Type_, fileName, Quality, IncludeDocProperties, IgnorePrintAreas, From, To_, OpenAfterPublish, FixedFormatExtClassPtr, WorkIdentity)
 End Sub
+#End If
 
 '******************************************************************************
 '* [概  要] Move メソッド
@@ -1188,13 +1195,20 @@ End Function
 '* @param vArray Variant配列データ
 '* @param lStartRow データ開始行番号
 '* @param lStartCol データ開始列番号
+'* @param transpose Trueにすると1次元配列を列方向に設定する
 '*
 '******************************************************************************
-Public Sub ImportArray(vArray, lStartRow As Long, lStartCol As Long)
+Public Sub ImportArray(vArray, lStartRow As Long, lStartCol As Long, Optional transpose As Boolean = True)
     If ValidateUtils.IsArray2DEx(vArray) Then
         Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, vArray.To2DArray, lStartRow, lStartCol)
     ElseIf ArrayUtils.Is2DArray(vArray) Then
         Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, vArray, lStartRow, lStartCol)
+    ElseIf ValidateUtils.IsArrayEx(vArray) Then
+        Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, vArray.To2DArray(transpose), lStartRow, lStartCol)
+    ElseIf ArrayUtils.Is1DArray(vArray) Then
+        Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, ArrayUtils.ArrayTo2DArray(vArray, transpose), lStartRow, lStartCol)
+    ElseIf ValidateUtils.IsPrimitive(vArray) Then
+        mOrigin.Cells(lStartRow, lStartCol).value = vArray
     End If
 End Sub
 
@@ -1350,3 +1364,5 @@ Public Function CopySheet(ByVal destSheetName As String, _
                    Optional ByRef wb As Workbook, Optional ByVal countAppend As Boolean = False) As Worksheet
     Set CopySheet = XlWorkSheetUtils.CopySheet(mOrigin.Name, destSheetName, wb, countAppend)
 End Function
+
+

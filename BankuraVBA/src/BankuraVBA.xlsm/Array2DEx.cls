@@ -20,7 +20,7 @@ Option Explicit
 '*           Ariawase Core, Ext, ArrayEx
 '*
 '* @author Bankura
-'* Copyright (c) 2020 Bankura
+'* Copyright (c) 2020-2021 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 '******************************************************************************
@@ -177,7 +177,7 @@ End Sub
 '* @return ArrayExオブジェクト
 '*
 '******************************************************************************
-Public Function Init(Optional ByVal val) As Array2DEx
+Public Function Init(Optional ByVal val, Optional ByVal transpose As Boolean = False) As Array2DEx
     If VBA.IsMissing(val) Then
         Call Clear
         Set Init = Me
@@ -222,7 +222,11 @@ Public Function Init(Optional ByVal val) As Array2DEx
         Next
     ElseIf ArrayUtils.Is1DArray(val) Or ValidateUtils.IsArrayEx(val) Then
         Call Clear
-        Call Me.AddRow(val)
+        If transpose Then
+            Call Me.AddColumn(val)
+        Else
+            Call Me.AddRow(val)
+        End If
     Else
         Call Clear
         Call Me.AddRow(ArrayUtils.CreateArrayEx().Add(val))
@@ -412,7 +416,7 @@ Public Function AddRow(ByVal var As Variant) As Array2DEx
         colLen = var.Length
         Set arrex = var
     Else
-        Err.Raise 9999, "Array2DEx#AddRow", "Invalid argument."
+        Err.raise 9999, "Array2DEx#AddRow", "Invalid argument."
     End If
 
     If mColLength < colLen Then
@@ -489,7 +493,7 @@ Public Function AddColumn(ByVal var As Variant) As Array2DEx
         rowLen = var.Length
         Set arrex = var
     Else
-        Err.Raise 9999, "Array2DEx#AddColumn", "Invalid argument."
+        Err.raise 9999, "Array2DEx#AddColumn", "Invalid argument."
     End If
 
     If mRowLength < rowLen Then
@@ -517,7 +521,7 @@ End Function
 Public Function AddColumns(ByVal var As Variant, ParamArray vars() As Variant) As Array2DEx
     Dim rowLen As Long
     Dim arr2dex As Array2DEx
-    Set arr2dex = Core.Init(New Array2DEx, var)
+    Set arr2dex = Core.Init(New Array2DEx, var, True)
     rowLen = arr2dex.RowLength
     
     If mRowLength < rowLen Then
@@ -577,7 +581,7 @@ Public Function Equals(ByVal arr2 As Variant) As Boolean
         rowLen = arr2.RowLength
         colLen = arr2.ColLength
     Else
-        Err.Raise 9999, "Array2DEx#Equals", "Invalid argument."
+        Err.raise 9999, "Array2DEx#Equals", "Invalid argument."
     End If
     
     If mRowLength <> rowLen Or mColLength <> colLen Then
@@ -619,7 +623,7 @@ End Function
 '******************************************************************************
 Public Function RowIndexOf(ByVal rowIdx As Variant, ByVal val As Variant, Optional ByVal ixStart As Long = 0, Optional ByVal cnt As Variant) As Long
     If IsInvalidRowIndex(rowIdx) Then
-        Err.Raise 9999, "Array2DEx#RowIndexOf", "Invalid argument."
+        Err.raise 9999, "Array2DEx#RowIndexOf", "Invalid argument."
     End If
     RowIndexOf = Core.ArrIndexOf(m2DItems(rowIdx).ToArray, val, ixStart, cnt)
     If RowIndexOf < ixStart Then RowIndexOf = -1
@@ -639,7 +643,7 @@ End Function
 '******************************************************************************
 Public Function ColIndexOf(ByVal colidx As Variant, ByVal val As Variant, Optional ByVal ixStart As Long = 0, Optional ByVal cnt As Variant) As Long
     If IsInvalidColIndex(colidx) Then
-        Err.Raise 9999, "Array2DEx#ColIndexOf", "Invalid argument."
+        Err.raise 9999, "Array2DEx#ColIndexOf", "Invalid argument."
     End If
     ColIndexOf = Core.ArrIndexOf(YColumn(colidx).ToArray, val, ixStart, cnt)
     If ColIndexOf < ixStart Then ColIndexOf = -1
@@ -656,7 +660,7 @@ End Function
 '******************************************************************************
 Public Function IndexOf(ByVal val As Variant, Optional ByVal ixStart As Long) As Array2DIndex
     If IsInvalidRowIndex(ixStart) Then
-        Err.Raise 9999, "Array2DEx#IndexOf", "Invalid argument."
+        Err.raise 9999, "Array2DEx#IndexOf", "Invalid argument."
     End If
 
     Dim x As Long, y As Long, arr2dIdx As Array2DIndex
@@ -686,7 +690,7 @@ End Function
 '******************************************************************************
 Public Function EntireRowIndexOf(ByVal rowData As Variant, Optional ByVal ixStart As Long = 0) As Long
     If IsInvalidRowIndex(ixStart) Then
-        Err.Raise 9999, "Array2DEx#RowsIndexOf", "Invalid argument."
+        Err.raise 9999, "Array2DEx#RowsIndexOf", "Invalid argument."
     End If
     
     Dim arr As Variant
@@ -695,7 +699,7 @@ Public Function EntireRowIndexOf(ByVal rowData As Variant, Optional ByVal ixStar
     ElseIf ValidateUtils.IsArrayEx(rowData) Then
         arr = rowData.ToArray
     Else
-        Err.Raise 9999, "Array2DEx#RowsIndexOf", "Invalid argument."
+        Err.raise 9999, "Array2DEx#RowsIndexOf", "Invalid argument."
     End If
     
     Dim x As Long
@@ -758,7 +762,7 @@ End Sub
 '******************************************************************************
 Public Sub Sort(ByVal colidx As Long, Optional ByVal orderAsc As Boolean = True)
     If IsInvalidColIndex(colidx) Then
-        Err.Raise 9999, "Array2DEx#Sort", "Invalid argument."
+        Err.raise 9999, "Array2DEx#Sort", "Invalid argument."
     End If
     Dim arr: arr = YColumn(colidx).ToArray
     Dim idxArr: idxArr = ArrSort(arr, orderAsc)
@@ -776,7 +780,7 @@ End Sub
 ''' @param orderAsc As Boolean
 Private Function ArrSort(ByRef arr As Variant, ByVal orderAsc As Boolean) As Variant
 
-    If Not IsArray(arr) Then Err.Raise 13
+    If Not IsArray(arr) Then Err.raise 13
     If ArrLen(arr) <= 1 Then GoTo Escape
 
     Dim ix0 As Long: ix0 = LBound(arr)
@@ -957,7 +961,7 @@ Public Function RowSlice(Optional ByVal idxStart As Variant, Optional ByVal idxE
         idxEnd = mRowMaxIndex
     End If
     If IsInvalidRowIndex(idxStart) Or IsInvalidRowIndex(idxEnd) Then
-        Err.Raise 9999, "Array2DEx#RowSlice", "Invalid argument."
+        Err.raise 9999, "Array2DEx#RowSlice", "Invalid argument."
     End If
     
     Dim arr2dex As Array2DEx: Set arr2dex = New Array2DEx
@@ -985,7 +989,7 @@ Public Function ColSlice(Optional ByVal idxStart As Variant, Optional ByVal idxE
         idxEnd = mColMaxIndex
     End If
     If IsInvalidColIndex(idxStart) Or IsInvalidColIndex(idxEnd) Then
-        Err.Raise 9999, "Array2DEx#ColSlice", "Invalid argument."
+        Err.raise 9999, "Array2DEx#ColSlice", "Invalid argument."
     End If
     
     Dim arr2dex As Array2DEx: Set arr2dex = New Array2DEx
@@ -1067,7 +1071,7 @@ Public Function Zip(ByVal fun As Func, ByVal arr2 As Variant) As Array2DEx
         Set Zip = Me
         Exit Function
     End If
-    If Not ArrayUtils.Is2DArray(arr2) Then Err.Raise 9999, "Array2DEx#Zip", "Invalid argument."
+    If Not ArrayUtils.Is2DArray(arr2) Then Err.raise 9999, "Array2DEx#Zip", "Invalid argument."
     
     Dim arr1: arr1 = Me.To2DArray()
 
@@ -1084,7 +1088,7 @@ Public Function Zip(ByVal fun As Func, ByVal arr2 As Variant) As Array2DEx
     Dim a2ub2 As Long: a2ub2 = UBound(arr2, 2)
     If (ub1 - lb1) <> (a2ub1 - a2lb1) Or _
        (ub2 - lb2) <> (a2ub2 - a2lb2) Then
-        Err.Raise 9999, "Array2DEx#Zip", "Invalid argument. Defferent count Of elements."
+        Err.raise 9999, "Array2DEx#Zip", "Invalid argument. Defferent count Of elements."
     End If
     
     Dim ret
@@ -1337,7 +1341,7 @@ End Function
 '******************************************************************************
 Public Function RowInsert(ByVal idx As Long, ByVal row As Variant) As Array2DEx
     If idx < 0 Or idx > mRowMaxIndex + 1 Then
-        Err.Raise 9999, "Array2DEx#RowInsert", "Invalid argument."
+        Err.raise 9999, "Array2DEx#RowInsert", "Invalid argument."
     End If
 
     Dim colLen As Long
@@ -1349,7 +1353,7 @@ Public Function RowInsert(ByVal idx As Long, ByVal row As Variant) As Array2DEx
         colLen = row.Length
         Set arrex = row
     Else
-        Err.Raise 9999, "Array2DEx#RowInsert", "Invalid argument."
+        Err.raise 9999, "Array2DEx#RowInsert", "Invalid argument."
     End If
 
     If mColLength < colLen Then
@@ -1373,7 +1377,7 @@ End Function
 '******************************************************************************
 Public Function ColInsert(ByVal idx As Long, ByVal col As Variant) As Array2DEx
     If idx < 0 Or idx > mColMaxIndex + 1 Then
-        Err.Raise 9999, "Array2DEx#ColInsert", "Invalid argument."
+        Err.raise 9999, "Array2DEx#ColInsert", "Invalid argument."
     End If
     
     Dim rowLen As Long
@@ -1385,7 +1389,7 @@ Public Function ColInsert(ByVal idx As Long, ByVal col As Variant) As Array2DEx
         rowLen = col.Length
         Set arrex = col
     Else
-        Err.Raise 9999, "Array2DEx#ColInsert", "Invalid argument."
+        Err.raise 9999, "Array2DEx#ColInsert", "Invalid argument."
     End If
 
     If mRowLength < rowLen Then
@@ -1413,7 +1417,7 @@ End Function
 '******************************************************************************
 Public Function RowsInsert(ByVal idx As Long, ByVal Rows As Variant, ParamArray rows2() As Variant) As Array2DEx
     If idx < 0 Or idx > mRowMaxIndex + 1 Then
-        Err.Raise 9999, "Array2DEx#RowsInsert", "Invalid argument."
+        Err.raise 9999, "Array2DEx#RowsInsert", "Invalid argument."
     End If
     
     Dim colLen As Long
@@ -1453,7 +1457,7 @@ End Function
 '******************************************************************************
 Public Function ColsInsert(ByVal idx As Long, ByVal cols As Variant, ParamArray cols2() As Variant) As Array2DEx
     If idx < 0 Or idx > mColMaxIndex + 1 Then
-        Err.Raise 9999, "Array2DEx#ColsInsert", "Invalid argument."
+        Err.raise 9999, "Array2DEx#ColsInsert", "Invalid argument."
     End If
     
     Dim rowLen As Long
@@ -1497,7 +1501,7 @@ End Function
 '******************************************************************************
 Public Function RowLastIndexOf(ByVal rowIdx As Variant, ByVal val As Variant, Optional ByVal ixStart As Variant, Optional ByVal cnt As Variant) As Long
     If IsInvalidRowIndex(rowIdx) Then
-        Err.Raise 9999, "Array2DEx#RowLastIndexOf", "Invalid argument."
+        Err.raise 9999, "Array2DEx#RowLastIndexOf", "Invalid argument."
     End If
     RowLastIndexOf = ArrayUtils.LastIndexOf(m2DItems(rowIdx).ToArray, val, ixStart, cnt)
 End Function
@@ -1517,7 +1521,7 @@ End Function
 '******************************************************************************
 Public Function ColLastIndexOf(ByVal colidx As Variant, ByVal val As Variant, Optional ByVal ixStart As Variant, Optional ByVal cnt As Variant) As Long
     If IsInvalidColIndex(colidx) Then
-        Err.Raise 9999, "Array2DEx#ColLastIndexOf", "Invalid argument."
+        Err.raise 9999, "Array2DEx#ColLastIndexOf", "Invalid argument."
     End If
     ColLastIndexOf = ArrayUtils.LastIndexOf(YColumn(colidx).ToArray, val, ixStart, cnt)
 End Function
@@ -1537,7 +1541,7 @@ Public Function LastIndexOf(ByVal val As Variant, Optional ByVal ixStart) As Arr
         ixStart = mRowMaxIndex
     End If
     If IsInvalidRowIndex(ixStart) Then
-        Err.Raise 9999, "Array2DEx#LastIndexOf", "Invalid argument."
+        Err.raise 9999, "Array2DEx#LastIndexOf", "Invalid argument."
     End If
 
     Dim x As Long, y As Long, arr2dIdx As Array2DIndex
@@ -1567,7 +1571,7 @@ End Function
 '******************************************************************************
 Public Function RowIndexListOf(ByVal rowIdx As Variant, ByVal val As Variant, Optional ByVal reverseOrder As Boolean = False) As Variant
     If IsInvalidRowIndex(rowIdx) Then
-        Err.Raise 9999, "Array2DEx#RowIndexListOf", "Invalid argument."
+        Err.raise 9999, "Array2DEx#RowIndexListOf", "Invalid argument."
     End If
     RowIndexListOf = m2DItems(rowIdx).IndexListOf(val, reverseOrder)
 End Function
@@ -1584,7 +1588,7 @@ End Function
 '******************************************************************************
 Public Function ColIndexListOf(ByVal colidx As Variant, ByVal val As Variant, Optional ByVal reverseOrder As Boolean = False) As Variant
     If IsInvalidColIndex(colidx) Then
-        Err.Raise 9999, "Array2DEx#ColIndexListOf", "Invalid argument."
+        Err.raise 9999, "Array2DEx#ColIndexListOf", "Invalid argument."
     End If
     ColIndexListOf = YColumn(colidx).IndexListOf(val, reverseOrder)
 End Function
@@ -1598,7 +1602,7 @@ End Function
 '******************************************************************************
 Public Function RowRemoveAt(ByVal idx As Long) As Array2DEx
     If IsInvalidRowIndex(idx) Then
-        Err.Raise 9999, "Array2DEx#RowRemoveAt", "Invalid argument."
+        Err.raise 9999, "Array2DEx#RowRemoveAt", "Invalid argument."
     End If
     m2DItems.RemoveAt idx
     mRowLength = mRowLength - 1
@@ -1615,7 +1619,7 @@ End Function
 '******************************************************************************
 Public Function ColRemoveAt(ByVal idx As Long) As Array2DEx
     If IsInvalidColIndex(idx) Then
-        Err.Raise 9999, "Array2DEx#ColRemoveAt", "Invalid argument."
+        Err.raise 9999, "Array2DEx#ColRemoveAt", "Invalid argument."
     End If
     Dim x As Long
     For x = 0 To mRowMaxIndex
@@ -1636,7 +1640,7 @@ End Function
 '******************************************************************************
 Public Function RowRemove(ByVal colidx As Long, ByVal keyvalue) As Array2DEx
     If IsInvalidColIndex(colidx) Then
-        Err.Raise 9999, "Array2DEx#RowRemove", "Invalid argument."
+        Err.raise 9999, "Array2DEx#RowRemove", "Invalid argument."
     End If
     Dim v
     For Each v In Me.ColIndexListOf(colidx, keyvalue, True)
@@ -1655,7 +1659,7 @@ End Function
 '******************************************************************************
 Public Function ColRemove(ByVal rowIdx As Long, ByVal keyvalue) As Array2DEx
     If IsInvalidRowIndex(rowIdx) Then
-        Err.Raise 9999, "Array2DEx#ColRemove", "Invalid argument."
+        Err.raise 9999, "Array2DEx#ColRemove", "Invalid argument."
     End If
     Dim v
     For Each v In Me.RowIndexListOf(rowIdx, keyvalue, True)
@@ -1674,10 +1678,10 @@ End Function
 '******************************************************************************
 Public Function RowRemoveRange(ByVal idx1 As Long, ByVal idx2 As Long) As Array2DEx
     If IsInvalidRowIndexes(idx1, idx2) Then
-        Err.Raise 9999, "Array2DEx#RowRemoveRange", "Invalid argument."
+        Err.raise 9999, "Array2DEx#RowRemoveRange", "Invalid argument."
     End If
     If idx1 > idx2 Then
-        Err.Raise 9999, "Array2DEx#RowRemoveRange", "Invalid argument."
+        Err.raise 9999, "Array2DEx#RowRemoveRange", "Invalid argument."
     End If
     Dim v
     For Each v In ArrayUtils.Range(idx2, idx1, -1)
@@ -1696,10 +1700,10 @@ End Function
 '******************************************************************************
 Public Function ColRemoveRange(ByVal idx1 As Long, ByVal idx2 As Long) As Array2DEx
     If IsInvalidColIndexes(idx1, idx2) Then
-        Err.Raise 9999, "Array2DEx#ColRemoveRange", "Invalid argument."
+        Err.raise 9999, "Array2DEx#ColRemoveRange", "Invalid argument."
     End If
     If idx1 > idx2 Then
-        Err.Raise 9999, "Array2DEx#ColRemoveRange", "Invalid argument."
+        Err.raise 9999, "Array2DEx#ColRemoveRange", "Invalid argument."
     End If
     Dim v
     For Each v In ArrayUtils.Range(idx2, idx1, -1)
@@ -1737,7 +1741,7 @@ End Function
 '******************************************************************************
 Public Function RowSearch(ByVal rowIdx As Variant, ByVal searchVal As Variant) As ArrayEx
     If IsInvalidRowIndex(rowIdx) Then
-        Err.Raise 9999, "Array2DEx#RowSearch", "Invalid argument."
+        Err.raise 9999, "Array2DEx#RowSearch", "Invalid argument."
     End If
     Set RowSearch = m2DItems(rowIdx).Search(searchVal)
 End Function
@@ -1753,7 +1757,7 @@ End Function
 '******************************************************************************
 Public Function ColSearch(ByVal colidx As Variant, ByVal searchVal As Variant) As ArrayEx
     If IsInvalidColIndex(colidx) Then
-        Err.Raise 9999, "Array2DEx#ColSearch", "Invalid argument."
+        Err.raise 9999, "Array2DEx#ColSearch", "Invalid argument."
     End If
     Set ColSearch = YColumn(colidx).Search(searchVal)
 End Function
@@ -1788,7 +1792,7 @@ End Function
 '******************************************************************************
 Public Function RowRegexSearch(ByVal rowIdx As Variant, ByVal searchStr As String, Optional ByVal igCase As Boolean = False) As ArrayEx
     If IsInvalidRowIndex(rowIdx) Then
-        Err.Raise 9999, "Array2DEx#RowRegexSearch", "Invalid argument."
+        Err.raise 9999, "Array2DEx#RowRegexSearch", "Invalid argument."
     End If
     Set RowRegexSearch = m2DItems(rowIdx).RegexSearch(searchStr, igCase)
 End Function
@@ -1805,7 +1809,7 @@ End Function
 '******************************************************************************
 Public Function ColRegexSearch(ByVal colidx As Variant, ByVal searchStr As String, Optional ByVal igCase As Boolean = False) As ArrayEx
     If IsInvalidColIndex(colidx) Then
-        Err.Raise 9999, "Array2DEx#ColRegexSearch", "Invalid argument."
+        Err.raise 9999, "Array2DEx#ColRegexSearch", "Invalid argument."
     End If
     Set ColRegexSearch = YColumn(colidx).RegexSearch(searchStr, igCase)
 End Function

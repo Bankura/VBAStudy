@@ -56,7 +56,7 @@ Public Sub Show(var)
     Debug.Print var
     Exit Sub
 ErrorHandler:
-    Debug.Print Err.Number, Err.Source, Err.Description
+    Debug.Print Err.Number, Err.source, Err.Description
 End Sub
 
 
@@ -93,16 +93,26 @@ End Sub
 '* @param vArr Variant配列
 '******************************************************************************
 Public Sub PrintVariantArray(vArr)
-    If ArrayUtils.IsEmptyArray(vArr) Then Exit Sub
+    Dim arr As Variant
+    If ValidateUtils.IsArrayEx(vArr) Then
+        arr = vArr.ToArray
+    ElseIf ValidateUtils.IsArray2DEx(vArr) Then
+        arr = vArr.ToArray
+    ElseIf ValidateUtils.IsArray(vArr) Then
+        arr = vArr
+    Else
+        Exit Sub
+    End If
+    If ArrayUtils.IsEmptyArray(arr) Then Exit Sub
     
     Dim i As Long, j As Long, tmp As String
-    For i = LBound(vArr, 1) To UBound(vArr, 1)
-        If ArrayUtils.Is2DArray(vArr) Then
-            For j = LBound(vArr, 2) To UBound(vArr, 2)
-                tmp = tmp & vArr(i, j) & " | "
+    For i = LBound(arr, 1) To UBound(arr, 1)
+        If ArrayUtils.Is2DArray(arr) Then
+            For j = LBound(arr, 2) To UBound(arr, 2)
+                tmp = tmp & arr(i, j) & " | "
             Next
         Else
-            tmp = vArr(i)
+            tmp = arr(i)
         End If
         Debug.Print tmp
         tmp = ""
@@ -113,8 +123,8 @@ Public Sub PrintEnumerator(obj)
     On Error Resume Next
     Dim v
     For Each v In obj
-        Debug.Print v.Name
-        Debug.Print v.Value
+        Debug.Print v.name
+        Debug.Print v.value
     Next
 End Sub
 
@@ -143,11 +153,11 @@ End Sub
 '*
 '* @param rf RecordFormat
 '******************************************************************************
-Public Sub PrintRecordSet(rf As RecordFormat)
+Public Sub PrintRecordFormat(rf As RecordFormat)
     Dim record As Collection, itm As Item, tmp As String
     For Each record In rf.RecordSet
         For Each itm In record
-            tmp = tmp & itm.Value & " | "
+            tmp = tmp & itm.value & " | "
         Next
         Debug.Print tmp
         tmp = ""
@@ -163,30 +173,30 @@ End Sub
 '* @return LongPtr メモリから取得したバイト整数値
 '******************************************************************************
 Public Function DumpMemoryFromVariant(ByRef var) As LongPtr
-    Dim addr As LongPtr, size As Long, opt As String
+    Dim addr As LongPtr, Size As Long, opt As String
     Dim vType As Long
     vType = CLng(BinaryUtils.ByteArray2LongPtr(BinaryUtils.CopyMemory2ByteArray(VarPtr(var), 2)))
     Select Case vType
         Case VT_I2, VT_BYREF + VT_I2     ' Integer
-            size = 2
+            Size = 2
             opt = "dec"
         Case VT_I4, VT_DATE, VT_BYREF + VT_I4, VT_BYREF + VT_DATE   ' Long, Date
-            size = 4
+            Size = 4
             opt = "dec"
         Case VT_R4, VT_BYREF + VT_R4     ' Single
-            size = 4
+            Size = 4
             opt = "bin"
         Case VT_R8, VT_BYREF + VT_R8     ' Double
-            size = 8
+            Size = 8
             opt = "bin"
         Case VT_BOOL, VT_UI1, VT_BYREF + VT_BOOL, VT_BYREF + VT_UI1  ' Boolean, Byte
-            size = 1
+            Size = 1
             opt = "bin"
         Case VT_BSTR, VT_DISPATCH, VT_BYREF + VT_BSTR, VT_BYREF + VT_DISPATCH ' String, Object
-            size = 8
+            Size = 8
             opt = "dec"
         Case Else ' LongLong, Currency
-            size = 8
+            Size = 8
             opt = "bin"
     End Select
     
@@ -196,7 +206,7 @@ Public Function DumpMemoryFromVariant(ByRef var) As LongPtr
         addr = VarPtr(var) + LONGPTR_SIZE
     End If
     
-    DumpMemoryFromVariant = DumpMemory(addr, size, opt)
+    DumpMemoryFromVariant = DumpMemory(addr, Size, opt)
 End Function
 
 '******************************************************************************
@@ -239,16 +249,16 @@ End Function
 '* @return LongPtr メモリから取得したバイト整数値
 '******************************************************************************
 Public Function DumpMemory(ByVal addr As LongPtr, _
-                    ByVal size As Long, _
+                    ByVal Size As Long, _
                     Optional ByVal opt As String) As LongPtr
 
-    If addr <= 0 Or size <= 0 Then
+    If addr <= 0 Or Size <= 0 Then
         Debug.Print addr & " :"
         Exit Function
     End If
 
-    ReDim bData(1 To size) As Byte
-    bData = BinaryUtils.CopyMemory2ByteArray(addr, size)
+    ReDim bData(1 To Size) As Byte
+    bData = BinaryUtils.CopyMemory2ByteArray(addr, Size)
   
     Select Case LCase(opt)
         Case "str"
