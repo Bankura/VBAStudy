@@ -75,6 +75,16 @@ Public Property Get Logger() As Logger
 End Property
 
 '*-----------------------------------------------------------------------------
+'* SettingInfo プロパティ
+'*-----------------------------------------------------------------------------
+Public Property Get SettingInfo() As SettingInfo
+    Set SettingInfo = mSettingInfo
+End Property
+Public Property Set SettingInfo(ByVal arg As SettingInfo)
+    Set mSettingInfo = arg
+End Property
+
+'*-----------------------------------------------------------------------------
 '* SettingSheetName プロパティ
 '*-----------------------------------------------------------------------------
 Public Property Get SettingSheetName() As String
@@ -444,3 +454,17 @@ Public Function CreateObject32bit(ByVal strClassName As String) As Variant
     Loop While CreateObject32bit Is Nothing
 End Function
 
+'******************************************************************************
+'* [概  要] SetAppSettingsNormal
+'* [詳  細] アプリケーションの設定を通常の設定にする。
+'*
+'******************************************************************************
+Public Sub SetAppSettingsNormal()
+    With Application
+        .Cursor = xlDefault
+        .DisplayAlerts = True
+        .ScreenUpdating = True
+        .Calculation = xlCalculationAutomatic
+        .EnableEvents = True
+    End With
+End Sub
