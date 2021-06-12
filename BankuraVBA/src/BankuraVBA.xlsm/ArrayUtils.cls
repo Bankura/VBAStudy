@@ -107,15 +107,19 @@ End Function
 '*
 '******************************************************************************
 Public Sub AddAllFromHierarchicalArray(ByVal arr As ArrayEx, ByRef vArray As Variant)
+    Dim v
     If ValidateUtils.IsPrimitive(vArray) Then
         arr.AddVal vArray
-    ElseIf IsObject(vArray) Then
-        arr.AddObj vArray
+    ElseIf ValidateUtils.IsArrayEx(vArray) Then
+        For Each v In vArray.ToArray
+            Call AddAllFromHierarchicalArray(arr, v)
+        Next
     ElseIf VBA.IsArray(vArray) Then
-        Dim v
         For Each v In vArray
             Call AddAllFromHierarchicalArray(arr, v)
         Next
+    ElseIf IsObject(vArray) Then
+        arr.AddObj vArray
     End If
 End Sub
 
