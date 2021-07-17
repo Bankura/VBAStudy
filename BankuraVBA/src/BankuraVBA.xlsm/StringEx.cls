@@ -40,11 +40,11 @@ Private mLength As Long
 '*-----------------------------------------------------------------------------
 '* Value プロパティ
 '*-----------------------------------------------------------------------------
-Public Property Get value() As String
-Attribute value.VB_UserMemId = 0
-    value = Me.ToString
+Public Property Get Value() As String
+Attribute Value.VB_UserMemId = 0
+    Value = Me.ToString
 End Property
-Public Property Let value(ByVal arg As String)
+Public Property Let Value(ByVal arg As String)
     mBuffer = String$(mCapacity, vbNullChar)
     mLength = 0
     Me.Append arg
@@ -80,7 +80,7 @@ End Sub
 '******************************************************************************
 Public Function Init(ByVal val, Optional cap As Long = 32768) As StringEx
     mCapacity = cap
-    Me.value = val
+    Me.Value = val
     Set Init = Me
 End Function
 
@@ -409,8 +409,8 @@ End Function
 '* @return StringEx 変換後文字列
 '*
 '******************************************************************************
-Public Function Center(Size As Long, Optional padStr As String = " ") As StringEx
-    Set Center = Me.Init(StringUtils.Center(Me.ToString, Size, padStr))
+Public Function Center(size As Long, Optional padStr As String = " ") As StringEx
+    Set Center = Me.Init(StringUtils.Center(Me.ToString, size, padStr))
 End Function
 
 '******************************************************************************
@@ -1030,8 +1030,8 @@ End Function
 '* @return StringEx 変換後文字列
 '*
 '******************************************************************************
-Public Function LeftPad(Size As Long, Optional padStr As String = " ") As StringEx
-    Set LeftPad = Me.Init(StringUtils.LeftPad(Me.ToString, Size, padStr))
+Public Function LeftPad(size As Long, Optional padStr As String = " ") As StringEx
+    Set LeftPad = Me.Init(StringUtils.LeftPad(Me.ToString, size, padStr))
 End Function
 
 
@@ -1270,8 +1270,8 @@ End Function
 '* @return StringEx 変換後文字列
 '*
 '******************************************************************************
-Public Function RightPad(Size As Long, Optional padStr As String = " ") As StringEx
-    Set RightPad = Me.Init(StringUtils.RightPad(Me.ToString, Size, padStr))
+Public Function RightPad(size As Long, Optional padStr As String = " ") As StringEx
+    Set RightPad = Me.Init(StringUtils.RightPad(Me.ToString, size, padStr))
 End Function
 
 
@@ -1537,8 +1537,8 @@ End Function
 '* @return StringEx 左ゼロ埋めした値
 '*
 '*******************************************************************************
-Public Function LeftPad0(ByVal Size As Long) As StringEx
-    Set LeftPad0 = Me.Init(StringUtils.LeftPad0(Me.ToString, Size))
+Public Function LeftPad0(ByVal size As Long) As StringEx
+    Set LeftPad0 = Me.Init(StringUtils.LeftPad0(Me.ToString, size))
 End Function
 
 '*******************************************************************************
@@ -1549,8 +1549,8 @@ End Function
 '* @return StringEx 右ゼロ埋めした値
 '*
 '*******************************************************************************
-Public Function RightPad0(ByVal Size As Long) As StringEx
-    Set RightPad0 = Me.Init(StringUtils.RightPad0(Me.ToString, Size))
+Public Function RightPad0(ByVal size As Long) As StringEx
+    Set RightPad0 = Me.Init(StringUtils.RightPad0(Me.ToString, size))
 End Function
 
 '*******************************************************************************

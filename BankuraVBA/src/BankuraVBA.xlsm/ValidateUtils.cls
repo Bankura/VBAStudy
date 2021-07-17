@@ -16,7 +16,7 @@ Option Explicit
 '* [参  考]
 '*
 '* @author Bankura
-'* Copyright (c) 2019-2020 Bankura
+'* Copyright (c) 2019-2021 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 '******************************************************************************
@@ -840,6 +840,80 @@ Public Function IsMailAddress(ByVal val As String, Optional ByVal required As Bo
 End Function
 
 '******************************************************************************
+'* [概  要] 配列空チェック
+'* [詳  細] 指定された配列内の要素のどれかが空かチェックを行う。
+'*
+'* @param arr Variant配列
+'* @return Boolean チェック結果（True：どれかが空、False：全て値あり）
+'******************************************************************************
+Public Function IsEmptyAny(ByRef arr As Variant) As Boolean
+    If IsNotArray(arr) Then
+        If arr = "" Then
+            IsEmptyAny = True
+            Exit Function
+        End If
+        IsEmptyAny = False
+        Exit Function
+    End If
+    Dim v
+    For Each v In arr
+        If v = "" Then
+            IsEmptyAny = True
+            Exit Function
+        End If
+    Next
+    IsEmptyAny = False
+End Function
+
+'******************************************************************************
+'* [概  要] 配列空チェック
+'* [詳  細] 指定された配列内の要素の全てが空かチェックを行う。
+'*
+'* @param arr Variant配列
+'* @return Boolean チェック結果（True：全てが空、False：どれかに値あり）
+'******************************************************************************
+Public Function IsEmptyAll(ByRef arr As Variant) As Boolean
+    If IsNotArray(arr) Then
+        If arr = "" Then
+            IsEmptyAll = True
+            Exit Function
+        End If
+        IsEmptyAll = False
+        Exit Function
+    End If
+    Dim v
+    For Each v In arr
+        If v <> "" Then
+            IsEmptyAll = False
+            Exit Function
+        End If
+    Next
+    IsEmptyAll = True
+End Function
+
+'******************************************************************************
+'* [概  要] 配列値設定チェック
+'* [詳  細] 指定された配列内の要素のどれかに値が設定されているかチェックを行う。
+'*
+'* @param arr Variant配列
+'* @return Boolean チェック結果（True：どれかに設定、False：全て設定なし）
+'******************************************************************************
+Public Function IsFilledAny(ByRef arr As Variant) As Boolean
+    IsFilledAny = Not IsEmptyAll(arr)
+End Function
+
+'******************************************************************************
+'* [概  要] 配列値設定チェック
+'* [詳  細] 指定された配列内の要素の全てに値が設定されているかチェックを行う。
+'*
+'* @param arr Variant配列
+'* @return Boolean チェック結果（True：全て設定、False：どれかが空）
+'******************************************************************************
+Public Function IsFilledAll(ByRef arr As Variant) As Boolean
+    IsFilledAll = Not IsEmptyAny(arr)
+End Function
+
+'******************************************************************************
 '* [概  要] 整数範囲チェック。
 '* [詳  細] 指定された値の範囲の整数であるかチェックを行う。
 '*
@@ -1012,5 +1086,19 @@ Public Function ValidateCellAddress(ByVal val As Variant) As Boolean
     
     ' 数値部分のチェック
     ValidateCellAddress = ValidateNumRange(strTmpNum, 1, 1048576)
+End Function
+
+'******************************************************************************
+'* [概  要] 設定順チェック
+'* [詳  細] 指定した配列Aの要素全てに値が設定されていない状態で、
+'*          指定した配列Bの要素のいづれかに値が設定されている場合NGとする。
+'*
+'* @param firstArr 配列A
+'* @param secondArr 配列B
+'* @return Boolean チェック結果（True：OK、False：NG）
+'******************************************************************************
+Public Function ValidateSettingOrder(ByRef firstArr As Variant, _
+                                    ByRef secondArr As Variant) As Boolean
+    ValidateSettingOrder = Not (IsEmptyAll(firstArr) And IsFilledAny(secondArr))
 End Function
 

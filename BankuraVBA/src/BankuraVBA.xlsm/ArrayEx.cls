@@ -426,9 +426,9 @@ End Function
 '* @param fun As Func(Of T, Boolean)
 '* @return ArrayEx(Of Array(Of T))
 '******************************************************************************
-Public Function filter(ByVal fun As Func) As ArrayEx
+Public Function Filter(ByVal fun As Func) As ArrayEx
     Dim arr: arr = Ext.ArrFilter(fun, Me.ToArray)
-    Set filter = Init(arr)
+    Set Filter = Init(arr)
 End Function
 
 '******************************************************************************
@@ -618,8 +618,8 @@ End Function
 '* @param count €–Ú
 '* @return Variant 1ŸŒ³”z—ñ
 '******************************************************************************
-Public Function Repeat(ByVal itm As Variant, ByVal count As Long) As ArrayEx
-    Set Repeat = Init(ArrayUtils.Repeat(itm, count))
+Public Function Repeat(ByVal itm As Variant, ByVal Count As Long) As ArrayEx
+    Set Repeat = Init(ArrayUtils.Repeat(itm, Count))
 End Function
 
 '******************************************************************************
@@ -707,6 +707,6 @@ End Function
 '* @param transpose True‚É‚·‚é‚Æ1ŸŒ³”z—ñ‚ğ—ñ•ûŒü‚Éİ’è‚·‚é
 '* @return Variant 2ŸŒ³”z—ñ
 '******************************************************************************
-Public Function To2DArray(Optional ByVal transpose As Boolean = False) As Variant
-    To2DArray = ArrayUtils.ArrayTo2DArray(Me, transpose)
+Public Function To2DArray(Optional ByVal Transpose As Boolean = False) As Variant
+    To2DArray = ArrayUtils.ArrayTo2DArray(Me, Transpose)
 End Function

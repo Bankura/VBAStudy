@@ -56,7 +56,7 @@ Public Sub Show(var)
     Debug.Print var
     Exit Sub
 ErrorHandler:
-    Debug.Print Err.Number, Err.source, Err.Description
+    Debug.Print Err.Number, Err.Source, Err.Description
 End Sub
 
 
@@ -123,8 +123,8 @@ Public Sub PrintEnumerator(obj)
     On Error Resume Next
     Dim v
     For Each v In obj
-        Debug.Print v.name
-        Debug.Print v.value
+        Debug.Print v.Name
+        Debug.Print v.Value
     Next
 End Sub
 
@@ -157,7 +157,7 @@ Public Sub PrintRecordFormat(rf As RecordFormat)
     Dim record As Collection, itm As Item, tmp As String
     For Each record In rf.RecordSet
         For Each itm In record
-            tmp = tmp & itm.value & " | "
+            tmp = tmp & itm.Value & " | "
         Next
         Debug.Print tmp
         tmp = ""
@@ -173,30 +173,30 @@ End Sub
 '* @return LongPtr メモリから取得したバイト整数値
 '******************************************************************************
 Public Function DumpMemoryFromVariant(ByRef var) As LongPtr
-    Dim addr As LongPtr, Size As Long, opt As String
+    Dim addr As LongPtr, size As Long, opt As String
     Dim vType As Long
     vType = CLng(BinaryUtils.ByteArray2LongPtr(BinaryUtils.CopyMemory2ByteArray(VarPtr(var), 2)))
     Select Case vType
         Case VT_I2, VT_BYREF + VT_I2     ' Integer
-            Size = 2
+            size = 2
             opt = "dec"
         Case VT_I4, VT_DATE, VT_BYREF + VT_I4, VT_BYREF + VT_DATE   ' Long, Date
-            Size = 4
+            size = 4
             opt = "dec"
         Case VT_R4, VT_BYREF + VT_R4     ' Single
-            Size = 4
+            size = 4
             opt = "bin"
         Case VT_R8, VT_BYREF + VT_R8     ' Double
-            Size = 8
+            size = 8
             opt = "bin"
         Case VT_BOOL, VT_UI1, VT_BYREF + VT_BOOL, VT_BYREF + VT_UI1  ' Boolean, Byte
-            Size = 1
+            size = 1
             opt = "bin"
         Case VT_BSTR, VT_DISPATCH, VT_BYREF + VT_BSTR, VT_BYREF + VT_DISPATCH ' String, Object
-            Size = 8
+            size = 8
             opt = "dec"
         Case Else ' LongLong, Currency
-            Size = 8
+            size = 8
             opt = "bin"
     End Select
     
@@ -206,7 +206,7 @@ Public Function DumpMemoryFromVariant(ByRef var) As LongPtr
         addr = VarPtr(var) + LONGPTR_SIZE
     End If
     
-    DumpMemoryFromVariant = DumpMemory(addr, Size, opt)
+    DumpMemoryFromVariant = DumpMemory(addr, size, opt)
 End Function
 
 '******************************************************************************
@@ -249,16 +249,16 @@ End Function
 '* @return LongPtr メモリから取得したバイト整数値
 '******************************************************************************
 Public Function DumpMemory(ByVal addr As LongPtr, _
-                    ByVal Size As Long, _
+                    ByVal size As Long, _
                     Optional ByVal opt As String) As LongPtr
 
-    If addr <= 0 Or Size <= 0 Then
+    If addr <= 0 Or size <= 0 Then
         Debug.Print addr & " :"
         Exit Function
     End If
 
-    ReDim bData(1 To Size) As Byte
-    bData = BinaryUtils.CopyMemory2ByteArray(addr, Size)
+    ReDim bData(1 To size) As Byte
+    bData = BinaryUtils.CopyMemory2ByteArray(addr, size)
   
     Select Case LCase(opt)
         Case "str"

@@ -195,7 +195,7 @@ End Function
 '******************************************************************************
 Public Function Transmit(req As HttpRequest, Optional saveOriginalBody As Boolean = False) As HttpResponse
     Call ReNewWinHttp
-    mWinHttp.Open req.method, req.url, False
+    mWinHttp.Open req.method, req.Url, False
     Call SetRequestHeaders(req)
     
     ' プロキシ設定
@@ -221,7 +221,7 @@ End Function
 '******************************************************************************
 Public Sub SetRequestHeaders(req As HttpRequest)
     Dim v
-    For Each v In req.Headers.Keys
+    For Each v In req.Headers.keys
         mWinHttp.SetRequestHeader CStr(v), req.Headers(v)
     Next
 End Sub
@@ -284,13 +284,13 @@ End Function
 '* @return Response情報
 '*
 '******************************************************************************
-Public Function SendRequest(method As String, url As String, reqHdrParams() As String, reqBody As String, _
+Public Function SendRequest(method As String, Url As String, reqHdrParams() As String, reqBody As String, _
                             Optional lTimeout As Long = 0, _
                             Optional resEncode As String = "utf-8") As HttpResponse
     Call ReNewWinHttp
     
     ' HTTP リクエスト
-    mWinHttp.Open method, url, False
+    mWinHttp.Open method, Url, False
 
     ' リクエストヘッダ設定
     Dim i As Long

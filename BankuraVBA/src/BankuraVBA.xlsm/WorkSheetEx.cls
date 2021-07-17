@@ -1198,17 +1198,17 @@ End Function
 '* @param transpose TrueÇ…Ç∑ÇÈÇ∆1éüå≥îzóÒÇóÒï˚å¸Ç…ê›íËÇ∑ÇÈ
 '*
 '******************************************************************************
-Public Sub ImportArray(vArray, lStartRow As Long, lStartCol As Long, Optional transpose As Boolean = True)
+Public Sub ImportArray(vArray, lStartRow As Long, lStartCol As Long, Optional Transpose As Boolean = True)
     If ValidateUtils.IsArray2DEx(vArray) Then
         Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, vArray.To2DArray, lStartRow, lStartCol)
     ElseIf ArrayUtils.Is2DArray(vArray) Then
         Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, vArray, lStartRow, lStartCol)
     ElseIf ValidateUtils.IsArrayEx(vArray) Then
-        Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, vArray.To2DArray(transpose), lStartRow, lStartCol)
+        Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, vArray.To2DArray(Transpose), lStartRow, lStartCol)
     ElseIf ArrayUtils.Is1DArray(vArray) Then
-        Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, ArrayUtils.ArrayTo2DArray(vArray, transpose), lStartRow, lStartCol)
+        Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, ArrayUtils.ArrayTo2DArray(vArray, Transpose), lStartRow, lStartCol)
     ElseIf ValidateUtils.IsPrimitive(vArray) Then
-        mOrigin.Cells(lStartRow, lStartCol).value = vArray
+        mOrigin.Cells(lStartRow, lStartCol).Value = vArray
     End If
 End Sub
 

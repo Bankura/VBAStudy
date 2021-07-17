@@ -502,7 +502,7 @@ Public Function Unescape(ByVal v As String) As String
             Case "\u"
 
                 If i + 6 - 1 > Len(v) Then
-                    Err.raise 512 + 1, TypeName(Me) & ".Unescape", "format error"
+                    Err.Raise 512 + 1, TypeName(Me) & ".Unescape", "format error"
                 End If
 
                 sb.Append ChrW$(val("&H" & Mid$(v, i + 2, 4)))
@@ -947,19 +947,19 @@ End Function
 '* @return String •ÏŠ·Œã•¶Žš—ñ
 '*
 '******************************************************************************
-Public Function Center(ByVal str As String, ByVal Size As Long, Optional padStr As String = " ") As String
-    If Me.IsEmpty(str) Or Size <= 0 Then
+Public Function Center(ByVal str As String, ByVal size As Long, Optional padStr As String = " ") As String
+    If Me.IsEmpty(str) Or size <= 0 Then
        Center = str
        Exit Function
     End If
     Dim strLen As Long: strLen = Me.CheckLength(str)
-    Dim pads As Long: pads = Size - strLen
+    Dim pads As Long: pads = size - strLen
     If pads <= 0 Then
        Center = str
        Exit Function
     End If
     str = Me.LeftPad(str, strLen + pads / 2, padStr)
-    str = Me.RightPad(str, Size, padStr)
+    str = Me.RightPad(str, size, padStr)
     Center = str
 End Function
 
@@ -1320,16 +1320,16 @@ Public Function CountMatches(ByVal str As String, ByVal searchStr As String) As 
         CountMatches = 0
         Exit Function
     End If
-    Dim count As Long: count = 0
+    Dim Count As Long: Count = 0
     Dim idx As Long: idx = 0
     
     idx = Me.IndexOf(str, searchStr, idx)
     Do While idx <> INDEX_NOT_FOUND
-        count = count + 1
+        Count = Count + 1
         idx = idx + Len(searchStr)
         idx = Me.IndexOf(str, searchStr, idx)
     Loop
-    CountMatches = count
+    CountMatches = Count
 End Function
 
 '******************************************************************************
@@ -2752,10 +2752,10 @@ End Function
 '* @return String •ÏŠ·Œã•¶Žš—ñ
 '*
 '******************************************************************************
-Public Function LeftPad(ByVal str As String, ByVal Size As Long, Optional ByVal padStr As String = " ") As String
+Public Function LeftPad(ByVal str As String, ByVal size As Long, Optional ByVal padStr As String = " ") As String
     Dim padLen As Long: padLen = Len(padStr)
     Dim strLen As Long: strLen = Len(str)
-    Dim pads As Long: pads = Size - strLen
+    Dim pads As Long: pads = size - strLen
     If pads <= 0 Then
         LeftPad = str '  returns original String when possible
         Exit Function
@@ -3264,7 +3264,7 @@ Public Function ReplaceIgnoreCase(ByVal str As String, ByVal searchString As Str
     Dim sb As StringEx: Set sb = New StringEx
     Dim pos As Long: pos = 1
     Dim nextpos As Long: nextpos = InStr(strIc, searchStringIc)
-    Dim count As Long: count = 0
+    Dim Count As Long: Count = 0
     
     Do Until nextpos = 0
         Call sb.Append(Mid(str, pos, nextpos - pos)) _
@@ -3272,9 +3272,9 @@ Public Function ReplaceIgnoreCase(ByVal str As String, ByVal searchString As Str
         
         pos = nextpos + Len(searchStringIc)
         nextpos = InStr(pos, strIc, searchStringIc)
-        count = count + 1
+        Count = Count + 1
     Loop
-    If count = 0 Then
+    If Count = 0 Then
         ReplaceIgnoreCase = str
         Exit Function
     Else
@@ -3326,10 +3326,10 @@ End Function
 '* @return String •ÏŠ·Œã•¶Žš—ñ
 '*
 '******************************************************************************
-Public Function RightPad(ByVal str As String, ByVal Size As Long, Optional ByVal padStr As String = " ") As String
+Public Function RightPad(ByVal str As String, ByVal size As Long, Optional ByVal padStr As String = " ") As String
     Dim padLen As Long: padLen = Len(padStr)
     Dim strLen As Long: strLen = Len(str)
-    Dim pads As Long: pads = Size - strLen
+    Dim pads As Long: pads = size - strLen
     If pads <= 0 Then
         RightPad = str '  returns original String when possible
         Exit Function
@@ -3734,7 +3734,7 @@ End Function
 '******************************************************************************
 Public Function Truncate(ByVal str As String, ByVal maxWidth As Long) As String
     If maxWidth < 0 Then
-        Call Err.raise(9999, "StringUtils#Truncate", "maxWith cannot be negative")
+        Call Err.Raise(9999, "StringUtils#Truncate", "maxWith cannot be negative")
     End If
     If Me.IsEmpty(str) Then
         Truncate = str
@@ -4007,8 +4007,8 @@ End Function
 '* @return String ¶ƒ[ƒ–„‚ß‚µ‚½’l
 '*
 '*******************************************************************************
-Public Function LeftPad0(ByVal str As String, ByVal Size As Long) As String
-    LeftPad0 = Me.LeftPad(str, Size, "0")
+Public Function LeftPad0(ByVal str As String, ByVal size As Long) As String
+    LeftPad0 = Me.LeftPad(str, size, "0")
 End Function
 
 '*******************************************************************************
@@ -4020,8 +4020,8 @@ End Function
 '* @return String ‰Eƒ[ƒ–„‚ß‚µ‚½’l
 '*
 '*******************************************************************************
-Public Function RightPad0(ByVal str As String, ByVal Size As Long) As String
-    RightPad0 = Me.RightPad(str, Size, "0")
+Public Function RightPad0(ByVal str As String, ByVal size As Long) As String
+    RightPad0 = Me.RightPad(str, size, "0")
 End Function
 
 '*******************************************************************************

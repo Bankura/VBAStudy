@@ -51,7 +51,7 @@ Public Property Get EmptyLongArray() As Long()
 
     Dim apiResult As Long
     apiResult = SafeArrayAllocDescriptor(1, EmptyLongArray)
-    If apiResult <> 0 Then Err.raise 5
+    If apiResult <> 0 Then Err.Raise 5
 End Property
 
 Public Property Get EmptyVariantArray() As Variant()
@@ -61,7 +61,7 @@ End Property
 Public Property Get EmptyVariant2DArray() As Variant()
     Dim apiResult As Long
     apiResult = SafeArrayAllocDescriptor(2, EmptyVariant2DArray)
-    If apiResult <> 0 Then Err.raise 5
+    If apiResult <> 0 Then Err.Raise 5
 End Property
 
 Public Property Get EmptyStringArray() As String()
@@ -538,8 +538,8 @@ End Function
 '* @param arr As Variant(Of Array(Of T))
 '* @return As Variant(Of Array(Of T))
 '******************************************************************************
-Public Function filter(ByVal fun As Func, ByVal arr As Variant) As Variant
-    filter = Ext.ArrFilter(fun, arr)
+Public Function Filter(ByVal fun As Func, ByVal arr As Variant) As Variant
+    Filter = Ext.ArrFilter(fun, arr)
 End Function
 
 '******************************************************************************
@@ -616,9 +616,9 @@ End Function
 '******************************************************************************
 Public Function RedimPreserve2D(ByVal orgArray, ByVal lengthTo) As Variant
     Dim transedArray()
-    transedArray = WorksheetFunction.transpose(orgArray)
+    transedArray = WorksheetFunction.Transpose(orgArray)
     ReDim Preserve transedArray(1 To UBound(transedArray, 1), 1 To lengthTo)
-    RedimPreserve2D = WorksheetFunction.transpose(transedArray)
+    RedimPreserve2D = WorksheetFunction.Transpose(transedArray)
 End Function
 
 '******************************************************************************
@@ -910,15 +910,15 @@ Public Function LastIndexOf(ByVal arr As Variant, ByVal val As Variant, _
     Optional ByVal ixStart As Variant, Optional ByVal cnt As Variant _
     ) As Long
     
-    If Not IsArray(arr) Then Err.raise 13
+    If Not IsArray(arr) Then Err.Raise 13
     
     Dim ixLast As Long:  ixLast = UBound(arr)
     Dim aLen As Long: aLen = Core.ArrLen(arr)
     If IsMissing(ixStart) Then ixStart = ixLast
-    If IsNumeric(ixStart) Then ixStart = CLng(ixStart) Else Err.raise 13
-    If ixStart < LBound(arr) Or ixStart > ixLast Then Err.raise 5
+    If IsNumeric(ixStart) Then ixStart = CLng(ixStart) Else Err.Raise 13
+    If ixStart < LBound(arr) Or ixStart > ixLast Then Err.Raise 5
     If IsMissing(cnt) Then cnt = aLen
-    If IsNumeric(cnt) Then cnt = CLng(cnt) Else Err.raise 13
+    If IsNumeric(cnt) Then cnt = CLng(cnt) Else Err.Raise 13
     cnt = Min(cnt, aLen)
     
     LastIndexOf = -1
@@ -1075,15 +1075,15 @@ End Function
 '* @param count 項目
 '* @return Variant 1次元配列
 '******************************************************************************
-Public Function Repeat(ByVal itm As Variant, ByVal count As Long) As Variant
-    If count <= 0 Then
+Public Function Repeat(ByVal itm As Variant, ByVal Count As Long) As Variant
+    If Count <= 0 Then
         Repeat = EmptyVariantArray
         Exit Function
     End If
     Dim vArr
-    ReDim vArr(0 To count - 1)
+    ReDim vArr(0 To Count - 1)
     Dim i As Long
-    For i = 0 To count - 1
+    For i = 0 To Count - 1
         If IsObject(itm) Then
             Set vArr(i) = itm
         Else
@@ -1297,9 +1297,9 @@ End Function
 '* @param transpose Trueにすると1次元配列を列方向に設定する
 '* @return Array2DEx Array2DExオブジェクト
 '******************************************************************************
-Public Function ArrayTo2DArrayEx(ByVal arr As Variant, Optional ByVal transpose As Boolean = False) As Array2DEx
+Public Function ArrayTo2DArrayEx(ByVal arr As Variant, Optional ByVal Transpose As Boolean = False) As Array2DEx
     Dim arr2dex As Array2DEx: Set arr2dex = New Array2DEx
-    Set ArrayTo2DArrayEx = arr2dex.Init(arr, transpose)
+    Set ArrayTo2DArrayEx = arr2dex.Init(arr, Transpose)
 End Function
 
 '******************************************************************************
@@ -1310,8 +1310,8 @@ End Function
 '* @param transpose Trueにすると1次元配列を列方向に設定する
 '* @return Variant 2次元配列
 '******************************************************************************
-Public Function ArrayTo2DArray(ByVal arr As Variant, Optional ByVal transpose As Boolean = False) As Variant
-    ArrayTo2DArray = ArrayTo2DArrayEx(arr, transpose).To2DArray
+Public Function ArrayTo2DArray(ByVal arr As Variant, Optional ByVal Transpose As Boolean = False) As Variant
+    ArrayTo2DArray = ArrayTo2DArrayEx(arr, Transpose).To2DArray
 End Function
 
 '******************************************************************************
