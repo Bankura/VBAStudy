@@ -50,16 +50,40 @@ Public Function IsNotStringArray(var) As Boolean
     IsNotStringArray = Not IsStringArray(var)
 End Function
 
+Public Function IsNumericType(var) As Boolean
+    IsNumericType = IsInteger(var) Or IsLong(var) Or IsSingle(var) Or IsDouble(var) Or IsCurrency(var) Or IsDecimal(var)
+End Function
+
+Public Function IsNotNumericType(var) As Boolean
+    IsNotNumericType = Not IsNumericType(var)
+End Function
+
+Public Function IsInteger(var) As Boolean
+    IsInteger = (TypeName(var) = "Integer")
+End Function
+
+Public Function IsNotInteger(var) As Boolean
+    IsNotInteger = Not IsInteger(var)
+End Function
+
+Public Function IsIntegerArray(var) As Boolean
+    IsIntegerArray = (TypeName(var) = "Integer()")
+End Function
+
+Public Function IsNotIntegerArray(var) As Boolean
+    IsNotIntegerArray = Not IsIntegerArray(var)
+End Function
+
 Public Function IsLong(var) As Boolean
     IsLong = (TypeName(var) = "Long")
 End Function
 
-Public Function IsLongArray(var) As Boolean
-    IsLongArray = (TypeName(var) = "Long()")
-End Function
-
 Public Function IsNotLong(var) As Boolean
     IsNotLong = Not IsLong(var)
+End Function
+
+Public Function IsLongArray(var) As Boolean
+    IsLongArray = (TypeName(var) = "Long()")
 End Function
 
 Public Function IsNotLongArray(var) As Boolean
@@ -161,7 +185,6 @@ End Function
 Public Function IsNotBooleanArray(var) As Boolean
     IsNotBooleanArray = Not IsBooleanArray(var)
 End Function
-
 
 Public Function IsVariant(var) As Boolean
     IsVariant = (TypeName(var) = "Variant")
@@ -362,12 +385,31 @@ Public Function IsNotArrayExOfArrayEx(obj) As Boolean
     IsNotArrayExOfArrayEx = Not IsArrayExOfArrayEx(obj)
 End Function
 
+Public Function IsArrayOfArrayEx(var) As Boolean
+    IsArrayOfArrayEx = False
+    If IsArray(var) Then
+        If ArrayUtils.IsEmptyArray(var) Then
+            IsArrayOfArrayEx = True
+        Else
+            IsArrayOfArrayEx = IsArrayEx(var(LBound(var)))
+        End If
+    End If
+End Function
+
+Public Function IsNotArrayOfArrayEx(obj) As Boolean
+    IsNotArrayOfArrayEx = Not IsArrayOfArrayEx(obj)
+End Function
+
 Public Function IsRecordFormat(obj) As Boolean
     IsRecordFormat = (TypeName(obj) = "RecordFormat")
 End Function
 
 Public Function IsNotRecordFormat(obj) As Boolean
     IsNotRecordFormat = Not IsRecordFormat(obj)
+End Function
+
+Public Function IsParamArrayMissing(ByVal arr) As Boolean
+    IsParamArrayMissing = LBound(arr) > UBound(arr)
 End Function
 
 '******************************************************************************
@@ -911,6 +953,95 @@ End Function
 '******************************************************************************
 Public Function IsFilledAll(ByRef arr As Variant) As Boolean
     IsFilledAll = Not IsEmptyAny(arr)
+End Function
+
+'******************************************************************************
+'* [概  要] 過去日チェック処理。
+'* [詳  細] 値が現在日より過去日かどうか判定する｡
+'*
+'* @param val 検証値
+'* @param timeIgnore 時刻を無視するか（Falseを指定すると時刻も考慮する）
+'* @return Boolean チェック結果（True：OK、False：NG）
+'*
+'******************************************************************************
+Public Function IsPastDay(ByVal val As Date, Optional timeIgnore As Boolean = True) As Boolean
+    IsPastDay = IsBeforeDay(val, Date, timeIgnore)
+End Function
+
+'******************************************************************************
+'* [概  要] 過去日チェック処理。
+'* [詳  細] 値が指定した日付より過去日かどうか判定する｡
+'*
+'* @param val 検証値
+'* @param baseDate 基準日
+'* @param timeIgnore 時刻を無視するか（Falseを指定すると時刻も考慮する）
+'* @return Boolean チェック結果（True：OK、False：NG）
+'*
+'******************************************************************************
+Public Function IsBeforeDay(ByVal val As Date, ByVal baseDate As Date, Optional timeIgnore As Boolean = True) As Boolean
+    If timeIgnore Then
+        val = DateValue(val)
+        baseDate = DateValue(baseDate)
+    End If
+
+    If val < baseDate Then
+        IsBeforeDay = True
+        Exit Function
+    End If
+    IsBeforeDay = False
+End Function
+
+'******************************************************************************
+'* [概  要] 未来日チェック処理。
+'* [詳  細] 値が現在日より未来日かどうか判定する｡
+'*
+'* @param val 検証値
+'* @param timeIgnore 時刻を無視するか（Falseを指定すると時刻も考慮する）
+'* @return Boolean チェック結果（True：OK、False：NG）
+'*
+'******************************************************************************
+Public Function IsFutureDay(ByVal val As Date, Optional timeIgnore As Boolean = True) As Boolean
+    IsFutureDay = IsAfterDay(val, Date, timeIgnore)
+End Function
+
+'******************************************************************************
+'* [概  要] 未来日チェック処理。
+'* [詳  細] 値が指定した日付より未来日かどうか判定する｡
+'*
+'* @param val 検証値
+'* @param baseDate 基準日
+'* @param timeIgnore 時刻を無視するか（Falseを指定すると時刻も考慮する）
+'* @return Boolean チェック結果（True：OK、False：NG）
+'*
+'******************************************************************************
+Public Function IsAfterDay(ByVal val As Date, ByVal baseDate As Date, Optional timeIgnore As Boolean = True) As Boolean
+    If timeIgnore Then
+        val = DateValue(val)
+        baseDate = DateValue(baseDate)
+    End If
+
+    If val > baseDate Then
+        IsAfterDay = True
+        Exit Function
+    End If
+    IsAfterDay = False
+End Function
+
+'******************************************************************************
+'* [概  要] 当日チェック処理。
+'* [詳  細] 値が現在日かどうか判定する｡
+'*
+'* @param val 検証値
+'* @return Boolean チェック結果（True：OK、False：NG）
+'*
+'******************************************************************************
+Public Function IsToday(ByVal val As Date) As Boolean
+    val = DateValue(val)
+    If val = Date Then
+        IsToday = True
+        Exit Function
+    End If
+    IsToday = False
 End Function
 
 '******************************************************************************

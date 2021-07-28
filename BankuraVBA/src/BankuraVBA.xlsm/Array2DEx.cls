@@ -261,7 +261,7 @@ Private Function IsInvalidColIndex(ByVal idx As Long) As Boolean
     IsInvalidColIndex = (idx < 0 Or mColMaxIndex < idx)
 End Function
 Private Function IsInvalidRowIndexes(ParamArray idxs() As Variant) As Boolean
-    If IsMissing(idxs) Then
+    If ValidateUtils.IsParamArrayMissing(idxs) Then
         IsInvalidRowIndexes = True
         Exit Function
     End If
@@ -275,7 +275,7 @@ Private Function IsInvalidRowIndexes(ParamArray idxs() As Variant) As Boolean
     IsInvalidRowIndexes = False
 End Function
 Private Function IsInvalidColIndexes(ParamArray idxs() As Variant) As Boolean
-    If IsMissing(idxs) Then
+    If ValidateUtils.IsParamArrayMissing(idxs) Then
         IsInvalidColIndexes = True
         Exit Function
     End If
@@ -407,20 +407,20 @@ End Sub
 '*
 '******************************************************************************
 Public Function AddRow(ByVal var As Variant) As Array2DEx
-    Dim colLen As Long
+    Dim collen As Long
     Dim arrex As ArrayEx
     If ArrayUtils.Is1DArray(var) Then
-        colLen = ArrayUtils.GetLength(var)
+        collen = ArrayUtils.GetLength(var)
         Set arrex = Core.Init(New ArrayEx, var)
     ElseIf ValidateUtils.IsArrayEx(var) Then
-        colLen = var.Length
+        collen = var.Length
         Set arrex = var
     Else
         Err.Raise 9999, "Array2DEx#AddRow", "Invalid argument."
     End If
 
-    If mColLength < colLen Then
-        Dim addCount As Long: addCount = colLen - mColLength
+    If mColLength < collen Then
+        Dim addCount As Long: addCount = collen - mColLength
         Call ExpandColumns(addCount)
     End If
     
@@ -443,13 +443,13 @@ End Function
 '*
 '******************************************************************************
 Public Function AddRows(ByVal var As Variant, ParamArray vars() As Variant) As Array2DEx
-    Dim colLen As Long
+    Dim collen As Long
     Dim arr2dex As Array2DEx
     Set arr2dex = Core.Init(New Array2DEx, var)
-    colLen = arr2dex.ColLength
+    collen = arr2dex.ColLength
 
-    If mColLength < colLen Then
-        Dim addCount As Long: addCount = colLen - mColLength
+    If mColLength < collen Then
+        Dim addCount As Long: addCount = collen - mColLength
         Call ExpandColumns(addCount)
     End If
     
@@ -465,7 +465,7 @@ Public Function AddRows(ByVal var As Variant, ParamArray vars() As Variant) As A
     mRowLength = mRowLength + arr2dex.RowLength
     mRowMaxIndex = mRowMaxIndex + arr2dex.RowLength
     
-    If Not VBA.IsMissing(vars) Then
+    If Not ValidateUtils.IsParamArrayMissing(vars) Then
         Dim v
         For Each v In vars
             Call AddRows(v)
@@ -543,7 +543,7 @@ Public Function AddColumns(ByVal var As Variant, ParamArray vars() As Variant) A
     mColLength = mColLength + arr2dex.ColLength
     mColMaxIndex = mColMaxIndex + arr2dex.ColLength
     
-    If Not VBA.IsMissing(vars) Then
+    If Not ValidateUtils.IsParamArrayMissing(vars) Then
         Dim v
         For Each v In vars
             Call AddColumns(v)
@@ -572,19 +572,19 @@ End Function
 '* @return Boolean 比較結果
 '******************************************************************************
 Public Function Equals(ByVal arr2 As Variant) As Boolean
-    Dim rowLen As Long, colLen As Long
+    Dim rowLen As Long, collen As Long
     
     If ArrayUtils.Is2DArray(arr2) Then
         rowLen = ArrayUtils.GetLength(arr2)
-        colLen = ArrayUtils.GetLength(arr2, 2)
+        collen = ArrayUtils.GetLength(arr2, 2)
     ElseIf ValidateUtils.IsArray2DEx(arr2) Then
         rowLen = arr2.RowLength
-        colLen = arr2.ColLength
+        collen = arr2.ColLength
     Else
         Err.Raise 9999, "Array2DEx#Equals", "Invalid argument."
     End If
     
-    If mRowLength <> rowLen Or mColLength <> colLen Then
+    If mRowLength <> rowLen Or mColLength <> collen Then
         Equals = False
         Exit Function
     End If
@@ -739,7 +739,7 @@ Public Sub ReverseColumns()
     Dim x As Long: x = 0
     Dim tmprow As ArrayEx
     For x = 0 To mRowMaxIndex
-        m2DItems(x).Reverse
+        m2DItems(x).reverse
     Next
 End Sub
 
@@ -748,7 +748,7 @@ End Sub
 '* [詳  細] 2次元配列の行列の並び順を反転させる。
 '*
 '******************************************************************************
-Public Sub Reverse()
+Public Sub reverse()
     Call ReverseRow
     Call ReverseColumns
 End Sub
@@ -1344,20 +1344,20 @@ Public Function RowInsert(ByVal idx As Long, ByVal row As Variant) As Array2DEx
         Err.Raise 9999, "Array2DEx#RowInsert", "Invalid argument."
     End If
 
-    Dim colLen As Long
+    Dim collen As Long
     Dim arrex As ArrayEx
     If ArrayUtils.Is1DArray(row) Then
-        colLen = ArrayUtils.GetLength(row)
+        collen = ArrayUtils.GetLength(row)
         Set arrex = Core.Init(New ArrayEx, row)
     ElseIf ValidateUtils.IsArrayEx(row) Then
-        colLen = row.Length
+        collen = row.Length
         Set arrex = row
     Else
         Err.Raise 9999, "Array2DEx#RowInsert", "Invalid argument."
     End If
 
-    If mColLength < colLen Then
-        Dim addCount As Long: addCount = colLen - mColLength
+    If mColLength < collen Then
+        Dim addCount As Long: addCount = collen - mColLength
         Call ExpandColumns(addCount)
     End If
 
@@ -1420,19 +1420,19 @@ Public Function RowsInsert(ByVal idx As Long, ByVal Rows As Variant, ParamArray 
         Err.Raise 9999, "Array2DEx#RowsInsert", "Invalid argument."
     End If
     
-    Dim colLen As Long
+    Dim collen As Long
     Dim arr2dex As Array2DEx
-    If Not VBA.IsMissing(rows2) Then
+    If Not ValidateUtils.IsParamArrayMissing(rows2) Then
         Dim tmp: tmp = rows2
         Set arr2dex = New Array2DEx
         arr2dex.AddRows Rows, tmp
     Else
         Set arr2dex = Core.Init(New Array2DEx, Rows)
     End If
-    colLen = arr2dex.ColLength
+    collen = arr2dex.ColLength
 
-    If mColLength < colLen Then
-        Dim addCount As Long: addCount = colLen - mColLength
+    If mColLength < collen Then
+        Dim addCount As Long: addCount = collen - mColLength
         Call ExpandColumns(addCount)
     End If
     
@@ -1462,7 +1462,7 @@ Public Function ColsInsert(ByVal idx As Long, ByVal cols As Variant, ParamArray 
     
     Dim rowLen As Long
     Dim arr2dex As Array2DEx
-    If Not VBA.IsMissing(cols2) Then
+    If Not ValidateUtils.IsParamArrayMissing(cols2) Then
         Dim tmp: tmp = cols2
         Set arr2dex = New Array2DEx
         arr2dex.AddColumns cols, tmp
@@ -1843,7 +1843,6 @@ Public Function ToString() As String
     ToString = ArrayUtils.ToString(Me.ToJagArray)
 End Function
 
-
 '******************************************************************************
 '* [概  要] FromCsvString
 '* [詳  細] CSVファイルを行単位で読込み、Array2DExに設定して返却する。
@@ -1859,4 +1858,30 @@ Public Function FromCsvString(ByVal csvData As String, _
                               Optional ByVal QuotExists As Boolean = False, _
                               Optional ByVal separator As LineSeparatorsEnum = adCRLF) As Array2DEx
     Set FromCsvString = Init(ArrayUtils.CsvStringToArray(csvData, HeaderExists, QuotExists, separator))
+End Function
+
+'******************************************************************************
+'* [概  要] SortBy
+'* [詳  細] 2次元配列のクイックソートを行う。
+'*
+'* @param keyNoOrFunc ソートに使用する列番号。もしくは、
+'*                    ソート比較用の関数名、またはFuncオブジェクト、または
+'*                    Compare（x1, x2, ByVal flg As Boolean）As Booleanメソッドを
+'*                    持つオブジェクト。
+'*                    第3引数のflgで条件を反転させる。軸要素は反転前、反転後の条件
+'*                    のどちらにも含まれないようにする必要がある。
+'* @return ソート済み2次元配列
+'*
+'* [keyColOrFuncの指定関数例]
+'*   Function Compare(val1, val2, ByVal flg As Boolean) As Boolean
+'*       If flg Then
+'*           Compare = val1(2) > val2(2)
+'*       Else
+'*           Compare = val1(2) < val2(2)
+'*       End If
+'*   End Function
+'*
+'*******************************************************************************
+Public Function SortBy(ByVal keyNoOrFunc) As Array2DEx
+    Set SortBy = Init(ArrayUtils.Array2DSort(Me.To2DArray, keyNoOrFunc))
 End Function

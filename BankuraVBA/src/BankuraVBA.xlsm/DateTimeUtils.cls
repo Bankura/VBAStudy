@@ -16,15 +16,30 @@ Option Explicit
 '*          Staticクラス（Attribute VB_PredeclaredId = True）とする。
 '*
 '* [参  考] https://www.take1mg.com/plus1/2018/04/excel-vba-datecalculatorclass/
+'*          https://vbabeginner.net/measure-milliseconds-and-microseconds/
 '*
 '* @author Bankura
-'* Copyright (c) 2020 Bankura
+'* Copyright (c) 2020-2021 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 
 '******************************************************************************
 '* WindowsAPI定義
 '******************************************************************************
+#If Win64 Then
+    Private Declare PtrSafe Function QueryPerformanceFrequency Lib "kernel32" (lpFrequency As LARGE_INTEGER) As Long
+    Private Declare PtrSafe Function QueryPerformanceCounter Lib "kernel32" (lpPerformanceCount As LARGE_INTEGER) As Long
+#Else
+    Private Declare Function QueryPerformanceFrequency Lib "kernel32" (frequency As Double) As Long
+    Private Declare Function QueryPerformanceCounter Lib "kernel32" (procTime As Double) As Long
+#End If
+
+'******************************************************************************
+'* 構造体定義
+'******************************************************************************
+Private Type LARGE_INTEGER
+    quadPart As LongLong
+End Type
 
 '******************************************************************************
 '* Enum定義
@@ -49,6 +64,11 @@ Private Const DATE_FORMAT_WAREKI_YOUBI As String = "ggge年mm月dd日(aaa)"
 '* 内部変数定義
 '******************************************************************************
 Private mHolidayList As Collection
+#If Win64 Then
+    Dim mPerfFrequency As LARGE_INTEGER
+#Else
+    Dim mPerfFrequency As Double
+#End If
 
 '******************************************************************************
 '* プロパティ定義
@@ -639,4 +659,67 @@ Public Function GetNendo(ByVal sourceDate As Date) As Long
         Exit Function
     End If
     GetNendo = Year(sourceDate)
+End Function
+
+'******************************************************************************
+'* [概  要] GetMicroSecond
+'* [詳  細] システム起動後の経過時間をマイクロ秒の精度で算出する。
+'* [参  考] https://vbabeginner.net/measure-milliseconds-and-microseconds/
+'*          http://www.alato.ne.jp/kazu-/vb/tip27.htm
+'*
+'* @return Double システム起動後の経過時間（マイクロ秒）
+'******************************************************************************
+Public Function GetMicroSecond() As Double
+#If Win64 Then
+    Dim perfCount As LARGE_INTEGER
+    If mPerfFrequency.quadPart = 0 Then
+#Else
+    Dim perfCount As Double
+    If mPerfFrequency = 0 Then
+#End If
+        If QueryPerformanceFrequency(mPerfFrequency) = 0 Then
+            Debug.Print "QueryPerformanceCounter Is Not Supported."
+            Exit Function
+        End If
+    End If
+    Call QueryPerformanceCounter(perfCount)
+
+#If Win64 Then
+    GetMicroSecond = perfCount.quadPart / mPerfFrequency.quadPart
+#Else
+    GetMicroSecond = perfCount / mPerfFrequency
+#End If
+End Function
+'******************************************************************************
+'* [概  要] GetMilliSecond
+'* [詳  細] システム起動後の経過時間をミリ秒の精度で算出する。
+'*
+'* @return Double システム起動後の経過時間（ミリ秒）
+'******************************************************************************
+Public Function GetMilliSecond() As Double
+    GetMilliSecond = GetMicroSecond * 1000
+End Function
+
+'******************************************************************************
+'* [概  要] GetTimestampString
+'* [詳  細] 現在時刻の年月日時分秒ミリ秒を「YYYY/MM/DD HH:NN:SS.000」形式の
+'*          文字列で取得する。
+'*
+'* @return String 現在時刻文字列
+'******************************************************************************
+Public Function GetTimestampString() As String
+    Dim dblTimer As Double
+    Dim hour As Integer
+    Dim minute As Integer
+    Dim second As Integer
+    Dim mSec As Double
+    
+    dblTimer = CDbl(Timer)
+    hour = dblTimer \ 3600
+    minute = (dblTimer Mod 3600) \ 60
+    second = dblTimer Mod 60
+    mSec = Fix((dblTimer - Fix(dblTimer)) * 1000)
+
+    GetTimestampString = Format(Now, "yyyy/mm/dd") & " " & Format(hour, "00") & ":" & _
+                         Format(minute, "00") & ":" & Format(second, "00") & "." & Format(mSec, "000")
 End Function

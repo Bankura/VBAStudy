@@ -307,7 +307,7 @@ Private Sub StartProcess(enumerator As Object)
     With rEnumerator.SourceData
         ' 1s–Úˆ—
         vRow = SplitCsvRow(.ReadText(adReadLine), True)
-         If Not mHeaderExists Then
+        If Not mHeaderExists Then
             arr2dex.AddRow vRow
         End If
         mColumnCount = UBound(vRow)

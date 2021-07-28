@@ -229,7 +229,6 @@ Sub Move(Destination As String)
     Call mOrigin.Move(Destination)
 End Sub
 
-
 '******************************************************************************
 '* [概  要] OpenAsTextStreamメソッド
 '* [詳  細] OpenAsTextStreamのラッパーメソッド。

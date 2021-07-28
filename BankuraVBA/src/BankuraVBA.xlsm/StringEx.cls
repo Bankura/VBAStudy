@@ -358,7 +358,7 @@ End Function
 '*
 '******************************************************************************
 Public Function AppendIfMissing(suffix As String, ParamArray suffixes()) As StringEx
-    If Not IsMissing(suffixes) Then
+    If Not ValidateUtils.IsParamArrayMissing(suffixes) Then
         Dim tmp: tmp = suffixes ' ParamArrayÇï ä÷êîÇ…ìnÇ∑ÇΩÇﬂÇÃëŒâû
         Set AppendIfMissing = Me.Init(StringUtils.AppendIfMissing(Me.ToString, suffix, tmp))
     Else
@@ -377,7 +377,7 @@ End Function
 '*
 '******************************************************************************
 Public Function AppendIfMissingIgnoreCase(str As String, suffix As String, ParamArray suffixes()) As StringEx
-    If Not IsMissing(suffixes) Then
+    If Not ValidateUtils.IsParamArrayMissing(suffixes) Then
         Dim tmp: tmp = suffixes ' ParamArrayÇï ä÷êîÇ…ìnÇ∑ÇΩÇﬂÇÃëŒâû
         Set AppendIfMissingIgnoreCase = Me.Init(StringUtils.AppendIfMissingIgnoreCase(Me.ToString, suffix, tmp))
     Else
@@ -493,7 +493,7 @@ End Function
 '*
 '******************************************************************************
 Public Function ContainsAll(ParamArray searchStr()) As Boolean
-    If VBA.IsMissing(searchStr) Then
+    If ValidateUtils.IsParamArrayMissing(searchStr) Then
         ContainsAll = False
         Exit Function
     End If
@@ -512,7 +512,7 @@ End Function
 '*
 '******************************************************************************
 Public Function ContainsAny(ParamArray searchStr()) As Boolean
-    If VBA.IsMissing(searchStr) Then
+    If ValidateUtils.IsParamArrayMissing(searchStr) Then
         ContainsAny = False
         Exit Function
     End If
@@ -643,7 +643,7 @@ End Function
 '*
 '******************************************************************************
 Public Function EndsWithAny(ParamArray endStr() As Variant) As Boolean
-    If Not IsMissing(endStr) Then
+    If Not ValidateUtils.IsParamArrayMissing(endStr) Then
         Dim tmp: tmp = endStr ' ParamArrayÇï ä÷êîÇ…ìnÇ∑ÇΩÇﬂÇÃëŒâû
         EndsWithAny = StringUtils.EndsWithAny(Me.ToString, tmp)
     Else
@@ -698,7 +698,7 @@ End Function
 '*
 '******************************************************************************
 Public Function EqualsAny(ParamArray searchStrings() As Variant) As Boolean
-    If Not IsMissing(searchStrings) Then
+    If Not ValidateUtils.IsParamArrayMissing(searchStrings) Then
         Dim tmp: tmp = searchStrings ' ParamArrayÇï ä÷êîÇ…ìnÇ∑ÇΩÇﬂÇÃëŒâû
         EqualsAny = StringUtils.EqualsAny(Me.ToString, searchStrings)
     Else
@@ -716,7 +716,7 @@ End Function
 '*
 '******************************************************************************
 Public Function EqualsAnyIgnoreCase(ParamArray searchStrings() As Variant) As Boolean
-    If Not IsMissing(searchStrings) Then
+    If Not ValidateUtils.IsParamArrayMissing(searchStrings) Then
         Dim tmp: tmp = searchStrings ' ParamArrayÇï ä÷êîÇ…ìnÇ∑ÇΩÇﬂÇÃëŒâû
         EqualsAnyIgnoreCase = StringUtils.EqualsAnyIgnoreCase(Me.ToString, searchStrings)
     Else
@@ -784,7 +784,7 @@ End Function
 '*
 '******************************************************************************
 Public Function IndexOfAny(ParamArray searchStrs() As Variant) As Long
-    If Not IsMissing(searchStrs) Then
+    If Not ValidateUtils.IsParamArrayMissing(searchStrs) Then
         Dim tmp: tmp = searchStrs ' ParamArrayÇï ä÷êîÇ…ìnÇ∑ÇΩÇﬂÇÃëŒâû
         IndexOfAny = StringUtils.IndexOfAny(Me.ToString, searchStrs)
     Else
@@ -802,7 +802,7 @@ End Function
 '*
 '******************************************************************************
 Public Function IndexOfAnyBut(ParamArray searchStrs() As Variant) As Long
-    If Not IsMissing(searchStrs) Then
+    If Not ValidateUtils.IsParamArrayMissing(searchStrs) Then
         Dim tmp: tmp = searchStrs ' ParamArrayÇï ä÷êîÇ…ìnÇ∑ÇΩÇﬂÇÃëŒâû
         IndexOfAnyBut = StringUtils.IndexOfAnyBut(Me.ToString, searchStrs)
     Else
@@ -1080,7 +1080,7 @@ End Function
 '*
 '******************************************************************************
 Public Function PrependIfMissing(prefix As String, ParamArray prefixes() As Variant) As StringEx
-    If Not IsMissing(prefixes) Then
+    If Not ValidateUtils.IsParamArrayMissing(prefixes) Then
         Dim tmp: tmp = prefixes
         Set PrependIfMissing = Me.Init(StringUtils.PrependIfMissing(Me.ToString, prefix, tmp))
     Else
@@ -1101,7 +1101,7 @@ End Function
 '*
 '******************************************************************************
 Public Function PrependIfMissingIgnoreCase(prefix As String, ParamArray prefixes() As Variant) As StringEx
-    If Not IsMissing(prefixes) Then
+    If Not ValidateUtils.IsParamArrayMissing(prefixes) Then
          Dim tmp: tmp = prefixes
         Set PrependIfMissingIgnoreCase = Me.Init(StringUtils.PrependIfMissingIgnoreCase(Me.ToString, prefix, tmp))
     Else
@@ -1255,8 +1255,8 @@ End Function
 '* @return String ïœä∑å„ï∂éöóÒ
 '*
 '******************************************************************************
-Public Function Reverse() As StringEx
-    Set Reverse = Me.Init(StringUtils.Reverse(Me.ToString))
+Public Function reverse() As StringEx
+    Set reverse = Me.Init(StringUtils.reverse(Me.ToString))
 End Function
 
 

@@ -266,7 +266,7 @@ End Function
 '*
 '* @param arr As Variant(Of Array(Of T))
 '******************************************************************************
-Public Sub Reverse()
+Public Sub reverse()
     Dim arr: arr = Me.ToArray
     Call Core.ArrRev(arr)
     Call Init(arr)
@@ -370,7 +370,7 @@ End Function
 '* @return ArrayEx(Of Array(Of T))
 '******************************************************************************
 Public Function FromEnumerator(ByVal enumr As Object) As ArrayEx
-    Dim arr: arr = Ext.EnumeratorToArr(enumr)
+    Dim arr: arr = ext.EnumeratorToArr(enumr)
     Set FromEnumerator = Init(arr)
 End Function
 
@@ -385,7 +385,7 @@ End Function
 '* @return ArrayEx(Of Array(Of T))
 '******************************************************************************
 Public Function Range(ByVal fromVal As Variant, ByVal toVal As Variant, Optional ByVal stepVal As Variant = 1) As ArrayEx
-    Dim arr: arr = Ext.ArrRange(fromVal, toVal, stepVal)
+    Dim arr: arr = ext.ArrRange(fromVal, toVal, stepVal)
     Set Range = Init(arr)
 End Function
 
@@ -398,7 +398,7 @@ End Function
 '* @return ArrayEx(Of Array(Of U))
 '******************************************************************************
 Public Function Map(ByVal fun As Func) As ArrayEx
-    Dim arr: arr = Ext.ArrMap(fun, Me.ToArray)
+    Dim arr: arr = ext.ArrMap(fun, Me.ToArray)
     Set Map = Init(arr)
 End Function
 
@@ -413,7 +413,7 @@ End Function
 '* @return ArrayEx(Of Array(Of R))
 '******************************************************************************
 Public Function Zip(ByVal fun As Func, ByVal arr2 As Variant) As ArrayEx
-    Dim arr: arr = Ext.ArrZip(fun, Me.ToArray, arr2)
+    Dim arr: arr = ext.ArrZip(fun, Me.ToArray, arr2)
     Set Zip = Init(arr)
 End Function
 
@@ -427,7 +427,7 @@ End Function
 '* @return ArrayEx(Of Array(Of T))
 '******************************************************************************
 Public Function Filter(ByVal fun As Func) As ArrayEx
-    Dim arr: arr = Ext.ArrFilter(fun, Me.ToArray)
+    Dim arr: arr = ext.ArrFilter(fun, Me.ToArray)
     Set Filter = Init(arr)
 End Function
 
@@ -441,7 +441,7 @@ End Function
 '* @return ArrayEx(Of Array(Of Tuple`2(Of K, T)))
 '******************************************************************************
 Public Function GroupBy(ByVal fun As Func) As ArrayEx
-    Dim arr: arr = Ext.ArrGroupBy(fun, Me.ToArray)
+    Dim arr: arr = ext.ArrGroupBy(fun, Me.ToArray)
     Set GroupBy = Init(arr)
 End Function
 
@@ -457,7 +457,7 @@ End Function
 '* @return Variant(Of U)
 '******************************************************************************
 Public Function Fold(ByVal fun As Func, Optional ByVal seedv As Variant) As Variant
-    Fold = Ext.ArrFold(fun, Me.ToArray, seedv)
+    Fold = ext.ArrFold(fun, Me.ToArray, seedv)
 End Function
 
 '******************************************************************************
@@ -471,7 +471,7 @@ End Function
 '* @return ArrayEx(Of Array(Of U))
 '******************************************************************************
 Public Function Scan(ByVal fun As Func, Optional ByVal seedv As Variant) As ArrayEx
-    Dim arr: arr = Ext.ArrScan(fun, Me.ToArray, seedv)
+    Dim arr: arr = ext.ArrScan(fun, Me.ToArray, seedv)
     Set Scan = Init(arr)
 End Function
 
@@ -486,7 +486,7 @@ End Function
 '* @return ArrayEx(Of Array(Of U))
 '******************************************************************************
 Public Function Unfold(ByVal fun As Func, ByVal seedv As Variant) As ArrayEx
-    Dim arr: arr = Ext.ArrUnfold(fun, seedv)
+    Dim arr: arr = ext.ArrUnfold(fun, seedv)
     Set Unfold = Init(arr)
 End Function
 
@@ -618,8 +618,8 @@ End Function
 '* @param count çÄñ⁄
 '* @return Variant 1éüå≥îzóÒ
 '******************************************************************************
-Public Function Repeat(ByVal itm As Variant, ByVal Count As Long) As ArrayEx
-    Set Repeat = Init(ArrayUtils.Repeat(itm, Count))
+Public Function Repeat(ByVal itm As Variant, ByVal count As Long) As ArrayEx
+    Set Repeat = Init(ArrayUtils.Repeat(itm, count))
 End Function
 
 '******************************************************************************

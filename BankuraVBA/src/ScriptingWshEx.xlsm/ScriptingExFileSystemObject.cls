@@ -369,7 +369,7 @@ End Function
 '******************************************************************************
 '* [概  要] GetStandardStream メソッド
 '* [詳  細] GetStandardStream のラッパーメソッド。
-'*         各システムフォルダの位置を取得します｡
+'*         指定した標準の TextStream オブジェクトを返します｡
 '*
 '* @param StandardStreamType
 '* @param Unicode 省略可能。

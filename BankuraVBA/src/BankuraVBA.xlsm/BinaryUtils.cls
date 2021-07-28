@@ -192,7 +192,11 @@ End Function
 '* @return LongPtr バイト整数値
 '******************************************************************************
 Public Function Hex2Dec(ByVal hVal As String, Optional ByVal pos As LongPtr = 0, Optional ByVal startPos As LongPtr = 0) As LongPtr
+    On Error Resume Next
     Hex2Dec = HexString2LongPtr(hVal) * (256 ^ (pos - startPos))
+    If Err.Number = 6 Then
+        Debug.Print Err.Description
+    End If
 End Function
 
 '******************************************************************************

@@ -664,7 +664,7 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
 
     Dim i As Long
     Dim strBuf As String
-    Dim c As String
+    Dim C As String
     Dim strRet As String
     Dim strBefore As String
     Dim strChr As String
@@ -677,7 +677,7 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
 
     For i = 1 To Len(strSource)
 
-        c = Mid$(strSource, i, 1)
+        C = Mid$(strSource, i, 1)
         
         If i = Len(strSource) Then
             strNext = ""
@@ -685,7 +685,7 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
             strNext = Mid$(strSource, i + 1, 1)
         End If
 
-        Select Case c
+        Select Case C
             'ëSäpÇÃÅè
             Case "Åè"
                 If (Conv And vbNarrow) > 0 Then
@@ -693,7 +693,7 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
                     strRet = strRet & VBA.StrConv(strBuf, Conv) & strChr
                     strBuf = ""
                 Else
-                    strBuf = strBuf & c
+                    strBuf = strBuf & C
                 End If
            
             'îºäpÇÃ\
@@ -703,12 +703,12 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
                     strRet = strRet & VBA.StrConv(strBuf, Conv) & strChr
                     strBuf = ""
                 Else
-                    strBuf = strBuf & c
+                    strBuf = strBuf & C
                 End If
             'ëSäpÇÃë˜ì_ÅAîºë˜ì_
             Case "ÅK", "ÅJ"
                 If (Conv And vbNarrow) > 0 Then
-                    If c = "ÅK" Then
+                    If C = "ÅK" Then
                         strChr = "ﬂ"
                     Else
                         strChr = "ﬁ"
@@ -716,7 +716,7 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
                     strRet = strRet & VBA.StrConv(strBuf, Conv) & strChr
                     strBuf = ""
                 Else
-                    strBuf = strBuf & c
+                    strBuf = strBuf & C
                 End If
                 
             'îºäpÇÃîºë˜ì_
@@ -724,14 +724,14 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
                 'ÇPÇ¬ëOÇÃï∂éö
                 Select Case strBefore
                     Case " " To "Œ"
-                        strBuf = strBuf & c
+                        strBuf = strBuf & C
                     Case Else
                         If (Conv And vbWide) > 0 Then
                              strChr = "ÅK"
                             strRet = strRet & VBA.StrConv(strBuf, Conv) & strChr
                             strBuf = ""
                         Else
-                            strBuf = strBuf & c
+                            strBuf = strBuf & C
                         End If
                 End Select
                 
@@ -740,14 +740,14 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
                 'ÇPÇ¬ëOÇÃï∂éö
                 Select Case strBefore
                     Case "≥", "∂" To "∫", "ª" To "ø", "¿" To "ƒ", " " To "Œ"
-                        strBuf = strBuf & c
+                        strBuf = strBuf & C
                     Case Else
                         If (Conv And vbWide) > 0 Then
                             strChr = "ÅJ"
                             strRet = strRet & VBA.StrConv(strBuf, Conv) & strChr
                             strBuf = ""
                         Else
-                            strBuf = strBuf & c
+                            strBuf = strBuf & C
                         End If
                 End Select
             'Éî
@@ -761,7 +761,7 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
                     strRet = strRet & VBA.StrConv(strBuf, Conv) & strChr
                     strBuf = ""
                 Else
-                    strBuf = strBuf & c
+                    strBuf = strBuf & C
                 End If
             'Ç§ÅJ
             Case "Ç§"
@@ -771,42 +771,42 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
                     strBuf = ""
                     i = i + 1
                 Else
-                    strBuf = strBuf & c
+                    strBuf = strBuf & C
                 End If
 
             'ÉñÉï
             Case "Éñ", "Éï"
                 If (Conv And vbHiragana) > 0 Then
-                    strRet = strRet & VBA.StrConv(strBuf, Conv) & c
+                    strRet = strRet & VBA.StrConv(strBuf, Conv) & C
                     strBuf = ""
                 Else
-                    strBuf = strBuf & c
+                    strBuf = strBuf & C
                 End If
 
             'ÇªÇÃëº
             Case Else
                 'ëÊìÒêÖèÄìôStrConvÇ≈ï∂éöâªÇØÇ∑ÇÈÇ‡ÇÃÇëﬁî
-                If Asc(c) = 63 And c <> "?" Then
-                    strRet = strRet & VBA.StrConv(strBuf, Conv) & c
+                If Asc(C) = 63 And C <> "?" Then
+                    strRet = strRet & VBA.StrConv(strBuf, Conv) & C
                     strBuf = ""
                 Else
                     'Ç§Åh
-                    If AscW(c) = &H3094 Then
+                    If AscW(C) = &H3094 Then
                         If Conv = vbKatakana Then
                             strRet = strRet & VBA.StrConv(strBuf, Conv) & "Éî"
                             strBuf = ""
                         Else
-                            strRet = strRet & VBA.StrConv(strBuf, Conv) & c
+                            strRet = strRet & VBA.StrConv(strBuf, Conv) & C
                             strBuf = ""
                         End If
                     Else
-                        strBuf = strBuf & c
+                        strBuf = strBuf & C
                     End If
                 End If
         End Select
         
         'ÇPå¬ëOÇÃï∂éö
-        strBefore = c
+        strBefore = C
 
     Next
 
@@ -846,7 +846,7 @@ Public Function AppendIfMissing(ByVal str As String, ByVal suffix As String, Par
         AppendIfMissing = str
         Exit Function
     End If
-    If Not IsMissing(suffixes) Then
+    If Not ValidateUtils.IsParamArrayMissing(suffixes) Then
         Dim tmp: tmp = suffixes ' ParamArrayÇï ä÷êîÇ…ìnÇ∑ÇΩÇﬂÇÃëŒâû
         Dim v
         For Each v In ArrayUtils.ToVArrayFlattened(tmp)
@@ -888,7 +888,7 @@ Public Function AppendIfMissingIgnoreCase(ByVal str As String, ByVal suffix As S
         AppendIfMissingIgnoreCase = str
         Exit Function
     End If
-    If Not IsMissing(suffixes) Then
+    If Not ValidateUtils.IsParamArrayMissing(suffixes) Then
         Dim tmp: tmp = suffixes ' ParamArrayÇï ä÷êîÇ…ìnÇ∑ÇΩÇﬂÇÃëŒâû
         Dim v
         For Each v In ArrayUtils.ToVArrayFlattened(tmp)
@@ -1149,7 +1149,7 @@ End Function
 '*
 '******************************************************************************
 Public Function ContainsAll(ByVal str As String, ParamArray searchStr()) As Boolean
-    If Me.IsEmpty(str) Or VBA.IsMissing(searchStr) Then
+    If Me.IsEmpty(str) Or ValidateUtils.IsParamArrayMissing(searchStr) Then
         ContainsAll = False
         Exit Function
     End If
@@ -1183,7 +1183,7 @@ End Function
 '*
 '******************************************************************************
 Public Function ContainsAny(ByVal str As String, ParamArray searchStr()) As Boolean
-    If Me.IsEmpty(str) Or VBA.IsMissing(searchStr) Then
+    If Me.IsEmpty(str) Or ValidateUtils.IsParamArrayMissing(searchStr) Then
         ContainsAny = False
         Exit Function
     End If
@@ -1320,16 +1320,16 @@ Public Function CountMatches(ByVal str As String, ByVal searchStr As String) As 
         CountMatches = 0
         Exit Function
     End If
-    Dim Count As Long: Count = 0
+    Dim count As Long: count = 0
     Dim idx As Long: idx = 0
     
     idx = Me.IndexOf(str, searchStr, idx)
     Do While idx <> INDEX_NOT_FOUND
-        Count = Count + 1
+        count = count + 1
         idx = idx + Len(searchStr)
         idx = Me.IndexOf(str, searchStr, idx)
     Loop
-    CountMatches = Count
+    CountMatches = count
 End Function
 
 '******************************************************************************
@@ -1440,7 +1440,7 @@ End Function
 '******************************************************************************
 Public Function EndsWithAny(ByVal str As String, ParamArray endStr() As Variant) As Boolean
 
-    If Me.IsEmpty(str) Or VBA.IsMissing(endStr) Then
+    If Me.IsEmpty(str) Or ValidateUtils.IsParamArrayMissing(endStr) Then
         EndsWithAny = False
         Exit Function
     End If
@@ -1531,7 +1531,7 @@ End Function
 '*
 '******************************************************************************
 Public Function EqualsAny(ByVal str As String, ParamArray searchStrings() As Variant) As Boolean
-    If VBA.IsMissing(searchStrings) Then
+    If ValidateUtils.IsParamArrayMissing(searchStrings) Then
         EqualsAny = False
         Exit Function
     End If
@@ -1561,7 +1561,7 @@ End Function
 '*
 '******************************************************************************
 Public Function EqualsAnyIgnoreCase(ByVal str As String, ParamArray searchStrings() As Variant) As Boolean
-    If VBA.IsMissing(searchStrings) Then
+    If ValidateUtils.IsParamArrayMissing(searchStrings) Then
         EqualsAnyIgnoreCase = False
         Exit Function
     End If
@@ -1593,7 +1593,7 @@ End Function
 '*
 '******************************************************************************
 Public Function FirstNonBlank(ParamArray values() As Variant) As String
-    If IsMissing(values) Then
+    If ValidateUtils.IsParamArrayMissing(values) Then
         FirstNonBlank = ""
         Exit Function
     End If
@@ -1626,7 +1626,7 @@ End Function
 '*
 '******************************************************************************
 Public Function FirstNonEmpty(ParamArray values() As Variant) As String
-    If IsMissing(values) Then
+    If ValidateUtils.IsParamArrayMissing(values) Then
         FirstNonEmpty = ""
         Exit Function
     End If
@@ -1695,7 +1695,7 @@ End Function
 '*
 '******************************************************************************
 Public Function GetCommonPrefix(ParamArray strs() As Variant) As String
-    If IsMissing(strs) Then
+    If ValidateUtils.IsParamArrayMissing(strs) Then
         GetCommonPrefix = ""
         Exit Function
     End If
@@ -1867,7 +1867,7 @@ End Function
 '*
 '******************************************************************************
 Public Function IndexOfAny(ByVal str As String, ParamArray searchStrs() As Variant) As Long
-    If IsMissing(searchStrs) Then
+    If ValidateUtils.IsParamArrayMissing(searchStrs) Then
         IndexOfAny = INDEX_NOT_FOUND
          Exit Function
     End If
@@ -1906,7 +1906,7 @@ End Function
 '*
 '******************************************************************************
 Public Function IndexOfAnyBut(ByVal str As String, ParamArray searchStrs() As Variant) As Long
-    If Me.IsEmpty(str) Or IsMissing(searchStrs) Then
+    If Me.IsEmpty(str) Or ValidateUtils.IsParamArrayMissing(searchStrs) Then
         IndexOfAnyBut = INDEX_NOT_FOUND
         Exit Function
     End If
@@ -1947,7 +1947,7 @@ End Function
 '*
 '******************************************************************************
 Public Function IndexOfDifference(ParamArray strs() As Variant) As Long
-    If IsMissing(strs) Then
+    If ValidateUtils.IsParamArrayMissing(strs) Then
         IndexOfDifference = INDEX_NOT_FOUND
         Exit Function
     End If
@@ -2080,7 +2080,7 @@ End Function
 '*
 '******************************************************************************
 Public Function IsAllBlank(ParamArray strs() As Variant) As Boolean
-    If VBA.IsMissing(strs) Then
+    If ValidateUtils.IsParamArrayMissing(strs) Then
         IsAllBlank = True
         Exit Function
     End If
@@ -2113,7 +2113,7 @@ End Function
 '*
 '******************************************************************************
 Public Function IsAllEmpty(ParamArray strs() As Variant) As Boolean
-    If VBA.IsMissing(strs) Then
+    If ValidateUtils.IsParamArrayMissing(strs) Then
         IsAllEmpty = True
         Exit Function
     End If
@@ -2332,7 +2332,7 @@ End Function
 '*
 '******************************************************************************
 Public Function IsAnyBlank(ParamArray strs() As Variant) As Boolean
-    If IsMissing(strs) Then
+    If ValidateUtils.IsParamArrayMissing(strs) Then
         IsAnyBlank = False
         Exit Function
     End If
@@ -2364,7 +2364,7 @@ End Function
 '*
 '******************************************************************************
 Public Function IsAnyEmpty(ParamArray strs() As Variant) As Boolean
-    If IsMissing(strs) Then
+    If ValidateUtils.IsParamArrayMissing(strs) Then
         IsAnyEmpty = False
         Exit Function
     End If
@@ -2752,9 +2752,17 @@ End Function
 '* @return String ïœä∑å„ï∂éöóÒ
 '*
 '******************************************************************************
-Public Function LeftPad(ByVal str As String, ByVal size As Long, Optional ByVal padStr As String = " ") As String
-    Dim padLen As Long: padLen = Len(padStr)
-    Dim strLen As Long: strLen = Len(str)
+Public Function LeftPad(ByVal str As String, ByVal size As Long, Optional ByVal padStr As String = " ", Optional useZenkaku2Width As Boolean = False) As String
+    Dim padLen As Long
+    Dim strLen As Long
+    If useZenkaku2Width Then
+        padLen = GetTextWidth(padStr)
+        strLen = GetTextWidth(str)
+    Else
+        padLen = CheckLength(padStr)
+        strLen = CheckLength(str)
+    End If
+
     Dim pads As Long: pads = size - strLen
     If pads <= 0 Then
         LeftPad = str '  returns original String when possible
@@ -2865,7 +2873,7 @@ Public Function PrependIfMissing(ByVal str As String, ByVal prefix As String, Pa
         PrependIfMissing = str
         Exit Function
     End If
-    If Not IsMissing(prefixes) Then
+    If Not ValidateUtils.IsParamArrayMissing(prefixes) Then
         Dim tmp: tmp = prefixes ' ParamArrayÇï ä÷êîÇ…ìnÇ∑ÇΩÇﬂÇÃëŒâû
         Dim v
         For Each v In ArrayUtils.ToVArrayFlattened(tmp)
@@ -2908,7 +2916,7 @@ Public Function PrependIfMissingIgnoreCase(ByVal str As String, ByVal prefix As 
         PrependIfMissingIgnoreCase = str
         Exit Function
     End If
-    If Not IsMissing(prefixes) Then
+    If Not ValidateUtils.IsParamArrayMissing(prefixes) Then
         Dim tmp: tmp = prefixes ' ParamArrayÇï ä÷êîÇ…ìnÇ∑ÇΩÇﬂÇÃëŒâû
         Dim v
         For Each v In ArrayUtils.ToVArrayFlattened(tmp)
@@ -3264,7 +3272,7 @@ Public Function ReplaceIgnoreCase(ByVal str As String, ByVal searchString As Str
     Dim sb As StringEx: Set sb = New StringEx
     Dim pos As Long: pos = 1
     Dim nextpos As Long: nextpos = InStr(strIc, searchStringIc)
-    Dim Count As Long: Count = 0
+    Dim count As Long: count = 0
     
     Do Until nextpos = 0
         Call sb.Append(Mid(str, pos, nextpos - pos)) _
@@ -3272,9 +3280,9 @@ Public Function ReplaceIgnoreCase(ByVal str As String, ByVal searchString As Str
         
         pos = nextpos + Len(searchStringIc)
         nextpos = InStr(pos, strIc, searchStringIc)
-        Count = Count + 1
+        count = count + 1
     Loop
-    If Count = 0 Then
+    If count = 0 Then
         ReplaceIgnoreCase = str
         Exit Function
     Else
@@ -3297,8 +3305,8 @@ End Function
 '* @return String ïœä∑å„ï∂éöóÒ
 '*
 '******************************************************************************
-Public Function Reverse(ByVal str As String) As String
-    Reverse = VBA.StrReverse(str)
+Public Function reverse(ByVal str As String) As String
+    reverse = VBA.StrReverse(str)
 End Function
 
 
@@ -3326,9 +3334,17 @@ End Function
 '* @return String ïœä∑å„ï∂éöóÒ
 '*
 '******************************************************************************
-Public Function RightPad(ByVal str As String, ByVal size As Long, Optional ByVal padStr As String = " ") As String
-    Dim padLen As Long: padLen = Len(padStr)
-    Dim strLen As Long: strLen = Len(str)
+Public Function RightPad(ByVal str As String, ByVal size As Long, Optional ByVal padStr As String = " ", Optional useZenkaku2Width As Boolean = False) As String
+    Dim padLen As Long
+    Dim strLen As Long
+    If useZenkaku2Width Then
+        padLen = GetTextWidth(padStr)
+        strLen = GetTextWidth(str)
+    Else
+        padLen = CheckLength(padStr)
+        strLen = CheckLength(str)
+    End If
+
     Dim pads As Long: pads = size - strLen
     If pads <= 0 Then
         RightPad = str '  returns original String when possible
@@ -3403,7 +3419,7 @@ End Function
 '*
 '******************************************************************************
 Public Function StartsWithAny(ByVal str As String, ParamArray searchStrings() As Variant) As Boolean
-    If Me.IsEmpty(str) Or VBA.IsMissing(searchStrings) Then
+    If Me.IsEmpty(str) Or ValidateUtils.IsParamArrayMissing(searchStrings) Then
         StartsWithAny = False
         Exit Function
     End If
@@ -4007,8 +4023,8 @@ End Function
 '* @return String ç∂É[ÉçñÑÇﬂÇµÇΩíl
 '*
 '*******************************************************************************
-Public Function LeftPad0(ByVal str As String, ByVal size As Long) As String
-    LeftPad0 = Me.LeftPad(str, size, "0")
+Public Function LeftPad0(ByVal str As String, ByVal size As Long, Optional useZenkaku2Width As Boolean = False) As String
+    LeftPad0 = Me.LeftPad(str, size, "0", useZenkaku2Width)
 End Function
 
 '*******************************************************************************
@@ -4020,8 +4036,8 @@ End Function
 '* @return String âEÉ[ÉçñÑÇﬂÇµÇΩíl
 '*
 '*******************************************************************************
-Public Function RightPad0(ByVal str As String, ByVal size As Long) As String
-    RightPad0 = Me.RightPad(str, size, "0")
+Public Function RightPad0(ByVal str As String, ByVal size As Long, Optional useZenkaku2Width As Boolean = False) As String
+    RightPad0 = Me.RightPad(str, size, "0", useZenkaku2Width)
 End Function
 
 '*******************************************************************************
@@ -4182,4 +4198,47 @@ End Function
 '******************************************************************************
 Public Function EscapeDoubleQuote(ByVal val As String) As String
     EscapeDoubleQuote = VBA.Replace(val, """", """""")
+End Function
+
+'******************************************************************************
+'* [äT  óv] GetTextWidth
+'* [è⁄  ç◊] ï∂éöïùÇéÊìæ°ëSäpï∂éöÇ2Ç≈ÉJÉEÉìÉgÅAîºäpï∂éöÇ1Ç≈ÉJÉEÉìÉgÇ∑ÇÈÅB
+'*
+'* @param strBuf ï∂éöóÒ
+'* @return Long ï∂éöïùÅiëSäpï∂éöÇ2Ç≈ÉJÉEÉìÉgÅj
+'*
+'******************************************************************************
+Public Function GetTextWidth(ByVal strBuf As String) As Long
+    Dim bytBuf() As Byte
+    Dim lngBuf As Long
+    Dim i As Long
+    Dim lngLen As Long
+
+    lngLen = 0
+
+    If Len(strBuf) = 0 Then
+        GetTextWidth = 0
+        Exit Function
+    End If
+
+    bytBuf = strBuf
+
+    For i = LBound(bytBuf) To UBound(bytBuf) Step 2
+        lngBuf = MathUtils.LShift(bytBuf(i + 1), 8) + bytBuf(i)
+
+        Select Case lngBuf
+            'è„à ÉTÉçÉQÅ[Ég
+            Case &HD800& To &HDBFF&
+                lngLen = lngLen + 2
+            'â∫à ÉTÉçÉQÅ[Ég
+            Case &HDC00& To &HDFFF&
+                'ÉJÉEÉìÉgÇµÇ»Ç¢
+            'îºäpâpêîãLçÜÅEîºäpÉJÉ^ÉJÉi
+            Case &H20& To &H7E&, &HFF61& To &HFF7E&
+                lngLen = lngLen + 1
+            Case Else
+                lngLen = lngLen + 2
+        End Select
+    Next
+    GetTextWidth = lngLen
 End Function

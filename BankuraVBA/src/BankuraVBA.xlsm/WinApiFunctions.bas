@@ -21,7 +21,7 @@ Private Declare PtrSafe Function GetWindow Lib "user32" (ByVal hWnd As LongPtr, 
 Private Declare PtrSafe Function GetWindowText Lib "user32" Alias "GetWindowTextA" (ByVal hWnd As LongPtr, ByVal lpString As String, ByVal cch As Long) As Long
 Private Declare PtrSafe Function GetWindowThreadProcessId Lib "user32" (ByVal hWnd As LongPtr, lpdwProcessId As Long) As Long
 Private Declare PtrSafe Function EnumWindows Lib "user32" (ByVal lpEnumFunc As LongPtr, ByVal lParam As LongPtr) As Long
-Private Declare PtrSafe Function EnumChildWindows Lib "user32" (ByVal hwndParent As LongPtr, ByVal lpEnumFunc As LongPtr, ByVal lParam As LongPtr) As Long
+Private Declare PtrSafe Function EnumChildWindows Lib "user32" (ByVal hWndParent As LongPtr, ByVal lpEnumFunc As LongPtr, ByVal lParam As LongPtr) As Long
 Private Declare PtrSafe Function GetDesktopWindow Lib "user32" () As LongPtr
 Private Declare PtrSafe Function IsWindow Lib "user32" (ByVal hWnd As LongPtr) As Long
 Private Declare PtrSafe Function SendMessage Lib "user32" Alias "SendMessageA" (ByVal hWnd As LongPtr, ByVal wMsg As Long, ByVal wParam As LongPtr, lParam As Any) As LongPtr
@@ -193,7 +193,7 @@ End Function
 '* @param lParam LPARAM
 '* @return Long 処理結果
 '******************************************************************************
-Public Function EnumChildSubProc(ByVal hWndChild As LongPtr, _
+Public Function EnumChildSubProc(ByVal hwndChild As LongPtr, _
                                 ByVal lParam As Long) As Long
 
     Dim strClassBuff As String * 128
@@ -203,21 +203,28 @@ Public Function EnumChildSubProc(ByVal hWndChild As LongPtr, _
     Dim lngRtnCode   As Long
     
     ' クラス名取得
-    lngRtnCode = GetClassName(hWndChild, strClassBuff, Len(strClassBuff))
+    lngRtnCode = GetClassName(hwndChild, strClassBuff, Len(strClassBuff))
     strClass = Left(strClassBuff, InStr(strClassBuff, vbNullChar) - 1)
     If strClass = "EXCEL7" Then
         ' テキストをバッファにする
-        lngRtnCode = GetWindowText(hWndChild, strTextBuff, Len(strTextBuff))
+        lngRtnCode = GetWindowText(hwndChild, strTextBuff, Len(strTextBuff))
         strText = Left(strTextBuff, InStr(strTextBuff, vbNullChar) - 1)
         If InStr(1, strText, ".xla") = 0 Then
-            If Sgn(wD) = 0 Then
+            On Error Resume Next
+            Dim cktemp As LongPtr
+            cktemp = UBound(wD)
+        
+            If Err.Number <> 0 Then
+                Err.Clear
+                On Error GoTo 0
                 ReDim wD(0)
                 wD(0).phwnd = tmpParentHwnd
-                wD(0).hWnd = hWndChild
+                wD(0).hWnd = hwndChild
             Else
+                On Error GoTo 0
                 ReDim Preserve wD(UBound(wD) + 1)
                 wD(UBound(wD)).phwnd = tmpParentHwnd
-                wD(UBound(wD)).hWnd = hWndChild
+                wD(UBound(wD)).hWnd = hwndChild
             End If
         End If
 
@@ -274,7 +281,13 @@ Public Function GetExcelBookProc() As Boolean
     Erase wD
     ' ワークブックのウィンドウハンドルを取得
     lngRtnCode = EnumWindows(AddressOf EnumWindowsProc, 0)
-    If Sgn(wD) <> 0 Then
+    
+    On Error Resume Next
+    Dim cktemp As Long
+    cktemp = UBound(wD)
+    
+    If Err.Number = 0 Then
+        On Error GoTo 0
         cnt = 0
         For i = 0 To UBound(wD)
             If GetExcelBook(wD(i)) Then
@@ -301,6 +314,8 @@ Public Function GetExcelBookProc() As Boolean
         Erase wD2
         GetExcelBookProc = True
     Else
+        Err.Clear
+        On Error GoTo 0
         GetExcelBookProc = False
     End If
 
@@ -323,7 +338,7 @@ Private Function GetExcelBook(wDl As WbkDtl) As Boolean
     GetExcelBook = False
     
     If IsWindow(wDl.hWnd) = 0 Then Exit Function
-    lngResult = SendMessage(wDl.hWnd, WM_GETOBJECT, 0, OBJID_NATIVEOM)
+    lngResult = SendMessage(wDl.hWnd, WM_GETOBJECT, 0, ByVal OBJID_NATIVEOM)
     If lngResult Then
         bytID = IID_IDispatch & vbNullChar
 

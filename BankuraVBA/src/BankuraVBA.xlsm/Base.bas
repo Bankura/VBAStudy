@@ -6,7 +6,7 @@ Option Explicit
 '* [詳  細] 共通で使用するプロシージャを提供する。
 '*
 '* @author Bankura
-'* Copyright (c) 2019-2020 Bankura
+'* Copyright (c) 2019-2021 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 
@@ -468,3 +468,52 @@ Public Sub SetAppSettingsNormal()
         .EnableEvents = True
     End With
 End Sub
+
+'******************************************************************************
+'* [概  要] JudgeCond
+'* [詳  細] アプリケーションの設定を通常の設定にする。
+'*
+'* @param val1 比較する値1
+'* @param val2 比較する値2
+'* @param cond 比較演算子（"<", ">", "<=", ">=", "="）
+'* @param flg 判定結果の反転用フラグ
+'*            "<", ">"の場合に反転後の条件に"="を含まない。
+'*            クイックソートの判定で使用。
+'*
+'* @return Boolean 判定結果
+'*
+'******************************************************************************
+Public Function JudgeCond(val1, val2, cond As String, flg As Boolean) As Boolean
+    If flg Then
+        Select Case cond
+            Case ">"
+                JudgeCond = val1 > val2
+            Case "<"
+                JudgeCond = val1 < val2
+            Case ">="
+                JudgeCond = val1 >= val2
+            Case "<="
+                JudgeCond = val1 <= val2
+            Case "="
+                JudgeCond = val1 = val2
+            Case Else
+                Err.Raise 9999, "JudgeCond", "Bad Condition."
+        End Select
+    Else
+        Select Case cond
+            Case ">"
+                JudgeCond = val1 < val2
+            Case "<"
+                JudgeCond = val1 > val2
+            Case ">="
+                JudgeCond = val1 <= val2
+            Case "<="
+                JudgeCond = val1 >= val2
+            Case "="
+                JudgeCond = val1 = val2
+            Case Else
+                Err.Raise 9999, "JudgeCond", "Bad Condition."
+        End Select
+    End If
+End Function
+

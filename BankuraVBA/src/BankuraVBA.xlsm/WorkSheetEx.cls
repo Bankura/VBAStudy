@@ -1281,10 +1281,28 @@ End Function
 '* @param lStartRow データ開始行番号
 '* @param lStartCol データ開始列番号
 '* @param itemCount 項目列数
+'* @return Variant2次元配列
 '*
 '******************************************************************************
-Public Function ExportArray(lStartRow As Long, lStartCol As Long, Optional colCount As Long)
+Public Function ExportArray(lStartRow As Long, lStartCol As Long, Optional colCount As Long, Optional startZeroIndex As Boolean = False)
     ExportArray = XlWorkSheetUtils.GetVariantDataFromSheet(mOrigin, lStartRow, lStartCol, colCount)
+    If startZeroIndex Then
+        ExportArray = ArrayUtils.Copy2DArray(ExportArray)
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] 表情報取得処理。
+'* [詳  細] worksheetの表から情報を取得し、Array2DExを返却｡
+'*
+'* @param lStartRow データ開始行番号
+'* @param lStartCol データ開始列番号
+'* @param itemCount 項目列数
+'* @returnArray2DEx
+'*
+'******************************************************************************
+Public Function ExportArray2DEx(lStartRow As Long, lStartCol As Long, Optional colCount As Long) As Array2DEx
+    Set ExportArray2DEx = Core.Init(New Array2DEx, XlWorkSheetUtils.GetVariantDataFromSheet(mOrigin, lStartRow, lStartCol, colCount))
 End Function
 
 '******************************************************************************

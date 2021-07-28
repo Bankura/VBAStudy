@@ -82,7 +82,6 @@ End Property
 '*
 '* [補  足]
 '* ・指定したキーに対する項目を設定します。値の取得も可能。
-'* ・<拡張>指定したキーが存在している場合は、削除後に設定します。
 '*-----------------------------------------------------------------------------
 Property Get Item(Key)
 Attribute Item.VB_UserMemId = 0
@@ -93,9 +92,6 @@ Attribute Item.VB_UserMemId = 0
     End If
 End Property
 Property Set Item(Key, arg)
-    If mOrigin.Exists(Key) Then
-        Me.Remove Key
-    End If
     If IsObject(arg) Then
         Set mOrigin.Item(Key) = arg
     Else
@@ -119,8 +115,8 @@ Property Let Key(KeyValue, arg)
         Dim i As Long
         For i = 1 To mKeys.Count
             If mKeys(i) = KeyValue Then
+                mKeys.Add arg, After:=i
                 mKeys.Remove i
-                mKeys.Add arg
                 Exit Property
             End If
         Next
@@ -164,7 +160,6 @@ End Sub
 Sub Add(Key, Item)
     Call mOrigin.Add(Key, Item)
     Call mKeys.Add(Key)
-    Exit Sub
 End Sub
 
 '******************************************************************************
@@ -178,7 +173,7 @@ End Sub
 Function Exists(Key) As Boolean
     Exists = mOrigin.Exists(Key)
 End Function
-                         
+
 '******************************************************************************
 '* [概  要] Itemsメソッド
 '* [詳  細] Itemsのラッパーメソッド。
@@ -209,10 +204,9 @@ End Function
 '* @param Key キー
 '******************************************************************************
 Sub Remove(Key)
-    Dim i As Long
-    i = 1
     If TypeName(Key) = "String" Then
         Call mOrigin.Remove(Key)
+        Call mKeys.Remove(Key)
     Else
         Dim k
         For Each k In mOrigin.Keys
@@ -221,7 +215,6 @@ Sub Remove(Key)
                 mKeys.Remove Key
                 Exit Sub
             End If
-            i = i + 1
         Next
     End If
     Exit Sub

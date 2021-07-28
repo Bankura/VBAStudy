@@ -74,7 +74,7 @@ End Function
 
 
 '*******************************************************************************
-'* [概  要] ToJsonString
+'* [概  要] ToString
 '* [詳  細] オブジェクト、プリミティブ型を文字列変換する。
 '*          JSON形式を意識した文字列に変換するが、完全にJSON形式
 '*          に準拠はしていない。
@@ -124,8 +124,11 @@ Public Function ObjectToString(ByVal var As Variant) As String
             ObjectToString = "Nothing"
         
         ElseIf ValidateUtils.IsArrayEx(var) Then
-            ObjectToString = ArrayUtils.ToString(var.ToArray)
+            ObjectToString = var.ToString()
         
+        ElseIf ValidateUtils.IsArray2DEx(var) Then
+            ObjectToString = var.ToString()
+                
         ElseIf ValidateUtils.IsStringEx(var) Then
             ObjectToString = """" & var.ToString & """"
         
@@ -143,4 +146,20 @@ Public Function ObjectToString(ByVal var As Variant) As String
     End If
 End Function
 
-
+'*******************************************************************************
+'* [概  要] SetItem
+'* [詳  細] 指定Variant項目に値を設定する。
+'*          値がオブジェクトかどうかを判別して設定を行う。
+'*          に準拠はしていない。
+'*
+'* @param item Variant項目
+'* @param value 設定する値
+'*
+'*******************************************************************************
+Public Sub SetItem(ByRef Item As Variant, ByRef Value As Variant)
+    If IsObject(Value) Then
+        Set Item = Value
+    Else
+        Let Item = Value
+    End If
+End Sub

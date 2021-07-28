@@ -322,7 +322,7 @@ Public Function GetUniqueFileName( _
 End Function
 
 '******************************************************************************
-'* [概  要] GetAllFolders
+'* [概  要] GetAllFolderPath
 '* [詳  細] 指定したパス配下のすべてのフォルダ（サブフォルダ内含め）の
 '*          フォルダパス文字列を取得し、Variant配列として返却する。
 '*          AriawaseのIOモジュールラッパーメソッド。
@@ -331,12 +331,12 @@ End Function
 '* @return Variant フォルダパスのリスト（1次元配列）
 '*
 '******************************************************************************
-Public Function GetAllFolders(ByVal folderPath As String) As Variant
-    GetAllFolders = IO.GetAllFolders(folderPath)
+Public Function GetAllFolderPath(ByVal folderPath As String) As Variant
+    GetAllFolderPath = IO.GetAllFolders(folderPath)
 End Function
 
 '******************************************************************************
-'* [概  要] GetAllFiles
+'* [概  要] GetAllFilePath
 '* [詳  細] 指定したパス配下のすべてのファイル（サブフォルダ内含め）の
 '*          ファイルパス文字列を取得し、Variant配列として返却する。
 '*          AriawaseのIOモジュールラッパーメソッド。
@@ -345,8 +345,8 @@ End Function
 '* @return Variant ファイルパスのリスト（1次元配列）
 '*
 '******************************************************************************
-Public Function GetAllFiles(ByVal folderPath As String) As Variant
-    GetAllFiles = IO.GetAllFiles(folderPath)
+Public Function GetAllFilePath(ByVal folderPath As String) As Variant
+    GetAllFilePath = IO.GetAllFiles(folderPath)
 End Function
 
 '******************************************************************************
@@ -1732,7 +1732,7 @@ End Function
 '* @return Long サブフォルダ数
 '******************************************************************************
 Public Function GetSubFoldersCount(ByVal dirPath As String) As Long
-    GetSubFoldersCount = IO.GetFolder(dirPath).SubFolders.Count
+    GetSubFoldersCount = IO.GetFolder(dirPath).SubFolders.count
 End Function
 
 '******************************************************************************
@@ -1744,7 +1744,7 @@ End Function
 '* @return Long ファイル数
 '******************************************************************************
 Public Function GetFilesCount(ByVal dirPath As String) As Long
-    GetFilesCount = IO.GetFolder(dirPath).Files.Count
+    GetFilesCount = IO.GetFolder(dirPath).Files.count
 End Function
 
 '******************************************************************************
@@ -2542,7 +2542,7 @@ End Function
 '* @return Boolean 実行結果
 '******************************************************************************
 Public Function CreateZipFile(filePath As String, ParamArray targetFiles() As Variant) As Boolean
-    If IsMissing(targetFiles) Or UCase(IO.GetExtensionName(filePath)) <> "ZIP" Then
+    If ValidateUtils.IsParamArrayMissing(targetFiles) Or UCase(IO.GetExtensionName(filePath)) <> "ZIP" Then
         CreateZipFile = False
         Exit Function
     End If
@@ -2565,7 +2565,7 @@ Public Function CreateZipFile(filePath As String, ParamArray targetFiles() As Va
             skip = True
         End If
         If IsFolder(targetFilePath) Then
-            If shellObj.Namespace(IO.GetAbsolutePathName(targetFilePath)).items().Count > 0 Then
+            If shellObj.Namespace(IO.GetAbsolutePathName(targetFilePath)).items().count > 0 Then
                 ' 空フォルダをスキップ対象とする
                 skip = True
             End If
@@ -2575,10 +2575,10 @@ Public Function CreateZipFile(filePath As String, ParamArray targetFiles() As Va
             Do
                 Dim zFolderItem As Object: Set zFolderItem = zipFolder.ParseName(fileName)
                 If zFolderItem Is Nothing Then
-                    Dim cnt As Long: cnt = zipFolder.items().Count
+                    Dim cnt As Long: cnt = zipFolder.items().count
                     zipFolder.CopyHere sFolderItem, &H4 Or &H10
                     Dim retryCnt As Long: retryCnt = 0
-                    Do While zipFolder.items().Count <= cnt
+                    Do While zipFolder.items().count <= cnt
                         If retryCnt > 10 Then
                             Debug.Print "RetryOver: " & targetFilePath
                             Exit Function
@@ -2621,11 +2621,11 @@ Public Function UnZipFile(zipFilePath As String, targetFolderPath As String) As 
     Dim shellObj As Object: Set shellObj = Base.GetShell
     Dim targetFolder As Object: Set targetFolder = shellObj.Namespace(IO.GetAbsolutePathName(saveFolderPath))
     Dim srcFolder As Object: Set srcFolder = shellObj.Namespace(IO.GetAbsolutePathName(zipFilePath))
-    Dim cnt As Long: cnt = srcFolder.items().Count
+    Dim cnt As Long: cnt = srcFolder.items().count
     Dim retryCnt As Long: retryCnt = 0
     
     targetFolder.CopyHere srcFolder.items, &H4 Or &H10
-    Do While targetFolder.items().Count < cnt
+    Do While targetFolder.items().count < cnt
         If retryCnt > 10 Then
             Debug.Print "RetryOver"
             Exit Function

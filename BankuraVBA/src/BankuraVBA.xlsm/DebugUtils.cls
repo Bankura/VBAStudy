@@ -53,7 +53,7 @@ End Sub
 
 Public Sub Show(var)
     On Error GoTo ErrorHandler
-    Debug.Print var
+    Debug.Print VariantUtils.ToString(var)
     Exit Sub
 ErrorHandler:
     Debug.Print Err.Number, Err.Source, Err.Description
@@ -92,12 +92,12 @@ End Sub
 '*
 '* @param vArr Variant配列
 '******************************************************************************
-Public Sub PrintVariantArray(vArr)
+Public Sub PrintArray(vArr)
     Dim arr As Variant
     If ValidateUtils.IsArrayEx(vArr) Then
         arr = vArr.ToArray
     ElseIf ValidateUtils.IsArray2DEx(vArr) Then
-        arr = vArr.ToArray
+        arr = vArr.To2DArray
     ElseIf ValidateUtils.IsArray(vArr) Then
         arr = vArr
     Else
@@ -105,18 +105,38 @@ Public Sub PrintVariantArray(vArr)
     End If
     If ArrayUtils.IsEmptyArray(arr) Then Exit Sub
     
-    Dim i As Long, j As Long, tmp As String
-    For i = LBound(arr, 1) To UBound(arr, 1)
-        If ArrayUtils.Is2DArray(arr) Then
+    Dim i As Long, j As Long, tmp As StringEx, v
+    If ArrayUtils.Is2DArray(arr) Then
+    
+        Dim collen() As Long
+        ReDim collen(LBound(arr, 2) To UBound(arr, 2)) As Long
+        Dim colNumAttr() As Boolean
+        ReDim colNumAttr(LBound(arr, 2) To UBound(arr, 2)) As Boolean
+        
+        For j = LBound(arr, 2) To UBound(arr, 2)
+            collen(j) = ArrayUtils.Array2DMaxTxtLength(arr, j, True)
+            v = arr(LBound(arr, 1), j)
+            colNumAttr(j) = ValidateUtils.IsNumericType(v)
+        Next
+
+        For i = LBound(arr, 1) To UBound(arr, 1)
+            Set tmp = New StringEx
+            Call tmp.Append("| ")
             For j = LBound(arr, 2) To UBound(arr, 2)
-                tmp = tmp & arr(i, j) & " | "
+                If colNumAttr(j) Then
+                    Call tmp.Append(StringUtils.LeftPad(arr(i, j), collen(j), , True))
+                Else
+                    Call tmp.Append(StringUtils.RightPad(arr(i, j), collen(j), , True))
+                End If
+                Call tmp.Append(" | ")
             Next
-        Else
-            tmp = arr(i)
-        End If
-        Debug.Print tmp
-        tmp = ""
-    Next
+            Debug.Print tmp.ToString
+        Next
+    Else
+        For i = LBound(arr, 1) To UBound(arr, 1)
+            Debug.Print arr(i)
+        Next
+    End If
 End Sub
 
 Public Sub PrintEnumerator(obj)
@@ -345,5 +365,58 @@ Public Sub DumpByteArrayAsBinary(bData() As Byte, Optional ByVal addr)
     Debug.Print pStr
 End Sub
 
+'******************************************************************************
+'* [概  要] MesureExcuteTime
+'* [詳  細] 関数を実行し、実行した時間をイミディエイトウィンドウに出力する。
+'*
+'* @param fnc       実行する関数（bas内のFunctionであること）
+'* @param arg1-arg8 関数に渡す引数
+'* @return          実行結果
+'******************************************************************************
+Public Function MesureExcuteTime(fnc As Func, _
+    Optional ByRef arg1 As Variant, _
+    Optional ByRef arg2 As Variant, _
+    Optional ByRef arg3 As Variant, _
+    Optional ByRef arg4 As Variant, _
+    Optional ByRef arg5 As Variant, _
+    Optional ByRef arg6 As Variant, _
+    Optional ByRef arg7 As Variant, _
+    Optional ByRef arg8 As Variant _
+    ) As Variant
+    
+    Dim startTime, endTime
+    Dim startMs As Double, endMs As Double, excuteMs As Double
+    startTime = DateTimeUtils.GetTimestampString
+    startMs = DateTimeUtils.GetMilliSecond
+    
+    Dim ret
+    If IsMissing(arg1) Then ret = fnc.Apply Else _
+    If IsMissing(arg2) Then ret = fnc.Apply(arg1) Else _
+    If IsMissing(arg3) Then ret = fnc.Apply(arg1, arg2) Else _
+    If IsMissing(arg4) Then ret = fnc.Apply(arg1, arg2, arg3) Else _
+    If IsMissing(arg5) Then ret = fnc.Apply(arg1, arg2, arg3, arg4) Else _
+    If IsMissing(arg6) Then ret = fnc.Apply(arg1, arg2, arg3, arg4, arg5) Else _
+    If IsMissing(arg7) Then ret = fnc.Apply(arg1, arg2, arg3, arg4, arg5, arg6) Else _
+    If IsMissing(arg8) Then ret = fnc.Apply(arg1, arg2, arg3, arg4, arg5, arg6, arg7) Else _
+    ret = fnc.Apply(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+    
+    endMs = DateTimeUtils.GetMilliSecond
+    endTime = DateTimeUtils.GetTimestampString
+    excuteMs = endMs - startMs
+    
+    Debug.Print "処理開始： " & startTime
+    Debug.Print "処理終了： " & endTime
+    Debug.Print "実行時間： " & excuteMs & " ms"
+    
+    MesureExcuteTime = ret
+End Function
 
-
+'******************************************************************************
+'* [概  要] WashImmediateWindow
+'* [詳  細] イミディエイトウィンドウに1000行分の改行を出力し、現在の表示を
+'*          内容を流す。
+'*
+'******************************************************************************
+Public Sub WashImmediateWindow()
+    Debug.Print String(1000, vbNewLine)
+End Sub
