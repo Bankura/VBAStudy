@@ -1885,3 +1885,24 @@ End Function
 Public Function SortBy(ByVal keyNoOrFunc) As Array2DEx
     Set SortBy = Init(ArrayUtils.Array2DSort(Me.To2DArray, keyNoOrFunc))
 End Function
+
+'*******************************************************************************
+'* [概  要] MaxTxtLength
+'* [詳  細] 2次元配列の指定した列の項目について、最大の文字数を返す。
+'*
+'* @param colnum 列番号
+'* @return Long 最大文字数
+'*******************************************************************************
+Public Function MaxTxtLength(ByVal colnum As Long, Optional useZenkaku2Width As Boolean = False) As Long
+    MaxTxtLength = ArrayUtils.Array2DMaxTxtLength(Me.To2DArray, colnum, useZenkaku2Width)
+End Function
+
+'******************************************************************************
+'* [概  要] RemoveEmpty
+'* [詳  細] 配列の空行を除去する。
+'*
+'* @return Variant 変更後配列
+'******************************************************************************
+Public Function RemoveEmpty() As Variant
+    Set RemoveEmpty = Init(ArrayUtils.RemoveEmpty(Me.To2DArray))
+End Function

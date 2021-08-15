@@ -853,6 +853,28 @@ Public Function Contains(ByRef vArr As Variant, ByVal itm As Variant) As Boolean
 End Function
 
 '******************************************************************************
+'* [概  要] ContainsLike
+'* [詳  細] 1次元配列に指定した検索文字列（正規表現）が含まれるかチェックする。
+'*
+'* @param varr 1次元配列
+'* @param searchStr 検索文字列（正規表現）
+'* @param igCase 大文字小文字の区別
+'* @return Boolean チェック結果（True：含む）
+'******************************************************************************
+Public Function ContainsLike(ByRef vArr As Variant, ByVal searchStr As String, Optional ByVal igCase As Boolean = False) As Boolean
+    Dim v As Variant
+    For Each v In vArr
+        If ValidateUtils.IsString(v) Then
+            If ValidateUtils.ValidatePattern(v, searchStr, igCase) Then
+                ContainsLike = True
+                Exit Function
+            End If
+        End If
+    Next
+    ContainsLike = False
+End Function
+
+'******************************************************************************
 '* [概  要] Insert
 '* [詳  細] 項目を1次元配列の指定位置に追加する。
 '*
@@ -1681,4 +1703,42 @@ Public Function Array2DMaxTxtLength(arr2d As Variant, ByVal colnum As Long, Opti
         End If
     Next
     Array2DMaxTxtLength = ret
+End Function
+
+
+'******************************************************************************
+'* [概  要] RemoveEmpty
+'* [詳  細] 配列の空データを除去する。
+'*
+'* @param vArr 配列
+'* @return Variant 変更後配列
+'******************************************************************************
+Public Function RemoveEmpty(ByRef vArr As Variant) As Variant
+    If Is1DArray(vArr) Then
+        Dim arrex As ArrayEx: Set arrex = New ArrayEx
+        Dim v
+        For Each v In vArr
+            If v <> "" And ValidateUtils.IsNotNullOrEmpty(v) Then
+                arrex.Add v
+            End If
+
+        Next
+        RemoveEmpty = arrex.ToArray
+    ElseIf Is2DArray(vArr) Then
+        Dim arr2dex As Array2DEx: Set arr2dex = New Array2DEx
+        Dim i As Long, j As Long, iamGoodRow As Boolean
+        For i = LBound(vArr, 1) To UBound(vArr, 1)
+            iamGoodRow = False
+            For j = LBound(vArr, 2) To UBound(vArr, 2)
+                If vArr(i, j) <> "" And ValidateUtils.IsNotNullOrEmpty(vArr(i, j)) Then
+                    iamGoodRow = True
+                    Exit For
+                End If
+            Next
+            If iamGoodRow Then
+                arr2dex.AddRow Copy2DArrayRow(vArr, i)
+            End If
+        Next
+        RemoveEmpty = arr2dex.To2DArray
+    End If
 End Function

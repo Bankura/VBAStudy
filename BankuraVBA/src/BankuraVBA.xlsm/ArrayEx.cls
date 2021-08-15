@@ -514,6 +514,18 @@ Public Function Contains(ByVal itm As Variant) As Boolean
 End Function
 
 '******************************************************************************
+'* [概  要] ContainsLike
+'* [詳  細] 指定した検索文字列（正規表現）が含まれるかチェックする。
+'*
+'* @param searchStr 検索文字列（正規表現）
+'* @param igCase 大文字小文字の区別
+'* @return Boolean チェック結果（True：含む）
+'******************************************************************************
+Public Function ContainsLike(ByVal searchStr As String, Optional ByVal igCase As Boolean = False) As Boolean
+    ContainsLike = ArrayUtils.ContainsLike(Me.ToArray, searchStr, igCase)
+End Function
+
+'******************************************************************************
 '* [概  要] Clone
 '* [詳  細] ArrayExオブジェクトを複製する。
 '*
@@ -710,3 +722,24 @@ End Function
 Public Function To2DArray(Optional ByVal Transpose As Boolean = False) As Variant
     To2DArray = ArrayUtils.ArrayTo2DArray(Me, Transpose)
 End Function
+
+'*******************************************************************************
+'* [概  要] MaxTxtLength
+'* [詳  細] 配列の中の項目で最大の文字数を返す。
+'*
+'* @return Long 最大文字数
+'*******************************************************************************
+Public Function MaxTxtLength(Optional useZenkaku2Width As Boolean = False) As Long
+    MaxTxtLength = ArrayUtils.ArrayMaxTxtLength(Me.ToArray, useZenkaku2Width)
+End Function
+
+'******************************************************************************
+'* [概  要] RemoveEmpty
+'* [詳  細] 配列の空データを除去する。
+'*
+'* @return ArrayEx 変更後配列
+'******************************************************************************
+Public Function RemoveEmpty() As ArrayEx
+    Set RemoveEmpty = Core.Init(New ArrayEx, ArrayUtils.RemoveEmpty(Me.ToArray))
+End Function
+

@@ -727,7 +727,7 @@ End Sub
 Sub PowershellCommander_Test001()
     Dim cmdr As New PowerShellCommander
     Dim v
-    For Each v In cmdr.GetCommandResultAsArray("Get-ChildItem | Select-Object CreationTime,LastWriteTime,LastAccessTime,Name")
+    For Each v In cmdr.Exec("Get-ChildItem | Select-Object CreationTime,LastWriteTime,LastAccessTime,Name", False)
         Debug.Print v
     Next
 
@@ -1090,7 +1090,7 @@ Sub Array2DSortTest001()
 End Sub
 
 Sub MesureExcuteTime_Test()
-    DebugUtils.MesureExcuteTime Core.Init(New Func, VbVarType.vbVariant, AddressOf CodeModuleUtils_Test001)
+    DebugUtils.MesureExcuteTime Core.Init(New Func, VbVarType.vbVariant, AddressOf PythonCommander_Test002)
 End Sub
 
 Sub CodeModuleUtils_Test001()
@@ -1124,4 +1124,126 @@ End Sub
 
 Sub CodeModuleUtils_Test003()
     VBCodeModuleUtils.ClearImmediateWindow
+End Sub
+
+
+Sub PythonCommander_Test001()
+
+    Dim cmder As PyCommander
+    Set cmder = New PyCommander
+    Debug.Print cmder.ExecCommand("print('aaa')")
+    
+    cmder.ScriptMode
+    'Debug.Print cmder.ExecScript("C:\develop\python\csvread_pandas_test.py")
+    cmder.ExecScript ("C:\develop\python\createForm.py")
+End Sub
+
+Sub PythonCommander_Test002()
+
+    Dim cmder As PyCommander
+    Set cmder = New PyCommander
+    
+    Dim arrex As ArrayEx
+    Set arrex = New ArrayEx
+    arrex.Add "import pandas as pd"
+    arrex.Add "csv_input = pd.read_csv(filepath_or_buffer='C:/develop/data/csv/test_stock.csv', encoding='utf_8', sep=',')"
+    arrex.Add "print(csv_input[['コード', '銘柄名']]) "
+    
+    Debug.Print cmder.WriteScriptAndRun(arrex.ToArray)
+    
+End Sub
+
+
+
+Sub powershellTest001()
+    Dim cmder As PowerShellCommander
+    Set cmder = New PowerShellCommander
+    Dim v
+    'For Each v In cmder.Exec("gsv -c localhost|?{$_.status -like 'r*'}", False)
+    '    Debug.Print v
+    'Next
+    DebugUtils.PrintArray cmder.Exec("gsv -c localhost|?{$_.status -like 'r*'}", False)
+End Sub
+
+Sub powershellTest002()
+
+    Dim cmder As PowerShellCommander
+    Set cmder = New PowerShellCommander
+    
+    Dim arrex As ArrayEx
+    Set arrex = New ArrayEx
+    arrex.Add "cd C:\develop\powershell"
+    arrex.Add "$cnt = (Get-ChildItem -Recurse).count"
+    arrex.Add "$allsize = 0"
+    arrex.Add "Get-ChildItem -Recurse | ForEach-Object { $allsize += $_.Length }"
+    arrex.Add "$average = $allsize / $cnt"
+    arrex.Add "Write-Output ""ファイルサイズの平均は ${average} byteです。"""
+    Debug.Print cmder.WriteScriptAndRun(arrex.ToArray)
+    
+End Sub
+
+Sub powershellTest003()
+
+    Dim cmder As PowerShellCommander
+    Set cmder = New PowerShellCommander
+    
+    Dim dic As DictionaryEx
+    Set dic = cmder.PSVersionTable
+
+    DebugUtils.Show dic
+
+    Debug.Print dic("PSVersion")("Major") & "." & dic("PSVersion")("Minor") & "." & dic("PSVersion")("Build") & "." & dic("PSVersion")("Revision")
+
+    Debug.Print cmder.GetExecutionPolicy
+    
+    
+End Sub
+
+
+Sub PsqlCommander_Test001()
+
+    Dim cmder As PsqlCommander
+    Set cmder = New PsqlCommander
+    cmder.DbHost = "localhost"
+    cmder.DbPort = 5433
+    cmder.dbName = "ban"
+    cmder.DbUserName = "ban"
+    cmder.DbPassword = "ban"
+    'cmder.TuplesOnly = True
+
+    Dim strSQL As String: strSQL = "select id as ""ユーザID"", name as ""名前"" from table1"
+    Dim vArr
+    
+    vArr = cmder.Exec(strSQL)
+    
+    DebugUtils.PrintArray vArr
+End Sub
+
+Sub DosCommander_Test901()
+    Dim cmder As DosCommander
+    Set cmder = New DosCommander
+
+    Debug.Print cmder.Exec("C:\develop\powershell\fuga.bat")
+End Sub
+
+Sub DosCommander_Test902()
+
+    Dim cmder As DosCommander
+    Set cmder = New DosCommander
+    
+    Dim arrex As ArrayEx
+    Set arrex = New ArrayEx
+    arrex.Add "@echo off"
+    arrex.Add "echo ふがあ"
+
+    Debug.Print cmder.WriteBatchAndRun(arrex.ToArray)
+End Sub
+
+Sub foooooooo()
+    Dim mysheet As New WorkSheetEx
+    Call mysheet.Init("Sheet1")
+    
+    Dim v
+    Set v = mysheet.GetRowToArrayEx(1)
+    DebugUtils.Show v
 End Sub

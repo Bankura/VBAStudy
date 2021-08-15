@@ -471,7 +471,7 @@ End Sub
 
 '******************************************************************************
 '* [概  要] JudgeCond
-'* [詳  細] アプリケーションの設定を通常の設定にする。
+'* [詳  細] 2値を指定した比較演算子で比較・判定する。
 '*
 '* @param val1 比較する値1
 '* @param val2 比較する値2
@@ -483,7 +483,7 @@ End Sub
 '* @return Boolean 判定結果
 '*
 '******************************************************************************
-Public Function JudgeCond(val1, val2, cond As String, flg As Boolean) As Boolean
+Public Function JudgeCond(val1, val2, cond As String, Optional flg As Boolean = True) As Boolean
     If flg Then
         Select Case cond
             Case ">"
@@ -517,3 +517,70 @@ Public Function JudgeCond(val1, val2, cond As String, flg As Boolean) As Boolean
     End If
 End Function
 
+'******************************************************************************
+'* [概  要] CreateUUID
+'* [詳  細] UUID(GUID)を生成する。
+'* [参  考] https://stackoverflow.com/a/46474125/918626
+'*
+'* @return String UUID
+'*
+'******************************************************************************
+Public Function CreateUUID() As String
+    Dim myUuid As String
+    Randomize Timer() + Application.hWnd
+    Do While Len(myUuid) < 32
+        If Len(myUuid) = 16 Then
+            myUuid = myUuid & Hex$(8 + CInt(Rnd * 3))
+        End If
+        myUuid = myUuid & Hex$(CInt(Rnd * 15))
+    Loop
+    CreateUUID = Mid(myUuid, 1, 8) & "-" & Mid(myUuid, 9, 4) & "-" & Mid(myUuid, 13, 4) & "-" & Mid(myUuid, 17, 4) & "-" & Mid(myUuid, 21, 12)
+End Function
+
+'******************************************************************************
+'* [概  要] AppendEnvItem
+'* [詳  細] 環境変数を追加する。
+'*
+'* @param itemName  項目名
+'* @param itemValue 設定値
+'* @param envType   環境変数の種類（デフォルトは"Process"）
+'*                    "System"  : システム環境変数。全ユーザーに適用される。
+'*                    "User"    : ユーザー環境変数。ユーザーに適用される。
+'*                    "Volatile": 揮発性環境変数。ログオフ時に破棄される。
+'*                    "Process" : プロセス環境変数。プロセス終了時に破棄。
+'* @param appendHead 先頭に加えるかどうか。
+'*
+'******************************************************************************
+Public Sub AppendEnvItem(itemName As String, itemValue, Optional envType As String = "Process", Optional appendHead As Boolean = True)
+    With Core.Wsh
+        Dim destEnvValue: destEnvValue = .Environment(envType).Item(itemName)
+        Dim sep As String: sep = IIf(destEnvValue <> "", ";", "")
+        
+        If Not StringUtils.Contains(destEnvValue, itemValue) Then
+            If appendHead Then
+                .Environment(envType).Item(itemName) = itemValue & sep & destEnvValue
+            Else
+                .Environment(envType).Item(itemName) = destEnvValue & sep & itemValue
+            End If
+        End If
+    End With
+End Sub
+
+'******************************************************************************
+'* [概  要] EditEnvItem
+'* [詳  細] 環境変数を編集する。
+'*
+'* @param itemName  項目名
+'* @param itemValue 設定値
+'* @param envType   環境変数の種類（デフォルトは"Process"）
+'*                    "System"  : システム環境変数。全ユーザーに適用される。
+'*                    "User"    : ユーザー環境変数。ユーザーに適用される。
+'*                    "Volatile": 揮発性環境変数。ログオフ時に破棄される。
+'*                    "Process" : プロセス環境変数。プロセス終了時に破棄。
+'*
+'******************************************************************************
+Public Sub EditEnvItem(itemName As String, itemValue, Optional envType As String = "Process")
+    With Core.Wsh
+        .Environment(envType).Item(itemName) = itemValue
+    End With
+End Sub

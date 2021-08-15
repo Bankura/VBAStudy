@@ -403,7 +403,7 @@ End Function
 '******************************************************************************
 Public Function PlaceHolder(ByVal str As String, ParamArray p() As Variant) As String
     Dim strMsg As String
-    strMsg = StringUtils.Unescape(str)
+    strMsg = str
     If UBound(p) >= 0 Then
         Dim tmp: tmp = p
         Dim vArr: vArr = ArrayUtils.ToVArrayFlattened(tmp)
@@ -413,6 +413,29 @@ Public Function PlaceHolder(ByVal str As String, ParamArray p() As Variant) As S
         Next
     End If
     PlaceHolder = strMsg
+End Function
+
+'******************************************************************************
+'* [概  要] PlaceHolderWithEscape
+'* [詳  細] 文字列にエスケープ処理実行後文字列のプレースホルダー{x}に値を埋め込む｡
+'*
+'* @param str 文字列
+'* @param p 埋込文字列の配列
+'* @return String 埋込後文字列
+'*
+'******************************************************************************
+Public Function PlaceHolderWithEscape(ByVal str As String, ParamArray p() As Variant) As String
+    Dim strMsg As String
+    strMsg = StringUtils.Unescape(str)
+    If UBound(p) >= 0 Then
+        Dim tmp: tmp = p
+        Dim vArr: vArr = ArrayUtils.ToVArrayFlattened(tmp)
+        Dim i As Long
+        For i = 0 To UBound(vArr)
+            strMsg = VBA.Replace(strMsg, "{" & CStr(i) & "}", vArr(i))
+        Next
+    End If
+    PlaceHolderWithEscape = strMsg
 End Function
 
 '******************************************************************************
@@ -4198,6 +4221,17 @@ End Function
 '******************************************************************************
 Public Function EscapeDoubleQuote(ByVal val As String) As String
     EscapeDoubleQuote = VBA.Replace(val, """", """""")
+End Function
+
+'******************************************************************************
+'* [概  要] EscapeSingleQuote
+'* [詳  細] シングルクォーテーションエスケープ処理
+'*
+'* @param val 文字列
+'* @return 編集後文字列
+'******************************************************************************
+Public Function EscapeSingleQuote(ByVal val As String) As String
+    EscapeSingleQuote = VBA.Replace(val, "'", "''")
 End Function
 
 '******************************************************************************

@@ -317,7 +317,7 @@ Public Function GetFinalRow(ByVal dataSheet As Worksheet, Optional ignoreColnum 
     Dim ret As Long
     Dim i As Long, cnta As Long
     With dataSheet.UsedRange
-        For i = .Rows.Count To 1 Step -1
+        For i = .Rows.count To 1 Step -1
             cnta = WorksheetFunction.CountA(.Rows(i))
             If cnta > 0 Then
                 If cnta <> 1 Then
@@ -355,7 +355,7 @@ Public Function GetFinalCol(ByVal dataSheet As Worksheet) As Long
     Dim ret As Long
     Dim i As Long
     With dataSheet.UsedRange
-        For i = .Columns.Count To 1 Step -1
+        For i = .Columns.count To 1 Step -1
             If WorksheetFunction.CountA(.Columns(i)) > 0 Then
                 ret = i
                 Exit For
@@ -378,7 +378,7 @@ End Function
 '*
 '******************************************************************************
 Public Function GetFinalKeyRow(ByVal dataSheet As Worksheet, StartCol As Long) As Long
-    GetFinalKeyRow = dataSheet.Cells(Rows.Count, StartCol).End(xlUp).row
+    GetFinalKeyRow = dataSheet.Cells(Rows.count, StartCol).End(xlUp).row
 End Function
 
 '******************************************************************************
@@ -391,7 +391,7 @@ End Function
 '*
 '******************************************************************************
 Public Function GetFinalKeyCol(ByVal dataSheet As Worksheet, StartRow As Long) As Long
-    GetFinalKeyCol = dataSheet.Cells(StartRow, Columns.Count).End(xlToLeft).Column
+    GetFinalKeyCol = dataSheet.Cells(StartRow, Columns.count).End(xlToLeft).Column
 End Function
 
 '******************************************************************************
@@ -465,9 +465,9 @@ Public Sub DeleteNoUsedRange(dataSheet As Worksheet, lStartRow As Long)
     If rng Is Nothing Then
         delStartRow = lStartRow
     Else
-        delStartRow = rng.Item(rng.Count).row + 1
+        delStartRow = rng.Item(rng.count).row + 1
     End If
-    delEndRow = dataSheet.UsedRange.Item(dataSheet.UsedRange.Count).row
+    delEndRow = dataSheet.UsedRange.Item(dataSheet.UsedRange.count).row
     
     If delStartRow > delEndRow Then
         Exit Sub
@@ -566,4 +566,37 @@ Public Function CopySheet(ByVal formatSheetName As String, ByVal destSheetName A
     Set CopySheet = wb.ActiveSheet
     
     wb.Worksheets(formatSheetName).Visible = tmpVisible
+End Function
+
+'******************************************************************************
+'* [概  要] 表情報取得処理。
+'* [詳  細] worksheetの表から1行分の情報を取得し、Variant配列を返却します｡
+'*
+'* @param dataSheet ワークシート
+'* @param lStartRow データ開始行番号
+'* @param lStartCol データ開始列番号
+'* @param colCount 項目列数
+'* @return Variant 1行分のデータ
+'*
+'******************************************************************************
+Public Function GetRowData(dataSheet As Worksheet, lStartRow As Long, Optional lStartCol As Long, Optional colCount As Long) As Variant
+    Dim lMaxCol As Long
+    If colCount = 0 Then
+        lMaxCol = GetFinalKeyCol(dataSheet, lStartRow)
+    Else
+        lMaxCol = lStartCol + colCount - 1
+    End If
+    If lStartCol = 0 Then
+        lStartCol = dataSheet.Cells(lStartRow, 1).End(xlToRight).Column
+    End If
+    
+    'レコードが存在しない場合
+    If lMaxCol < lStartCol Then
+        GetRowData = Empty
+        Exit Function
+    End If
+    
+    Dim vArr: vArr = dataSheet.Range(dataSheet.Cells(lStartRow, lStartCol), dataSheet.Cells(lStartRow, lMaxCol))
+    
+    GetRowData = ArrayUtils.Copy2DArrayRow(vArr, LBound(vArr))
 End Function

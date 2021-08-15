@@ -1306,6 +1306,34 @@ Public Function ExportArray2DEx(lStartRow As Long, lStartCol As Long, Optional c
 End Function
 
 '******************************************************************************
+'* [概  要] 表情報取得処理。
+'* [詳  細] worksheetの表から1行分の情報を取得し、Variant配列を返却｡
+'*
+'* @param lStartRow データ開始行番号
+'* @param lStartCol データ開始列番号
+'* @param itemCount 項目列数
+'* @return Variant 1行分のデータ
+'*
+'******************************************************************************
+Public Function GetRowData(lStartRow As Long, Optional lStartCol As Long, Optional colCount As Long) As Variant
+    GetRowData = XlWorkSheetUtils.GetRowData(mOrigin, lStartRow, lStartCol, colCount)
+End Function
+
+'******************************************************************************
+'* [概  要] 表情報取得処理。
+'* [詳  細] worksheetの表から1行分の情報を取得し、Variant配列を返却｡
+'*
+'* @param lStartRow データ開始行番号
+'* @param lStartCol データ開始列番号
+'* @param itemCount 項目列数
+'* @return ArrayEx 1行分のデータ
+'*
+'******************************************************************************
+Public Function GetRowToArrayEx(lStartRow As Long, Optional lStartCol As Long, Optional colCount As Long) As ArrayEx
+    Set GetRowToArrayEx = Core.Init(New ArrayEx, XlWorkSheetUtils.GetRowData(mOrigin, lStartRow, lStartCol, colCount))
+End Function
+
+'******************************************************************************
 '* [概  要] 使用セル範囲クリア処理。
 '* [詳  細] worksheetのデータ表の使用セル範囲をクリア｡
 '*

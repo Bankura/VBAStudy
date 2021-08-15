@@ -1624,3 +1624,23 @@ Public Function EscapeDoubleQuote() As StringEx
     Set EscapeDoubleQuote = Me.Init(StringUtils.EscapeDoubleQuote(Me.ToString))
 End Function
 
+'******************************************************************************
+'* [概  要] EscapeSingleQuote
+'* [詳  細] シングルクォーテーションエスケープ処理
+'*
+'* @return 編集後文字列
+'******************************************************************************
+Public Function EscapeSingleQuote() As StringEx
+    Set EscapeSingleQuote = Me.Init(StringUtils.EscapeSingleQuote(Me.ToString))
+End Function
+
+'******************************************************************************
+'* [概  要] GetTextWidth
+'* [詳  細] 文字幅を取得｡全角文字を2でカウント、半角文字を1でカウントする。
+'*
+'* @return Long 文字幅（全角文字を2でカウント）
+'******************************************************************************
+Public Function GetTextWidth() As Long
+    GetTextWidth = StringUtils.GetTextWidth(Me.ToString)
+End Function
+

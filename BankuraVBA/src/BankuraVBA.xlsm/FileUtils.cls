@@ -959,56 +959,10 @@ End Function
 '******************************************************************************
 '* [概  要] テキストファイル書込処理。
 '* [詳  細] テキストファイルの書込を行う。
+'*          データが配列の場合、配列データを行単位で書込を行う。
 '*
 '* @param filePath 対象となるテキストファイルのフルパス
 '* @param data 書込テキストデータ
-'* @param cSet キャラセット（文字コード指定）
-'*               ※使用可能なCharset例：
-'*                 utf-8、shift_jis、euc-jp、ISO-2022-JP、unicode（既定）
-'*                 「HKEY_CLASSES_ROOT\MIME\Database\Charset」参照。
-'* @param willAppend 追記有無（省略可。規定はFalse:追記なし）
-'* @param bomInclude BOM有無（省略可。規定はFalse:BOM無）
-'******************************************************************************
-Public Sub WriteTextFile(filePath As String, data As String, cSet As String, _
-                         Optional willAppend As Boolean = False, _
-                         Optional bomInclude As Boolean = False)
-                         
-    Dim stream As Object: Set stream = IO.CreateADODBStream(adTypeText, cSet)
-    With stream
-        .mode = adModeReadWrite
-        .Open
-        If willAppend Then
-            AppendMode stream, filePath
-        End If
-        .WriteText data, adWriteChar
-        If Not bomInclude Then ExcludeBom stream  ' BOM対応
-            
-        .SaveToFile filePath, adSaveCreateOverWrite 'ファイル上書指定
-        .Close
-    End With
-End Sub
-
-'******************************************************************************
-'* [概  要] UTF-8テキストファイル書込処理。
-'* [詳  細] UTF-8テキストファイルの書込を行う。
-'*
-'* @param filePath 対象となるテキストファイルのフルパス
-'* @param data 書込テキストデータ
-'* @param willAppend 追記有無（省略可。規定はFalse:追記なし）
-'* @param bomInclude BOM有無（省略可。規定はFalse:BOM無）
-'******************************************************************************
-Public Sub WriteUTF8TextFile(filePath As String, data As String, _
-                             Optional willAppend As Boolean = False, _
-                             Optional bomInclude As Boolean = False)
-     Call WriteTextFile(filePath, data, "UTF-8", willAppend, bomInclude)
-End Sub
-
-'******************************************************************************
-'* [概  要] テキストファイル書込処理。
-'* [詳  細] テキストファイルに配列データを行単位で書込を行う。
-'*
-'* @param filePath 対象となるテキストファイルのフルパス
-'* @param vArray 書込配列データ（Variant）
 '* @param cSet キャラセット（文字コード指定）
 '*               ※使用可能なCharset例：
 '*                 utf-8、shift_jis、euc-jp、ISO-2022-JP、unicode（既定）
@@ -1017,11 +971,11 @@ End Sub
 '* @param willAppend 追記有無（省略可。規定はFalse:追記なし）
 '* @param bomInclude BOM有無（省略可。規定はFalse:BOM無）
 '******************************************************************************
-Public Sub WriteTextFileFromVArray(filePath As String, vArray As Variant, cSet As String, _
-                                   Optional separator As LineSeparatorsEnum = adCRLF, _
-                                   Optional willAppend As Boolean = False, _
-                                   Optional bomInclude As Boolean = False)
-    Dim tmp
+Public Sub WriteTextFile(filePath As String, data As Variant, cSet As String, _
+                         Optional separator As LineSeparatorsEnum = adCRLF, _
+                         Optional willAppend As Boolean = False, _
+                         Optional bomInclude As Boolean = False)
+    Dim v
     Dim stream As Object: Set stream = IO.CreateADODBStream(adTypeText, cSet, separator)
     With stream
         .mode = adModeReadWrite
@@ -1029,13 +983,38 @@ Public Sub WriteTextFileFromVArray(filePath As String, vArray As Variant, cSet A
         If willAppend Then
             AppendMode stream, filePath
         End If
-        For Each tmp In vArray
-            .WriteText CStr(tmp), adWriteLine
-        Next
+        
+        If IsArray(data) Then
+            For Each v In data
+                .WriteText CStr(v), adWriteLine
+            Next
+        Else
+            .WriteText CStr(data), adWriteChar
+        End If
+        
         If Not bomInclude Then ExcludeBom stream  ' BOM対応
+
         .SaveToFile filePath, adSaveCreateOverWrite 'ファイル上書指定
         .Close
     End With
+End Sub
+
+'******************************************************************************
+'* [概  要] UTF-8テキストファイル書込処理。
+'* [詳  細] UTF-8テキストファイルの書込を行う。
+'*          データが配列の場合、配列データを行単位で書込を行う。
+'*
+'* @param filePath 対象となるテキストファイルのフルパス
+'* @param data 書込テキストデータ
+'* @param separator 改行コード（省略可。規定はCRLF）
+'* @param willAppend 追記有無（省略可。規定はFalse:追記なし）
+'* @param bomInclude BOM有無（省略可。規定はFalse:BOM無）
+'******************************************************************************
+Public Sub WriteUTF8TextFile(filePath As String, data As Variant, _
+                             Optional separator As LineSeparatorsEnum = adCRLF, _
+                             Optional willAppend As Boolean = False, _
+                             Optional bomInclude As Boolean = False)
+     Call WriteTextFile(filePath, data, "UTF-8", separator, willAppend, bomInclude)
 End Sub
 
 '******************************************************************************
