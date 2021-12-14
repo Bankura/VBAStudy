@@ -307,7 +307,9 @@ Public Function IsNotDictionaryEx(obj) As Boolean
 End Function
 
 Public Function IsWScriptShell(obj) As Boolean
-    IsWScriptShell = (TypeName(obj) = "IWshShell3")
+    IsWScriptShell = (TypeName(obj) = "IWshShell3") Or _
+                     (TypeName(obj) = "IWshShell2") Or _
+                     (TypeName(obj) = "IWshShell")
 End Function
 
 Public Function IsNotWScriptShell(obj) As Boolean
@@ -320,6 +322,37 @@ End Function
 
 Public Function IsNotWmi(obj) As Boolean
     IsNotWmi = Not IsWmi(obj)
+End Function
+
+Public Function IsScriptControl(obj) As Boolean
+    IsScriptControl = (TypeName(obj) = "ScriptControl")
+End Function
+
+Public Function IsNotScriptControl(obj) As Boolean
+    IsNotScriptControl = Not IsScriptControl(obj)
+End Function
+
+Public Function IsShell(obj) As Boolean
+    IsShell = (TypeName(obj) = "IShellDispatch6") Or _
+              (TypeName(obj) = "IShellDispatch5") Or _
+              (TypeName(obj) = "IShellDispatch4") Or _
+              (TypeName(obj) = "IShellDispatch3") Or _
+              (TypeName(obj) = "IShellDispatch2") Or _
+              (TypeName(obj) = "IShellDispatch") Or _
+              (TypeName(obj) = "Shell")
+End Function
+
+Public Function IsNotShell(obj) As Boolean
+    IsNotShell = Not IsShell(obj)
+End Function
+
+Public Function IsFolderItem(obj) As Boolean
+    IsFolderItem = (TypeName(obj) = "FolderItem2") Or _
+              (TypeName(obj) = "FolderItem")
+End Function
+
+Public Function IsNotFolderItem(obj) As Boolean
+    IsNotFolderItem = Not IsFolderItem(obj)
 End Function
 
 Public Function IsRegExp(obj) As Boolean
@@ -408,8 +441,8 @@ Public Function IsNotRecordFormat(obj) As Boolean
     IsNotRecordFormat = Not IsRecordFormat(obj)
 End Function
 
-Public Function IsParamArrayMissing(ByVal arr) As Boolean
-    IsParamArrayMissing = LBound(arr) > UBound(arr)
+Public Function IsParamArrayMissing(ByVal Arr) As Boolean
+    IsParamArrayMissing = LBound(Arr) > UBound(Arr)
 End Function
 
 '******************************************************************************
@@ -429,7 +462,7 @@ Public Function ValidatePattern(ByVal val As String, ByVal patternStr As String,
             .Pattern = patternStr
             .IgnoreCase = igCase
             .Global = True
-            ValidatePattern = .Test(val)
+            ValidatePattern = .test(val)
         End With
         Exit Function
     End If
@@ -888,9 +921,9 @@ End Function
 '* @param arr Variant配列
 '* @return Boolean チェック結果（True：どれかが空、False：全て値あり）
 '******************************************************************************
-Public Function IsEmptyAny(ByRef arr As Variant) As Boolean
-    If IsNotArray(arr) Then
-        If arr = "" Then
+Public Function IsEmptyAny(ByRef Arr As Variant) As Boolean
+    If IsNotArray(Arr) Then
+        If Arr = "" Then
             IsEmptyAny = True
             Exit Function
         End If
@@ -898,7 +931,7 @@ Public Function IsEmptyAny(ByRef arr As Variant) As Boolean
         Exit Function
     End If
     Dim v
-    For Each v In arr
+    For Each v In Arr
         If v = "" Then
             IsEmptyAny = True
             Exit Function
@@ -914,9 +947,9 @@ End Function
 '* @param arr Variant配列
 '* @return Boolean チェック結果（True：全てが空、False：どれかに値あり）
 '******************************************************************************
-Public Function IsEmptyAll(ByRef arr As Variant) As Boolean
-    If IsNotArray(arr) Then
-        If arr = "" Then
+Public Function IsEmptyAll(ByRef Arr As Variant) As Boolean
+    If IsNotArray(Arr) Then
+        If Arr = "" Then
             IsEmptyAll = True
             Exit Function
         End If
@@ -924,7 +957,7 @@ Public Function IsEmptyAll(ByRef arr As Variant) As Boolean
         Exit Function
     End If
     Dim v
-    For Each v In arr
+    For Each v In Arr
         If v <> "" Then
             IsEmptyAll = False
             Exit Function
@@ -940,8 +973,8 @@ End Function
 '* @param arr Variant配列
 '* @return Boolean チェック結果（True：どれかに設定、False：全て設定なし）
 '******************************************************************************
-Public Function IsFilledAny(ByRef arr As Variant) As Boolean
-    IsFilledAny = Not IsEmptyAll(arr)
+Public Function IsFilledAny(ByRef Arr As Variant) As Boolean
+    IsFilledAny = Not IsEmptyAll(Arr)
 End Function
 
 '******************************************************************************
@@ -951,8 +984,8 @@ End Function
 '* @param arr Variant配列
 '* @return Boolean チェック結果（True：全て設定、False：どれかが空）
 '******************************************************************************
-Public Function IsFilledAll(ByRef arr As Variant) As Boolean
-    IsFilledAll = Not IsEmptyAny(arr)
+Public Function IsFilledAll(ByRef Arr As Variant) As Boolean
+    IsFilledAll = Not IsEmptyAny(Arr)
 End Function
 
 '******************************************************************************
@@ -1180,43 +1213,55 @@ End Function
 '*
 '******************************************************************************
 Public Function ValidateCellAddress(ByVal val As Variant) As Boolean
-    Dim cntAlph As Integer
-    Dim iLen As Integer
-    Dim i As Integer
+    If IsNotString(val) Then
+        ValidateCellAddress = False
+        Exit Function
+    End If
 
-    iLen = Len(val)
-    If iLen < 2 Or iLen > 10 Then
-        ValidateCellAddress = False
-        Exit Function
-    End If
-    
-    ' 先頭からのアルファベットの数をチェック
-    For i = 1 To iLen
-        If Not (Mid(val, i, 1) Like "[A-Z]") Then
-            cntAlph = i - 1
-            Exit For
-        End If
-    Next i
-    If cntAlph = 0 Or cntAlph > 3 Or cntAlph = iLen Then
-        ValidateCellAddress = False
-        Exit Function
-    End If
-    
-    ' アルファベット部分と数値部分を切分け
-    Dim strTmpAlph As String, strTmpNum As String
-    strTmpAlph = Left(CStr(val), cntAlph)
-    strTmpNum = Mid(CStr(val), cntAlph + 1)
-    
-    ' アルファベット3文字の場合はアルファベット部分をチェック
-    If cntAlph = 3 Then
-        If ValidatePattern(strTmpAlph, "[A-W][A-Z]{2}|X[A-E][A-Z]|XF[A-D]") Then
+    Dim v
+    For Each v In Split(val, ":")
+        Dim cntAlph As Integer: cntAlph = 0
+        Dim iLen As Integer: iLen = 0
+        Dim i As Integer: i = 0
+        
+        iLen = Len(v)
+        If iLen < 2 Or iLen > 10 Then
             ValidateCellAddress = False
             Exit Function
         End If
-    End If
-    
-    ' 数値部分のチェック
-    ValidateCellAddress = ValidateNumRange(strTmpNum, 1, 1048576)
+        
+        ' 先頭からのアルファベットの数をチェック
+        For i = 1 To iLen
+            If Not (Mid(v, i, 1) Like "[A-Z]") Then
+                cntAlph = i - 1
+                Exit For
+            End If
+        Next i
+        If cntAlph = 0 Or cntAlph > 3 Or cntAlph = iLen Then
+            ValidateCellAddress = False
+            Exit Function
+        End If
+        
+        ' アルファベット部分と数値部分を切分け
+        Dim strTmpAlph As String, strTmpNum As String
+        strTmpAlph = Left(CStr(v), cntAlph)
+        strTmpNum = Mid(CStr(v), cntAlph + 1)
+        
+        ' アルファベット3文字の場合はアルファベット部分をチェック
+        If cntAlph = 3 Then
+            If ValidatePattern(strTmpAlph, "[A-W][A-Z]{2}|X[A-E][A-Z]|XF[A-D]") Then
+                ValidateCellAddress = False
+                Exit Function
+            End If
+        End If
+        
+        ' 数値部分のチェック
+        If Not ValidateNumRange(strTmpNum, 1, 1048576) Then
+            ValidateCellAddress = False
+            Exit Function
+        End If
+    Next
+    ValidateCellAddress = True
 End Function
 
 '******************************************************************************

@@ -78,25 +78,25 @@ End Function
 '******************************************************************************
 Public Function Min(ParamArray parr() As Variant) As Variant
     Dim tmp: tmp = parr
-    Dim arr: arr = ArrayUtils.ToVArrayFlattened(tmp)
+    Dim Arr: Arr = ArrayUtils.ToVArrayFlattened(tmp)
     Dim ret: ret = Empty
     
-    Dim ub As Variant: ub = UBound(arr)
+    Dim ub As Variant: ub = UBound(Arr)
     If ub < 0 Then
         Min = ret
         Exit Function
     End If
     
     Dim i As Long
-    If IsObject(arr(0)) Then
-        Set ret = arr(0)
+    If IsObject(Arr(0)) Then
+        Set ret = Arr(0)
         For i = 1 To ub
-            If Compare(arr(i), ret) = -1 Then Set ret = arr(i)
+            If Compare(Arr(i), ret) = -1 Then Set ret = Arr(i)
         Next
     Else
-        Let ret = arr(0)
+        Let ret = Arr(0)
         For i = 1 To ub
-            If Compare(arr(i), ret) = -1 Then Let ret = arr(i)
+            If Compare(Arr(i), ret) = -1 Then Let ret = Arr(i)
         Next
     End If
     Min = ret
@@ -111,25 +111,25 @@ End Function
 '******************************************************************************
 Public Function Max(ParamArray parr() As Variant) As Variant
     Dim tmp: tmp = parr
-    Dim arr: arr = ArrayUtils.ToVArrayFlattened(tmp)
+    Dim Arr: Arr = ArrayUtils.ToVArrayFlattened(tmp)
     Dim ret: ret = Empty
     
-    Dim ub As Variant: ub = UBound(arr)
+    Dim ub As Variant: ub = UBound(Arr)
     If ub < 0 Then
         Max = ret
         Exit Function
     End If
     
     Dim i As Long
-    If IsObject(arr(0)) Then
-        Set ret = arr(0)
+    If IsObject(Arr(0)) Then
+        Set ret = Arr(0)
         For i = 1 To ub
-            If Compare(arr(i), ret) = 1 Then Set ret = arr(i)
+            If Compare(Arr(i), ret) = 1 Then Set ret = Arr(i)
         Next
     Else
-        Let ret = arr(0)
+        Let ret = Arr(0)
         For i = 1 To ub
-            If Compare(arr(i), ret) = 1 Then Let ret = arr(i)
+            If Compare(Arr(i), ret) = 1 Then Let ret = Arr(i)
         Next
     End If
     Max = ret
@@ -148,6 +148,28 @@ Public Function IsInt(ByVal num As Variant) As Boolean
 End Function
 
 '******************************************************************************
+'* [概  要] IsEven
+'* [詳  細] 偶数かどうかチェック｡
+'*
+'* @param num 対象数値
+'* @return Boolean チェック結果（True：整数）
+'******************************************************************************
+Public Function IsEven(ByVal num As Long) As Boolean
+    IsEven = (num Mod 2 = 0)
+End Function
+
+'******************************************************************************
+'* [概  要] IsOdd
+'* [詳  細] 奇数かどうかチェック｡
+'*
+'* @param num 対象数値
+'* @return Boolean チェック結果（True：整数）
+'******************************************************************************
+Public Function IsOdd(ByVal num As Long) As Boolean
+    IsOdd = (num Mod 2 = 1)
+End Function
+
+'******************************************************************************
 '* [概  要] ARound
 '* [詳  細] 四捨五入等の端数処理を行う。
 '*          AriawaseのCoreモジュールラッパーメソッド。
@@ -161,4 +183,22 @@ Public Function ARound( _
     ByVal num As Variant, Optional ByVal digits As Integer = 0, Optional rndup As Integer = 5 _
     ) As Variant
     ARound = Core.ARound(num, digits, rndup)
+End Function
+
+'******************************************************************************
+'* [概  要] Sum
+'* [詳  細] 指定した要素の合計値を返却する｡
+'*
+'* @param arr() 対象要素（複数）
+'* @return Variant 最大の要素
+'******************************************************************************
+Public Function Sum(ParamArray parr() As Variant) As Double
+    Dim tmp: tmp = parr
+    Dim Arr: Arr = ArrayUtils.ToVArrayFlattened(tmp)
+
+    Dim total As Double, v
+    For Each v In Arr
+        total = total + CDbl(v)
+    Next
+    Sum = total
 End Function

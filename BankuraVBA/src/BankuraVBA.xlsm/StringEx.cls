@@ -18,7 +18,7 @@ Option Explicit
 '*          http://dev-clips.com/clip/vba/stringbuilder-for-vba/
 '*
 '* @author Bankura
-'* Copyright (c) 2019-2020 Bankura
+'* Copyright (c) 2019-2021 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 
@@ -793,6 +793,24 @@ Public Function IndexOfAny(ParamArray searchStrs() As Variant) As Long
 End Function
 
 '******************************************************************************
+'* [概  要] IndexOfAnyAll
+'* [詳  細] 指定された文字セット内の任意の文字のインデックス（文字位置）を
+'*          すべて検索する｡
+'*
+'* @param searchStrs 検索文字列（複数指定）
+'* @return Variant 文字列のインデックス。一致がない場合、空配列入力の場合は空配列
+'*
+'******************************************************************************
+Public Function IndexOfAnyAll(ParamArray searchStrs() As Variant) As Variant
+    If Not ValidateUtils.IsParamArrayMissing(searchStrs) Then
+        Dim tmp: tmp = searchStrs ' ParamArrayを別関数に渡すための対応
+        IndexOfAnyAll = StringUtils.IndexOfAnyAll(Me.ToString, searchStrs)
+    Else
+        IndexOfAnyAll = StringUtils.IndexOfAnyAll(Me.ToString)
+    End If
+End Function
+
+'******************************************************************************
 '* [概  要] IndexOfAnyBut
 '* [詳  細] 指定された文字セットにない任意の文字の最初のインデックス（文字位置）
 '*          を検索する｡
@@ -1476,8 +1494,8 @@ End Function
 '* @return StringEx 変換後文字列
 '*
 '******************************************************************************
-Public Function Wrap(wrapWith As String) As StringEx
-    Set Wrap = Me.Init(StringUtils.Wrap(Me.ToString, wrapWith))
+Public Function wrap(wrapWith As String) As StringEx
+    Set wrap = Me.Init(StringUtils.wrap(Me.ToString, wrapWith))
 End Function
 
 '******************************************************************************
@@ -1642,5 +1660,71 @@ End Function
 '******************************************************************************
 Public Function GetTextWidth() As Long
     GetTextWidth = StringUtils.GetTextWidth(Me.ToString)
+End Function
+
+'*******************************************************************************
+'* [概  要] Split
+'* [詳  細] 指定した文字で文字列を分割する。
+'*
+'* @param delim    デリミタ文字（配列で複数指定可能, 1キャラクタのみ）
+'* @return Variant 分割後配列
+'*
+'*******************************************************************************
+Public Function Split(ParamArray delim()) As Variant
+    If Not ValidateUtils.IsParamArrayMissing(delim) Then
+        Dim tmp: tmp = delim
+        Split = StringUtils.Split(Me.ToString, tmp)
+    Else
+        Split = StringUtils.Split(Me.ToString, ",")
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] Split2ArrayEx
+'* [詳  細] 指定した文字で文字列を分割する。
+'*
+'* @param delim    デリミタ文字（配列で複数指定可能, 1キャラクタのみ）
+'* @return ArrayEx 分割後配列
+'*
+'******************************************************************************
+Public Function Split2ArrayEx(ParamArray delim()) As ArrayEx
+    If Not ValidateUtils.IsParamArrayMissing(delim) Then
+        Dim tmp: tmp = delim
+        Set Split2ArrayEx = StringUtils.Split2ArrayEx(Me.ToString, tmp)
+    Else
+        Set Split2ArrayEx = StringUtils.Split2ArrayEx(Me.ToString, ",")
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] SplitNumber
+'* [詳  細] 数字とそれ以外を分割する。
+'* [参  考] https://www.excel-chunchun.com/entry/AutoFilterPlus
+'*
+'* [用  例]
+'*   StringUtils.SplitNumber("abc")          = ["abc"]
+'*   StringUtils.SplitNumber("abc123")       = ["abc", "123"]
+'*   StringUtils.SplitNumber("abc123def")    = ["abc", "123", "def"]
+'*   StringUtils.SplitNumber("123def")       = ["123", "def"]
+'*   StringUtils.SplitNumber("123def456")    = ["123", "def", "456"]
+'*   StringUtils.SplitNumber("abc123def456") = ["abc", "123", "def", "456"]
+'*
+'* @return Variant 分割後配列
+'*
+'******************************************************************************
+Public Function SplitNumber() As Variant
+    SplitNumber = StringUtils.SplitNumber(Me.ToString)
+End Function
+
+'******************************************************************************
+'* [概  要] RemoveNullChar
+'* [詳  細] 文字列から左端より検索して見つかったNull文字以降の文字を除去する。
+'*          WinAPI等での戻り値に対して使用することを想定。
+'*
+'* @return String 変換後文字列
+'*
+'******************************************************************************
+Public Function RemoveNullChar() As String
+    RemoveNullChar = StringUtils.RemoveNullChar(Me.ToString)
 End Function
 

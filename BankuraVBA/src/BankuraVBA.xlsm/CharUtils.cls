@@ -138,6 +138,57 @@ Public Function IsLowerCase(ByVal val As String) As Boolean
 End Function
 
 '******************************************************************************
+'* [概  要] 全角ひらがなチェック処理。
+'* [詳  細] 値が全角ひらがなかどうか判定する｡※ヴはカタカナとする
+'*
+'* @param val 検証値（１文字）
+'* @return Boolean チェック結果（True：OK、False：NG）
+'*
+'******************************************************************************
+Public Function IsHiragana(ByVal val As String) As Boolean
+    IsHiragana = (val Like "[ぁ-ん]" Or val Like "[" & ChrW(12436) & "ゝゞ]")   '12436:うの濁音
+End Function
+
+'******************************************************************************
+'* [概  要] 全角カタカナチェック処理。
+'* [詳  細] 値が全角カタカナかどうか判定する｡
+'*
+'* @param val 検証値（１文字）
+'* @return Boolean チェック結果（True：OK、False：NG）
+'*
+'******************************************************************************
+Public Function IsFullKatakana(ByVal val As String) As Boolean
+    IsFullKatakana = (val Like "[ァ-ヶ]" Or val Like "[ヽヾ]")
+End Function
+
+'******************************************************************************
+'* [概  要] 半角カタカナチェック処理。
+'* [詳  細] 値が半角カタカナかどうか判定する｡
+'*
+'* @param val 検証値（１文字）
+'* @param includeMark 「ｰﾞﾟ」を半角カタカナに含むかどうか
+'* @return Boolean チェック結果（True：OK、False：NG）
+'*
+'******************************************************************************
+Public Function IsHalfKatakana(val As String, Optional includeMark As Boolean = False) As Boolean
+    IsHalfKatakana = (val Like "[ｦ-ﾝ]")
+    If includeMark Then IsHalfKatakana = IsHalfKatakana Or (val Like "[ｰﾞﾟ]")
+End Function
+
+'******************************************************************************
+'* [概  要] 半角全角カタカナチェック処理。
+'* [詳  細] 値が半角全角カタカナかどうか判定する｡
+'*
+'* @param val 検証値（１文字）
+'* @param includeMark 「ｰﾞﾟ」を半角カタカナに含むかどうか
+'* @return Boolean チェック結果（True：OK、False：NG）
+'*
+'******************************************************************************
+Public Function IsKatakana(val As String, Optional includeMark As Boolean = False) As Boolean
+    IsKatakana = IsFullKatakana(val) Or IsHalfKatakana(val, includeMark)
+End Function
+
+'******************************************************************************
 '* [概  要] ToIntValue
 '* [詳  細] 数値に変換する。
 '*

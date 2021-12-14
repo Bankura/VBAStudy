@@ -342,7 +342,7 @@ End Function
 '* @param vDir
 '******************************************************************************
 Sub OpenFolder(vDir)
-    Call mOrigin.OpenFolder(vDir)
+    Call mOrigin.Open(vDir)
 End Sub
 
 '******************************************************************************

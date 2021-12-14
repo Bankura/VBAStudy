@@ -539,6 +539,11 @@ End Sub
 Public Function Init(dic As Object) As DictionaryEx
     Set dict_pDictionary = dic
     Set mKeys = New Collection
+    
+    Dim k
+    For Each k In dict_pDictionary.keys
+        mKeys.Add k
+    Next
     Set Init = Me
 End Function
 

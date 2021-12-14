@@ -239,7 +239,7 @@ Sub TestArray2DEx009()
     arr2dex.DefaultInitValue = 0
     arr2dex.AddRows Array(1, 2, 3), Array(1, 2, 3), Array(1, 2, 3), Array(1, 4, 6)
 
-    DebugUtils.Show arr2dex.ToString
+    DebugUtils.Show arr2dex
 End Sub
 
 
@@ -330,8 +330,8 @@ Sub TestHoge()
     
     Debug.Print GetExcelBookProc
     Dim i As Long
-    For i = 0 To UBound(WinApiFunctions.wD)
-        Debug.Print WinApiFunctions.wD(i).wkb.Name
+    For i = 0 To UBound(WinApiFunctions.wd)
+        Debug.Print WinApiFunctions.wd(i).wkb.Name
     Next
     
 End Sub
@@ -719,7 +719,7 @@ Sub DosCommander_Test001()
 '    For Each v In cmdr.CmdDir("C:\dev\vba", "/R", "/A")
 '        Debug.Print v
 '    Next
-    For Each v In cmdr.GetFilePathsRecursive("C:\dev\vba")
+    For Each v In cmdr.GetFilePathsRecursive("C:\develop\data")
         Debug.Print v
     Next
 End Sub
@@ -782,10 +782,10 @@ Sub ArrayUtils_Test001()
     dic.Add "k4", "4"
     dic.Add "k5", Array("a", "b", "c")
     
-    Dim arr
-    arr = Array("ara", "yada", "cyo", 2020, col, dic, Core.Wsh)
+    Dim Arr
+    Arr = Array("ara", "yada", "cyo", 2020, col, dic, Core.Wsh)
     
-    Debug.Print ArrayUtils.ToString(arr)
+    Debug.Print ArrayUtils.ToString(Arr)
 End Sub
 
 
@@ -1053,16 +1053,16 @@ Function CompareTesTesQuick(val1, val2, ByVal flg As Boolean) As Boolean
     
     If flg Then
         If val1(1) = val2(1) Then
-            CompareTesTesQuick = val1(2) > val2(2)
-            Exit Function
-        End If
-        CompareTesTesQuick = val1(1) > val2(1)
-    Else
-        If val1(1) = val2(1) Then
             CompareTesTesQuick = val1(2) < val2(2)
             Exit Function
         End If
         CompareTesTesQuick = val1(1) < val2(1)
+    Else
+        If val1(1) = val2(1) Then
+            CompareTesTesQuick = val1(2) > val2(2)
+            Exit Function
+        End If
+        CompareTesTesQuick = val1(1) > val2(1)
     End If
 End Function
 
@@ -1072,7 +1072,7 @@ Sub Array2DSortTest001()
     Dim wsex As WorkSheetEx: Set wsex = Core.Init(New WorkSheetEx, "Sheet1")
     'Dim var As Variant: var = wsex.ExportArray(1, 1, , True)
     Dim arr2dex As Array2DEx
-    Set arr2dex = wsex.ExportArray2DEx(1, 1)
+    Set arr2dex = wsex.ExportArray2DEx(1, 3)
 
     'Dim fnc As Func
     'Set fnc = Core.Init(New Func, vbBoolean, AddressOf CompareTesTesQuick)
@@ -1085,7 +1085,7 @@ Sub Array2DSortTest001()
     'DebugUtils.PrintArray arr2dex.SortBy(fnc)
     'arr2dex.SortBy fnc
     
-    DebugUtils.PrintArray arr2dex.SortBy(Array("0 asc", "1 desc", "2 desc")).RowSlice(0, 10)
+    DebugUtils.PrintArray arr2dex.SortBy(Array("0 desc", "1 desc", "2 desc")).RowSlice(0, 4)
 
 End Sub
 
@@ -1246,4 +1246,126 @@ Sub foooooooo()
     Dim v
     Set v = mysheet.GetRowToArrayEx(1)
     DebugUtils.Show v
+End Sub
+
+
+Sub ApplyFunc2ExcelFiles_Test001()
+    Dim fnc As Func
+    Set fnc = Core.Init(New Func, vbBoolean, AddressOf BookA1Print)
+    'Call XlBookUtils.ApplyProc2Books("C:\develop\data\xls", fnc, True)
+    Call XlBookUtils.ApplyProc2Books("C:\develop\data\xls", "BookA1Print", True)
+End Sub
+
+Sub BookA1Print(ByVal bookObj As Workbook)
+    Debug.Print bookObj.Worksheets(1).Cells(1, 1).Value
+    bookObj.Worksheets(1).Cells(1, 1).Value = bookObj.Worksheets(1).Cells(1, 1).Value & "X"
+    bookObj.Save
+
+End Sub
+
+Sub ForEach_Test001()
+    Dim fnc As Func
+    Set fnc = Core.Init(New Func, vbBoolean, AddressOf PrintNameTes)
+    Call ForEach(ThisWorkbook.Worksheets, fnc)
+
+End Sub
+Sub PrintNameTes(ByVal obj As Object)
+    Debug.Print obj.Name
+End Sub
+
+Sub munuuu()
+    Dim v
+    
+'    For Each v In SystemUtils.ExecWmiQuery("Select * from Win32_BIOS")
+'        Debug.Print "Build Number         : " & v.Properties_("BuildNumber")
+'        Debug.Print "Current Language     : " & v.Properties_("CurrentLanguage")
+'        Debug.Print "Installable Languages: " & v.Properties_("InstallableLanguages")
+'        Debug.Print "Manufacturer         : " & v.Properties_("Manufacturer")
+'        Debug.Print "Name                 : " & v.Properties_("Name")
+'        Debug.Print "Primary BIOS         : " & v.Properties_("PrimaryBIOS")
+'        Debug.Print "Serial Number        : " & v.Properties_("SerialNumber")
+'        Debug.Print "SMBIOS Version       : " & v.Properties_("SMBIOSBIOSVersion")
+'        Debug.Print "SMBIOS Major Version : " & v.Properties_("SMBIOSMajorVersion")
+'        Debug.Print "SMBIOS Minor Version : " & v.Properties_("SMBIOSMinorVersion")
+'        Debug.Print "SMBIOS Present       : " & v.Properties_("SMBIOSPresent")
+'        Debug.Print "Status               : " & v.Properties_("Status")
+'    Next
+    For Each v In SystemUtils.ExecWmiQuery("Select * From Win32_NTLogEvent Where Logfile='System' And TimeGenerated > '2021/11/01'" & _
+                                           " And (Eventcode = '6005' Or Eventcode = '6006' Or Eventcode = '7001' Or Eventcode = '7002')")
+        Debug.Print Format(Mid(v.TimeGenerated, 1, 14), "####/##/## ##:##:##"), v.EventCode, v.Message
+    Next
+End Sub
+
+Public Sub UXUtils_IconTest001()
+    Call UXUtils.AddIcon(Application.hwnd, "アイコンてすと") 'システムトレイにアイコンを登録
+End Sub
+
+Public Sub UXUtils_IconTest002()
+    Call UXUtils.ShowBalloon("バルーンメッセージてすと", "バルーンタイトル", 1, 10)       'バルーンチップの表示
+End Sub
+
+Public Sub UXUtils_IconTest003()
+    Call UXUtils.ModifyIcon("C:\windows\system32\notepad.exe") 'アイコンの変更
+End Sub
+
+Public Sub UXUtils_IconTest004()
+    Call UXUtils.DeleteIcon 'アイコンの削除
+End Sub
+Public Sub UXUtils_IconTest005()
+    Call UXUtils.NotifyToast("Excelからの通知", "私がやってきた！", , 30)
+End Sub
+
+Public Sub WorkSheetEx_Test001()
+    Dim ws As WorkSheetEx: Set ws = Core.Init(New WorkSheetEx, "Sheet1")
+    Call ws.SetAutoFilter(1, 3, 1, 6).FilterOn(1, "4")
+End Sub
+Public Sub WorkSheetEx_Test002()
+    Dim ws As WorkSheetEx: Set ws = Core.Init(New WorkSheetEx, "Sheet1")
+    Call ws.FilterOff
+End Sub
+Public Sub WorkSheetEx_Test003()
+    Dim ws As WorkSheetEx: Set ws = Core.Init(New WorkSheetEx, "Sheet1")
+    Call ws.RemoveAutoFilter
+End Sub
+
+Public Sub BaseParallel_Test001()
+    Call Base.ParallelExec("testFunc", 3, "C:\develop\tmp\test0.txt", "C:\develop\tmp\test1.txt", "C:\develop\tmp\test2.txt")
+End Sub
+
+Public Sub testFunc(n As Long, ParamArray paParams())
+    Call FileUtils.CreateNullCharFile(CStr(paParams(n)), 500000000)
+    Application.DisplayAlerts = False
+    ThisWorkbook.Close False
+End Sub
+
+Public Sub OnTimeForClass_Test001()
+    Dim tesObj As ZZC_MyTest
+    Set tesObj = New ZZC_MyTest
+    
+    Call Base.OnTimeForClass(1, tesObj, "DebugPrintLong", 1)
+    Call Base.OnTimeForClass(2, tesObj, "DebugPrintLong", 2)
+    Call Base.OnTimeForClass(3, tesObj, "DebugPrintLong", 3)
+    Call Base.OnTimeForClass(4, tesObj, "DebugPrintLong", 4)
+    Call Base.OnTimeForClass(5, tesObj, "DebugPrintLong", 5)
+     
+End Sub
+Public Sub OnTimeForClass_Test002()
+    Dim tesObj As ZZC_MyTest
+    Set tesObj = New ZZC_MyTest
+    
+    Dim k1 As String: k1 = Base.OnTimeForClass(1, tesObj, "DebugPrintLongR", 1)
+    Dim k2 As String: k2 = Base.OnTimeForClass(2, tesObj, "DebugPrintLongR", 2)
+    Dim k3 As String: k3 = Base.OnTimeForClass(3, tesObj, "DebugPrintLongR", 3)
+    Dim k4 As String: k4 = Base.OnTimeForClass(4, tesObj, "DebugPrintLongR", 4)
+    Dim k5 As String: k5 = Base.OnTimeForClass(5, tesObj, "DebugPrintLongR", 5)
+
+    Debug.Print "ResultKey1: " & k1
+    Debug.Print "ResultKey2: " & k2
+    Debug.Print "ResultKey3: " & k3
+    Debug.Print "ResultKey4: " & k4
+    Debug.Print "ResultKey5: " & k5
+End Sub
+Public Sub OnTimeForClass_Test003()
+
+    Call Base.OnTimeForClass(1, DebugUtils, "Show", 111)
 End Sub

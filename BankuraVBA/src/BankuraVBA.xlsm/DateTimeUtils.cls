@@ -17,6 +17,7 @@ Option Explicit
 '*
 '* [参  考] https://www.take1mg.com/plus1/2018/04/excel-vba-datecalculatorclass/
 '*          https://vbabeginner.net/measure-milliseconds-and-microseconds/
+'*          https://www.excel-chunchun.com/entry/2019/02/05/014303
 '*
 '* @author Bankura
 '* Copyright (c) 2020-2021 Bankura
@@ -33,6 +34,7 @@ Option Explicit
     Private Declare Function QueryPerformanceFrequency Lib "kernel32" (frequency As Double) As Long
     Private Declare Function QueryPerformanceCounter Lib "kernel32" (procTime As Double) As Long
 #End If
+Private Declare PtrSafe Function timeGetTime Lib "winmm.dll" () As Long
 
 '******************************************************************************
 '* 構造体定義
@@ -64,11 +66,20 @@ Private Const DATE_FORMAT_WAREKI_YOUBI As String = "ggge年mm月dd日(aaa)"
 '* 内部変数定義
 '******************************************************************************
 Private mHolidayList As Collection
+Private mSWbemDateTime As Object
 #If Win64 Then
     Dim mPerfFrequency As LARGE_INTEGER
 #Else
     Dim mPerfFrequency As Double
 #End If
+' Timer用 Start ----------------------
+Private mStartNum As Double
+Private mLapNum   As Double
+Private mPauseNum As Double
+Private mPauseFlg As Boolean
+Private mLapTimes As Collection
+Private mDefaultFormat As String
+' Timer用 End   ----------------------
 
 '******************************************************************************
 '* プロパティ定義
@@ -102,6 +113,7 @@ End Property
 '* コンストラクタ・デストラクタ
 '******************************************************************************
 Private Sub Class_Initialize()
+    Set mSWbemDateTime = CreateObject("WbemScripting.SWbemDateTime")
 End Sub
 
 '******************************************************************************
@@ -624,7 +636,6 @@ Public Function GetHolidayList() As Collection
     Set GetHolidayList = hList
 End Function
 
-
 '******************************************************************************
 '* [概  要] GetHttpResponseText
 '* [詳  細] 指定したURLにHTTP Getリクエストを送り、レスポンスのテキストを
@@ -723,3 +734,211 @@ Public Function GetTimestampString() As String
     GetTimestampString = Format(Now, "yyyy/mm/dd") & " " & Format(hour, "00") & ":" & _
                          Format(minute, "00") & ":" & Format(second, "00") & "." & Format(mSec, "000")
 End Function
+
+'******************************************************************************
+'* [概  要] Get10Kan12Shi
+'* [詳  細] 十干十二支を取得する。
+'*
+'* @param yearValue 対象年
+'* @return String 十干十二支
+'******************************************************************************
+Public Function Get10Kan12Shi(ByVal yearValue As Integer) As String
+    Dim list10Kan: list10Kan = Array("甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸")
+    Dim list12Shi: list12Shi = Array("子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥")
+    
+    Get10Kan12Shi = list10Kan((yearValue + 6) Mod 10) & list12Shi((yearValue + 8) Mod 12)
+End Function
+
+'******************************************************************************
+'* [概  要] GetUTCDate メソッド
+'* [詳  細] 日時を設定し、UTC日時の値を取得する。
+'*
+'* @param targetDate 設定する日時
+'* @return UTC日時
+'*
+'******************************************************************************
+Function GetUTCDate(targetDate As Date) As String
+    mSWbemDateTime.SetVarDate targetDate, True
+    GetUTCDate = mSWbemDateTime.Value
+End Function
+
+'******************************************************************************
+'* [概  要] UTCtoJST メソッド
+'* [詳  細] UTC日時値を標準時間に直して日付型に変換する。
+'* [参  考] https://selifelog.com/blog-entry-312.html
+'*
+'* @param strUTCDate UTC日時値文字列(YYYYMMDDHHMMSS)
+'* @return 標準時間
+'*
+'******************************************************************************
+Function UTCtoJST(strUTCDate As String) As Date
+    Dim strYear As String:   strYear = Left(strUTCDate, 4)
+    Dim strMonth As String:  strMonth = Mid(strUTCDate, 5, 2)
+    Dim strDay As String:    strDay = Mid(strUTCDate, 7, 2)
+    Dim strHour As String:   strHour = Mid(strUTCDate, 9, 2)
+    Dim strMinute As String: strMinute = Mid(strUTCDate, 11, 2)
+    Dim strSec As String:    strSec = Mid(strUTCDate, 13, 2)
+    
+    ' YYYY/MM/DD HH:MM:SSに作り変えて日付型に変換
+    Dim JSTDateTime As Date: JSTDateTime = CDate(strYear & "/" & strMonth & "/" & strDay & " " & strHour & ":" & strMinute & ":" & strSec)
+    
+    ' UTC日時値に9時間加算して日本の標準時に直した値を返却
+    UTCtoJST = JSTDateTime + TimeValue("9:00:00")
+End Function
+
+'******************************************************************************
+'* [概  要] StartTimer
+'* [詳  細] タイマーの計測を開始／再開。
+'* [参  考] https://www.excel-chunchun.com/entry/2019/02/05/014303
+'*
+'* @param defFormat デフォルトの時間フォーマット（s, ms, 0ms, 0s etc.）
+'*
+'******************************************************************************
+Public Sub StartTimer(Optional defFormat As String = "")
+    If defFormat <> "" Then mDefaultFormat = defFormat
+
+    If mPauseFlg Then
+        ' 再開時は、停止していた時間分を開始時間に足すことで辻褄をあわせる
+        mStartNum = mStartNum + (GetMilliSecond() - mPauseNum)
+        mLapNum = mLapNum + (GetMilliSecond() - mPauseNum)
+        mPauseFlg = False
+    Else
+        mStartNum = GetMilliSecond()
+        mLapNum = GetMilliSecond()
+    End If
+    mPauseNum = 0
+
+    If mLapTimes Is Nothing Then
+        Set mLapTimes = New Collection
+    End If
+End Sub
+
+'******************************************************************************
+'* [概  要] ResetTimer
+'* [詳  細] タイマーの全ての時間を初期化。
+'* [参  考] https://www.excel-chunchun.com/entry/2019/02/05/014303
+'*
+'******************************************************************************
+Public Sub ResetTimer()
+    mStartNum = 0
+    mLapNum = 0
+    mPauseNum = 0
+    mPauseFlg = False
+    Set mLapTimes = New Collection
+End Sub
+
+'******************************************************************************
+'* [概  要] PauseTimer
+'* [詳  細] タイマーを一時停止し停止時間を記憶。
+'* [参  考] https://www.excel-chunchun.com/entry/2019/02/05/014303
+'*
+'******************************************************************************
+Public Sub PauseTimer()
+    If mStartNum = 0 Then Exit Sub
+    mPauseNum = GetMilliSecond()
+    mPauseFlg = True
+End Sub
+
+'******************************************************************************
+'* [概  要] SplitTime
+'* [詳  細] タイマー開始からの経過時間を返却。
+'* [参  考] https://www.excel-chunchun.com/entry/2019/02/05/014303
+'*
+'* @param timeFormat 時間フォーマット（s, ms, #,0 ms, 0.00 s etc.）
+'* @param willReset 経過時間を計算後、タイマーのリセットを実行するかどうか
+'* @return 開始からの経過時間
+'******************************************************************************
+Public Function SplitTime(Optional ByVal timeFormat As String = "", _
+                          Optional ByVal willReset As Boolean = False) As Variant
+    If mStartNum = 0 Then Exit Function
+    
+    Dim tm As Double
+    If mPauseFlg Then
+        tm = (mPauseNum - mStartNum)
+    Else
+        tm = (GetMilliSecond() - mStartNum)
+    End If
+
+    If timeFormat = "" Then timeFormat = mDefaultFormat
+    If timeFormat = "" Then
+        SplitTime = tm
+    Else
+        SplitTime = GetTimeFormatForTimer(tm, timeFormat)
+    End If
+    If willReset Then
+        Call ResetTimer
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] LapTime
+'* [詳  細] タイマーの直前の計測からの経過時間を返却。
+'* [参  考] https://www.excel-chunchun.com/entry/2019/02/05/014303
+'*
+'* @param timeFormat 時間フォーマット（s, ms, #,0 ms, 0.00 s etc.）
+'* @return 直前の計測からの経過時間
+'******************************************************************************
+Public Function LapTime(Optional ByVal timeFormat As String = "") As Variant
+    If mStartNum = 0 Or mPauseFlg Then Exit Function
+    Dim tmpTm As Double: tmpTm = GetMilliSecond
+    Dim tm As Double: tm = (tmpTm - mLapNum)
+    mLapNum = tmpTm
+
+    If timeFormat = "" Then timeFormat = mDefaultFormat
+    If timeFormat = "" Then
+        LapTime = tm
+    Else
+        LapTime = GetTimeFormatForTimer(tm, timeFormat)
+    End If
+    mLapTimes.Add LapTime
+End Function
+
+'******************************************************************************
+'* [概  要] LapTimes
+'* [詳  細] タイマーで記録したラップタイムのコレクションを返却。
+'* [参  考] https://www.excel-chunchun.com/entry/2019/02/05/014303
+'*
+'* @return ラップタイムのコレクション（一次元配列）
+'******************************************************************************
+Public Function LapTimes() As Variant
+    If mStartNum = 0 Or mLapTimes.count = 0 Then
+        LapTimes = Split(vbNullString)
+    Else
+        Dim Arr() As Variant
+        ReDim Arr(1 To mLapTimes.count)
+        Dim i As Long
+        For i = 1 To mLapTimes.count
+            Arr(i) = mLapTimes(i)
+        Next
+        LapTimes = Arr
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] GetTimeFormatForTimer
+'* [詳  細] ミリセコンドから任意の書式に変換（タイマー処理用）。
+'* [参  考] https://www.excel-chunchun.com/entry/2019/02/05/014303
+'*
+'* @param tm 時間（ms）
+'* @param timeFormat 時間フォーマット（s, ms, #,0 ms, 0.00 s etc.）
+'* @return 指定書式に変換した時間
+'******************************************************************************
+Private Function GetTimeFormatForTimer(tm As Double, timeFormat As String) As Variant
+    Select Case True
+        Case timeFormat = "s"
+            GetTimeFormatForTimer = tm / 1000
+            
+        Case timeFormat = "ms"
+            GetTimeFormatForTimer = CLng(tm)
+            
+        Case timeFormat Like "*ms"
+            GetTimeFormatForTimer = Right(String(10, " ") & Format(CLng(tm), timeFormat), 10)
+        
+        Case timeFormat Like "*s"
+            GetTimeFormatForTimer = Right(String(10, " ") & Format(tm / 1000, timeFormat), 10)
+        
+        Case Else
+            GetTimeFormatForTimer = Format(CLng(tm), timeFormat)
+    End Select
+End Function
+

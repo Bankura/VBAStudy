@@ -15,7 +15,7 @@ Attribute rowEnumerator1.VB_VarHelpID = -1
 Public Sub Main()
     ' RowEnumeratorÇÃê›íË
     'Set rowEnumerator1 = New RowEnumerator
-    Set rowEnumerator1 = Init(New XlRowEnumerator, ThisWorkbook, "Sheet1", 4, 2)
+    Set rowEnumerator1 = Init(New XlRowEnumerator, ThisWorkbook, "Sheet1", 1, 3)
 '    rowEnumerator1.StartRow = 1
 '    rowEnumerator1.EndRow = 10000
 '    rowEnumerator1.ReportUnit = 500
@@ -52,4 +52,16 @@ Private Sub rowEnumerator1_EndAction(sender As XlRowEnumerator)
     Debug.Print "ÅöEndAction"
 End Sub
 
+Public Sub DebugPrint(txt As String)
+    Debug.Print txt
+End Sub
+
+Public Sub DebugPrintLong(lngNum As Long)
+    Debug.Print lngNum * 10
+End Sub
+
+Public Function DebugPrintLongR(lngNum As Long) As Long
+    Debug.Print lngNum * 10
+    DebugPrintLongR = lngNum * 10
+End Function
 

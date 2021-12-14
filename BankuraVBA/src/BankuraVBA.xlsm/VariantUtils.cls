@@ -72,6 +72,38 @@ Public Function DefaultIfMissing(ByVal arg, ByVal defaultValue) As Variant
     DefaultIfMissing = arg
 End Function
 
+'******************************************************************************
+'* [概  要] EmptyArrayIfParamArrayMissing
+'* [詳  細] ParamArray引数が省略されている場合、空配列に変換する｡
+'*
+'* @param arg 引数（ParamArray引数を渡す）
+'* @return Variant 変換後Variant
+'*
+'******************************************************************************
+Public Function EmptyArrayIfParamArrayMissing(ByVal arg) As Variant
+    If ValidateUtils.IsParamArrayMissing(arg) Then
+        EmptyArrayIfParamArrayMissing = ArrayUtils.EmptyVariantArray
+    Else
+        EmptyArrayIfParamArrayMissing = arg
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] DefaultIfParamArrayMissing
+'* [詳  細] ParamArray引数が省略されている場合、デフォルト値に変換する｡
+'*
+'* @param arg 引数（ParamArray引数を渡す）
+'* @param defaultValue デフォルト値
+'* @return Variant 変換後Variant
+'*
+'******************************************************************************
+Public Function DefaultIfParamArrayMissing(ByVal arg, ByVal defaultValue) As Variant
+    If ValidateUtils.IsParamArrayMissing(arg) Then
+        DefaultIfParamArrayMissing = ArrayUtils.EmptyVariantArray
+    Else
+        DefaultIfParamArrayMissing = defaultValue
+    End If
+End Function
 
 '*******************************************************************************
 '* [概  要] ToString
@@ -150,16 +182,16 @@ End Function
 '* [概  要] SetItem
 '* [詳  細] 指定Variant項目に値を設定する。
 '*          値がオブジェクトかどうかを判別して設定を行う。
-'*          に準拠はしていない。
+
 '*
-'* @param item Variant項目
-'* @param value 設定する値
+'* @param vItem Variant項目
+'* @param val   設定する値
 '*
 '*******************************************************************************
-Public Sub SetItem(ByRef Item As Variant, ByRef Value As Variant)
-    If IsObject(Value) Then
-        Set Item = Value
+Public Sub SetItem(ByRef vItem As Variant, ByRef val As Variant)
+    If IsObject(val) Then
+        Set vItem = val
     Else
-        Let Item = Value
+        Let vItem = val
     End If
 End Sub

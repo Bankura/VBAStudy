@@ -46,13 +46,13 @@ Public Function AddObj(ByVal obj As Variant)
 End Function
 
 Public Function ToArray() As Variant
-    Dim arr As Variant: arr = xItems
+    Dim Arr As Variant: Arr = xItems
     If xIndex > -1 Then
-        ReDim Preserve arr(xIndex)
+        ReDim Preserve Arr(xIndex)
     Else
-        arr = Array()
+        Arr = Array()
     End If
-    ToArray = arr
+    ToArray = Arr
 End Function
 
 
@@ -267,9 +267,9 @@ End Function
 '* @param arr As Variant(Of Array(Of T))
 '******************************************************************************
 Public Sub reverse()
-    Dim arr: arr = Me.ToArray
-    Call Core.ArrRev(arr)
-    Call Init(arr)
+    Dim Arr: Arr = Me.ToArray
+    Call Core.ArrRev(Arr)
+    Call Init(Arr)
 End Sub
 
 '******************************************************************************
@@ -280,9 +280,9 @@ End Sub
 '* @param orderAsc As Boolean
 '******************************************************************************
 Public Sub Sort(Optional ByVal orderAsc As Boolean = True)
-    Dim arr: arr = Me.ToArray
-    Call Core.ArrSort(arr, orderAsc)
-    Call Init(arr)
+    Dim Arr: Arr = Me.ToArray
+    Call Core.ArrSort(Arr, orderAsc)
+    Call Init(Arr)
 End Sub
 
 '******************************************************************************
@@ -290,10 +290,10 @@ End Sub
 '* [詳  細] 一次元配列の重複要素を排除する。
 '*          AriawaseのCoreモジュールラッパーメソッド。
 '*
-'* @return As Variant(Of Array(Of T))
+'* @return ArrayEx
 '******************************************************************************
-Public Function Uniq() As Variant
-    Uniq = Core.ArrUniq(Me.ToArray)
+Public Function Uniq() As ArrayEx
+    Set Uniq = Core.Init(New ArrayEx, Core.ArrUniq(Me.ToArray))
 End Function
 
 '******************************************************************************
@@ -303,10 +303,16 @@ End Function
 '*
 '* @param arr1 As Variant(Of Array(Of T))
 '* @param arr2 As Variant(Of Array(Of T))
-'* @return As Variant(Of Array(Of T))
+'* @return ArrayEx
 '******************************************************************************
-Public Function Concat(ByVal arr2 As Variant) As Variant
-    Concat = Core.ArrConcat(Me.ToArray, arr2)
+Public Function Concat(ByRef arr2 As Variant) As ArrayEx
+    If ValidateUtils.IsArrayEx(arr2) Then
+        Set Concat = Core.Init(New ArrayEx, Core.ArrConcat(Me.ToArray, arr2.ToArray))
+    ElseIf IsArray(arr2) Then
+        Set Concat = Core.Init(New ArrayEx, Core.ArrConcat(Me.ToArray, arr2))
+    Else
+        Set Concat = Core.Init(New ArrayEx, Core.ArrConcat(Me.ToArray, Array(arr2)))
+    End If
 End Function
 
 '******************************************************************************
@@ -316,10 +322,10 @@ End Function
 '*
 '* @param ixStart As Variant(Of Long)
 '* @param ixEnd As Variant(Of Long)
-'* @return As Variant(Of Array(Of T))
+'* @return ArrayEx
 '******************************************************************************
-Public Function Slice(Optional ByVal ixStart As Variant, Optional ByVal ixEnd As Variant) As Variant
-    Slice = Core.ArrSlice(Me.ToArray, ixStart, ixEnd)
+Public Function Slice(Optional ByVal ixStart As Variant, Optional ByVal ixEnd As Variant) As ArrayEx
+    Set Slice = Core.Init(New ArrayEx, Core.ArrSlice(Me.ToArray, ixStart, ixEnd))
 End Function
 
 '******************************************************************************
@@ -332,8 +338,8 @@ End Function
 '* @return ArrayEx(Of Array(Of T))
 '******************************************************************************
 Public Function FromJagArray(ByVal jagArr As Variant) As ArrayEx
-    Dim arr: arr = Core.ArrFlatten(jagArr)
-    Set FromJagArray = Init(arr)
+    Dim Arr: Arr = Core.ArrFlatten(jagArr)
+    Set FromJagArray = Init(Arr)
 End Function
 
 '******************************************************************************
@@ -356,8 +362,8 @@ End Function
 '* @return ArrayEx(Of Array(Of T))
 '******************************************************************************
 Public Function FromCollection(ByVal clct As Collection) As ArrayEx
-    Dim arr: arr = Core.ClctToArr(clct)
-    Set FromCollection = Init(arr)
+    Dim Arr: Arr = Core.ClctToArr(clct)
+    Set FromCollection = Init(Arr)
 End Function
 
 '******************************************************************************
@@ -370,8 +376,8 @@ End Function
 '* @return ArrayEx(Of Array(Of T))
 '******************************************************************************
 Public Function FromEnumerator(ByVal enumr As Object) As ArrayEx
-    Dim arr: arr = ext.EnumeratorToArr(enumr)
-    Set FromEnumerator = Init(arr)
+    Dim Arr: Arr = ext.EnumeratorToArr(enumr)
+    Set FromEnumerator = Init(Arr)
 End Function
 
 '******************************************************************************
@@ -385,8 +391,8 @@ End Function
 '* @return ArrayEx(Of Array(Of T))
 '******************************************************************************
 Public Function Range(ByVal fromVal As Variant, ByVal toVal As Variant, Optional ByVal stepVal As Variant = 1) As ArrayEx
-    Dim arr: arr = ext.ArrRange(fromVal, toVal, stepVal)
-    Set Range = Init(arr)
+    Dim Arr: Arr = ext.ArrRange(fromVal, toVal, stepVal)
+    Set Range = Init(Arr)
 End Function
 
 '******************************************************************************
@@ -398,8 +404,8 @@ End Function
 '* @return ArrayEx(Of Array(Of U))
 '******************************************************************************
 Public Function Map(ByVal fun As Func) As ArrayEx
-    Dim arr: arr = ext.ArrMap(fun, Me.ToArray)
-    Set Map = Init(arr)
+    Dim Arr: Arr = ext.ArrMap(fun, Me.ToArray)
+    Set Map = Init(Arr)
 End Function
 
 '******************************************************************************
@@ -413,8 +419,8 @@ End Function
 '* @return ArrayEx(Of Array(Of R))
 '******************************************************************************
 Public Function Zip(ByVal fun As Func, ByVal arr2 As Variant) As ArrayEx
-    Dim arr: arr = ext.ArrZip(fun, Me.ToArray, arr2)
-    Set Zip = Init(arr)
+    Dim Arr: Arr = ext.ArrZip(fun, Me.ToArray, arr2)
+    Set Zip = Init(Arr)
 End Function
 
 '******************************************************************************
@@ -427,8 +433,8 @@ End Function
 '* @return ArrayEx(Of Array(Of T))
 '******************************************************************************
 Public Function Filter(ByVal fun As Func) As ArrayEx
-    Dim arr: arr = ext.ArrFilter(fun, Me.ToArray)
-    Set Filter = Init(arr)
+    Dim Arr: Arr = ext.ArrFilter(fun, Me.ToArray)
+    Set Filter = Init(Arr)
 End Function
 
 '******************************************************************************
@@ -441,8 +447,8 @@ End Function
 '* @return ArrayEx(Of Array(Of Tuple`2(Of K, T)))
 '******************************************************************************
 Public Function GroupBy(ByVal fun As Func) As ArrayEx
-    Dim arr: arr = ext.ArrGroupBy(fun, Me.ToArray)
-    Set GroupBy = Init(arr)
+    Dim Arr: Arr = ext.ArrGroupBy(fun, Me.ToArray)
+    Set GroupBy = Init(Arr)
 End Function
 
 '******************************************************************************
@@ -471,8 +477,8 @@ End Function
 '* @return ArrayEx(Of Array(Of U))
 '******************************************************************************
 Public Function Scan(ByVal fun As Func, Optional ByVal seedv As Variant) As ArrayEx
-    Dim arr: arr = ext.ArrScan(fun, Me.ToArray, seedv)
-    Set Scan = Init(arr)
+    Dim Arr: Arr = ext.ArrScan(fun, Me.ToArray, seedv)
+    Set Scan = Init(Arr)
 End Function
 
 '******************************************************************************
@@ -486,8 +492,8 @@ End Function
 '* @return ArrayEx(Of Array(Of U))
 '******************************************************************************
 Public Function Unfold(ByVal fun As Func, ByVal seedv As Variant) As ArrayEx
-    Dim arr: arr = ext.ArrUnfold(fun, seedv)
-    Set Unfold = Init(arr)
+    Dim Arr: Arr = ext.ArrUnfold(fun, seedv)
+    Set Unfold = Init(Arr)
 End Function
 
 '******************************************************************************
@@ -498,8 +504,8 @@ End Function
 '* @param rowNum 指定行
 '* @return Variant 変更後2次元配列
 '******************************************************************************
-Public Function CopyTo2DArrayRow(ByRef v2DArr As Variant, ByVal rownum As Long) As Variant
-    CopyTo2DArrayRow = ArrayUtils.Copy1DArrayTo2DArrayRow(v2DArr, rownum, Me.ToArray)
+Public Function CopyTo2DArrayRow(ByRef v2DArr As Variant, ByVal rowNum As Long) As Variant
+    CopyTo2DArrayRow = ArrayUtils.Copy1DArrayTo2DArrayRow(v2DArr, rowNum, Me.ToArray)
 End Function
 
 '******************************************************************************
@@ -608,6 +614,26 @@ End Function
 '******************************************************************************
 Public Function RemoveAt(ByVal idx As Long) As ArrayEx
     Set RemoveAt = Init(ArrayUtils.RemoveAt(Me.ToArray, idx))
+End Function
+
+'******************************************************************************
+'* [概  要] RemoveFirst
+'* [詳  細] 先頭の要素を削除する。
+'*
+'* @return ArrayEx 削除後1次元配列
+'******************************************************************************
+Public Function RemoveFirst() As ArrayEx
+    Set RemoveFirst = Init(ArrayUtils.RemoveAt(Me.ToArray, 0))
+End Function
+
+'******************************************************************************
+'* [概  要] RemoveLast
+'* [詳  細] 最後の要素を削除する。
+'*
+'* @return ArrayEx 削除後1次元配列
+'******************************************************************************
+Public Function RemoveLast() As ArrayEx
+    Set RemoveLast = Init(ArrayUtils.RemoveAt(Me.ToArray, xIndex))
 End Function
 
 '******************************************************************************
@@ -742,4 +768,15 @@ End Function
 Public Function RemoveEmpty() As ArrayEx
     Set RemoveEmpty = Core.Init(New ArrayEx, ArrayUtils.RemoveEmpty(Me.ToArray))
 End Function
+
+'******************************************************************************
+'* [概  要] NaturalSort
+'* [詳  細] エクスプローラのファイル順のように自然順ソートで並び替える。
+'*
+'******************************************************************************
+Public Sub NaturalSort()
+    Dim Arr: Arr = Me.ToArray
+    Call ArrayUtils.NaturalSort(Arr)
+    Call Init(Arr)
+End Sub
 
