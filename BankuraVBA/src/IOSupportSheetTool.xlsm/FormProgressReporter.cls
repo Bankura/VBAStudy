@@ -18,7 +18,7 @@ Implements IProgressReporter
 '* [参  考]
 '*
 '* @author Bankura
-'* Copyright (c) 2020 Bankura
+'* Copyright (c) 2020-2021 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 '******************************************************************************
@@ -28,6 +28,10 @@ Private mProgressBarForm As ProgressBarForm
 Private mBaseMessage As String
 Private mProgressString As String
 Private mCountVisible As Boolean
+Private mUnitName As String
+Private mBarColor As Long
+Private mInteractive As Long
+Private mFormCaption As String
 
 '******************************************************************************
 '* プロパティ定義
@@ -51,6 +55,43 @@ Public Property Let CountVisible(arg As Boolean)
     mCountVisible = arg
 End Property
 
+'*-----------------------------------------------------------------------------
+'* UnitName プロパティ
+'*
+'* 表示する単位の名称（「件」「％」等）
+'*-----------------------------------------------------------------------------
+Public Property Let UnitName(arg As String)
+    mUnitName = arg
+End Property
+
+'*-----------------------------------------------------------------------------
+'* BarColor プロパティ
+'*
+'* プログレスバーの色指定
+'*-----------------------------------------------------------------------------
+Public Property Let BarColor(arg As Long)
+    mBarColor = arg
+End Property
+
+'*-----------------------------------------------------------------------------
+'* Interactive プロパティ
+'*
+'* 割込み拒否指定
+'*-----------------------------------------------------------------------------
+Public Property Let Interactive(arg As Boolean)
+    mInteractive = arg
+End Property
+
+'*-----------------------------------------------------------------------------
+'* FormCaption プロパティ
+'*
+'* 表示するフォームのCaption（タイトル）
+'*-----------------------------------------------------------------------------
+Public Property Let FormCaption(arg As String)
+    mFormCaption = arg
+End Property
+
+
 '******************************************************************************
 '* コンストラクタ・デストラクタ
 '******************************************************************************
@@ -58,6 +99,10 @@ Private Sub Class_Initialize()
     Set mProgressBarForm = New ProgressBarForm
     mBaseMessage = "処理中"
     mCountVisible = True
+    mUnitName = "件"
+    mBarColor = rgb(0, 0, 128)
+    mInteractive = False
+    mFormCaption = "しばらくお待ちください…"
 End Sub
 Private Sub Class_Terminate()
     Set mProgressBarForm = Nothing
@@ -73,15 +118,17 @@ End Sub
 '* @param enumerator IEnumeratorオブジェクト
 '******************************************************************************
 Public Sub Start(enumerator As IEnumerator)
+    If mProgressBarForm Is Nothing Then
+        Set mProgressBarForm = New ProgressBarForm
+    End If
     With mProgressBarForm
         .ProcessTitle = mBaseMessage
-        With .ProgressBar
-            .Min = 0
-            .Max = enumerator.MaxReportCount
-            .Value = 0
-        End With
+        .BarColor = mBarColor
+        .Interactive = mInteractive
+        .MaxValue = enumerator.MaxReportCount
+        .SelfDoEvents = False
         .ProgressText.Caption = GetProgressMessage(enumerator)
-        .Show vbModeless
+        .ShowModeless mFormCaption
     End With
 End Sub
 
@@ -92,7 +139,10 @@ End Sub
 '* @param enumerator IEnumeratorオブジェクト
 '******************************************************************************
 Public Sub Finish(enumerator As IEnumerator)
-    mProgressBarForm.Hide
+    If Not mProgressBarForm.IsCancel Then
+        mProgressBarForm.Unload
+    End If
+    Set mProgressBarForm = Nothing
 End Sub
 
 '******************************************************************************
@@ -103,9 +153,11 @@ End Sub
 '******************************************************************************
 Public Sub Proceed(enumerator As IEnumerator)
     With mProgressBarForm
-         .ProgressBar.Value = enumerator.CurrentReportCount
+        If .IsCancel Then
+            Err.Raise 8000, "FormProgressReporter#Proceed", "ユーザ操作によりキャンセルされました。"
+        End If
          .ProgressText.Caption = GetProgressMessage(enumerator)
-         .Repaint
+         Call .SetProgressValue(enumerator.CurrentReportCount)
     End With
 End Sub
 
@@ -122,7 +174,8 @@ Private Function GetProgressMessage(enumerator As IEnumerator) As String
         msg.Append enumerator.CurrentReportCount
         msg.Append " / "
         msg.Append enumerator.MaxReportCount
-        msg.Append " 件"
+        msg.Append " "
+        msg.Append mUnitName
     End If
     GetProgressMessage = msg.ToString
 End Function
@@ -151,4 +204,5 @@ End Sub
 Private Sub IProgressReporter_Proceed(enumerator As IEnumerator)
     Me.Proceed enumerator
 End Sub
+
 

@@ -26,10 +26,10 @@ Option Explicit
 '******************************************************************************
 Private Declare PtrSafe Function GetInputState Lib "user32" () As Long
 Private Declare PtrSafe Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
-Private Declare PtrSafe Function IsIconic Lib "user32" (ByVal hwnd As LongPtr) As Long
-Private Declare PtrSafe Function ShowWindowAsync Lib "user32" (ByVal hwnd As LongPtr, ByVal nCmdShow As Long) As Long
-Private Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hwnd As LongPtr) As Long
-Private Declare PtrSafe Function PeekMessage Lib "user32" Alias "PeekMessageA" (lpMsg As msg, ByVal hwnd As LongPtr, ByVal wMsgFilterMin As Long, ByVal wMsgFilterMax As Long, ByVal wRemoveMsg As Long) As Long
+Private Declare PtrSafe Function IsIconic Lib "user32" (ByVal hWnd As LongPtr) As Long
+Private Declare PtrSafe Function ShowWindowAsync Lib "user32" (ByVal hWnd As LongPtr, ByVal nCmdShow As Long) As Long
+Private Declare PtrSafe Function SetForegroundWindow Lib "user32" (ByVal hWnd As LongPtr) As Long
+Private Declare PtrSafe Function PeekMessage Lib "user32" Alias "PeekMessageA" (lpMsg As msg, ByVal hWnd As LongPtr, ByVal wMsgFilterMin As Long, ByVal wMsgFilterMax As Long, ByVal wRemoveMsg As Long) As Long
 Private Declare PtrSafe Function TranslateMessage Lib "user32" (lpMsg As msg) As Long
 Private Declare PtrSafe Function DispatchMessage Lib "user32" Alias "DispatchMessageA" (lpMsg As msg) As LongPtr
 Private Declare PtrSafe Function GetKeyboardState Lib "user32" (pbKeyState As Byte) As Long
@@ -38,9 +38,9 @@ Private Declare PtrSafe Function SetCursorPos Lib "user32" (ByVal x As Long, ByV
 Private Declare PtrSafe Function GetCursorPos Lib "user32" (lpPoint As POINTAPI) As Long
 Private Declare PtrSafe Function Shell_NotifyIcon Lib "shell32.dll" Alias "Shell_NotifyIconA" (ByVal dwMessage As Long, lpData As NOTIFYICONDATA) As Long
 Private Declare PtrSafe Function ExtractIconEx Lib "shell32.dll" Alias "ExtractIconExA" (ByVal lpszFile As String, ByVal nIconIndex As Long, phiconLarge As LongPtr, phiconSmall As LongPtr, ByVal nIcons As Long) As Long
-Private Declare PtrSafe Function DrawMenuBar Lib "user32" (ByVal hwnd As LongPtr) As Long
-Private Declare PtrSafe Function GetWindowLong Lib "user32" Alias "GetWindowLongA" (ByVal hwnd As LongPtr, ByVal nIndex As Long) As Long
-Private Declare PtrSafe Function SetWindowLong Lib "user32" Alias "SetWindowLongA" (ByVal hwnd As LongPtr, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
+Private Declare PtrSafe Function DrawMenuBar Lib "user32" (ByVal hWnd As LongPtr) As Long
+Private Declare PtrSafe Function GetWindowLong Lib "user32" Alias "GetWindowLongA" (ByVal hWnd As LongPtr, ByVal nIndex As Long) As Long
+Private Declare PtrSafe Function SetWindowLong Lib "user32" Alias "SetWindowLongA" (ByVal hWnd As LongPtr, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
 Private Declare PtrSafe Function GetActiveWindow Lib "user32" () As LongPtr
 Private Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As LongPtr
 
@@ -87,7 +87,7 @@ End Type
 
 Private Type NOTIFYICONDATA
     cbSize As Long
-    hwnd As LongPtr
+    hWnd As LongPtr
     uID As Long
     uFlags As Long
     uCallbackMessage As Long
@@ -244,11 +244,11 @@ End Function
 '* @param  hwnd 対象ウィンドウのハンドル番号
 '*
 '******************************************************************************
-Public Sub ShowForeground(ByVal hwnd As LongPtr)
-    If IsIconic(hwnd) Then
-        Call ShowWindowAsync(hwnd, SW_RESTORE)
+Public Sub ShowForeground(ByVal hWnd As LongPtr)
+    If IsIconic(hWnd) Then
+        Call ShowWindowAsync(hWnd, SW_RESTORE)
     End If
-    Call SetForegroundWindow(hwnd)
+    Call SetForegroundWindow(hWnd)
 End Sub
 
 '******************************************************************************
@@ -258,9 +258,9 @@ End Sub
 '* @param hwnd 対象ウィンドウのハンドル番号
 '*
 '******************************************************************************
-Public Sub ShowForegroundMax(ByVal hwnd As LongPtr)
-    Call ShowWindowAsync(hwnd, SW_SHOWMAXIMIZED)
-    Call SetForegroundWindow(hwnd)
+Public Sub ShowForegroundMax(ByVal hWnd As LongPtr)
+    Call ShowWindowAsync(hWnd, SW_SHOWMAXIMIZED)
+    Call SetForegroundWindow(hWnd)
 End Sub
 
 '******************************************************************************
@@ -270,9 +270,9 @@ End Sub
 '* @param hwnd 対象ウィンドウのハンドル番号
 '*
 '******************************************************************************
-Public Sub ShowMinimizedNoActive(ByVal hwnd As LongPtr)
-    If Not IsIconic(hwnd) Then
-        Call ShowWindowAsync(hwnd, SW_SHOWMINNOACTIVE)
+Public Sub ShowMinimizedNoActive(ByVal hWnd As LongPtr)
+    If Not IsIconic(hWnd) Then
+        Call ShowWindowAsync(hWnd, SW_SHOWMINNOACTIVE)
     End If
 End Sub
 
@@ -282,10 +282,10 @@ End Sub
 '*
 '******************************************************************************
 Public Sub DoEventsForPaint()
-    Dim Message  As msg
-    If PeekMessage(Message, 0, WM_PAINT, WM_PAINT, PM_REMOVE) Then
-        Call TranslateMessage(Message)
-        Call DispatchMessage(Message)
+    Dim message  As msg
+    If PeekMessage(message, 0, WM_PAINT, WM_PAINT, PM_REMOVE) Then
+        Call TranslateMessage(message)
+        Call DispatchMessage(message)
     End If
 End Sub
 
@@ -346,13 +346,13 @@ Public Sub NotifyToast(ByVal msg As String, _
                        Optional ByVal toastTitle As String = "Notifyicon", _
                        Optional ByVal toastIcon As NOTIFYICONINFO, _
                        Optional ByVal toastTimeOutSecond As Long = 10, _
-                       Optional ByVal hwnd As LongPtr = 0, _
+                       Optional ByVal hWnd As LongPtr = 0, _
                        Optional ByVal toolTip As String = "Notifyicon", _
                        Optional ByVal iconResourceFile As String = "")
-    If hwnd = 0 Then
-        hwnd = Application.hwnd
+    If hWnd = 0 Then
+        hWnd = Application.hWnd
     End If
-    Call AddIcon(hwnd, toolTip, iconResourceFile)
+    Call AddIcon(hWnd, toolTip, iconResourceFile)
     Call ShowBalloon(msg, toastTitle, toastIcon, toastTimeOutSecond)
     Me.WaitFor 3    ' 通知前にアイコンを削除すると通知元の表示がおかしくなるため、3秒待機
     Call DeleteIcon
@@ -368,7 +368,7 @@ End Sub
 '* @return Long Shell_NotifyIcon関数の戻り値
 '*
 '******************************************************************************
-Public Function AddIcon(ByVal hwnd As LongPtr, Optional ByVal toolTip As String = "Notifyicon", Optional ByVal iconResourceFile As String = "") As Long
+Public Function AddIcon(ByVal hWnd As LongPtr, Optional ByVal toolTip As String = "Notifyicon", Optional ByVal iconResourceFile As String = "") As Long
     Dim iconSmall As LongPtr
     If iconResourceFile = "" Then
         iconResourceFile = Application.Path & "\" & "EXCEL.EXE"
@@ -378,7 +378,7 @@ Public Function AddIcon(ByVal hwnd As LongPtr, Optional ByVal toolTip As String 
     
     With mIcon
         .cbSize = NOTIFYICONDATA_V3_SIZE
-        .hwnd = hwnd
+        .hWnd = hWnd
         .uID = 0
         .uFlags = NIF_ICON Or NIF_TIP Or NIF_MESSAGE Or NIF_INFO Or NIF_GUID
         .hIcon = iconSmall
@@ -389,7 +389,7 @@ Public Function AddIcon(ByVal hwnd As LongPtr, Optional ByVal toolTip As String 
         .dwInfoFlags = 0
     End With
     
-    DrawMenuBar hwnd
+    DrawMenuBar hWnd
     
     AddIcon = Shell_NotifyIcon(NIM_ADD, mIcon)
 End Function
@@ -483,13 +483,13 @@ End Function
 '*
 '******************************************************************************
 Public Sub FormResizeable()
-    Dim hwnd As LongPtr: hwnd = GetActiveWindow()
-    Dim style As Long: style = GetWindowLong(hwnd, GWL_STYLE)
+    Dim hWnd As LongPtr: hWnd = GetActiveWindow()
+    Dim style As Long: style = GetWindowLong(hWnd, GWL_STYLE)
     
     ' ウインドウサイズ可変＋最小ボタン＋最大ボタンを追加
     style = style Or WS_THICKFRAME Or WS_MINIMIZEBOX Or WS_MAXIMIZEBOX
 
-    Call SetWindowLong(hwnd, GWL_STYLE, style)
+    Call SetWindowLong(hWnd, GWL_STYLE, style)
 End Sub
 
 '******************************************************************************

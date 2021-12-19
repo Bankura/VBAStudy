@@ -197,6 +197,13 @@ Public Function Transmit(req As HttpRequest, Optional saveOriginalBody As Boolea
     Call ReNewWinHttp
     mWinHttp.Open req.method, req.Url, False
     Call SetRequestHeaders(req)
+    
+    ' プロキシ設定
+    Dim proxyaddr As String: proxyaddr = GetRegProxyServer()
+    If proxyaddr <> "" Then
+        mWinHttp.SetProxy 2, proxyaddr
+    End If
+    
     If req.method = "GET" Or req.method = "DELETE" Or req.method = "HEAD" Or req.method = "OPTIONS" Then
         mWinHttp.Send
     Else
@@ -298,6 +305,12 @@ Public Function SendRequest(method As String, Url As String, reqHdrParams() As S
         mWinHttp.SetTimeouts lTimeout, lTimeout, lTimeout, lTimeout
     End If
     
+    ' プロキシ設定
+    Dim proxyaddr As String: proxyaddr = GetRegProxyServer()
+    If proxyaddr <> "" Then
+        mWinHttp.SetProxy 2, proxyaddr
+    End If
+    
     ' リクエスト送信
     If method = "GET" Or method = "DELETE" Or method = "HEAD" Or method = "OPTIONS" Then
         mWinHttp.Send
@@ -334,3 +347,23 @@ Public Function DownloadFile(req As HttpRequest, saveFilePath As String) As Http
     End If
 End Function
 
+'******************************************************************************
+'* [概  要] GetRegProxyServer メソッド
+'* [詳  細] レジストリよりProxyサーバの設定を取得する。
+'*
+'* @return String Proxyサーバアドレス:ポート番号
+'******************************************************************************
+Private Function GetRegProxyServer() As String
+    Dim stdRegProv As Object: Set stdRegProv = Core.CreateStdRegProv()
+    
+    ' Proxyサーバがオフなら空文字返却
+    Dim proxyEnable As Long
+    stdRegProv.GetDWORDValue HKEY_CURRENT_USER, "SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings", "ProxyEnable", proxyEnable
+    If proxyEnable = 0 Then Exit Function
+    
+    ' Proxyサーバアドレス:ポート番号を取得
+    Dim proxyaddr As String
+    stdRegProv.GetStringValue HKEY_CURRENT_USER, "SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings", "ProxyServer", proxyaddr
+
+    GetRegProxyServer = proxyaddr
+End Function

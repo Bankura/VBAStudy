@@ -333,7 +333,7 @@ Public Sub DeleteFormatConditions(Optional ByRef wb As Workbook, _
             Set fcds = rng.FormatConditions
             
             Dim i As Long
-            For i = fcds.count To 1 Step -1
+            For i = fcds.Count To 1 Step -1
                 If TypeName(fcds(i)) = "FormatCondition" Then
                     Set fcd = fcds(i)
                     If refErrorOnly And InStr(fcd.Formula1, "#REF") > 0 Then
@@ -391,7 +391,7 @@ Public Sub DeleteStyles(Optional ByRef wb As Workbook)
         Set wb = ThisWorkbook
     End If
     Dim i As Long
-    For i = wb.Styles.count To 1 Step -1
+    For i = wb.Styles.Count To 1 Step -1
         wb.Styles(i).Delete
     Next
 End Sub
@@ -583,7 +583,7 @@ Public Sub SaveCustomXMLProperty(ByVal propName As String, _
     Set parts = wb.CustomXMLParts.SelectByNamespace(ns)
     
     Dim part As Office.CustomXMLPart
-    If parts.count < 1 Then
+    If parts.Count < 1 Then
         Set part = InitCustomXMLParts(wb, ns)
     Else
         Set part = parts.Item(1)
@@ -592,10 +592,10 @@ Public Sub SaveCustomXMLProperty(ByVal propName As String, _
     Dim root As Office.CustomXMLNode
     Set root = part.DocumentElement
     
-    Dim target As Office.CustomXMLNode
-    Set target = root.SelectSingleNode("//CustomProperty[@id='" & propName & "']")
+    Dim Target As Office.CustomXMLNode
+    Set Target = root.SelectSingleNode("//CustomProperty[@id='" & propName & "']")
     
-    If target Is Nothing Then
+    If Target Is Nothing Then
         Dim d As Object: Set d = CreateObject("MSXML2.DOMDocument.6.0")
         Dim child As Object: Set child = d.createElement("CustomProperty")
         
@@ -613,7 +613,7 @@ Public Sub SaveCustomXMLProperty(ByVal propName As String, _
         root.AppendChildSubtree d.XML
     Else
         Dim targetAttr As Office.CustomXMLNode
-        For Each targetAttr In target.Attributes
+        For Each targetAttr In Target.Attributes
             If targetAttr.BaseName = "value" Then
                 targetAttr.NodeValue = propValue
                 Exit For
@@ -666,16 +666,16 @@ Public Function LoadCustomXMLProperty(ByVal propName As String, _
     Dim parts As Office.CustomXMLParts
     Set parts = wb.CustomXMLParts.SelectByNamespace(ns)
     
-    If parts.count > 0 Then
+    If parts.Count > 0 Then
         Dim root As Office.CustomXMLNode
         Set root = parts.Item(1).DocumentElement
         
-        Dim target As Office.CustomXMLNode
-        Set target = root.SelectSingleNode("//CustomProperty[@id='" & propName & "']")
+        Dim Target As Office.CustomXMLNode
+        Set Target = root.SelectSingleNode("//CustomProperty[@id='" & propName & "']")
         
-        If Not target Is Nothing Then
+        If Not Target Is Nothing Then
             Dim targetAttr As Office.CustomXMLNode
-            For Each targetAttr In target.Attributes
+            For Each targetAttr In Target.Attributes
                 If targetAttr.BaseName = "value" Then
                     LoadCustomXMLProperty = targetAttr.NodeValue
                 End If
@@ -704,15 +704,15 @@ Public Sub DeleteCustomXMLProperty(ByVal propName As String, _
     Dim parts As Office.CustomXMLParts
     Set parts = wb.CustomXMLParts.SelectByNamespace(ns)
     
-    If parts.count > 0 Then
+    If parts.Count > 0 Then
         Dim root As Office.CustomXMLNode
         Set root = parts.Item(1).DocumentElement
         
-        Dim target As Office.CustomXMLNode
-        Set target = root.SelectSingleNode("//CustomProperty[@id='" & propName & "']")
+        Dim Target As Office.CustomXMLNode
+        Set Target = root.SelectSingleNode("//CustomProperty[@id='" & propName & "']")
         
-        If Not target Is Nothing Then
-            target.Delete
+        If Not Target Is Nothing Then
+            Target.Delete
         End If
     End If
 End Sub
@@ -734,7 +734,7 @@ Public Sub DeleteCustomXMLPart(Optional ByRef wb As Workbook, _
 
     Dim parts As Office.CustomXMLParts
     Set parts = wb.CustomXMLParts.SelectByNamespace(ns)
-    If parts.count > 0 Then parts.Item(1).Delete
+    If parts.Count > 0 Then parts.Item(1).Delete
 End Sub
 
 '******************************************************************************

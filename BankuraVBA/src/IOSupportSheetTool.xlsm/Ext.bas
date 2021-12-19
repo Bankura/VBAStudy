@@ -7,16 +7,16 @@ Attribute VB_Name = "Ext"
 Option Explicit
 Option Private Module
 
-Public Function CreateAssocArray(ParamArray arr() As Variant) As Variant
-    Dim aLen As Long: aLen = UBound(arr)
+Public Function CreateAssocArray(ParamArray Arr() As Variant) As Variant
+    Dim aLen As Long: aLen = UBound(Arr)
     If Abs(aLen Mod 2) = 0 Then Err.Raise 5
     
     Dim aarr As Variant: aarr = Array()
     If aLen < 0 Then GoTo Ending
     
-    ReDim aarr(Fix(UBound(arr) / 2))
+    ReDim aarr(Fix(UBound(Arr) / 2))
     Dim i As Long
-    For i = 0 To UBound(aarr): Set aarr(i) = Init(New Tuple, arr(2 * i), arr(2 * i + 1)): Next
+    For i = 0 To UBound(aarr): Set aarr(i) = Init(New Tuple, Arr(2 * i), Arr(2 * i + 1)): Next
     
 Ending:
     CreateAssocArray = aarr
@@ -31,18 +31,18 @@ End Function
 
 Public Function DictToAssocArr(ByVal dict As Object) As Variant
     If TypeName(dict) <> "Dictionary" Then Err.Raise 13
-    Dim arr As Variant: arr = Array()
+    Dim Arr As Variant: Arr = Array()
     
     Dim ks As Variant: ks = dict.keys
     Dim dlen As Long: dlen = UBound(ks)
     If dlen < 0 Then GoTo Ending
     
-    ReDim arr(UBound(ks))
+    ReDim Arr(UBound(ks))
     Dim i As Long
-    For i = 0 To dlen: Set arr(i) = Init(New Tuple, ks(i), dict.Item(ks(i))): Next
+    For i = 0 To dlen: Set Arr(i) = Init(New Tuple, ks(i), dict.Item(ks(i))): Next
     
 Ending:
-    DictToAssocArr = arr
+    DictToAssocArr = Arr
 End Function
 
 ''' @param enumr As Enumerator(Of T)
@@ -92,10 +92,10 @@ End Function
 ''' @param fun As Func(Of T, U)
 ''' @param arr As Variant(Of Array(Of T))
 ''' @return As Variant(Of Array(Of U))
-Public Function ArrMap(ByVal fun As Func, ByVal arr As Variant) As Variant
-    If Not IsArray(arr) Then Err.Raise 13
-    Dim lb As Long: lb = LBound(arr)
-    Dim ub As Long: ub = UBound(arr)
+Public Function ArrMap(ByVal fun As Func, ByVal Arr As Variant) As Variant
+    If Not IsArray(Arr) Then Err.Raise 13
+    Dim lb As Long: lb = LBound(Arr)
+    Dim ub As Long: ub = UBound(Arr)
     Dim ret As Variant
     If ub - lb < 0 Then
         ret = Array()
@@ -105,7 +105,7 @@ Public Function ArrMap(ByVal fun As Func, ByVal arr As Variant) As Variant
     ReDim ret(lb To ub)
     
     Dim i As Long
-    For i = lb To ub: fun.FastApply ret(i), arr(i): Next
+    For i = lb To ub: fun.FastApply ret(i), Arr(i): Next
     
 Ending:
     ArrMap = ret
@@ -142,10 +142,10 @@ End Function
 ''' @param fun As Func(Of T, Boolean)
 ''' @param arr As Variant(Of Array(Of T))
 ''' @return As Variant(Of Array(Of T))
-Public Function ArrFilter(ByVal fun As Func, ByVal arr As Variant) As Variant
-    If Not IsArray(arr) Then Err.Raise 13
-    Dim lb As Long: lb = LBound(arr)
-    Dim ub As Long: ub = UBound(arr)
+Public Function ArrFilter(ByVal fun As Func, ByVal Arr As Variant) As Variant
+    If Not IsArray(Arr) Then Err.Raise 13
+    Dim lb As Long: lb = LBound(Arr)
+    Dim ub As Long: ub = UBound(Arr)
     Dim ret As Variant
     If ub - lb < 0 Then
         ret = Array()
@@ -157,15 +157,15 @@ Public Function ArrFilter(ByVal fun As Func, ByVal arr As Variant) As Variant
     Dim flg As Boolean
     Dim ixArr As Long
     Dim ixRet As Long: ixRet = lb
-    If IsObject(arr(lb)) Then
+    If IsObject(Arr(lb)) Then
         For ixArr = lb To ub
-            fun.FastApply flg, arr(ixArr)
-            If flg Then Set ret(IncrPst(ixRet)) = arr(ixArr)
+            fun.FastApply flg, Arr(ixArr)
+            If flg Then Set ret(IncrPst(ixRet)) = Arr(ixArr)
         Next
     Else
         For ixArr = lb To ub
-            fun.FastApply flg, arr(ixArr)
-            If flg Then Let ret(IncrPst(ixRet)) = arr(ixArr)
+            fun.FastApply flg, Arr(ixArr)
+            If flg Then Let ret(IncrPst(ixRet)) = Arr(ixArr)
         Next
     End If
     
@@ -182,10 +182,10 @@ End Function
 ''' @param fun As Func(Of T, K)
 ''' @param arr As Variant(Of Array(Of T))
 ''' @return As Variant(Of Array(Of Tuple`2(Of K, T)))
-Public Function ArrGroupBy(ByVal fun As Func, ByVal arr As Variant) As Variant
-    If Not IsArray(arr) Then Err.Raise 13
-    Dim lb As Long: lb = LBound(arr)
-    Dim ub As Long: ub = UBound(arr)
+Public Function ArrGroupBy(ByVal fun As Func, ByVal Arr As Variant) As Variant
+    If Not IsArray(Arr) Then Err.Raise 13
+    Dim lb As Long: lb = LBound(Arr)
+    Dim ub As Long: ub = UBound(Arr)
     Dim ixRet As Long: ixRet = -1
     Dim ret As Variant
     If ub - lb < 0 Then
@@ -196,9 +196,9 @@ Public Function ArrGroupBy(ByVal fun As Func, ByVal arr As Variant) As Variant
     ReDim ret(ub - lb)
     
     Dim k As Variant, i As Long, j As Long
-    If IsObject(arr(lb)) Then
+    If IsObject(Arr(lb)) Then
         For i = lb To ub
-            fun.FastApply k, arr(i)
+            fun.FastApply k, Arr(i)
             For j = ixRet To 0 Step -1
                 If Equals(k, ret(j)(0)) Then Exit For
             Next
@@ -206,11 +206,11 @@ Public Function ArrGroupBy(ByVal fun As Func, ByVal arr As Variant) As Variant
                 j = IncrPre(ixRet)
                 ret(j) = Array(k, New ArrayEx)
             End If
-            ret(j)(1).AddObj arr(i)
+            ret(j)(1).AddObj Arr(i)
         Next
     Else
         For i = lb To ub
-            fun.FastApply k, arr(i)
+            fun.FastApply k, Arr(i)
             For j = ixRet To 0 Step -1
                 If Equals(k, ret(j)(0)) Then Exit For
             Next
@@ -218,7 +218,7 @@ Public Function ArrGroupBy(ByVal fun As Func, ByVal arr As Variant) As Variant
                 j = IncrPre(ixRet)
                 ret(j) = Array(k, New ArrayEx)
             End If
-            ret(j)(1).AddVal arr(i)
+            ret(j)(1).AddVal Arr(i)
         Next
     End If
     
@@ -233,7 +233,7 @@ Ending:
 End Function
 
 Private Sub ArrFoldPrep( _
-    arr As Variant, seedv As Variant, i As Long, stat As Variant, _
+    Arr As Variant, seedv As Variant, i As Long, stat As Variant, _
     Optional isObj As Boolean _
     )
     
@@ -244,11 +244,11 @@ Private Sub ArrFoldPrep( _
     End If
     
     If IsMissing(stat) Then
-        isObj = IsObject(arr(i))
+        isObj = IsObject(Arr(i))
         If isObj Then
-            Set stat = arr(i)
+            Set stat = Arr(i)
         Else
-            Let stat = arr(i)
+            Let stat = Arr(i)
         End If
         i = i + 1
     End If
@@ -259,17 +259,17 @@ End Sub
 ''' @param seedv As Variant(Of U)
 ''' @return As Variant(Of U)
 Public Function ArrFold( _
-    ByVal fun As Func, ByVal arr As Variant, Optional ByVal seedv As Variant _
+    ByVal fun As Func, ByVal Arr As Variant, Optional ByVal seedv As Variant _
     ) As Variant
     
-    If Not IsArray(arr) Then Err.Raise 13
+    If Not IsArray(Arr) Then Err.Raise 13
     
     Dim stat As Variant
-    Dim i As Long: i = LBound(arr)
-    ArrFoldPrep arr, seedv, i, stat
+    Dim i As Long: i = LBound(Arr)
+    ArrFoldPrep Arr, seedv, i, stat
     
-    For i = i To UBound(arr)
-        fun.FastApply stat, stat, arr(i)
+    For i = i To UBound(Arr)
+        fun.FastApply stat, stat, Arr(i)
     Next
     
     If IsObject(stat) Then
@@ -284,27 +284,27 @@ End Function
 ''' @param seedv As Variant(Of U)
 ''' @return As Variant(Of Array(Of U))
 Public Function ArrScan( _
-    ByVal fun As Func, ByVal arr As Variant, Optional ByVal seedv As Variant _
+    ByVal fun As Func, ByVal Arr As Variant, Optional ByVal seedv As Variant _
     ) As Variant
     
-    If Not IsArray(arr) Then Err.Raise 13
+    If Not IsArray(Arr) Then Err.Raise 13
     
     Dim isObj As Boolean
     Dim stat As Variant
-    Dim i As Long: i = LBound(arr)
-    ArrFoldPrep arr, seedv, i, stat, isObj
+    Dim i As Long: i = LBound(Arr)
+    ArrFoldPrep Arr, seedv, i, stat, isObj
     
     Dim stats As ArrayEx: Set stats = New ArrayEx
     If isObj Then
         stats.AddObj stat
-        For i = i To UBound(arr)
-            fun.FastApply stat, stat, arr(i)
+        For i = i To UBound(Arr)
+            fun.FastApply stat, stat, Arr(i)
             stats.AddObj stat
         Next
     Else
         stats.AddVal stat
-        For i = i To UBound(arr)
-            fun.FastApply stat, stat, arr(i)
+        For i = i To UBound(Arr)
+            fun.FastApply stat, stat, Arr(i)
             stats.AddVal stat
         Next
     End If

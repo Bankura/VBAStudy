@@ -121,8 +121,8 @@ End Sub
 '******************************************************************************
 Private Sub GetMasterInfo()
     Dim mstHeadLetters As String: mstHeadLetters = GetSettingValue("MasterHeadLetters")
-    Dim StartRow As Long: StartRow = GetSettingValue("MasterStartRowNo")
-    Dim StartCol As Long: StartCol = GetSettingValue("MasterStartColNo")
+    Dim startRow As Long: startRow = GetSettingValue("MasterStartRowNo")
+    Dim startCol As Long: startCol = GetSettingValue("MasterStartColNo")
     
     Dim reg As Object
     Set reg = GetRegExp()
@@ -135,9 +135,9 @@ Private Sub GetMasterInfo()
     Dim wb As Workbook, ws As Worksheet
     Set wb = Application.ThisWorkbook
     For Each ws In wb.Worksheets
-        If reg.Test(ws.Name) Then
+        If reg.test(ws.Name) Then
             Dim master As Object
-            Set master = GetMasterDataFromSheet(ws, StartRow, StartCol, 2)
+            Set master = GetMasterDataFromSheet(ws, startRow, startCol, 2)
             Call mMasters.Add(ws.Name, master)
         End If
     Next

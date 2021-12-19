@@ -86,7 +86,9 @@ End Sub
 Public Sub ReadFileButton_Click()
     On Error GoTo ErrorHandler
     Call MyInit
-
+    Dim mysheet As WorkSheetEx
+    Set mysheet = Core.Init(New WorkSheetEx, TOOL_SHEET_NAME)
+        
     Dim fReader As CsvFileReader
     Set fReader = New CsvFileReader
     fReader.QuotExists = True
@@ -110,6 +112,9 @@ Public Sub ReadFileButton_Click()
         ' CSVファイル読込
         fReader.HeaderExists = True
         Dim csvData As Array2DEx: Set csvData = fReader.Read
+        AppActivate ThisWorkbook.Name
+        mysheet.Activate
+        DoEvents
         
         If csvData.IsEmptyArray() Then
             If fReader.ValidFormat Then
@@ -118,7 +123,7 @@ Public Sub ReadFileButton_Click()
                 Call Err.Raise(9999, "CSVファイル読込処理", "読込ファイルのフォーマットが不正です。")
             End If
         End If
-        
+
         ' データ検証
         myReporter.BaseMessage = "CSVデータ検証中"
         Set rf.ProgressReporter = myReporter
@@ -126,6 +131,9 @@ Public Sub ReadFileButton_Click()
             DebugUtils.Show rf.ErrMessage
             Call Err.Raise(9999, "CSVファイル読込処理", "読込ファイルのフォーマットが不正です。")
         End If
+        AppActivate ThisWorkbook.Name
+        mysheet.Activate
+        DoEvents
         
         ' フォーム項目定義情報読込
         Dim formRecDef As RecordFormat
@@ -135,11 +143,11 @@ Public Sub ReadFileButton_Click()
         myReporter.BaseMessage = "シートデータ変換処理中"
         Set formRecDef.ProgressReporter = myReporter
         Dim formData As Array2DEx: Set formData = formRecDef.Convert(csvData)
-        Call UXUtils.CheckEvents
+        AppActivate ThisWorkbook.Name
+        mysheet.Activate
+        DoEvents
 
         'シートをクリア
-        Dim mysheet As WorkSheetEx
-        Set mysheet = Core.Init(New WorkSheetEx, TOOL_SHEET_NAME)
         Call mysheet.ClearActualUsedRange(dsStartRow, dsKoubanCol, dsItemCount)
         Call mysheet.DeleteNoUsedRange(dsStartRow)
         Call UXUtils.CheckEvents
@@ -151,7 +159,8 @@ Public Sub ReadFileButton_Click()
         Call UXUtils.CheckEvents
 
         Call MyEndProcess
-        
+        AppActivate ThisWorkbook.Name
+        mysheet.Activate
         mysheet.Cells(dsStartRow, dsStartCol).Select
         MsgBox "CSVファイルの読込が完了しました｡", vbOKOnly + vbInformation, TOOL_NAME
     End If
@@ -159,6 +168,8 @@ Public Sub ReadFileButton_Click()
     Exit Sub
 ErrorHandler:
     Call MyEndProcess
+    AppActivate ThisWorkbook.Name
+    mysheet.Activate
     Call MyErrorProcess
 End Sub
 
@@ -181,6 +192,8 @@ Public Sub OutputFileButton_Click()
     ' 項目データ読込・データ検証
     Dim formData As Array2DEx: Set formData = CheckDataSheet(mysheet, rf)
     If formData Is Nothing Then
+        AppActivate ThisWorkbook.Name
+        mysheet.Activate
         Exit Sub
     End If
 
@@ -216,7 +229,8 @@ Public Sub OutputFileButton_Click()
             Call fWriter.WriteFile(editedFormData)
 
             Call MyEndProcess
-            
+            AppActivate ThisWorkbook.Name
+            mysheet.Activate
             MsgBox "CSVファイルの出力が完了しました｡", vbOKOnly + vbInformation, TOOL_NAME
         End If
     End If
@@ -224,6 +238,8 @@ Public Sub OutputFileButton_Click()
     Exit Sub
 ErrorHandler:
     Call MyEndProcess
+    AppActivate ThisWorkbook.Name
+    mysheet.Activate
     Call MyErrorProcess
 End Sub
 
@@ -254,6 +270,8 @@ Public Sub DeleteRowButton_Click()
 
 ErrorHandler:
     Call MyEndProcess
+    AppActivate ThisWorkbook.Name
+    mysheet.Activate
     Call MyErrorProcess
 End Sub
 
@@ -281,6 +299,8 @@ Sub CheckButton_Click()
     End If
 
     'メッセージ表示
+    AppActivate ThisWorkbook.Name
+    mysheet.Activate
     mysheet.Cells(dsStartRow, dsStartCol).Select
     MsgBox "チェックが完了しました｡" + vbNewLine + "問題ありません。", vbOKOnly + vbInformation, TOOL_NAME
     
@@ -288,6 +308,8 @@ Sub CheckButton_Click()
 
 ErrorHandler:
     Call MyEndProcess
+    AppActivate ThisWorkbook.Name
+    mysheet.Activate
     Call MyErrorProcess
 End Sub
 
@@ -316,11 +338,15 @@ Public Sub ClearButton_Click()
     Call mysheet.DeleteNoUsedRange(dsStartRow)
     
     Call MyEndProcess
+    AppActivate ThisWorkbook.Name
+    mysheet.Activate
     mysheet.Cells(dsStartRow, dsStartCol).Select
 
     Exit Sub
 ErrorHandler:
     Call MyEndProcess
+    AppActivate ThisWorkbook.Name
+    mysheet.Activate
     Call MyErrorProcess
 End Sub
 
@@ -387,6 +413,9 @@ Function CheckDataSheet(mysheet As WorkSheetEx, rf As RecordFormat) As Array2DEx
     Dim formData As Array2DEx
     Set formData = mysheet.GetActualUsedRangeToArray2DEx(dsStartRow, dsStartCol, rf.ColumnCount, dsKoubanCol)
     If formData.IsEmptyArray Then
+        AppActivate ThisWorkbook.Name
+        mysheet.Activate
+        Call MyEndProcess
         MsgBox "データが入力されていません。", vbOKOnly + vbExclamation, TOOL_NAME
         Set CheckDataSheet = Nothing
         Exit Function
@@ -401,14 +430,17 @@ Function CheckDataSheet(mysheet As WorkSheetEx, rf As RecordFormat) As Array2DEx
     myReporter.BaseMessage = "データ検証中"
     Set rf.ProgressReporter = myReporter
     If Not rf.Validate(formData, True) Then
-        Call MyEndProcess
+        AppActivate ThisWorkbook.Name
+        mysheet.Activate
         mysheet.Cells(dsStartRow + rf.ErrRowNo - 1, dsStartCol + rf.ErrColNo - 1).Select
+        Call MyEndProcess
         MsgBox rf.ErrMessage, vbOKOnly + vbExclamation, TOOL_NAME
         Set CheckDataSheet = Nothing
         Exit Function
     End If
     Set CheckDataSheet = formData
-    
+    AppActivate ThisWorkbook.Name
+    mysheet.Activate
     Call MyEndProcess
     Exit Function
 End Function
@@ -488,7 +520,6 @@ End Function
 '*
 '******************************************************************************
 Private Function GetDefinedRecordFormat(vArr) As RecordFormat
-    Dim rf As RecordFormat
     Dim itmdefs As Collection: Set itmdefs = New Collection
     Dim i As Long
     For i = LBound(vArr, 1) To UBound(vArr, 1)
@@ -506,14 +537,14 @@ End Function
 '* @return Item 定義済み項目
 '*
 '******************************************************************************
-Private Function DefineItem(vArr, rownum As Long) As Item
+Private Function DefineItem(vArr, rowNum As Long) As Item
     Dim itm As Item
     Set itm = New Item
-    itm.Name = vArr(rownum, 1)
-    If vArr(rownum, 2) = "○" Then
+    itm.Name = vArr(rowNum, 1)
+    If vArr(rowNum, 2) = "○" Then
         itm.required = True
     End If
-    Select Case vArr(rownum, 3)
+    Select Case vArr(rowNum, 3)
         Case "半角"
             itm.Attr = AttributeEnum.attrHalf
         Case "半角英数"
@@ -537,7 +568,7 @@ Private Function DefineItem(vArr, rownum As Long) As Item
         Case Else
             itm.Attr = AttributeEnum.attrString
     End Select
-    Select Case vArr(rownum, 4)
+    Select Case vArr(rowNum, 4)
         Case "固定"
             itm.KindOfDigits = KindOfDigitsEnum.digitFixed
         Case "以内"
@@ -547,18 +578,18 @@ Private Function DefineItem(vArr, rownum As Long) As Item
         Case Else
             itm.KindOfDigits = KindOfDigitsEnum.digitNone
     End Select
-    If vArr(rownum, 5) <> "" And VBA.IsNumeric(vArr(rownum, 5)) Then
-        itm.MinNumOfDigits = CLng(vArr(rownum, 5))
+    If vArr(rowNum, 5) <> "" And VBA.IsNumeric(vArr(rowNum, 5)) Then
+        itm.MinNumOfDigits = CLng(vArr(rowNum, 5))
     End If
-    If vArr(rownum, 6) <> "" And VBA.IsNumeric(vArr(rownum, 6)) Then
-        itm.MaxNumOfDigits = CLng(vArr(rownum, 6))
+    If vArr(rowNum, 6) <> "" And VBA.IsNumeric(vArr(rowNum, 6)) Then
+        itm.MaxNumOfDigits = CLng(vArr(rowNum, 6))
     End If
-    itm.Pattern = vArr(rownum, 7)
+    itm.Pattern = vArr(rowNum, 7)
     If UBound(vArr, 2) = 13 Then
-        If vArr(rownum, 8) <> "" And VBA.IsNumeric(vArr(rownum, 8)) Then
-            itm.InputColNo = vArr(rownum, 8)
+        If vArr(rowNum, 8) <> "" And VBA.IsNumeric(vArr(rowNum, 8)) Then
+            itm.InputColNo = vArr(rowNum, 8)
         End If
-        Select Case vArr(rownum, 9)
+        Select Case vArr(rowNum, 9)
             Case "マスタ変換（Code→Value）"
                 itm.InitValueKind = EditKindEnum.mstCodeToValue
             Case "マスタ変換（Value→Code）"
@@ -568,11 +599,11 @@ Private Function DefineItem(vArr, rownum As Long) As Item
             Case Else
                 itm.InitValueKind = EditKindEnum.edtNone
         End Select
-        itm.InitValue = vArr(rownum, 10)
-        If vArr(rownum, 11) = "○" Then
+        itm.InitValue = vArr(rowNum, 10)
+        If vArr(rowNum, 11) = "○" Then
             itm.OutputTarget = True
         End If
-        Select Case vArr(rownum, 12)
+        Select Case vArr(rowNum, 12)
             Case "マスタ変換（Code→Value）"
                 itm.OutputEditKind = EditKindEnum.mstCodeToValue
             Case "マスタ変換（Value→Code）"
@@ -582,7 +613,7 @@ Private Function DefineItem(vArr, rownum As Long) As Item
             Case Else
                 itm.OutputEditKind = EditKindEnum.edtNone
         End Select
-        itm.OutputEditValue = vArr(rownum, 13)
+        itm.OutputEditValue = vArr(rowNum, 13)
     End If
     Set DefineItem = itm
 End Function

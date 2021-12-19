@@ -31,6 +31,7 @@ Option Explicit
 '* WindowsAPI定義
 '******************************************************************************
 Private Declare PtrSafe Function SafeArrayAllocDescriptor Lib "oleaut32" (ByVal cDims As Long, ByRef ppsaOut() As Any) As Long
+Private Declare PtrSafe Function StrCmpLogicalW Lib "SHLWAPI.DLL" (ByVal lpStr1 As String, ByVal lpStr2 As String) As Long
 
 '******************************************************************************
 '* Enum定義
@@ -89,11 +90,11 @@ End Sub
 '* @return Variant 変換後Variant型配列
 '*
 '******************************************************************************
-Public Function ToVArrayFlattened(ByRef vArray As Variant) As Variant
-    Dim arr As ArrayEx: Set arr = New ArrayEx
+Public Function ToVArrayFlattened(ByRef vArray As Variant, Optional applyArrayEx As Boolean = False) As Variant
+    Dim Arr As ArrayEx: Set Arr = New ArrayEx
     
-    Call AddAllFromHierarchicalArray(arr, vArray)
-    ToVArrayFlattened = arr.ToArray
+    Call AddAllFromHierarchicalArray(Arr, vArray, applyArrayEx)
+    ToVArrayFlattened = Arr.ToArray
 End Function
 
 '******************************************************************************
@@ -106,16 +107,20 @@ End Function
 '* @param vArray Variant型配列
 '*
 '******************************************************************************
-Public Sub AddAllFromHierarchicalArray(ByVal arr As ArrayEx, ByRef vArray As Variant)
+Public Sub AddAllFromHierarchicalArray(ByVal Arr As ArrayEx, ByRef vArray As Variant, Optional applyArrayEx As Boolean = False)
+    Dim v
     If ValidateUtils.IsPrimitive(vArray) Then
-        arr.AddVal vArray
-    ElseIf IsObject(vArray) Then
-        arr.AddObj vArray
-    ElseIf VBA.IsArray(vArray) Then
-        Dim v
-        For Each v In vArray
-            Call AddAllFromHierarchicalArray(arr, v)
+        Arr.AddVal vArray
+    ElseIf ValidateUtils.IsArrayEx(vArray) And applyArrayEx Then
+        For Each v In vArray.ToArray
+            Call AddAllFromHierarchicalArray(Arr, v, applyArrayEx)
         Next
+    ElseIf VBA.IsArray(vArray) Then
+        For Each v In vArray
+            Call AddAllFromHierarchicalArray(Arr, v, applyArrayEx)
+        Next
+    ElseIf IsObject(vArray) Then
+        Arr.AddObj vArray
     End If
 End Sub
 
@@ -129,8 +134,10 @@ End Sub
 '******************************************************************************
 Public Function GetDimension(ByRef vArray As Variant) As Integer
     On Error GoTo ErrorHandler
-    GetDimension = Core.ArrRank(vArray)
-    Exit Function
+    If IsArray(vArray) Then
+        GetDimension = Core.ArrRank(vArray)
+        Exit Function
+    End If
 ErrorHandler:
     GetDimension = -1
 End Function
@@ -145,9 +152,9 @@ End Function
 '* @return Long 要素数(配列ではない場合-1)
 '*
 '******************************************************************************
-Public Function GetLength(ByRef vArray As Variant, Optional dimmention As Integer = 1) As Long
+Public Function GetLength(ByRef vArray As Variant, Optional dimention As Integer = 1) As Long
     On Error GoTo ErrorHandler
-    GetLength = Core.ArrLen(vArray, dimmention)
+    GetLength = Core.ArrLen(vArray, dimention)
     Exit Function
 ErrorHandler:
     GetLength = -1
@@ -240,6 +247,28 @@ Public Function IsJagArray(ByRef vArray As Variant) As Boolean
 End Function
 
 '******************************************************************************
+'* [概  要] IsCorrectRange
+'* [詳  細] 指定された添え字が指定配列内に存在するかチェックする｡
+'*
+'* @param vArray 検査する配列
+'* @param n 検査する添え字
+'* @param dimention 対象の次元
+'* @return Boolean 判定結果(True:存在する)
+'*
+'******************************************************************************
+Public Function IsCorrectRange(ByRef vArray As Variant, ByVal n As Long, Optional ByVal dimention As Integer = 1) As Boolean
+    If Not VBA.IsArray(vArray) Then Exit Function
+    If Me.IsEmptyArray(vArray) Then Exit Function
+    Dim i As Long
+    For i = 0 To GetDimension(vArray) - 1
+        If n < LBound(vArray, i) Or UBound(vArray, i) < n Then
+            Exit Function
+        End If
+    Next
+    IsCorrectRange = True
+End Function
+
+'******************************************************************************
 '* [概  要] ArrayRank
 '* [詳  細] 配列の次元を返却する。
 '*          AriawaseのCoreモジュールラッパーメソッド。
@@ -247,8 +276,8 @@ End Function
 '* @param arr As Variant(Of Array(Of T))
 '* @return As Integer
 '******************************************************************************
-Public Function ArrayRank(ByVal arr As Variant) As Integer
-    ArrayRank = Core.ArrRank(arr)
+Public Function ArrayRank(ByVal Arr As Variant) As Integer
+    ArrayRank = Core.ArrRank(Arr)
 End Function
 
 '******************************************************************************
@@ -260,8 +289,8 @@ End Function
 '* @param dimen As Integer
 '* @return As Long
 '******************************************************************************
-Public Function ArrayLen(ByVal arr As Variant, Optional ByVal dimen As Integer = 1) As Long
-    ArrayLen = Core.ArrLen(arr, dimen)
+Public Function ArrayLen(ByVal Arr As Variant, Optional ByVal dimen As Integer = 1) As Long
+    ArrayLen = Core.ArrLen(Arr, dimen)
 End Function
 
 '******************************************************************************
@@ -311,10 +340,10 @@ End Function
 '* @return As Long
 '******************************************************************************
 Public Function IndexOf( _
-    ByVal arr As Variant, ByVal val As Variant, _
+    ByVal Arr As Variant, ByVal val As Variant, _
     Optional ByVal ixStart As Variant, Optional ByVal cnt As Variant _
     ) As Long
-    IndexOf = Core.ArrIndexOf(arr, val, ixStart, cnt)
+    IndexOf = Core.ArrIndexOf(Arr, val, ixStart, cnt)
 End Function
 
 '******************************************************************************
@@ -324,8 +353,8 @@ End Function
 '*
 '* @param arr As Variant(Of Array(Of T))
 '******************************************************************************
-Public Sub Reverse(ByRef arr As Variant)
-    Call Core.ArrRev(arr)
+Public Sub reverse(ByRef Arr As Variant)
+    Call Core.ArrRev(Arr)
 End Sub
 
 '******************************************************************************
@@ -336,8 +365,8 @@ End Sub
 '* @param arr As Variant(Of Array(Of T))
 '* @param orderAsc As Boolean
 '******************************************************************************
-Public Sub Sort(ByRef arr As Variant, Optional ByVal orderAsc As Boolean = True)
-    Call Core.ArrSort(arr, orderAsc)
+Public Sub Sort(ByRef Arr As Variant, Optional ByVal orderAsc As Boolean = True)
+    Call Core.ArrSort(Arr, orderAsc)
 End Sub
 
 '******************************************************************************
@@ -348,8 +377,8 @@ End Sub
 '* @param arr As Variant(Of Array(Of T))
 '* @return As Variant(Of Array(Of T))
 '******************************************************************************
-Public Function Uniq(ByVal arr As Variant) As Variant
-    Uniq = Core.ArrUniq(arr)
+Public Function Uniq(ByVal Arr As Variant) As Variant
+    Uniq = Core.ArrUniq(Arr)
 End Function
 
 '******************************************************************************
@@ -366,7 +395,7 @@ Public Function Concat(ByVal arr1 As Variant, ByVal arr2 As Variant) As Variant
 End Function
 
 '******************************************************************************
-'* [概  要] ArraySlice
+'* [概  要] Slice
 '* [詳  細] 一次元配列をスライス（一部を配列として切り出）して返却する。
 '*          AriawaseのCoreモジュールラッパーメソッド。
 '*
@@ -376,14 +405,14 @@ End Function
 '* @return As Variant(Of Array(Of T))
 '******************************************************************************
 Public Function Slice( _
-    ByVal arr As Variant, _
+    ByVal Arr As Variant, _
     Optional ByVal ixStart As Variant, Optional ByVal ixEnd As Variant _
     ) As Variant
-    Slice = Core.ArrSlice(arr, ixStart, ixEnd)
+    Slice = Core.ArrSlice(Arr, ixStart, ixEnd)
 End Function
 
 '******************************************************************************
-'* [概  要] ArrayFlatten
+'* [概  要] Flatten
 '* [詳  細] ジャグ配列のフラット化。ジャグ配列を一次元配列に変換して返却する。
 '*          AriawaseのCoreモジュールラッパーメソッド。
 '*
@@ -402,8 +431,8 @@ End Function
 '* @param arr As Variant(Of Array(Of T))
 '* @return As Collection(Of T)
 '******************************************************************************
-Public Function ArrayToCollection(ByVal arr As Variant) As Collection
-    Set ArrayToCollection = Core.ArrToClct(arr)
+Public Function ArrayToCollection(ByVal Arr As Variant) As Collection
+    Set ArrayToCollection = Core.ArrToClct(Arr)
 End Function
 
 '******************************************************************************
@@ -503,8 +532,8 @@ End Function
 '* @param arr As Variant(Of Array(Of T))
 '* @return As Variant(Of Array(Of U))
 '******************************************************************************
-Public Function Map(ByVal fun As Func, ByVal arr As Variant) As Variant
-    Map = Ext.ArrMap(fun, arr)
+Public Function Map(ByVal fun As Func, ByVal Arr As Variant) As Variant
+    Map = Ext.ArrMap(fun, Arr)
 End Function
 
 '******************************************************************************
@@ -534,8 +563,8 @@ End Function
 '* @param arr As Variant(Of Array(Of T))
 '* @return As Variant(Of Array(Of T))
 '******************************************************************************
-Public Function Filter(ByVal fun As Func, ByVal arr As Variant) As Variant
-    Filter = Ext.ArrFilter(fun, arr)
+Public Function Filter(ByVal fun As Func, ByVal Arr As Variant) As Variant
+    Filter = Ext.ArrFilter(fun, Arr)
 End Function
 
 '******************************************************************************
@@ -548,8 +577,8 @@ End Function
 '* @param arr As Variant(Of Array(Of T))
 '* @return As Variant(Of Array(Of Tuple`2(Of K, T)))
 '******************************************************************************
-Public Function GroupBy(ByVal fun As Func, ByVal arr As Variant) As Variant
-    GroupBy = Ext.ArrGroupBy(fun, arr)
+Public Function GroupBy(ByVal fun As Func, ByVal Arr As Variant) As Variant
+    GroupBy = Ext.ArrGroupBy(fun, Arr)
 End Function
 
 '******************************************************************************
@@ -565,9 +594,9 @@ End Function
 '* @return As Variant(Of U)
 '******************************************************************************
 Public Function Fold( _
-    ByVal fun As Func, ByVal arr As Variant, Optional ByVal seedv As Variant _
+    ByVal fun As Func, ByVal Arr As Variant, Optional ByVal seedv As Variant _
     ) As Variant
-    Fold = Ext.ArrFold(fun, arr, seedv)
+    Fold = Ext.ArrFold(fun, Arr, seedv)
 End Function
 
 '******************************************************************************
@@ -582,9 +611,9 @@ End Function
 '* @return As Variant(Of Array(Of U))
 '******************************************************************************
 Public Function Scan( _
-    ByVal fun As Func, ByVal arr As Variant, Optional ByVal seedv As Variant _
+    ByVal fun As Func, ByVal Arr As Variant, Optional ByVal seedv As Variant _
     ) As Variant
-    Scan = Ext.ArrScan(fun, arr, seedv)
+    Scan = Ext.ArrScan(fun, Arr, seedv)
 End Function
 
 '******************************************************************************
@@ -626,10 +655,10 @@ End Function
 '* @param defaultVal デフォルト値
 '* @return Variant 変更後2次元配列
 '******************************************************************************
-Public Function SetDefaultTo2DArrayRow(ByRef v2DArr As Variant, ByVal rownum As Long, ByVal defaultVal As Variant) As Variant
+Public Function SetDefaultTo2DArrayRow(ByRef v2DArr As Variant, ByVal rowNum As Long, ByVal defaultVal As Variant) As Variant
     Dim i As Long
     For i = LBound(v2DArr, 2) To UBound(v2DArr, 2)
-        v2DArr(rownum, i) = defaultVal
+        v2DArr(rowNum, i) = defaultVal
     Next
     SetDefaultTo2DArrayRow = v2DArr
 End Function
@@ -643,12 +672,30 @@ End Function
 '* @param v1DArr 1次元配列
 '* @return Variant 変更後2次元配列
 '******************************************************************************
-Public Function Copy1DArrayTo2DArrayRow(ByRef v2DArr As Variant, ByVal rownum As Long, ByRef v1DArr As Variant) As Variant
+Public Function Copy1DArrayTo2DArrayRow(ByRef v2DArr As Variant, ByVal rowNum As Long, ByRef v1DArr As Variant) As Variant
     Dim i As Long
     For i = LBound(v2DArr, 2) To UBound(v2DArr, 2)
-        v2DArr(rownum, i) = v1DArr(i)
+        v2DArr(rowNum, i) = v1DArr(i)
     Next
     Copy1DArrayTo2DArrayRow = v2DArr
+End Function
+
+'******************************************************************************
+'* [概  要] Copy2DArrayRowTo2DArrayRow
+'* [詳  細] 2次元配列の指定行に対して、2次元配列の指定行の値を設定する。
+'*
+'* @param destArr コピー先2次元配列
+'* @param destRowNum コピー先指定行
+'* @param srcArr コピー元2次元配列
+'* @param srcRowNum コピー元指定行
+'* @return Variant 変更後2次元配列
+'******************************************************************************
+Public Function Copy2DArrayRowTo2DArrayRow(ByRef destArr As Variant, ByVal destRowNum As Long, ByRef srcArr As Variant, ByVal srcRowNum As Long) As Variant
+    Dim i As Long
+    For i = LBound(destArr, 2) To UBound(destArr, 2)
+        destArr(destRowNum, i) = srcArr(srcRowNum, i)
+    Next
+    Copy2DArrayRowTo2DArrayRow = destArr
 End Function
 
 '******************************************************************************
@@ -699,19 +746,16 @@ End Function
 '*                                   Array(4,5,6),
 '*                                   Array(7,8,9))
 '*
-'* @param lower1 1次元開始インデックス
-'* @param upper1 1次元終了インデックス
-'* @param lower2 2次元開始インデックス
-'* @param upper2 2次元終了インデックス
+'* @param arrList 1次元配列のリスト
 '* @return Variant 2次元配列
 '******************************************************************************
 Public Function Create2DArrayWithValue(ParamArray arrList() As Variant) As Variant
-    If IsMissing(arrList) Then
+    If ValidateUtils.IsParamArrayMissing(arrList) Then
         GoTo InValidParam
     End If
     
-    Dim v, c As Long, rownum As Long, colnum As Long
-    c = 0: rownum = 0: colnum = 0
+    Dim v, c As Long, rowNum As Long, colnum As Long
+    c = 0: rowNum = 0: colnum = 0
     
     For Each v In arrList
         If Not IsArray(v) Then
@@ -724,10 +768,10 @@ Public Function Create2DArrayWithValue(ParamArray arrList() As Variant) As Varia
             If colnum <> c Then GoTo InValidParam
         End If
         c = GetLength(v)
-        rownum = rownum + 1
+        rowNum = rowNum + 1
     Next
     
-    Dim vNew2DArr: vNew2DArr = Create2DArrayEasy(rownum - 1, colnum - 1)
+    Dim vNew2DArr: vNew2DArr = Create2DArrayEasy(rowNum - 1, colnum - 1)
     Dim i As Long: i = LBound(vNew2DArr)
 
     For Each v In arrList
@@ -787,13 +831,23 @@ End Function
 '* @param rowIdx 行インデックス
 '* @return Variant 1次元配列
 '******************************************************************************
-Public Function Copy2DArrayRow(ByRef source2DArr As Variant, ByVal rowIdx As Long) As Variant
-    Dim vNewArr As Variant: vNewArr = Create1DArray(0, UBound(source2DArr) - LBound(source2DArr))
+Public Function Copy2DArrayRow(ByRef source2DArr As Variant, ByVal rowIdx As Long, Optional inheritIndex As Boolean = False) As Variant
+    Dim startInd As Long
+    Dim endInd As Long
+    If inheritIndex Then
+        startInd = LBound(source2DArr, 2)
+        endInd = UBound(source2DArr, 2)
+    Else
+        startInd = 0
+        endInd = UBound(source2DArr, 2) - LBound(source2DArr, 2)
+    End If
     
-    Dim colidx As Long
-    Dim y As Long: y = 0
-    For colidx = LBound(source2DArr) To UBound(source2DArr)
-        vNewArr(y) = source2DArr(rowIdx, colidx)
+    Dim vNewArr As Variant: vNewArr = Create1DArray(startInd, endInd)
+    
+    Dim colIdx As Long
+    Dim y As Long: y = startInd
+    For colIdx = LBound(source2DArr, 2) To UBound(source2DArr, 2)
+        vNewArr(y) = source2DArr(rowIdx, colIdx)
         y = y + 1
     Next
     Copy2DArrayRow = vNewArr
@@ -816,6 +870,28 @@ Public Function Contains(ByRef vArr As Variant, ByVal itm As Variant) As Boolean
         End If
     Next
     Contains = False
+End Function
+
+'******************************************************************************
+'* [概  要] ContainsLike
+'* [詳  細] 1次元配列に指定した検索文字列（正規表現）が含まれるかチェックする。
+'*
+'* @param varr 1次元配列
+'* @param searchStr 検索文字列（正規表現）
+'* @param igCase 大文字小文字の区別
+'* @return Boolean チェック結果（True：含む）
+'******************************************************************************
+Public Function ContainsLike(ByRef vArr As Variant, ByVal searchStr As String, Optional ByVal igCase As Boolean = False) As Boolean
+    Dim v As Variant
+    For Each v In vArr
+        If ValidateUtils.IsString(v) Then
+            If ValidateUtils.ValidatePattern(v, searchStr, igCase) Then
+                ContainsLike = True
+                Exit Function
+            End If
+        End If
+    Next
+    ContainsLike = False
 End Function
 
 '******************************************************************************
@@ -860,7 +936,7 @@ End Function
 '* @return Variant 追加後1次元配列
 '******************************************************************************
 Public Function InsertAll(ByRef vArr As Variant, ByVal idx As Long, ParamArray itms() As Variant) As Variant
-    If IsMissing(itms) Then
+    If ValidateUtils.IsParamArrayMissing(itms) Then
         InsertAll = vArr
         Exit Function
     End If
@@ -902,30 +978,30 @@ End Function
 '* @param cnt As Variant(Of Long)
 '* @return As Long
 '******************************************************************************
-Public Function LastIndexOf(ByVal arr As Variant, ByVal val As Variant, _
+Public Function LastIndexOf(ByVal Arr As Variant, ByVal val As Variant, _
     Optional ByVal ixStart As Variant, Optional ByVal cnt As Variant _
     ) As Long
     
-    If Not IsArray(arr) Then Err.Raise 13
+    If Not IsArray(Arr) Then Err.Raise 13
     
-    Dim ixLast As Long:  ixLast = UBound(arr)
-    Dim aLen As Long: aLen = Core.ArrLen(arr)
+    Dim ixLast As Long:  ixLast = UBound(Arr)
+    Dim aLen As Long: aLen = Core.ArrLen(Arr)
     If IsMissing(ixStart) Then ixStart = ixLast
     If IsNumeric(ixStart) Then ixStart = CLng(ixStart) Else Err.Raise 13
-    If ixStart < LBound(arr) Or ixStart > ixLast Then Err.Raise 5
+    If ixStart < LBound(Arr) Or ixStart > ixLast Then Err.Raise 5
     If IsMissing(cnt) Then cnt = aLen
     If IsNumeric(cnt) Then cnt = CLng(cnt) Else Err.Raise 13
     cnt = Min(cnt, aLen)
     
     LastIndexOf = -1
     Dim ixEnd As Long: ixEnd = ixStart - cnt + 1
-    If ixEnd < LBound(arr) Then
-        ixEnd = LBound(arr)
+    If ixEnd < LBound(Arr) Then
+        ixEnd = LBound(Arr)
     End If
 
     Dim i As Long
     For i = ixStart To ixEnd Step -1
-        If Core.Equals(arr(i), val, True) Then
+        If Core.Equals(Arr(i), val, True) Then
             LastIndexOf = i
             GoTo Escape
         End If
@@ -943,21 +1019,21 @@ End Function
 '* @param reverseOrder リストの並びを逆順にするか
 '* @return Variant インデックスリスト（1次元配列）
 '******************************************************************************
-Public Function IndexListOf(ByVal arr As Variant, ByVal val As Variant, Optional ByVal reverseOrder As Boolean = False) As Variant
+Public Function IndexListOf(ByVal Arr As Variant, ByVal val As Variant, Optional ByVal reverseOrder As Boolean = False) As Variant
     Dim arrex As ArrayEx: Set arrex = New ArrayEx
-    If Not Me.Is1DArray(arr) Or Me.IsEmptyArray(arr) Then
+    If Not Me.Is1DArray(Arr) Or Me.IsEmptyArray(Arr) Then
         IndexListOf = arrex.ToArray
         Exit Function
     End If
     Dim uIdx As Long, lIdx As Long
-    uIdx = UBound(arr)
-    lIdx = LBound(arr)
+    uIdx = UBound(Arr)
+    lIdx = LBound(Arr)
 
     Dim idx As Long, ret As Long
     If Not reverseOrder Then
         idx = lIdx
         Do
-            ret = Me.IndexOf(arr, val, idx)
+            ret = Me.IndexOf(Arr, val, idx)
             If idx <= ret Then
                 arrex.Add ret
                 If ret = uIdx Then Exit Do
@@ -969,7 +1045,7 @@ Public Function IndexListOf(ByVal arr As Variant, ByVal val As Variant, Optional
     Else
         idx = uIdx
         Do
-            ret = Me.LastIndexOf(arr, val, idx)
+            ret = Me.LastIndexOf(Arr, val, idx)
             If ret >= 0 Then
                 arrex.Add ret
                 If ret = lIdx Then Exit Do
@@ -1101,12 +1177,32 @@ Public Function ToString(ByRef vArr As Variant) As String
 
     strx.Append "["
     Dim i As Long
-    For i = LBound(vArr) To UBound(vArr)
-        strx.Append VariantUtils.ToString(vArr(i))
-        If i < UBound(vArr) Then
-            strx.Append ", "
-        End If
-    Next
+    If Is2DArray(vArr) Then
+        Dim j As Long
+        For i = LBound(vArr, 1) To UBound(vArr, 1)
+            strx.Append "["
+            For j = LBound(vArr, 2) To UBound(vArr, 2)
+                strx.Append VariantUtils.ToString(vArr(i, j))
+                If j < UBound(vArr, 2) Then
+                    strx.Append ", "
+                End If
+            Next
+            strx.Append "]"
+            
+            If i < UBound(vArr, 1) Then
+                strx.Append ", "
+            End If
+        Next
+    ElseIf Is1DArray(vArr) Then
+        For i = LBound(vArr) To UBound(vArr)
+            strx.Append VariantUtils.ToString(vArr(i))
+            If i < UBound(vArr) Then
+                strx.Append ", "
+            End If
+        Next
+    Else
+        strx.Append "(未対応の次元配列)"
+    End If
     strx.Append "]"
     ToString = strx.ToString
 End Function
@@ -1285,6 +1381,31 @@ Public Function Array2DToArray2DEx(ByVal arr2d As Variant) As Array2DEx
 End Function
 
 '******************************************************************************
+'* [概  要] ArrayTo2DArrayEx
+'* [詳  細] 1次元配列をArray2DExに変換する。
+'*
+'* @param arr 1次元配列
+'* @param transpose Trueにすると1次元配列を列方向に設定する
+'* @return Array2DEx Array2DExオブジェクト
+'******************************************************************************
+Public Function ArrayTo2DArrayEx(ByVal Arr As Variant, Optional ByVal Transpose As Boolean = False) As Array2DEx
+    Dim arr2dex As Array2DEx: Set arr2dex = New Array2DEx
+    Set ArrayTo2DArrayEx = arr2dex.Init(Arr, Transpose)
+End Function
+
+'******************************************************************************
+'* [概  要] ArrayTo2DArray
+'* [詳  細] 1次元配列を2次元配列に変換する。
+'*
+'* @param arr 1次元配列
+'* @param transpose Trueにすると1次元配列を列方向に設定する
+'* @return Variant 2次元配列
+'******************************************************************************
+Public Function ArrayTo2DArray(ByVal Arr As Variant, Optional ByVal Transpose As Boolean = False) As Variant
+    ArrayTo2DArray = ArrayTo2DArrayEx(Arr, Transpose).To2DArray
+End Function
+
+'******************************************************************************
 '* [概  要] CreateArrayEx
 '* [詳  細] ArrayExオブジェクトを作成する。
 '*
@@ -1343,3 +1464,357 @@ Public Function Create1DArrayEasy(ByVal upper As Long) As Variant
     ReDim vNewArr(0 To upper) As Variant
     Create1DArrayEasy = vNewArr
 End Function
+
+'******************************************************************************
+'* [概  要] CsvStringToArray
+'* [詳  細] CSV文字データを行単位で読込み、Variant配列に設定して返却する。
+'*
+'* @param csvData CSV文字データ
+'* @param headerExists ヘッダ行の有無
+'* @param quotExists ""で括っているか
+'* @param separator 改行コード
+'* @return 読込テキストデータ（Variant2次元配列）
+'******************************************************************************
+Public Function CsvStringToArray(ByVal csvData As String, _
+                                 Optional ByVal HeaderExists As Boolean = True, _
+                                 Optional ByVal QuotExists As Boolean = False, _
+                                 Optional ByVal separator As LineSeparatorsEnum = adCRLF) As Variant
+    Dim vLine, lCount As Long, i As Long, vRow, vArr()
+    Dim vData As Variant: vData = Split(csvData, IO.FromLineSeparatorsEnum(separator))
+    Dim lSize As Long: lSize = GetLength(vData)
+    
+     ' 空データは空Variant配列で返却
+    If (HeaderExists And lSize <= 1) Or (Not HeaderExists And lSize = 0) Then
+        Exit Function
+    End If
+
+    For Each vLine In vData
+        ' 1行目処理
+        If lCount = 0 Then
+            vRow = StringUtils.SplitCsvRow(CStr(vLine), QuotExists)
+            If Not HeaderExists Then
+                ReDim vArr(0 To lSize - 1, 0 To UBound(vRow))
+                For i = LBound(vRow) To UBound(vRow)
+                    vArr(lCount, i) = vRow(i)
+                Next
+                lCount = lCount + 1
+            Else
+                ReDim vArr(0 To lSize - 2, 0 To UBound(vRow))
+            End If
+            Dim colCount As Long: colCount = UBound(vRow)
+        End If
+
+        ' 2行目以降処理
+        vRow = StringUtils.SplitCsvRow(CStr(vLine), QuotExists)
+        If UBound(vRow) <> colCount Then
+            CsvStringToArray = Empty
+            Exit Function
+        End If
+        
+        For i = LBound(vRow) To UBound(vRow)
+            vArr(lCount, i) = vRow(i)
+        Next
+        lCount = lCount + 1
+    Next
+    CsvStringToArray = vArr
+End Function
+
+'*******************************************************************************
+'* [概  要] Array2DSort
+'* [詳  細] 2次元配列のクイックソートを行う。
+'*
+'* @param arr2d       対象の2次元配列
+'* @param keyNoOrFunc ソートに使用する列番号。もしくは、
+'*                    ソート比較用の関数名、またはFuncオブジェクト、または
+'*                    Compare（x1, x2, ByVal flg As Boolean）As Booleanメソッドを
+'*                    持つオブジェクト。
+'*                    第3引数のflgで条件を反転させる。軸要素は反転前、反転後の条件
+'*                    のどちらにも含まれないようにする必要がある。
+'* @return ソート済み2次元配列
+'*
+'* [keyColOrFuncの指定関数例]
+'*   Function Compare(val1, val2, ByVal flg As Boolean) As Boolean
+'*       If flg Then
+'*           Compare = val1(2) > val2(2)
+'*       Else
+'*           Compare = val1(2) < val2(2)
+'*       End If
+'*   End Function
+'*
+'*******************************************************************************
+Public Function Array2DSort(ByRef arr2d As Variant, ByVal keyNoOrFunc) As Variant
+    Call Array2DSortImpl(arr2d, LBound(arr2d), UBound(arr2d), keyNoOrFunc)
+    Array2DSort = arr2d
+End Function
+Private Sub Array2DSortImpl(ByRef arr2d As Variant, ByVal startInd As Long, ByVal endInd As Long, ByVal keyNoOrFunc)
+    If startInd >= endInd Then
+        Exit Sub
+    End If
+    
+    ' 軸要素の選択
+    Dim pivot As Variant
+    pivot = Me.Copy2DArrayRow(arr2d, Int((startInd + endInd) / 2), True)
+    
+    ' パーティション分割
+    Dim tmpswap As Variant
+    Dim i As Long: i = startInd
+    Dim j As Long: j = endInd
+    Do
+        If ValidateUtils.IsLong(keyNoOrFunc) Then
+            Do While i <= endInd And arr2d(i, keyNoOrFunc) < pivot(keyNoOrFunc): i = i + 1: Loop
+            Do While j >= startInd And arr2d(j, keyNoOrFunc) > pivot(keyNoOrFunc): j = j - 1: Loop
+            
+        ElseIf IsArray(keyNoOrFunc) Then
+            Do While i <= endInd And AnalyzeCondArray(Copy2DArrayRow(arr2d, i, True), pivot, keyNoOrFunc, True): i = i + 1: Loop
+            Do While j >= startInd And AnalyzeCondArray(Copy2DArrayRow(arr2d, j, True), pivot, keyNoOrFunc, False): j = j - 1: Loop
+            
+        ElseIf ValidateUtils.IsFunc(keyNoOrFunc) Then
+            Do While i <= endInd And keyNoOrFunc.Apply(Copy2DArrayRow(arr2d, i, True), pivot, True): i = i + 1: Loop
+            Do While j >= startInd And keyNoOrFunc.Apply(Copy2DArrayRow(arr2d, j, True), pivot, False): j = j - 1: Loop
+            
+        ElseIf ValidateUtils.IsString(keyNoOrFunc) And keyNoOrFunc <> "" Then
+            Do While i <= endInd And Application.Run(keyNoOrFunc, Copy2DArrayRow(arr2d, i, True), pivot, True): i = i + 1: Loop
+            Do While j >= startInd And Application.Run(keyNoOrFunc, Copy2DArrayRow(arr2d, j, True), pivot, False): j = j - 1: Loop
+            
+        ElseIf IsObject(keyNoOrFunc) Then
+            Do While i <= endInd And keyNoOrFunc.Compare(Copy2DArrayRow(arr2d, i, True), pivot, True): i = i + 1: Loop
+            Do While j >= startInd And keyNoOrFunc.Compare(Copy2DArrayRow(arr2d, j, True), pivot, False): j = j - 1: Loop
+
+        Else
+            Do While i <= endInd And arr2d(i, 0) < pivot(0): i = i + 1: Loop
+            Do While j >= startInd And arr2d(j, 0) > pivot(0): j = j - 1: Loop
+            
+        End If
+        If i >= j Then Exit Do
+        
+        tmpswap = Copy2DArrayRow(arr2d, i, True)
+        Call Copy2DArrayRowTo2DArrayRow(arr2d, i, arr2d, j)
+        Call Copy1DArrayTo2DArrayRow(arr2d, j, tmpswap)
+        
+        i = i + 1
+        j = j - 1
+    Loop
+    
+    ' 再帰実行
+    Call Array2DSortImpl(arr2d, startInd, i - 1, keyNoOrFunc)
+    Call Array2DSortImpl(arr2d, j + 1, endInd, keyNoOrFunc)
+End Sub
+
+'*******************************************************************************
+'* [概  要] AnalyzeCondArray
+'* [詳  細] 指定された比較条件の配列を解析し判定を行う。
+'*
+'* @param row1    比較対象行1（1次元配列）
+'* @param row2    比較対象行2（1次元配列）
+'* @param condArr 比較条件の配列。配列内の文字で、比較条件を指定する。
+'*                １つの条件は、列番号と半角スペースで区切った後に「asc」/「desc」
+'*                の並び順の指定で構成する。
+'*                 Array("1 asc", "3 desc", "5 asc")
+'* @param flg     条件反転用のフラグ（クイックソートで使用）
+'* @return        判定結果
+'*
+'*******************************************************************************
+Private Function AnalyzeCondArray(row1, row2, condArr As Variant, ByVal flg As Boolean) As Boolean
+    AnalyzeCondArray = AnalyzeCondArrayImpl(LBound(condArr), row1, row2, condArr, flg)
+End Function
+Private Function AnalyzeCondArrayImpl(i As Long, row1, row2, condArr As Variant, ByVal flg As Boolean) As Boolean
+    Dim elems: elems = Split(condArr(i))
+    Dim Target As String, orderByDesc As Boolean
+    If ArrayUtils.GetLength(elems) = 1 Then
+        Target = elems(0)
+        orderByDesc = False
+    Else
+        Target = elems(0)
+        If LCase(elems(1)) = "desc" Then
+            orderByDesc = True
+        Else
+            orderByDesc = False
+        End If
+    End If
+    
+    If row1(Target) = row2(Target) Then
+        If i < UBound(condArr) Then
+            i = i + 1
+            AnalyzeCondArrayImpl = AnalyzeCondArrayImpl(i, row1, row2, condArr, flg)
+        Else
+            AnalyzeCondArrayImpl = False
+        End If
+    Else
+        If orderByDesc Then
+            AnalyzeCondArrayImpl = JudgeCond(row1(Target), row2(Target), ">", flg)
+        Else
+            AnalyzeCondArrayImpl = JudgeCond(row1(Target), row2(Target), "<", flg)
+        End If
+    End If
+End Function
+
+'*******************************************************************************
+'* [概  要] ArrayMaxTxtLength
+'* [詳  細] 配列の中の項目で最大の文字数を返す。
+'*
+'* @param arr 対象配列（1次元配列）
+'* @return Long 最大文字数
+'*
+'*******************************************************************************
+Public Function ArrayMaxTxtLength(Arr As Variant, Optional useZenkaku2Width As Boolean = False) As Long
+    Dim v, ret As Long: ret = 0
+    Dim targetLength As Long
+    
+    For Each v In Arr
+        If Not ValidateUtils.IsString(v) Then
+            On Error Resume Next
+            v = CStr(v)
+            If Err.Number <> 0 Then
+                v = ""
+                Err.Clear
+            End If
+            On Error GoTo 0
+        End If
+        
+        If useZenkaku2Width Then
+            targetLength = StringUtils.GetTextWidth(v)
+        Else
+            targetLength = StringUtils.CheckLength(v)
+        End If
+        
+        If ret < targetLength Then
+            ret = targetLength
+        End If
+    Next
+    ArrayMaxTxtLength = ret
+End Function
+
+'*******************************************************************************
+'* [概  要] Array2DMaxTxtLength
+'* [詳  細] 2次元配列の指定した列の項目について、最大の文字数を返す。
+'*
+'* @param arr2d  対象の2次元配列
+'* @param colnum 列番号
+'* @return Long 最大文字数
+'*
+'*******************************************************************************
+Public Function Array2DMaxTxtLength(arr2d As Variant, ByVal colnum As Long, Optional useZenkaku2Width As Boolean = False) As Long
+    Dim v, ret As Long: ret = 0
+    Dim targetLength As Long
+    
+    Dim i As Long
+    For i = LBound(arr2d, 1) To UBound(arr2d, 1)
+        v = arr2d(i, colnum)
+        If Not ValidateUtils.IsString(v) Then
+            On Error Resume Next
+            v = CStr(v)
+            If Err.Number <> 0 Then
+                v = ""
+                Err.Clear
+            End If
+            On Error GoTo 0
+        End If
+        
+        If useZenkaku2Width Then
+            targetLength = StringUtils.GetTextWidth(v)
+        Else
+            targetLength = StringUtils.CheckLength(v)
+        End If
+        
+        If ret < targetLength Then
+            ret = targetLength
+        End If
+    Next
+    Array2DMaxTxtLength = ret
+End Function
+
+'******************************************************************************
+'* [概  要] RemoveEmpty
+'* [詳  細] 配列の空データを除去する。
+'*
+'* @param vArr 配列
+'* @return Variant 変更後配列
+'******************************************************************************
+Public Function RemoveEmpty(ByRef vArr As Variant) As Variant
+    If Is1DArray(vArr) Then
+        Dim arrex As ArrayEx: Set arrex = New ArrayEx
+        Dim v
+        For Each v In vArr
+            If v <> "" And ValidateUtils.IsNotNullOrEmpty(v) Then
+                arrex.Add v
+            End If
+
+        Next
+        RemoveEmpty = arrex.ToArray
+    ElseIf Is2DArray(vArr) Then
+        Dim arr2dex As Array2DEx: Set arr2dex = New Array2DEx
+        Dim i As Long, j As Long, iamGoodRow As Boolean
+        For i = LBound(vArr, 1) To UBound(vArr, 1)
+            iamGoodRow = False
+            For j = LBound(vArr, 2) To UBound(vArr, 2)
+                If vArr(i, j) <> "" And ValidateUtils.IsNotNullOrEmpty(vArr(i, j)) Then
+                    iamGoodRow = True
+                    Exit For
+                End If
+            Next
+            If iamGoodRow Then
+                arr2dex.AddRow Copy2DArrayRow(vArr, i)
+            End If
+        Next
+        RemoveEmpty = arr2dex.To2DArray
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] ArrayOf
+'* [詳  細] 指定した要素で配列を作成する。
+'*          VBA.Array と同じ内容。VBA.Array を使えば問題なし。
+'*
+'* @param elems 要素
+'* @return Variant 配列
+'*
+'******************************************************************************
+Public Function ArrayOf(ParamArray elems()) As Variant
+    Dim Arr As ArrayEx: Set Arr = New ArrayEx
+    Dim elem
+    For Each elem In elems
+        Arr.Add elem
+    Next
+    ArrayOf = Arr.ToArray
+End Function
+
+'******************************************************************************
+'* [概  要] ArrayEx
+'* [詳  細] 指定した要素でArrayExを作成する。
+'*
+'* @param elems 要素
+'* @return ArrayEx
+'*
+'******************************************************************************
+Public Function ArrayEx(ParamArray elems()) As ArrayEx
+    Dim Arr As ArrayEx: Set Arr = New ArrayEx
+    Dim elem
+    For Each elem In elems
+        Arr.Add elem
+    Next
+    Set ArrayEx = Arr
+End Function
+
+'******************************************************************************
+'* [概  要] NaturalSort
+'* [詳  細] エクスプローラのファイル順のように自然順ソートで並び替える。
+'* [参  考] http://hk29.hatenablog.jp/entry/2018/03/10/183447
+'*
+'* @param arr 配列
+'*
+'******************************************************************************
+Public Sub NaturalSort(ByRef Arr As Variant)
+    Dim i As Long, j As Long
+    Dim tmp As String
+
+    For i = LBound(Arr) To UBound(Arr)
+        For j = i To UBound(Arr)
+            If StrCmpLogicalW(StrConv(CStr(Arr(i)), vbUnicode), _
+                              StrConv(CStr(Arr(j)), vbUnicode)) > 0 Then
+                Let tmp = Arr(i)
+                Let Arr(i) = Arr(j)
+                Let Arr(j) = tmp
+            End If
+       Next
+    Next
+End Sub

@@ -89,7 +89,7 @@ Public Function GetCommandResultAsTextStream(commandString, Optional myTempPath)
     
     ' コマンド実行
     Call Core.Wsh.Run(execComandString.ToString, WshHide, True)
-    Set GetCommandResultAsTextStream = IO.OpenTextFile(tempPath, Base.ForReading)
+    Set GetCommandResultAsTextStream = IO.fso.OpenTextFile(tempPath, Base.ForReading)
 End Function
 
 '******************************************************************************
@@ -113,7 +113,7 @@ Public Function GetCommandResult(commandString) As String
         ret = ts.ReadAll
     End If
     ts.Close
-    Call IO.DeleteFile(tempPath, True)
+    Call IO.fso.DeleteFile(tempPath, True)
     GetCommandResult = ret
 End Function
 
@@ -137,7 +137,7 @@ End Function
 '*          バッファサイズが4KBのため、大量にデータが出力される場合バッファが
 '*          一杯になり処理がフリーズする。
 '*          そのため、Exec終了を待たずに、標準出力から行毎の読み出しを行うことで
-'*          バッファが一杯にならないようにしているが、
+'*          バッファがいっぱいにならないようにしているが、
 '*          標準出力の1行分のデータ量が4KBを超える場合は対応できずフリーズする。
 '*
 '* @param commandString コマンド文字列

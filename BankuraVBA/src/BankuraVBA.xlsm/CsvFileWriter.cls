@@ -312,13 +312,13 @@ Private Function EditRecord(record) As String
     Dim itm As Item, ret As String, val As String, first As Boolean
     first = True
     If ValidateUtils.IsArrayEx(record) Then
-        Dim colidx As Long
-        For colidx = 0 To record.LastIndex
+        Dim colIdx As Long
+        For colIdx = 0 To record.LastIndex
             If first Then
-                ret = EditItem(CStr(record.Item(colidx)))
+                ret = EditItem(CStr(record.Item(colIdx)))
                 first = False
             Else
-                ret = ret & mDelimiter & EditItem(CStr(record.Item(colidx)))
+                ret = ret & mDelimiter & EditItem(CStr(record.Item(colIdx)))
             End If
         Next
     ElseIf ArrayUtils.Is1DArray(record) Then
@@ -418,19 +418,19 @@ Private Sub StartProcess(enumerator As Object)
     
     If ValidateUtils.IsArray2DEx(records) Then
         rEnumerator.MaxReportCount = records.RowLength
-        rEnumerator.StartRow = 0
+        rEnumerator.startRow = 0
         rEnumerator.EndRow = records.RowMaxIndex
         mRowCount = records.RowLength
         mColumnCount = records.ColLength
     ElseIf ArrayUtils.Is2DArray(records) Then
         rEnumerator.MaxReportCount = ArrayUtils.GetLength(records)
-        rEnumerator.StartRow = LBound(records)
+        rEnumerator.startRow = LBound(records)
         rEnumerator.EndRow = UBound(records)
         mRowCount = ArrayUtils.GetLength(records)
         mColumnCount = ArrayUtils.GetLength(records, 2)
     ElseIf ValidateUtils.IsRecordFormat(records) Then
         rEnumerator.MaxReportCount = records.RecordSet.Count
-        rEnumerator.StartRow = 1
+        rEnumerator.startRow = 1
         rEnumerator.EndRow = records.RecordSet.Count
         mRowCount = records.RecordSet.Count
         If mHeaderExists Then
@@ -484,6 +484,17 @@ Private Sub EndProcess(enumerator As Object)
 End Sub
 
 '******************************************************************************
+'* [概  要] CancelProcess
+'* [詳  細] キャンセル時の処理を行う。
+'*
+'******************************************************************************
+Private Sub CancelProcess(enumerator As Object)
+    Dim rEnumerator As RowEnumerator
+    Set rEnumerator = enumerator
+    rEnumerator.DestTarget.Close
+End Sub
+
+'******************************************************************************
 '* インタフェース実装
 '******************************************************************************
 '*-----------------------------------------------------------------------------
@@ -507,4 +518,10 @@ End Sub
 Private Sub IRowEditor_EndProcess(enumerator As Object)
     EndProcess enumerator
 End Sub
-
+'*-----------------------------------------------------------------------------
+'* IRowEditor#CancelProcess
+'*
+'*-----------------------------------------------------------------------------
+Public Sub IRowEditor_CancelProcess(enumerator As Object)
+    CancelProcess enumerator
+End Sub

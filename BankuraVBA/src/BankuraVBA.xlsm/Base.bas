@@ -491,7 +491,7 @@ End Sub
 '******************************************************************************
 Public Function CreateUUID() As String
     Dim myUuid As String
-    Randomize Timer() + Application.hwnd
+    Randomize Timer() + Application.hWnd
     Do While Len(myUuid) < 32
         If Len(myUuid) = 16 Then
             myUuid = myUuid & Hex$(8 + CInt(Rnd * 3))
@@ -841,8 +841,8 @@ Public Sub ParallelExec(ByVal fncName As String, ByVal procNum As Integer, Param
     Set app = Nothing: Set wb = Nothing
     
     ' 子プロセス終了待ち
-    For i = 1 To apps.count
-        Do While apps(i).Workbooks.count > 0
+    For i = 1 To apps.Count
+        Do While apps(i).Workbooks.Count > 0
             Application.Wait [Now() + "00:00:00.2"]
             DoEvents
         Loop
@@ -850,7 +850,7 @@ Public Sub ParallelExec(ByVal fncName As String, ByVal procNum As Integer, Param
     
     ' 子Excelのインスタンスの破棄
     On Error Resume Next
-    For i = 1 To apps.count
+    For i = 1 To apps.Count
         apps(1).Quit
         apps.Remove 1
     Next

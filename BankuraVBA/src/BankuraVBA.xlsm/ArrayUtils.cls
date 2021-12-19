@@ -152,9 +152,9 @@ End Function
 '* @return Long 要素数(配列ではない場合-1)
 '*
 '******************************************************************************
-Public Function GetLength(ByRef vArray As Variant, Optional dimmention As Integer = 1) As Long
+Public Function GetLength(ByRef vArray As Variant, Optional dimention As Integer = 1) As Long
     On Error GoTo ErrorHandler
-    GetLength = Core.ArrLen(vArray, dimmention)
+    GetLength = Core.ArrLen(vArray, dimention)
     Exit Function
 ErrorHandler:
     GetLength = -1
@@ -244,6 +244,28 @@ Public Function IsJagArray(ByRef vArray As Variant) As Boolean
         If Not Me.Is1DArray(v) Then Exit Function
     Next
     IsJagArray = True
+End Function
+
+'******************************************************************************
+'* [概  要] IsCorrectRange
+'* [詳  細] 指定された添え字が指定配列内に存在するかチェックする｡
+'*
+'* @param vArray 検査する配列
+'* @param n 検査する添え字
+'* @param dimention 対象の次元
+'* @return Boolean 判定結果(True:存在する)
+'*
+'******************************************************************************
+Public Function IsCorrectRange(ByRef vArray As Variant, ByVal n As Long, Optional ByVal dimention As Integer = 1) As Boolean
+    If Not VBA.IsArray(vArray) Then Exit Function
+    If Me.IsEmptyArray(vArray) Then Exit Function
+    Dim i As Long
+    For i = 0 To GetDimension(vArray) - 1
+        If n < LBound(vArray, i) Or UBound(vArray, i) < n Then
+            Exit Function
+        End If
+    Next
+    IsCorrectRange = True
 End Function
 
 '******************************************************************************
@@ -732,24 +754,24 @@ Public Function Create2DArrayWithValue(ParamArray arrList() As Variant) As Varia
         GoTo InValidParam
     End If
     
-    Dim v, C As Long, rowNum As Long, colNum As Long
-    C = 0: rowNum = 0: colNum = 0
+    Dim v, c As Long, rowNum As Long, colnum As Long
+    c = 0: rowNum = 0: colnum = 0
     
     For Each v In arrList
         If Not IsArray(v) Then
             GoTo InValidParam
         End If
-        If colNum = 0 Then
-            colNum = GetLength(v)
+        If colnum = 0 Then
+            colnum = GetLength(v)
         Else
-            colNum = GetLength(v)
-            If colNum <> C Then GoTo InValidParam
+            colnum = GetLength(v)
+            If colnum <> c Then GoTo InValidParam
         End If
-        C = GetLength(v)
+        c = GetLength(v)
         rowNum = rowNum + 1
     Next
     
-    Dim vNew2DArr: vNew2DArr = Create2DArrayEasy(rowNum - 1, colNum - 1)
+    Dim vNew2DArr: vNew2DArr = Create2DArrayEasy(rowNum - 1, colnum - 1)
     Dim i As Long: i = LBound(vNew2DArr)
 
     For Each v In arrList
@@ -1125,15 +1147,15 @@ End Function
 '* @param count 項目
 '* @return Variant 1次元配列
 '******************************************************************************
-Public Function Repeat(ByVal itm As Variant, ByVal count As Long) As Variant
-    If count <= 0 Then
+Public Function Repeat(ByVal itm As Variant, ByVal Count As Long) As Variant
+    If Count <= 0 Then
         Repeat = EmptyVariantArray
         Exit Function
     End If
     Dim vArr
-    ReDim vArr(0 To count - 1)
+    ReDim vArr(0 To Count - 1)
     Dim i As Long
-    For i = 0 To count - 1
+    For i = 0 To Count - 1
         If IsObject(itm) Then
             Set vArr(i) = itm
         Else
@@ -1597,12 +1619,12 @@ Private Function AnalyzeCondArray(row1, row2, condArr As Variant, ByVal flg As B
 End Function
 Private Function AnalyzeCondArrayImpl(i As Long, row1, row2, condArr As Variant, ByVal flg As Boolean) As Boolean
     Dim elems: elems = Split(condArr(i))
-    Dim target As String, orderByDesc As Boolean
+    Dim Target As String, orderByDesc As Boolean
     If ArrayUtils.GetLength(elems) = 1 Then
-        target = elems(0)
+        Target = elems(0)
         orderByDesc = False
     Else
-        target = elems(0)
+        Target = elems(0)
         If LCase(elems(1)) = "desc" Then
             orderByDesc = True
         Else
@@ -1610,7 +1632,7 @@ Private Function AnalyzeCondArrayImpl(i As Long, row1, row2, condArr As Variant,
         End If
     End If
     
-    If row1(target) = row2(target) Then
+    If row1(Target) = row2(Target) Then
         If i < UBound(condArr) Then
             i = i + 1
             AnalyzeCondArrayImpl = AnalyzeCondArrayImpl(i, row1, row2, condArr, flg)
@@ -1619,9 +1641,9 @@ Private Function AnalyzeCondArrayImpl(i As Long, row1, row2, condArr As Variant,
         End If
     Else
         If orderByDesc Then
-            AnalyzeCondArrayImpl = JudgeCond(row1(target), row2(target), ">", flg)
+            AnalyzeCondArrayImpl = JudgeCond(row1(Target), row2(Target), ">", flg)
         Else
-            AnalyzeCondArrayImpl = JudgeCond(row1(target), row2(target), "<", flg)
+            AnalyzeCondArrayImpl = JudgeCond(row1(Target), row2(Target), "<", flg)
         End If
     End If
 End Function
@@ -1671,13 +1693,13 @@ End Function
 '* @return Long 最大文字数
 '*
 '*******************************************************************************
-Public Function Array2DMaxTxtLength(arr2d As Variant, ByVal colNum As Long, Optional useZenkaku2Width As Boolean = False) As Long
+Public Function Array2DMaxTxtLength(arr2d As Variant, ByVal colnum As Long, Optional useZenkaku2Width As Boolean = False) As Long
     Dim v, ret As Long: ret = 0
     Dim targetLength As Long
     
     Dim i As Long
     For i = LBound(arr2d, 1) To UBound(arr2d, 1)
-        v = arr2d(i, colNum)
+        v = arr2d(i, colnum)
         If Not ValidateUtils.IsString(v) Then
             On Error Resume Next
             v = CStr(v)

@@ -369,7 +369,7 @@ Public Sub ShowAvailableSpeakEngines()
     Dim i As Long, token
     Debug.Print "[Nomal Engine]"
     With CreateObject("SAPI.SpVoice")
-        For i = 0 To .GetVoices.count - 1
+        For i = 0 To .GetVoices.Count - 1
             Debug.Print i & ":" & .GetVoices.Item(i).GetDescription
         Next
     End With

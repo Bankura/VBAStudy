@@ -36,7 +36,7 @@ Option Private Module
 Private Declare PtrSafe _
 Function rtcCallByName Lib "VBE7.DLL" ( _
     ByVal Object As Object, _
-    ByVal ProcName As LongPtr, _
+    ByVal procName As LongPtr, _
     ByVal CallType As VbCallType, _
     ByRef Args() As Any, _
     Optional ByVal lcid As Long _

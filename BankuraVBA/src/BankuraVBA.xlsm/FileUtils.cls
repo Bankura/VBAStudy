@@ -26,7 +26,7 @@ Option Explicit
 '* WindowsAPI定義
 '******************************************************************************
 Private Declare PtrSafe Function SHFileOperation Lib "shell32" Alias "SHFileOperationA" (lpFileOp As SHFILEOPSTRUCT) As Long
-Private Declare PtrSafe Function SHCreateDirectoryEx Lib "shell32" Alias "SHCreateDirectoryExA" (ByVal hwnd As LongPtr, ByVal pszPath As String, ByVal psa As Any) As LongPtr
+Private Declare PtrSafe Function SHCreateDirectoryEx Lib "shell32" Alias "SHCreateDirectoryExA" (ByVal hWnd As LongPtr, ByVal pszPath As String, ByVal psa As Any) As LongPtr
 Private Declare PtrSafe Function SystemTimeToFileTime Lib "kernel32" (lpSystemTime As SystemTime, lpFileTime As FILETIME) As Long
 Private Declare PtrSafe Function LocalFileTimeToFileTime Lib "kernel32" (lpLocalFileTime As FILETIME, lpFileTime As FILETIME) As Long
 Private Declare PtrSafe Function CreateFile Lib "kernel32" Alias "CreateFileA" (ByVal lpFileName As String, ByVal dwDesiredAccess As Long, ByVal dwShareMode As Long, ByVal lpSecurityAttributes As Long, ByVal dwCreationDisposition As Long, ByVal dwFlagsAndAttributes As Long, ByVal hTemplateFile As LongPtr) As LongPtr
@@ -69,7 +69,7 @@ Private Const FIND_FIRST_EX_ON_DISK_ENTRIES_ONLY = 4&
 '* 構造体定義
 '******************************************************************************
 Private Type SHFILEOPSTRUCT
-        hwnd As LongPtr
+        hWnd As LongPtr
         wFunc As Long
         pFrom As String
         pTo As String
@@ -1760,7 +1760,7 @@ End Function
 '* @return Long サブフォルダ数
 '******************************************************************************
 Public Function GetSubFoldersCount(ByVal dirPath As String) As Long
-    GetSubFoldersCount = IO.GetFolder(dirPath).SubFolders.count
+    GetSubFoldersCount = IO.GetFolder(dirPath).SubFolders.Count
 End Function
 
 '******************************************************************************
@@ -1772,7 +1772,7 @@ End Function
 '* @return Long ファイル数
 '******************************************************************************
 Public Function GetFilesCount(ByVal dirPath As String) As Long
-    GetFilesCount = IO.GetFolder(dirPath).Files.count
+    GetFilesCount = IO.GetFolder(dirPath).Files.Count
 End Function
 
 '******************************************************************************
@@ -2562,7 +2562,7 @@ End Sub
 Public Function MoveTrashBox(ByVal fPath As String) As Boolean
     Dim sh As SHFILEOPSTRUCT, re As Long
     With sh
-        .hwnd = Application.hwnd
+        .hWnd = Application.hWnd
         .wFunc = FO_DELETE
         .pFrom = fPath
         .fFlags = FOF_ALLOWUNDO + FOF_NOCONFIRMATION + FOF_NOERRORUI
@@ -2629,7 +2629,7 @@ Public Function CreateZipFile(filePath As String, ParamArray targetFiles() As Va
             skip = True
         End If
         If IsFolder(targetFilePath) Then
-            If shellObj.NameSpace(IO.GetAbsolutePathName(targetFilePath)).items().count > 0 Then
+            If shellObj.NameSpace(IO.GetAbsolutePathName(targetFilePath)).items().Count > 0 Then
                 ' 空フォルダをスキップ対象とする
                 skip = True
             End If
@@ -2639,10 +2639,10 @@ Public Function CreateZipFile(filePath As String, ParamArray targetFiles() As Va
             Do
                 Dim zFolderItem As Object: Set zFolderItem = zipFolder.ParseName(fileName)
                 If zFolderItem Is Nothing Then
-                    Dim cnt As Long: cnt = zipFolder.items().count
+                    Dim cnt As Long: cnt = zipFolder.items().Count
                     zipFolder.CopyHere sFolderItem, &H4 Or &H10
                     Dim retryCnt As Long: retryCnt = 0
-                    Do While zipFolder.items().count <= cnt
+                    Do While zipFolder.items().Count <= cnt
                         If retryCnt > 10 Then
                             Debug.Print "RetryOver: " & targetFilePath
                             Exit Function
@@ -2685,11 +2685,11 @@ Public Function UnZipFile(zipFilePath As String, targetFolderPath As String) As 
     Dim shellObj As Object: Set shellObj = Base.GetShell
     Dim targetFolder As Object: Set targetFolder = shellObj.NameSpace(IO.GetAbsolutePathName(saveFolderPath))
     Dim srcFolder As Object: Set srcFolder = shellObj.NameSpace(IO.GetAbsolutePathName(zipFilePath))
-    Dim cnt As Long: cnt = srcFolder.items().count
+    Dim cnt As Long: cnt = srcFolder.items().Count
     Dim retryCnt As Long: retryCnt = 0
     
     targetFolder.CopyHere srcFolder.items, &H4 Or &H10
-    Do While targetFolder.items().count < cnt
+    Do While targetFolder.items().Count < cnt
         If retryCnt > 10 Then
             Debug.Print "RetryOver"
             Exit Function

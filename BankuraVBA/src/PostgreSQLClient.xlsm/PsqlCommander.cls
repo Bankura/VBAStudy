@@ -45,7 +45,7 @@ Private mDbName As String
 Private mDbUserName As String
 Private mDbPassword As String
 Private mClEncode As String
-
+Private mTuplesOnly As Boolean
 
 '******************************************************************************
 '* プロパティ定義
@@ -60,7 +60,7 @@ Public Property Get PsqlPath() As String
     PsqlPath = mPsqlPath
 End Property
 Public Property Let PsqlPath(arg As String)
-    mPsqlPath = arg
+    mPsqlPath = StringUtils.WrapIfMissing(arg, """")
 End Property
 
 '*-----------------------------------------------------------------------------
@@ -128,62 +128,37 @@ End Property
 '*
 '* Clientエンコード
 '*-----------------------------------------------------------------------------
-Public Property Get clEncode() As String
-    clEncode = mClEncode
+Public Property Get ClEncode() As String
+    ClEncode = mClEncode
 End Property
-Public Property Let clEncode(arg As String)
+Public Property Let ClEncode(arg As String)
     mClEncode = arg
 End Property
 
-
+'*-----------------------------------------------------------------------------
+'* TuplesOnly プロパティ
+'*
+'* 出力結果をデータのみにするかどうか。Falseにすると、ヘッダと行数が出力される。
+'*-----------------------------------------------------------------------------
+Public Property Get TuplesOnly() As Boolean
+    TuplesOnly = mTuplesOnly
+End Property
+Public Property Let TuplesOnly(arg As Boolean)
+    mTuplesOnly = arg
+End Property
 '******************************************************************************
 '* コンストラクタ・デストラクタ
 '******************************************************************************
 Private Sub Class_Initialize()
     Set mCommander = New Commander
     mClEncode = "SJIS"
+    mTuplesOnly = False
+    Call SetPsqlInstallPathFromRegistry
 End Sub
 
 '******************************************************************************
 '* メソッド定義
 '******************************************************************************
-'******************************************************************************
-'* [概  要] GetCommandResultAsTextStream
-'* [詳  細] コマンドを実行し、実行した結果を一時ファイルに保存する。
-'*          一時ファイルから実行結果をTextStreamで取得する。
-'*
-'* @param commandString コマンド文字列
-'* @param myTempPath 一時ファイルパス（標準のパス以外にしたい場合に指定）
-'* @return Object(Of Scripting.TextStream)
-'******************************************************************************
-Public Function GetCommandResultAsTextStream(commandString, Optional myTempPath) As Object
-    Call SetPsqlBaseCommand
-    Set GetCommandResultAsTextStream = mCommander.GetCommandResultAsTextStream(commandString, myTempPath)
-End Function
-
-'******************************************************************************
-'* [概  要] GetCommandResult
-'* [詳  細] コマンドを実行し、実行した結果文字列を取得する。
-'*
-'* @param commandString コマンド文字列
-'* @return String コマンド実行結果
-'******************************************************************************
-Public Function GetCommandResult(commandString) As String
-    Call SetPsqlBaseCommand
-    GetCommandResult = mCommander.GetCommandResult(commandString)
-End Function
-
-'******************************************************************************
-'* [概  要] GetCommandResultAsArray
-'* [詳  細] コマンドを実行し、実行した結果を行毎に分割した文字配列で取得する。
-'*
-'* @param commandString コマンド文字列
-'* @return String() コマンド実行結果
-'******************************************************************************
-Public Function GetCommandResultAsArray(commandString) As String()
-    Call SetPsqlBaseCommand
-    GetCommandResultAsArray = mCommander.GetCommandResultAsArray(commandString)
-End Function
 
 '******************************************************************************
 '* [概  要] SetPsqlBaseCommand
@@ -195,12 +170,14 @@ Private Sub SetPsqlBaseCommand()
     mCommander.BaseCommand = mPsqlPath & " -h " & mDbHost & " -p " & mDbPort & _
                                          " -d " & mDbName & " -U " & mDbUserName & _
                                          " -c ""{0}"" -A " & "-o {1}"
-    With Core.Wsh
-        ' パスワードを環境変数に設定
-        .Environment("Process").Item("PGPASSWORD") = mDbPassword
-        ' Client(psql)のエンコード設定：デフォルト「SJIS」
-        .Environment("Process").Item("PGCLIENTENCODING") = mClEncode
-    End With
+    If mTuplesOnly Then
+        mCommander.BaseCommand = mCommander.BaseCommand & " -t "
+    End If
+   
+    ' パスワードを環境変数に設定
+    Call Base.AppendEnvItem("PGPASSWORD", mDbPassword)
+    ' Client(psql)のエンコード設定：デフォルト「SJIS」
+    Call Base.AppendEnvItem("PGCLIENTENCODING", mClEncode)
 End Sub
 
 '******************************************************************************
@@ -216,9 +193,10 @@ End Sub
 '* @return 実行結果データ（2次元配列）
 '*
 '******************************************************************************
-Public Function ExecPsql(sql As String) As Variant
-    Dim resultData: resultData = GetCommandResultAsArray(sql)
-    ExecPsql = EditQueryResult(resultData)
+Public Function Exec(sql As String) As Variant
+    Call SetPsqlBaseCommand
+    Dim resultData: resultData = mCommander.GetCommandResultAsArray(sql)
+    Exec = EditQueryResult(resultData)
 End Function
 
 '******************************************************************************
@@ -238,33 +216,31 @@ End Function
 '* @return CommandResult情報
 '*
 '******************************************************************************
-Public Function ExecPsqlToCommandResult(sql As String) As CommandResult
+Public Function ExecToCommandResult(sql As String) As CommandResult
     Dim cmd As String, oExec
     
     ' コマンド組立て
     cmd = mPsqlPath & " -h " & mDbHost & " -p " & mDbPort & " -d " & mDbName & " -U " & mDbUserName & " -c """ & sql & """ -A"
-    Debug.Print cmd
-    
-    ' Wscript.Shellオブジェクト生成
-    With Core.Wsh
-        ' パスワードを環境変数に設定
-        .Environment("Process").Item("PGPASSWORD") = mDbPassword
-    
-        ' Client(psql)のエンコード設定：デフォルト「SJIS」
-        .Environment("Process").Item("PGCLIENTENCODING") = mClEncode
-    End With
+    If mTuplesOnly Then
+        cmd = cmd & " -t"
+    End If
+
+    ' パスワードを環境変数に設定
+    Call Base.AppendEnvItem("PGPASSWORD", mDbPassword)
+    ' Client(psql)のエンコード設定：デフォルト「SJIS」
+    Call Base.AppendEnvItem("PGCLIENTENCODING", mClEncode)
 
     ' コマンド実行・結果設定
     Dim res As CommandResult: Set res = mCommander.Exec(cmd)
     
     ' コマンド失敗時処理
     If res.ExitCd <> 0 Then
-        Set ExecPsqlToCommandResult = res
+        Set ExecToCommandResult = res
         Exit Function
     End If
 
     If ArrayUtils.IsEmptyArray(res.StdOutList) Then
-        Set ExecPsqlToCommandResult = res
+        Set ExecToCommandResult = res
         Exit Function
     End If
     
@@ -275,7 +251,7 @@ Public Function ExecPsqlToCommandResult(sql As String) As CommandResult
     res.StdOutList = resultEditData
     res.RowMax = ArrayUtils.GetLength(resultEditData)
     res.ColMax = ArrayUtils.GetLength(resultEditData, 2)
-    Set ExecPsqlToCommandResult = res
+    Set ExecToCommandResult = res
 End Function
 
 '******************************************************************************
@@ -311,7 +287,7 @@ Private Function EditQueryResult(resultData)
         'Debug.Print "Line: " & row
         
         ' SQL実行結果に列区切り(|)なしのパターン
-        If StringUtils.ContainsNone(row, "|") Then
+        If StringUtils.ContainsNone(row, "|") Or row = "" Then
             ' 1列目以外は空埋め
             Call ArrayUtils.SetDefaultTo2DArrayRow(vArray, i, "")
             vArray(i, 0) = row
@@ -322,6 +298,42 @@ Private Function EditQueryResult(resultData)
         End If
         i = i + 1
     Next
-    EditQueryResult = vArray
+    EditQueryResult = ArrayUtils.RemoveEmpty(vArray)
 End Function
 
+'******************************************************************************
+'* [概  要] SetPsqlInstallPathFromRegistry
+'* [詳  細] レジストリからPsqlのインストールパスを取得し、設定する。
+'*
+'******************************************************************************
+Private Sub SetPsqlInstallPathFromRegistry()
+    Const PSQL_REG_PATH As String = "SOFTWARE\PostgreSQL\Installations"
+    Const PSQL_REG_WOW_PATH As String = "SOFTWARE\Wow6432Node\PostgreSQL\Installations"
+    
+    Dim stdRegProv As Object: Set stdRegProv = CreateStdRegProv()
+    Dim regPsqlInstallPathString As String
+    Dim regRoot As Long
+
+    Dim vArr
+    stdRegProv.EnumKey HKEY_CURRENT_USER, PSQL_REG_PATH, vArr
+    If IsNull(vArr) Then
+        stdRegProv.EnumKey HKEY_LOCAL_MACHINE, PSQL_REG_PATH, vArr
+        If IsNull(vArr) Then
+            stdRegProv.EnumKey HKEY_LOCAL_MACHINE, PSQL_REG_WOW_PATH, vArr
+            regPsqlInstallPathString = PSQL_REG_WOW_PATH
+            regRoot = HKEY_LOCAL_MACHINE
+        Else
+            regPsqlInstallPathString = PSQL_REG_PATH
+            regRoot = HKEY_LOCAL_MACHINE
+        End If
+    Else
+        regPsqlInstallPathString = PSQL_REG_PATH
+        regRoot = HKEY_CURRENT_USER
+    End If
+    
+    If Not IsNull(vArr) Then
+        ArrayUtils.Sort vArr, False
+        stdRegProv.GetStringValue regRoot, regPsqlInstallPathString & "\" & CStr(vArr(0)), "Base Directory", mPsqlPath
+        mPsqlPath = StringUtils.wrap(mPsqlPath & "\bin\psql.exe", """")
+    End If
+End Sub

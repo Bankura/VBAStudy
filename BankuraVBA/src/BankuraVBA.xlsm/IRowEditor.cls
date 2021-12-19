@@ -17,7 +17,7 @@ Option Explicit
 '* [éQ  çl]
 '*
 '* @author Bankura
-'* Copyright (c) 2020 Bankura
+'* Copyright (c) 2020-2021 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 
@@ -30,3 +30,5 @@ End Sub
 Public Sub EndProcess(enumerator As Object)
 End Sub
 
+Public Sub CancelProcess(enumerator As Object)
+End Sub

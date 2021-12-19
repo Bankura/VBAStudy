@@ -334,6 +334,6 @@ Private Sub SetPsqlInstallPathFromRegistry()
     If Not IsNull(vArr) Then
         ArrayUtils.Sort vArr, False
         stdRegProv.GetStringValue regRoot, regPsqlInstallPathString & "\" & CStr(vArr(0)), "Base Directory", mPsqlPath
-        mPsqlPath = StringUtils.Wrap(mPsqlPath & "\bin\psql.exe", """")
+        mPsqlPath = StringUtils.wrap(mPsqlPath & "\bin\psql.exe", """")
     End If
 End Sub

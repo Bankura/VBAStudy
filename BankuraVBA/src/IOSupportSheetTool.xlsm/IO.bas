@@ -55,7 +55,7 @@ End Enum
 Public Enum LineSeparatorsEnum
     adCRLF = -1
     adCR = 13
-    adLF = 10
+    adLf = 10
 End Enum
 
 Public Enum StreamOpenOptionsEnum
@@ -729,4 +729,23 @@ Public Function OpenTextFile(ByVal fileName As String, _
                       Optional ByVal create As Boolean = False, _
                       Optional ByVal Format As TristateEnum = False_) As Object
     Set OpenTextFile = fso.OpenTextFile(fileName, IOMode, create, Format)
+End Function
+
+'******************************************************************************
+'* [概  要] FromLineSeparatorsEnum メソッド
+'* [詳  細] LineSeparatorsEnum列挙体で指定した値を、改行文字列に変換する｡
+'*
+'* @param separator LineSeparatorsEnum列挙体
+'* @return String 改行文字列
+'*
+'******************************************************************************
+Public Function FromLineSeparatorsEnum(separator As LineSeparatorsEnum) As String
+    Select Case separator
+        Case LineSeparatorsEnum.adCRLF
+            FromLineSeparatorsEnum = vbCrLf
+        Case LineSeparatorsEnum.adLf
+            FromLineSeparatorsEnum = vbLf
+        Case Else
+            FromLineSeparatorsEnum = vbCr
+    End Select
 End Function

@@ -18,7 +18,7 @@ Option Explicit
 '*          http://dev-clips.com/clip/vba/stringbuilder-for-vba/
 '*
 '* @author Bankura
-'* Copyright (c) 2019-2020 Bankura
+'* Copyright (c) 2019-2021 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 
@@ -319,8 +319,8 @@ End Function
 '* @return Boolean チェック結果（該当:True）
 '*
 '******************************************************************************
-Public Function Matches(ByVal regex As String) As Boolean
-    Matches = ValidateUtils.ValidatePattern(Me.ToString, regex)
+Public Function matches(ByVal regex As String) As Boolean
+    matches = ValidateUtils.ValidatePattern(Me.ToString, regex)
 End Function
 
 '******************************************************************************
@@ -358,7 +358,7 @@ End Function
 '*
 '******************************************************************************
 Public Function AppendIfMissing(suffix As String, ParamArray suffixes()) As StringEx
-    If Not IsMissing(suffixes) Then
+    If Not ValidateUtils.IsParamArrayMissing(suffixes) Then
         Dim tmp: tmp = suffixes ' ParamArrayを別関数に渡すための対応
         Set AppendIfMissing = Me.Init(StringUtils.AppendIfMissing(Me.ToString, suffix, tmp))
     Else
@@ -377,7 +377,7 @@ End Function
 '*
 '******************************************************************************
 Public Function AppendIfMissingIgnoreCase(str As String, suffix As String, ParamArray suffixes()) As StringEx
-    If Not IsMissing(suffixes) Then
+    If Not ValidateUtils.IsParamArrayMissing(suffixes) Then
         Dim tmp: tmp = suffixes ' ParamArrayを別関数に渡すための対応
         Set AppendIfMissingIgnoreCase = Me.Init(StringUtils.AppendIfMissingIgnoreCase(Me.ToString, suffix, tmp))
     Else
@@ -493,7 +493,7 @@ End Function
 '*
 '******************************************************************************
 Public Function ContainsAll(ParamArray searchStr()) As Boolean
-    If VBA.IsMissing(searchStr) Then
+    If ValidateUtils.IsParamArrayMissing(searchStr) Then
         ContainsAll = False
         Exit Function
     End If
@@ -512,7 +512,7 @@ End Function
 '*
 '******************************************************************************
 Public Function ContainsAny(ParamArray searchStr()) As Boolean
-    If VBA.IsMissing(searchStr) Then
+    If ValidateUtils.IsParamArrayMissing(searchStr) Then
         ContainsAny = False
         Exit Function
     End If
@@ -643,7 +643,7 @@ End Function
 '*
 '******************************************************************************
 Public Function EndsWithAny(ParamArray endStr() As Variant) As Boolean
-    If Not IsMissing(endStr) Then
+    If Not ValidateUtils.IsParamArrayMissing(endStr) Then
         Dim tmp: tmp = endStr ' ParamArrayを別関数に渡すための対応
         EndsWithAny = StringUtils.EndsWithAny(Me.ToString, tmp)
     Else
@@ -698,7 +698,7 @@ End Function
 '*
 '******************************************************************************
 Public Function EqualsAny(ParamArray searchStrings() As Variant) As Boolean
-    If Not IsMissing(searchStrings) Then
+    If Not ValidateUtils.IsParamArrayMissing(searchStrings) Then
         Dim tmp: tmp = searchStrings ' ParamArrayを別関数に渡すための対応
         EqualsAny = StringUtils.EqualsAny(Me.ToString, searchStrings)
     Else
@@ -716,7 +716,7 @@ End Function
 '*
 '******************************************************************************
 Public Function EqualsAnyIgnoreCase(ParamArray searchStrings() As Variant) As Boolean
-    If Not IsMissing(searchStrings) Then
+    If Not ValidateUtils.IsParamArrayMissing(searchStrings) Then
         Dim tmp: tmp = searchStrings ' ParamArrayを別関数に渡すための対応
         EqualsAnyIgnoreCase = StringUtils.EqualsAnyIgnoreCase(Me.ToString, searchStrings)
     Else
@@ -784,11 +784,29 @@ End Function
 '*
 '******************************************************************************
 Public Function IndexOfAny(ParamArray searchStrs() As Variant) As Long
-    If Not IsMissing(searchStrs) Then
+    If Not ValidateUtils.IsParamArrayMissing(searchStrs) Then
         Dim tmp: tmp = searchStrs ' ParamArrayを別関数に渡すための対応
         IndexOfAny = StringUtils.IndexOfAny(Me.ToString, searchStrs)
     Else
         IndexOfAny = StringUtils.IndexOfAny(Me.ToString)
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] IndexOfAnyAll
+'* [詳  細] 指定された文字セット内の任意の文字のインデックス（文字位置）を
+'*          すべて検索する｡
+'*
+'* @param searchStrs 検索文字列（複数指定）
+'* @return Variant 文字列のインデックス。一致がない場合、空配列入力の場合は空配列
+'*
+'******************************************************************************
+Public Function IndexOfAnyAll(ParamArray searchStrs() As Variant) As Variant
+    If Not ValidateUtils.IsParamArrayMissing(searchStrs) Then
+        Dim tmp: tmp = searchStrs ' ParamArrayを別関数に渡すための対応
+        IndexOfAnyAll = StringUtils.IndexOfAnyAll(Me.ToString, searchStrs)
+    Else
+        IndexOfAnyAll = StringUtils.IndexOfAnyAll(Me.ToString)
     End If
 End Function
 
@@ -802,7 +820,7 @@ End Function
 '*
 '******************************************************************************
 Public Function IndexOfAnyBut(ParamArray searchStrs() As Variant) As Long
-    If Not IsMissing(searchStrs) Then
+    If Not ValidateUtils.IsParamArrayMissing(searchStrs) Then
         Dim tmp: tmp = searchStrs ' ParamArrayを別関数に渡すための対応
         IndexOfAnyBut = StringUtils.IndexOfAnyBut(Me.ToString, searchStrs)
     Else
@@ -1059,6 +1077,17 @@ Public Function Narrow() As StringEx
 End Function
 
 '******************************************************************************
+'* [概  要] NarrowNumber
+'* [詳  細] 全角数字を半角数字に変換する｡
+'*
+'* @return StringEx 変換後文字列
+'*
+'******************************************************************************
+Public Function NarrowNumber() As StringEx
+    Set NarrowNumber = Me.Init(StringUtils.NarrowNumber(Me.ToString))
+End Function
+
+'******************************************************************************
 '* [概  要] PrependIfMissing
 '* [詳  細] 文字列がどの接頭辞（プレフィックス）でも始まっていない場合は、
 '*          文字列の先頭に接頭辞を付加する｡
@@ -1069,7 +1098,7 @@ End Function
 '*
 '******************************************************************************
 Public Function PrependIfMissing(prefix As String, ParamArray prefixes() As Variant) As StringEx
-    If Not IsMissing(prefixes) Then
+    If Not ValidateUtils.IsParamArrayMissing(prefixes) Then
         Dim tmp: tmp = prefixes
         Set PrependIfMissing = Me.Init(StringUtils.PrependIfMissing(Me.ToString, prefix, tmp))
     Else
@@ -1090,7 +1119,7 @@ End Function
 '*
 '******************************************************************************
 Public Function PrependIfMissingIgnoreCase(prefix As String, ParamArray prefixes() As Variant) As StringEx
-    If Not IsMissing(prefixes) Then
+    If Not ValidateUtils.IsParamArrayMissing(prefixes) Then
          Dim tmp: tmp = prefixes
         Set PrependIfMissingIgnoreCase = Me.Init(StringUtils.PrependIfMissingIgnoreCase(Me.ToString, prefix, tmp))
     Else
@@ -1244,8 +1273,8 @@ End Function
 '* @return String 変換後文字列
 '*
 '******************************************************************************
-Public Function Reverse() As StringEx
-    Set Reverse = Me.Init(StringUtils.Reverse(Me.ToString))
+Public Function reverse() As StringEx
+    Set reverse = Me.Init(StringUtils.reverse(Me.ToString))
 End Function
 
 
@@ -1465,8 +1494,8 @@ End Function
 '* @return StringEx 変換後文字列
 '*
 '******************************************************************************
-Public Function Wrap(wrapWith As String) As StringEx
-    Set Wrap = Me.Init(StringUtils.Wrap(Me.ToString, wrapWith))
+Public Function wrap(wrapWith As String) As StringEx
+    Set wrap = Me.Init(StringUtils.wrap(Me.ToString, wrapWith))
 End Function
 
 '******************************************************************************
@@ -1611,5 +1640,91 @@ End Function
 '******************************************************************************
 Public Function EscapeDoubleQuote() As StringEx
     Set EscapeDoubleQuote = Me.Init(StringUtils.EscapeDoubleQuote(Me.ToString))
+End Function
+
+'******************************************************************************
+'* [概  要] EscapeSingleQuote
+'* [詳  細] シングルクォーテーションエスケープ処理
+'*
+'* @return 編集後文字列
+'******************************************************************************
+Public Function EscapeSingleQuote() As StringEx
+    Set EscapeSingleQuote = Me.Init(StringUtils.EscapeSingleQuote(Me.ToString))
+End Function
+
+'******************************************************************************
+'* [概  要] GetTextWidth
+'* [詳  細] 文字幅を取得｡全角文字を2でカウント、半角文字を1でカウントする。
+'*
+'* @return Long 文字幅（全角文字を2でカウント）
+'******************************************************************************
+Public Function GetTextWidth() As Long
+    GetTextWidth = StringUtils.GetTextWidth(Me.ToString)
+End Function
+
+'*******************************************************************************
+'* [概  要] Split
+'* [詳  細] 指定した文字で文字列を分割する。
+'*
+'* @param delim    デリミタ文字（配列で複数指定可能, 1キャラクタのみ）
+'* @return Variant 分割後配列
+'*
+'*******************************************************************************
+Public Function Split(ParamArray delim()) As Variant
+    If Not ValidateUtils.IsParamArrayMissing(delim) Then
+        Dim tmp: tmp = delim
+        Split = StringUtils.Split(Me.ToString, tmp)
+    Else
+        Split = StringUtils.Split(Me.ToString, ",")
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] Split2ArrayEx
+'* [詳  細] 指定した文字で文字列を分割する。
+'*
+'* @param delim    デリミタ文字（配列で複数指定可能, 1キャラクタのみ）
+'* @return ArrayEx 分割後配列
+'*
+'******************************************************************************
+Public Function Split2ArrayEx(ParamArray delim()) As ArrayEx
+    If Not ValidateUtils.IsParamArrayMissing(delim) Then
+        Dim tmp: tmp = delim
+        Set Split2ArrayEx = StringUtils.Split2ArrayEx(Me.ToString, tmp)
+    Else
+        Set Split2ArrayEx = StringUtils.Split2ArrayEx(Me.ToString, ",")
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] SplitNumber
+'* [詳  細] 数字とそれ以外を分割する。
+'* [参  考] https://www.excel-chunchun.com/entry/AutoFilterPlus
+'*
+'* [用  例]
+'*   StringUtils.SplitNumber("abc")          = ["abc"]
+'*   StringUtils.SplitNumber("abc123")       = ["abc", "123"]
+'*   StringUtils.SplitNumber("abc123def")    = ["abc", "123", "def"]
+'*   StringUtils.SplitNumber("123def")       = ["123", "def"]
+'*   StringUtils.SplitNumber("123def456")    = ["123", "def", "456"]
+'*   StringUtils.SplitNumber("abc123def456") = ["abc", "123", "def", "456"]
+'*
+'* @return Variant 分割後配列
+'*
+'******************************************************************************
+Public Function SplitNumber() As Variant
+    SplitNumber = StringUtils.SplitNumber(Me.ToString)
+End Function
+
+'******************************************************************************
+'* [概  要] RemoveNullChar
+'* [詳  細] 文字列から左端より検索して見つかったNull文字以降の文字を除去する。
+'*          WinAPI等での戻り値に対して使用することを想定。
+'*
+'* @return String 変換後文字列
+'*
+'******************************************************************************
+Public Function RemoveNullChar() As String
+    RemoveNullChar = StringUtils.RemoveNullChar(Me.ToString)
 End Function
 

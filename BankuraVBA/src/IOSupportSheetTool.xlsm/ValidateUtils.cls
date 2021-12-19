@@ -16,7 +16,7 @@ Option Explicit
 '* [参  考]
 '*
 '* @author Bankura
-'* Copyright (c) 2019-2020 Bankura
+'* Copyright (c) 2019-2021 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 '******************************************************************************
@@ -50,16 +50,40 @@ Public Function IsNotStringArray(var) As Boolean
     IsNotStringArray = Not IsStringArray(var)
 End Function
 
+Public Function IsNumericType(var) As Boolean
+    IsNumericType = IsInteger(var) Or IsLong(var) Or IsSingle(var) Or IsDouble(var) Or IsCurrency(var) Or IsDecimal(var)
+End Function
+
+Public Function IsNotNumericType(var) As Boolean
+    IsNotNumericType = Not IsNumericType(var)
+End Function
+
+Public Function IsInteger(var) As Boolean
+    IsInteger = (TypeName(var) = "Integer")
+End Function
+
+Public Function IsNotInteger(var) As Boolean
+    IsNotInteger = Not IsInteger(var)
+End Function
+
+Public Function IsIntegerArray(var) As Boolean
+    IsIntegerArray = (TypeName(var) = "Integer()")
+End Function
+
+Public Function IsNotIntegerArray(var) As Boolean
+    IsNotIntegerArray = Not IsIntegerArray(var)
+End Function
+
 Public Function IsLong(var) As Boolean
     IsLong = (TypeName(var) = "Long")
 End Function
 
-Public Function IsLongArray(var) As Boolean
-    IsLongArray = (TypeName(var) = "Long()")
-End Function
-
 Public Function IsNotLong(var) As Boolean
     IsNotLong = Not IsLong(var)
+End Function
+
+Public Function IsLongArray(var) As Boolean
+    IsLongArray = (TypeName(var) = "Long()")
 End Function
 
 Public Function IsNotLongArray(var) As Boolean
@@ -161,7 +185,6 @@ End Function
 Public Function IsNotBooleanArray(var) As Boolean
     IsNotBooleanArray = Not IsBooleanArray(var)
 End Function
-
 
 Public Function IsVariant(var) As Boolean
     IsVariant = (TypeName(var) = "Variant")
@@ -284,7 +307,9 @@ Public Function IsNotDictionaryEx(obj) As Boolean
 End Function
 
 Public Function IsWScriptShell(obj) As Boolean
-    IsWScriptShell = (TypeName(obj) = "IWshShell3")
+    IsWScriptShell = (TypeName(obj) = "IWshShell3") Or _
+                     (TypeName(obj) = "IWshShell2") Or _
+                     (TypeName(obj) = "IWshShell")
 End Function
 
 Public Function IsNotWScriptShell(obj) As Boolean
@@ -297,6 +322,37 @@ End Function
 
 Public Function IsNotWmi(obj) As Boolean
     IsNotWmi = Not IsWmi(obj)
+End Function
+
+Public Function IsScriptControl(obj) As Boolean
+    IsScriptControl = (TypeName(obj) = "ScriptControl")
+End Function
+
+Public Function IsNotScriptControl(obj) As Boolean
+    IsNotScriptControl = Not IsScriptControl(obj)
+End Function
+
+Public Function IsShell(obj) As Boolean
+    IsShell = (TypeName(obj) = "IShellDispatch6") Or _
+              (TypeName(obj) = "IShellDispatch5") Or _
+              (TypeName(obj) = "IShellDispatch4") Or _
+              (TypeName(obj) = "IShellDispatch3") Or _
+              (TypeName(obj) = "IShellDispatch2") Or _
+              (TypeName(obj) = "IShellDispatch") Or _
+              (TypeName(obj) = "Shell")
+End Function
+
+Public Function IsNotShell(obj) As Boolean
+    IsNotShell = Not IsShell(obj)
+End Function
+
+Public Function IsFolderItem(obj) As Boolean
+    IsFolderItem = (TypeName(obj) = "FolderItem2") Or _
+              (TypeName(obj) = "FolderItem")
+End Function
+
+Public Function IsNotFolderItem(obj) As Boolean
+    IsNotFolderItem = Not IsFolderItem(obj)
 End Function
 
 Public Function IsRegExp(obj) As Boolean
@@ -362,12 +418,31 @@ Public Function IsNotArrayExOfArrayEx(obj) As Boolean
     IsNotArrayExOfArrayEx = Not IsArrayExOfArrayEx(obj)
 End Function
 
+Public Function IsArrayOfArrayEx(var) As Boolean
+    IsArrayOfArrayEx = False
+    If IsArray(var) Then
+        If ArrayUtils.IsEmptyArray(var) Then
+            IsArrayOfArrayEx = True
+        Else
+            IsArrayOfArrayEx = IsArrayEx(var(LBound(var)))
+        End If
+    End If
+End Function
+
+Public Function IsNotArrayOfArrayEx(obj) As Boolean
+    IsNotArrayOfArrayEx = Not IsArrayOfArrayEx(obj)
+End Function
+
 Public Function IsRecordFormat(obj) As Boolean
     IsRecordFormat = (TypeName(obj) = "RecordFormat")
 End Function
 
 Public Function IsNotRecordFormat(obj) As Boolean
     IsNotRecordFormat = Not IsRecordFormat(obj)
+End Function
+
+Public Function IsParamArrayMissing(ByVal Arr) As Boolean
+    IsParamArrayMissing = LBound(Arr) > UBound(Arr)
 End Function
 
 '******************************************************************************
@@ -387,7 +462,7 @@ Public Function ValidatePattern(ByVal val As String, ByVal patternStr As String,
             .Pattern = patternStr
             .IgnoreCase = igCase
             .Global = True
-            ValidatePattern = .Test(val)
+            ValidatePattern = .test(val)
         End With
         Exit Function
     End If
@@ -840,6 +915,169 @@ Public Function IsMailAddress(ByVal val As String, Optional ByVal required As Bo
 End Function
 
 '******************************************************************************
+'* [概  要] 配列空チェック
+'* [詳  細] 指定された配列内の要素のどれかが空かチェックを行う。
+'*
+'* @param arr Variant配列
+'* @return Boolean チェック結果（True：どれかが空、False：全て値あり）
+'******************************************************************************
+Public Function IsEmptyAny(ByRef Arr As Variant) As Boolean
+    If IsNotArray(Arr) Then
+        If Arr = "" Then
+            IsEmptyAny = True
+            Exit Function
+        End If
+        IsEmptyAny = False
+        Exit Function
+    End If
+    Dim v
+    For Each v In Arr
+        If v = "" Then
+            IsEmptyAny = True
+            Exit Function
+        End If
+    Next
+    IsEmptyAny = False
+End Function
+
+'******************************************************************************
+'* [概  要] 配列空チェック
+'* [詳  細] 指定された配列内の要素の全てが空かチェックを行う。
+'*
+'* @param arr Variant配列
+'* @return Boolean チェック結果（True：全てが空、False：どれかに値あり）
+'******************************************************************************
+Public Function IsEmptyAll(ByRef Arr As Variant) As Boolean
+    If IsNotArray(Arr) Then
+        If Arr = "" Then
+            IsEmptyAll = True
+            Exit Function
+        End If
+        IsEmptyAll = False
+        Exit Function
+    End If
+    Dim v
+    For Each v In Arr
+        If v <> "" Then
+            IsEmptyAll = False
+            Exit Function
+        End If
+    Next
+    IsEmptyAll = True
+End Function
+
+'******************************************************************************
+'* [概  要] 配列値設定チェック
+'* [詳  細] 指定された配列内の要素のどれかに値が設定されているかチェックを行う。
+'*
+'* @param arr Variant配列
+'* @return Boolean チェック結果（True：どれかに設定、False：全て設定なし）
+'******************************************************************************
+Public Function IsFilledAny(ByRef Arr As Variant) As Boolean
+    IsFilledAny = Not IsEmptyAll(Arr)
+End Function
+
+'******************************************************************************
+'* [概  要] 配列値設定チェック
+'* [詳  細] 指定された配列内の要素の全てに値が設定されているかチェックを行う。
+'*
+'* @param arr Variant配列
+'* @return Boolean チェック結果（True：全て設定、False：どれかが空）
+'******************************************************************************
+Public Function IsFilledAll(ByRef Arr As Variant) As Boolean
+    IsFilledAll = Not IsEmptyAny(Arr)
+End Function
+
+'******************************************************************************
+'* [概  要] 過去日チェック処理。
+'* [詳  細] 値が現在日より過去日かどうか判定する｡
+'*
+'* @param val 検証値
+'* @param timeIgnore 時刻を無視するか（Falseを指定すると時刻も考慮する）
+'* @return Boolean チェック結果（True：OK、False：NG）
+'*
+'******************************************************************************
+Public Function IsPastDay(ByVal val As Date, Optional timeIgnore As Boolean = True) As Boolean
+    IsPastDay = IsBeforeDay(val, Date, timeIgnore)
+End Function
+
+'******************************************************************************
+'* [概  要] 過去日チェック処理。
+'* [詳  細] 値が指定した日付より過去日かどうか判定する｡
+'*
+'* @param val 検証値
+'* @param baseDate 基準日
+'* @param timeIgnore 時刻を無視するか（Falseを指定すると時刻も考慮する）
+'* @return Boolean チェック結果（True：OK、False：NG）
+'*
+'******************************************************************************
+Public Function IsBeforeDay(ByVal val As Date, ByVal baseDate As Date, Optional timeIgnore As Boolean = True) As Boolean
+    If timeIgnore Then
+        val = DateValue(val)
+        baseDate = DateValue(baseDate)
+    End If
+
+    If val < baseDate Then
+        IsBeforeDay = True
+        Exit Function
+    End If
+    IsBeforeDay = False
+End Function
+
+'******************************************************************************
+'* [概  要] 未来日チェック処理。
+'* [詳  細] 値が現在日より未来日かどうか判定する｡
+'*
+'* @param val 検証値
+'* @param timeIgnore 時刻を無視するか（Falseを指定すると時刻も考慮する）
+'* @return Boolean チェック結果（True：OK、False：NG）
+'*
+'******************************************************************************
+Public Function IsFutureDay(ByVal val As Date, Optional timeIgnore As Boolean = True) As Boolean
+    IsFutureDay = IsAfterDay(val, Date, timeIgnore)
+End Function
+
+'******************************************************************************
+'* [概  要] 未来日チェック処理。
+'* [詳  細] 値が指定した日付より未来日かどうか判定する｡
+'*
+'* @param val 検証値
+'* @param baseDate 基準日
+'* @param timeIgnore 時刻を無視するか（Falseを指定すると時刻も考慮する）
+'* @return Boolean チェック結果（True：OK、False：NG）
+'*
+'******************************************************************************
+Public Function IsAfterDay(ByVal val As Date, ByVal baseDate As Date, Optional timeIgnore As Boolean = True) As Boolean
+    If timeIgnore Then
+        val = DateValue(val)
+        baseDate = DateValue(baseDate)
+    End If
+
+    If val > baseDate Then
+        IsAfterDay = True
+        Exit Function
+    End If
+    IsAfterDay = False
+End Function
+
+'******************************************************************************
+'* [概  要] 当日チェック処理。
+'* [詳  細] 値が現在日かどうか判定する｡
+'*
+'* @param val 検証値
+'* @return Boolean チェック結果（True：OK、False：NG）
+'*
+'******************************************************************************
+Public Function IsToday(ByVal val As Date) As Boolean
+    val = DateValue(val)
+    If val = Date Then
+        IsToday = True
+        Exit Function
+    End If
+    IsToday = False
+End Function
+
+'******************************************************************************
 '* [概  要] 整数範囲チェック。
 '* [詳  細] 指定された値の範囲の整数であるかチェックを行う。
 '*
@@ -975,42 +1213,68 @@ End Function
 '*
 '******************************************************************************
 Public Function ValidateCellAddress(ByVal val As Variant) As Boolean
-    Dim cntAlph As Integer
-    Dim iLen As Integer
-    Dim i As Integer
+    If IsNotString(val) Then
+        ValidateCellAddress = False
+        Exit Function
+    End If
 
-    iLen = Len(val)
-    If iLen < 2 Or iLen > 10 Then
-        ValidateCellAddress = False
-        Exit Function
-    End If
-    
-    ' 先頭からのアルファベットの数をチェック
-    For i = 1 To iLen
-        If Not (Mid(val, i, 1) Like "[A-Z]") Then
-            cntAlph = i - 1
-            Exit For
-        End If
-    Next i
-    If cntAlph = 0 Or cntAlph > 3 Or cntAlph = iLen Then
-        ValidateCellAddress = False
-        Exit Function
-    End If
-    
-    ' アルファベット部分と数値部分を切分け
-    Dim strTmpAlph As String, strTmpNum As String
-    strTmpAlph = Left(CStr(val), cntAlph)
-    strTmpNum = Mid(CStr(val), cntAlph + 1)
-    
-    ' アルファベット3文字の場合はアルファベット部分をチェック
-    If cntAlph = 3 Then
-        If ValidatePattern(strTmpAlph, "[A-W][A-Z]{2}|X[A-E][A-Z]|XF[A-D]") Then
+    Dim v
+    For Each v In Split(val, ":")
+        Dim cntAlph As Integer: cntAlph = 0
+        Dim iLen As Integer: iLen = 0
+        Dim i As Integer: i = 0
+        
+        iLen = Len(v)
+        If iLen < 2 Or iLen > 10 Then
             ValidateCellAddress = False
             Exit Function
         End If
-    End If
-    
-    ' 数値部分のチェック
-    ValidateCellAddress = ValidateNumRange(strTmpNum, 1, 1048576)
+        
+        ' 先頭からのアルファベットの数をチェック
+        For i = 1 To iLen
+            If Not (Mid(v, i, 1) Like "[A-Z]") Then
+                cntAlph = i - 1
+                Exit For
+            End If
+        Next i
+        If cntAlph = 0 Or cntAlph > 3 Or cntAlph = iLen Then
+            ValidateCellAddress = False
+            Exit Function
+        End If
+        
+        ' アルファベット部分と数値部分を切分け
+        Dim strTmpAlph As String, strTmpNum As String
+        strTmpAlph = Left(CStr(v), cntAlph)
+        strTmpNum = Mid(CStr(v), cntAlph + 1)
+        
+        ' アルファベット3文字の場合はアルファベット部分をチェック
+        If cntAlph = 3 Then
+            If ValidatePattern(strTmpAlph, "[A-W][A-Z]{2}|X[A-E][A-Z]|XF[A-D]") Then
+                ValidateCellAddress = False
+                Exit Function
+            End If
+        End If
+        
+        ' 数値部分のチェック
+        If Not ValidateNumRange(strTmpNum, 1, 1048576) Then
+            ValidateCellAddress = False
+            Exit Function
+        End If
+    Next
+    ValidateCellAddress = True
+End Function
+
+'******************************************************************************
+'* [概  要] 設定順チェック
+'* [詳  細] 指定した配列Aの要素全てに値が設定されていない状態で、
+'*          指定した配列Bの要素のいづれかに値が設定されている場合NGとする。
+'*
+'* @param firstArr 配列A
+'* @param secondArr 配列B
+'* @return Boolean チェック結果（True：OK、False：NG）
+'******************************************************************************
+Public Function ValidateSettingOrder(ByRef firstArr As Variant, _
+                                    ByRef secondArr As Variant) As Boolean
+    ValidateSettingOrder = Not (IsEmptyAll(firstArr) And IsFilledAny(secondArr))
 End Function
 

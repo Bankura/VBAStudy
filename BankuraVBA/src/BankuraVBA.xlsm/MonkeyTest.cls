@@ -199,30 +199,30 @@ Public Sub CoreEnumr_Test()
     Assert.AreEqual 2&, ArrIndexOf(Array("I", "I", "f"), "f", 1, 9)
     Assert.AreEqual 3&, ArrIndexOf(Array(0, 1, 2, Null, 4, 5), Null)
     
-    Dim arr As Variant
+    Dim Arr As Variant
     
-    arr = Array()
-    ArrRev arr
-    Assert.AreEqualArr Array(), arr
-    arr = Array(2, 1)
-    ArrRev arr
-    Assert.AreEqualArr Array(1, 2), arr
-    arr = Array(1, 2, 3, 4, 5, 6, 7, 8, 9)
-    ArrRev arr
-    Assert.AreEqualArr Array(9, 8, 7, 6, 5, 4, 3, 2, 1), arr
+    Arr = Array()
+    ArrRev Arr
+    Assert.AreEqualArr Array(), Arr
+    Arr = Array(2, 1)
+    ArrRev Arr
+    Assert.AreEqualArr Array(1, 2), Arr
+    Arr = Array(1, 2, 3, 4, 5, 6, 7, 8, 9)
+    ArrRev Arr
+    Assert.AreEqualArr Array(9, 8, 7, 6, 5, 4, 3, 2, 1), Arr
     
-    arr = Array("S", "O", "R", "T")
-    ArrSort arr
-    Assert.AreEqualArr Array("O", "R", "S", "T"), arr
-    arr = Array(2, 4, 3, 5, 6, 7, 0, 1, 9, 8)
-    ArrSort arr, True
-    Assert.AreEqualArr Array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), arr
-    arr = Array(2, 4, 3, 5, 6, 7, 0, 1, 9, 8)
-    ArrSort arr, False
-    Assert.AreEqualArr Array(9, 8, 7, 6, 5, 4, 3, 2, 1, 0), arr
-    arr = Array(2, 1, 0, Null)
-    ArrSort arr
-    Assert.AreEqualArr Array(Null, 0, 1, 2), arr
+    Arr = Array("S", "O", "R", "T")
+    ArrSort Arr
+    Assert.AreEqualArr Array("O", "R", "S", "T"), Arr
+    Arr = Array(2, 4, 3, 5, 6, 7, 0, 1, 9, 8)
+    ArrSort Arr, True
+    Assert.AreEqualArr Array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), Arr
+    Arr = Array(2, 4, 3, 5, 6, 7, 0, 1, 9, 8)
+    ArrSort Arr, False
+    Assert.AreEqualArr Array(9, 8, 7, 6, 5, 4, 3, 2, 1, 0), Arr
+    Arr = Array(2, 1, 0, Null)
+    ArrSort Arr
+    Assert.AreEqualArr Array(Null, 0, 1, 2), Arr
     
     Assert.AreEqualArr Array(6, 5, 3), ArrUniq(Array(6, 5, 5, 3, 6))
     

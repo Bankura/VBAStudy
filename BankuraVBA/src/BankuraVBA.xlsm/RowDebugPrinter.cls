@@ -55,7 +55,7 @@ End Sub
 Public Sub Edit(enumerator As Object)
     Dim msg As New StringEx
     msg.Append " 現在行　:" & enumerator.CurrentRow
-    msg.Append " 開始行　:" & enumerator.StartRow
+    msg.Append " 開始行　:" & enumerator.startRow
     msg.Append " 終了行　:" & enumerator.EndRow
     msg.Append " 処理件数:" & enumerator.CurrentReportCount
     msg.Append " 最大件数:" & enumerator.MaxReportCount
@@ -69,6 +69,15 @@ End Sub
 '******************************************************************************
 Public Sub EndProcess(enumerator As Object)
     DebugUtils.Show "■終了 --------------------------------"
+End Sub
+
+'******************************************************************************
+'* [概  要] CancelProcess
+'* [詳  細] キャンセル時の処理を行う。
+'*
+'******************************************************************************
+Public Sub CancelProcess(enumerator As Object)
+    DebugUtils.Show "■終了（キャンセル） ------------------"
 End Sub
 
 '******************************************************************************
@@ -94,4 +103,12 @@ End Sub
 '*-----------------------------------------------------------------------------
 Private Sub IRowEditor_EndProcess(enumerator As Object)
     Me.EndProcess enumerator
+End Sub
+
+'*-----------------------------------------------------------------------------
+'* IRowEditor#CancelProcess
+'*
+'*-----------------------------------------------------------------------------
+Public Sub IRowEditor_CancelProcess(enumerator As Object)
+    Me.CancelProcess enumerator
 End Sub

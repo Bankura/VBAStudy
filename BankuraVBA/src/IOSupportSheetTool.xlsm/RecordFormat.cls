@@ -16,7 +16,7 @@ Implements IRowEditor
 '* [詳  細] 項目のフォーマット定義情報をレコード単位で束ねたクラス。
 '*
 '* @author Bankura
-'* Copyright (c) 2019 Bankura
+'* Copyright (c) 2019-2021 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 '******************************************************************************
@@ -228,7 +228,7 @@ Public Function Validate(vArr, Optional forOutput As Boolean = False) As Boolean
     rEnumerator.SourceData = arr2dex
     rEnumerator.IsActionable = False
     rEnumerator.MaxReportCount = arr2dex.RowLength
-    rEnumerator.StartRow = 0
+    rEnumerator.startRow = 0
     rEnumerator.EndRow = arr2dex.RowMaxIndex
     mRowCount = arr2dex.RowLength
     
@@ -266,11 +266,11 @@ End Function
 '* @param colnum エラー発生データ列番号
 '*
 '******************************************************************************
-Private Sub SetErrorMessage(ByVal itm As Item, ByVal rownum As Long, ByVal colnum As Long)
-    mErrMessage = "[行" + CStr(rownum) + " 列" + CStr(colnum) + "]  " + itm.Name _
+Private Sub SetErrorMessage(ByVal itm As Item, ByVal rowNum As Long, ByVal colnum As Long)
+    mErrMessage = "[行" + CStr(rowNum) + " 列" + CStr(colnum) + "]  " + itm.Name _
                   + vbNewLine + "[" + itm.Value + "]" + vbNewLine + vbNewLine + _
                     itm.GetErrorMessage
-    mErrRowNo = rownum
+    mErrRowNo = rowNum
     mErrColNo = colnum
 End Sub
 
@@ -364,7 +364,7 @@ Public Function Convert(vArr, Optional forOutput As Boolean = False) As Array2DE
     rEnumerator.DestTarget = destArr2dex
     rEnumerator.IsActionable = False
     rEnumerator.MaxReportCount = arr2dex.RowLength
-    rEnumerator.StartRow = 0
+    rEnumerator.startRow = 0
     rEnumerator.EndRow = arr2dex.RowMaxIndex
     mRowCount = arr2dex.RowLength
     
@@ -426,14 +426,14 @@ End Sub
 Private Sub Edit_Validate(enumerator As RowEnumerator)
     Dim arr2dex As Array2DEx
     Set arr2dex = enumerator.SourceData
-    Dim colidx As Long, itm As Item, ind As Long
+    Dim colIdx As Long, itm As Item, ind As Long
     ind = 1
-    For colidx = 0 To arr2dex.ColMaxIndex
+    For colIdx = 0 To arr2dex.ColMaxIndex
         Set itm = mCol(ind)
         itm.forOutput = mForOutput
-        itm.Value = arr2dex(enumerator.CurrentRow, colidx)
+        itm.Value = arr2dex(enumerator.CurrentRow, colIdx)
         If Not itm.Validate Then
-            Call SetErrorMessage(itm, enumerator.CurrentRow + 1, colidx + 1)
+            Call SetErrorMessage(itm, enumerator.CurrentRow + 1, colIdx + 1)
             Err.Raise 9998, "RecordFormat#Edit_Validate", "不正データが見つかりました。"
         End If
         ind = ind + 1
@@ -446,14 +446,14 @@ Private Sub Edit_Convert(enumerator As RowEnumerator)
     Set destArr2dex = enumerator.DestTarget
     Set record = New ArrayEx
 
-    Dim colidx As Long, itm As Item, ind As Long, val As String
+    Dim colIdx As Long, itm As Item, ind As Long, val As String
     ind = 1
-    For colidx = 0 To mColumnCount - 1
+    For colIdx = 0 To mColumnCount - 1
         Set itm = mCol(ind)
         itm.forOutput = mForOutput
         If mForOutput Then
             If itm.OutputTarget Then
-                itm.Value = srcArr2dex(enumerator.CurrentRow, colidx)
+                itm.Value = srcArr2dex(enumerator.CurrentRow, colIdx)
                 val = itm.EditedValue
                 record.Add val
             End If
@@ -482,7 +482,14 @@ Private Sub EndProcess(enumerator As Object)
     ' Nothing
 End Sub
 
-
+'******************************************************************************
+'* [概  要] CancelProcess
+'* [詳  細] キャンセル時の処理を行う。
+'*
+'******************************************************************************
+Private Sub CancelProcess(enumerator As Object)
+    ' Nothing
+End Sub
 
 '******************************************************************************
 '* インタフェース実装
@@ -508,3 +515,11 @@ End Sub
 Private Sub IRowEditor_EndProcess(enumerator As Object)
     EndProcess enumerator
 End Sub
+'*-----------------------------------------------------------------------------
+'* IRowEditor#CancelProcess
+'*
+'*-----------------------------------------------------------------------------
+Public Sub IRowEditor_CancelProcess(enumerator As Object)
+    CancelProcess enumerator
+End Sub
+

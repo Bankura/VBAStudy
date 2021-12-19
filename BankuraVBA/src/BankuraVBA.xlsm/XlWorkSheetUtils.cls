@@ -272,20 +272,20 @@ Public Function ExtractKeyData(inputSheetName As String, startRow As Integer, st
                            outputSheetName As String) As Boolean
            
     Dim myDic As Object, myKey As Variant
-    Dim C As Variant, varData As Variant
+    Dim c As Variant, varData As Variant
     Set myDic = CreateObject("Scripting.Dictionary")
     
     ' 入力情報を取得
     With Worksheets(inputSheetName)
-        varData = .Range(.Cells(startRow, startCol), .Cells(Rows.count, startCol).End(xlUp)).Value
+        varData = .Range(.Cells(startRow, startCol), .Cells(Rows.Count, startCol).End(xlUp)).Value
     End With
 
     '空データ、重複データを除外
     If IsArray(varData) Then
-        For Each C In varData
-            If Not C = Empty Then
-                If Not myDic.Exists(C) Then
-                    myDic.Add C, Null
+        For Each c In varData
+            If Not c = Empty Then
+                If Not myDic.Exists(c) Then
+                    myDic.Add c, Null
                 End If
             End If
         Next
@@ -299,10 +299,10 @@ Public Function ExtractKeyData(inputSheetName As String, startRow As Integer, st
         .Range("A:A").ClearContents
 
         '読込先シートにデータを出力
-        .Range("A1").Resize(myDic.count) = Application.WorksheetFunction.Transpose(myKey)
+        .Range("A1").Resize(myDic.Count) = Application.WorksheetFunction.Transpose(myKey)
         
         'ソート処理
-        .Range("A1").Resize(myDic.count).Sort key1:=.Range("A1")
+        .Range("A1").Resize(myDic.Count).Sort key1:=.Range("A1")
     End With
     Set myDic = Nothing
     ExtractKeyData = True
@@ -326,20 +326,20 @@ Public Function ExtractKeyData2(inputSheet As Worksheet, startRow As Integer, st
     On Error GoTo ErrorHandler
            
     Dim myDic As Object, myKey As Variant
-    Dim C As Variant, varData As Variant
+    Dim c As Variant, varData As Variant
     Set myDic = CreateObject("Scripting.Dictionary")
     
     ' 入力情報を取得
     With inputSheet
-        varData = .Range(.Cells(startRow, startCol), .Cells(Rows.count, startCol).End(xlUp)).Value
+        varData = .Range(.Cells(startRow, startCol), .Cells(Rows.Count, startCol).End(xlUp)).Value
     End With
 
     '空データ、重複データを除外
     If IsArray(varData) Then
-        For Each C In varData
-            If Not C = Empty Then
-                If Not myDic.Exists(C) Then
-                    myDic.Add C, Null
+        For Each c In varData
+            If Not c = Empty Then
+                If Not myDic.Exists(c) Then
+                    myDic.Add c, Null
                 End If
             End If
         Next
@@ -418,7 +418,7 @@ Public Function GetFinalRow(ByVal dataSheet As Worksheet, Optional ignoreColnum 
     Dim ret As Long
     Dim i As Long, cnta As Long
     With dataSheet.UsedRange
-        For i = .Rows.count To 1 Step -1
+        For i = .Rows.Count To 1 Step -1
             cnta = WorksheetFunction.CountA(.Rows(i))
             If cnta > 0 Then
                 If cnta <> 1 Then
@@ -456,7 +456,7 @@ Public Function GetFinalCol(ByVal dataSheet As Worksheet) As Long
     Dim ret As Long
     Dim i As Long
     With dataSheet.UsedRange
-        For i = .Columns.count To 1 Step -1
+        For i = .Columns.Count To 1 Step -1
             If WorksheetFunction.CountA(.Columns(i)) > 0 Then
                 ret = i
                 Exit For
@@ -479,7 +479,7 @@ End Function
 '*
 '******************************************************************************
 Public Function GetFinalKeyRow(ByVal dataSheet As Worksheet, startCol As Long) As Long
-    GetFinalKeyRow = dataSheet.Cells(Rows.count, startCol).End(xlUp).row
+    GetFinalKeyRow = dataSheet.Cells(Rows.Count, startCol).End(xlUp).row
 End Function
 
 '******************************************************************************
@@ -492,7 +492,7 @@ End Function
 '*
 '******************************************************************************
 Public Function GetFinalKeyCol(ByVal dataSheet As Worksheet, startRow As Long) As Long
-    GetFinalKeyCol = dataSheet.Cells(startRow, Columns.count).End(xlToLeft).Column
+    GetFinalKeyCol = dataSheet.Cells(startRow, Columns.Count).End(xlToLeft).Column
 End Function
 
 '******************************************************************************
@@ -566,9 +566,9 @@ Public Sub DeleteNoUsedRange(ByVal dataSheet As Worksheet, lStartRow As Long)
     If rng Is Nothing Then
         delStartRow = lStartRow
     Else
-        delStartRow = rng.Item(rng.count).row + 1
+        delStartRow = rng.Item(rng.Count).row + 1
     End If
-    delEndRow = dataSheet.UsedRange.Item(dataSheet.UsedRange.count).row
+    delEndRow = dataSheet.UsedRange.Item(dataSheet.UsedRange.Count).row
     
     If delStartRow > delEndRow Then
         Exit Sub
@@ -1321,8 +1321,8 @@ Public Sub CellToPng(ByVal saveDirPath As String, ByVal rngAddress As String, Op
 
         ' セルアドレスを取得
         Dim sAddress As String
-        If (rng.count = 1) Then
-            If (rng.MergeArea.count > 1) Then
+        If (rng.Count = 1) Then
+            If (rng.MergeArea.Count > 1) Then
                 sAddress = rng.MergeArea.Address(False, False)
                 If (Left(sAddress, Len(rng.Address(False, False))) <> rng.Address(False, False)) Then
                     Exit Sub
@@ -1361,7 +1361,7 @@ Public Sub CellToPng(ByVal saveDirPath As String, ByVal rngAddress As String, Op
         
         ' 単一セル指定の場合（セル範囲の場合はPNGファイルが複数出力され、image_xxx.pngのどれが正しいのか不明のため選別しない）
         Dim sPngFileName As String
-        If (rng.count = 1) Then
+        If (rng.Count = 1) Then
             sPngFileName = sAddressStr & "_image001.png"
             
             ' 既に作成済みの場合は再作成するため削除

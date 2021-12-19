@@ -901,13 +901,13 @@ End Function
 '* @return ラップタイムのコレクション（一次元配列）
 '******************************************************************************
 Public Function LapTimes() As Variant
-    If mStartNum = 0 Or mLapTimes.count = 0 Then
+    If mStartNum = 0 Or mLapTimes.Count = 0 Then
         LapTimes = Split(vbNullString)
     Else
         Dim Arr() As Variant
-        ReDim Arr(1 To mLapTimes.count)
+        ReDim Arr(1 To mLapTimes.Count)
         Dim i As Long
-        For i = 1 To mLapTimes.count
+        For i = 1 To mLapTimes.Count
             Arr(i) = mLapTimes(i)
         Next
         LapTimes = Arr

@@ -108,8 +108,16 @@ End Sub
 '*
 '******************************************************************************
 Private Sub eventObject_OnAction(sender As IEnumerator)
+    On Error GoTo ErrorHandler
     If Not mProgressReporter Is Nothing And mIsReportable Then
         mProgressReporter.Proceed sender
     End If
-    DoEvents
+    UXUtils.CheckEvents
+    Exit Sub
+ErrorHandler:
+    If Err.Number = 8000 Then
+        sender.IsCancel = True
+    Else
+        sender.IsError = True
+    End If
 End Sub

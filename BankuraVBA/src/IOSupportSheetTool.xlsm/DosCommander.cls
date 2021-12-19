@@ -87,6 +87,41 @@ Public Function GetCommandResultAsArray(commandString) As String()
     GetCommandResultAsArray = mCommander.GetCommandResultAsArray(commandString)
 End Function
 
+'******************************************************************************
+'* [概  要] WriteBatchAndRun
+'* [詳  細] パッチファイルを作成し、実行した結果を取得する。
+'*
+'* @param batchString パッチファイル文字列、または1次元配列
+'* @param recieveResultString 結果を文字列で受け取るか
+'*                            （True:String, False:配列）
+'* @return Variant コマンド実行結果
+'******************************************************************************
+Public Function WriteBatchAndRun(batchString, Optional recieveResultString As Boolean = True) As Variant
+    Dim tempPath As String: tempPath = FileUtils.GetTempFilePath(, ".bat")
+    Call FileUtils.WriteTextFile(tempPath, batchString, "Shift_JIS")
+    
+    WriteBatchAndRun = Exec(tempPath, recieveResultString)
+
+    Call IO.fso.DeleteFile(tempPath, True)
+End Function
+
+'******************************************************************************
+'* [概  要] Exec
+'* [詳  細] 指定したコマンドまたはスクリプトを実行した結果を取得する。
+'*
+'* @param execString 実行文字列（コマンドまたはスクリプト）
+'* @param recieveResultString 結果を文字列で受け取るか
+'*                            （True:String, False:配列）
+'* @return Variant スクリプト実行結果
+'******************************************************************************
+Public Function Exec(execString As String, Optional recieveResultString As Boolean = True) As Variant
+    If recieveResultString Then
+        Exec = mCommander.GetCommandResult(execString)
+    Else
+        Exec = mCommander.GetCommandResultAsArray(execString)
+    End If
+End Function
+
 Public Function CmdDir(ByVal Path As String, ParamArray options() As Variant) As String()
     CmdDir = GetCommandResultAsArray("DIR " & Path & " " & Join(options, " "))
 End Function

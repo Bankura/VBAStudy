@@ -45,7 +45,7 @@ Private mDbName As String
 Private mDbUserName As String
 Private mDbPassword As String
 Private mClEncode As String
-
+Private mTuplesOnly As Boolean
 
 '******************************************************************************
 '* プロパティ定義
@@ -60,7 +60,7 @@ Public Property Get PsqlPath() As String
     PsqlPath = mPsqlPath
 End Property
 Public Property Let PsqlPath(arg As String)
-    mPsqlPath = arg
+    mPsqlPath = StringUtils.WrapIfMissing(arg, """")
 End Property
 
 '*-----------------------------------------------------------------------------
@@ -92,10 +92,10 @@ End Property
 '*
 '* アクセスするDB名
 '*-----------------------------------------------------------------------------
-Public Property Get DbName() As String
-    DbName = mDbName
+Public Property Get dbName() As String
+    dbName = mDbName
 End Property
-Public Property Let DbName(arg As String)
+Public Property Let dbName(arg As String)
     mDbName = arg
 End Property
 
@@ -135,13 +135,25 @@ Public Property Let ClEncode(arg As String)
     mClEncode = arg
 End Property
 
-
+'*-----------------------------------------------------------------------------
+'* TuplesOnly プロパティ
+'*
+'* 出力結果をデータのみにするかどうか。Falseにすると、ヘッダと行数が出力される。
+'*-----------------------------------------------------------------------------
+Public Property Get TuplesOnly() As Boolean
+    TuplesOnly = mTuplesOnly
+End Property
+Public Property Let TuplesOnly(arg As Boolean)
+    mTuplesOnly = arg
+End Property
 '******************************************************************************
 '* コンストラクタ・デストラクタ
 '******************************************************************************
 Private Sub Class_Initialize()
     Set mCommander = New Commander
     mClEncode = "SJIS"
+    mTuplesOnly = False
+    Call SetPsqlInstallPathFromRegistry
 End Sub
 
 '******************************************************************************
@@ -149,50 +161,120 @@ End Sub
 '******************************************************************************
 
 '******************************************************************************
+'* [概  要] SetPsqlBaseCommand
+'* [詳  細] Psqlのコマンド・環境変数を設定する。
+'*          事前に各プロパティを設定しておく必要がある。
+'*
+'******************************************************************************
+Private Sub SetPsqlBaseCommand()
+    mCommander.BaseCommand = mPsqlPath & " -h " & mDbHost & " -p " & mDbPort & _
+                                         " -d " & mDbName & " -U " & mDbUserName & _
+                                         " -c ""{0}"" -A " & "-o {1}"
+    If mTuplesOnly Then
+        mCommander.BaseCommand = mCommander.BaseCommand & " -t "
+    End If
+   
+    ' パスワードを環境変数に設定
+    Call Base.AppendEnvItem("PGPASSWORD", mDbPassword)
+    ' Client(psql)のエンコード設定：デフォルト「SJIS」
+    Call Base.AppendEnvItem("PGCLIENTENCODING", mClEncode)
+End Sub
+
+'******************************************************************************
+'* [概  要] psqlコマンドを介してSQLを実行する。
+'* [詳  細] psqlコマンドを介して、SQLを実行し、実行結果を返却する。
+'*          ローカル環境にpsqlがインストールされている必要がある。
+'*          psqlはpostgreSQLインストール時に合わせてインストールされる。
+'*          実行結果は一時ファイルに一度出力後、読み出しを行うため、
+'*          大量データにも対応可能（現状一括読出しのため、GiBレベルだと
+'*          対応は難しいかもしれない）。
+'*
+'* @param sql SQL文
+'* @return 実行結果データ（2次元配列）
+'*
+'******************************************************************************
+Public Function Exec(sql As String) As Variant
+    Call SetPsqlBaseCommand
+    Dim resultData: resultData = mCommander.GetCommandResultAsArray(sql)
+    Exec = EditQueryResult(resultData)
+End Function
+
+'******************************************************************************
 '* [概  要] psqlコマンドを介してSQLを実行する。
 '* [詳  細] psqlコマンドを介して、SQLを実行し、実行結果を返却する。
 '*          ローカル環境にpsqlがインストールされている必要がある。
 '*          psqlはpostgreSQLインストール時に合わせてインストールされる。
 '*
+'* [注  意] WScript.ShellのExecメソッドの標準出力及びエラー出力の
+'*          バッファサイズが4KBのため、大量にデータが出力される場合バッファが
+'*          一杯になり処理がフリーズする。
+'*          そのため、Exec終了を待たずに、標準出力から行毎の読み出しを行うことで
+'*          バッファがいっぱいにならないようにしているが、
+'*          標準出力の1行分のデータ量が4KBを超える場合は対応できずフリーズする。
+'*
 '* @param sql SQL文
 '* @return CommandResult情報
 '*
 '******************************************************************************
-Public Function ExecPsql(sql As String) As CommandResult
+Public Function ExecToCommandResult(sql As String) As CommandResult
     Dim cmd As String, oExec
     
     ' コマンド組立て
     cmd = mPsqlPath & " -h " & mDbHost & " -p " & mDbPort & " -d " & mDbName & " -U " & mDbUserName & " -c """ & sql & """ -A"
-    Debug.Print cmd
-    
-    ' Wscript.Shellオブジェクト生成
-    With Core.Wsh
-        ' パスワードを環境変数に設定
-        .Environment("Process").Item("PGPASSWORD") = mDbPassword
-    
-        ' Client(psql)のエンコード設定：デフォルト「SJIS」
-        .Environment("Process").Item("PGCLIENTENCODING") = mClEncode
-    End With
+    If mTuplesOnly Then
+        cmd = cmd & " -t"
+    End If
+
+    ' パスワードを環境変数に設定
+    Call Base.AppendEnvItem("PGPASSWORD", mDbPassword)
+    ' Client(psql)のエンコード設定：デフォルト「SJIS」
+    Call Base.AppendEnvItem("PGCLIENTENCODING", mClEncode)
 
     ' コマンド実行・結果設定
     Dim res As CommandResult: Set res = mCommander.Exec(cmd)
     
     ' コマンド失敗時処理
     If res.ExitCd <> 0 Then
-        Set ExecPsql = res
+        Set ExecToCommandResult = res
         Exit Function
     End If
 
+    If ArrayUtils.IsEmptyArray(res.StdOutList) Then
+        Set ExecToCommandResult = res
+        Exit Function
+    End If
+    
+    ' 実行結果編集
+    Dim resultEditData: resultEditData = EditQueryResult(res.StdOutList)
+
+    ' 返却値設定
+    res.StdOutList = resultEditData
+    res.RowMax = ArrayUtils.GetLength(resultEditData)
+    res.ColMax = ArrayUtils.GetLength(resultEditData, 2)
+    Set ExecToCommandResult = res
+End Function
+
+'******************************************************************************
+'* [概  要] SQL実行結果編集処理。
+'* [詳  細] psqlコマンドを介したSQL実行結果を2次元配列に編集する。
+'*
+'* @param resultData 実行結果データ（1次元配列）
+'* @return 編集済み実行結果データ（2次元配列）
+'*
+'******************************************************************************
+Private Function EditQueryResult(resultData)
     ' 正常時処理
     Dim lRowMax As Long: lRowMax = 0
     Dim lColMax As Long: lColMax = 0
     
-    If ArrayUtils.IsEmptyArray(res.StdOutList) Then
-        Set ExecPsql = res
+    If ArrayUtils.IsEmptyArray(resultData) Then
+        EditQueryResult = ArrayUtils.EmptyVariant2DArray
         Exit Function
     End If
+    lRowMax = ArrayUtils.GetLength(resultData)
+    
     ' 列数計測
-    Dim vTmpCols As Variant: vTmpCols = Split(res.StdOutList(0), "|")
+    Dim vTmpCols As Variant: vTmpCols = Split(resultData(0), "|")
     lColMax = UBound(vTmpCols) - LBound(vTmpCols) + 1
 
     'データ設定
@@ -201,11 +283,11 @@ Public Function ExecPsql(sql As String) As CommandResult
     
     Dim i As Long, cols As Variant
     Dim row
-    For Each row In res.StdOutList
-        Debug.Print "Line: " & row
+    For Each row In resultData
+        'Debug.Print "Line: " & row
         
         ' SQL実行結果に列区切り(|)なしのパターン
-        If StringUtils.ContainsNone(row, "|") Then
+        If StringUtils.ContainsNone(row, "|") Or row = "" Then
             ' 1列目以外は空埋め
             Call ArrayUtils.SetDefaultTo2DArrayRow(vArray, i, "")
             vArray(i, 0) = row
@@ -216,9 +298,42 @@ Public Function ExecPsql(sql As String) As CommandResult
         End If
         i = i + 1
     Next
-
-    res.StdOutList = vArray
-    res.RowMax = lRowMax
-    res.ColMax = lColMax
-    Set ExecPsql = res
+    EditQueryResult = ArrayUtils.RemoveEmpty(vArray)
 End Function
+
+'******************************************************************************
+'* [概  要] SetPsqlInstallPathFromRegistry
+'* [詳  細] レジストリからPsqlのインストールパスを取得し、設定する。
+'*
+'******************************************************************************
+Private Sub SetPsqlInstallPathFromRegistry()
+    Const PSQL_REG_PATH As String = "SOFTWARE\PostgreSQL\Installations"
+    Const PSQL_REG_WOW_PATH As String = "SOFTWARE\Wow6432Node\PostgreSQL\Installations"
+    
+    Dim stdRegProv As Object: Set stdRegProv = CreateStdRegProv()
+    Dim regPsqlInstallPathString As String
+    Dim regRoot As Long
+
+    Dim vArr
+    stdRegProv.EnumKey HKEY_CURRENT_USER, PSQL_REG_PATH, vArr
+    If IsNull(vArr) Then
+        stdRegProv.EnumKey HKEY_LOCAL_MACHINE, PSQL_REG_PATH, vArr
+        If IsNull(vArr) Then
+            stdRegProv.EnumKey HKEY_LOCAL_MACHINE, PSQL_REG_WOW_PATH, vArr
+            regPsqlInstallPathString = PSQL_REG_WOW_PATH
+            regRoot = HKEY_LOCAL_MACHINE
+        Else
+            regPsqlInstallPathString = PSQL_REG_PATH
+            regRoot = HKEY_LOCAL_MACHINE
+        End If
+    Else
+        regPsqlInstallPathString = PSQL_REG_PATH
+        regRoot = HKEY_CURRENT_USER
+    End If
+    
+    If Not IsNull(vArr) Then
+        ArrayUtils.Sort vArr, False
+        stdRegProv.GetStringValue regRoot, regPsqlInstallPathString & "\" & CStr(vArr(0)), "Base Directory", mPsqlPath
+        mPsqlPath = StringUtils.wrap(mPsqlPath & "\bin\psql.exe", """")
+    End If
+End Sub

@@ -91,7 +91,7 @@ Private Function ExecSQL(sql As String, ByRef nrow As Long, ws As Worksheet) As 
     Call Base.StartProcess
     
     ' SQL実行(psql使用)
-    Dim ret: ret = mCommander.ExecPsql(sql)
+    Dim ret: ret = mCommander.Exec(sql)
     
     ' ワークシートへの結果出力
     ws.Cells(nrow, 1).Value = sql

@@ -20,7 +20,7 @@ Option Explicit
 '* [参  考]
 '*
 '* @author Bankura
-'* Copyright (c) 2020 Bankura
+'* Copyright (c) 2020-2021 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 '******************************************************************************
@@ -118,8 +118,8 @@ End Function
 '* @param arr As Variant(Of Array(Of T))
 '* @return As Collection(Of T)
 '******************************************************************************
-Public Function ArrayToCollection(ByVal arr As Variant) As Collection
-    Set ArrayToCollection = Core.ArrToClct(arr)
+Public Function ArrayToCollection(ByVal Arr As Variant) As Collection
+    Set ArrayToCollection = Core.ArrToClct(Arr)
 End Function
 
 '******************************************************************************
@@ -200,10 +200,13 @@ End Function
 '*
 '* @param index インデックス
 '* @param col コレクション
+'* @param colChange コレクションの変更有無
+'*                 （コレクション生成後に値を入れ替えている場合は
+'*                   前方からの検索しかできないのでTrueを指定）
 '* @return キー名
 '*
 '******************************************************************************
-Public Function GetCollectionKeyByIndex(ByVal Index As Long, col As Collection) As String
+Public Function GetCollectionKeyByIndex(ByVal ind As Long, col As Collection, Optional colChange As Boolean = False) As String
     Dim ptr As LongPtr
 
     Dim i As LongPtr
@@ -211,25 +214,26 @@ Public Function GetCollectionKeyByIndex(ByVal Index As Long, col As Collection) 
     If col Is Nothing Then
         Err.Raise 91
     Else
-        Select Case Index
-            Case Is > col.Count
-                Err.Raise 9
-            Case Is <= col.Count / 2
-                Call CopyMemoryByRef(ptr, ByVal (ObjPtr(col) + FOWARD_SHIFT), LONGPTR_SIZE)
-                For i = 2 To Index
-                    Call CopyMemoryByRef(ptr, ByVal (ptr + FOWARD_SHIFT), LONGPTR_SIZE)
-                Next i
-            Case Else
-                Call CopyMemoryByRef(ptr, ByVal (ObjPtr(col) + BACKWARD_SHIFT), LONGPTR_SIZE)
-                For i = col.Count - 1 To Index Step -1
-                    Call CopyMemoryByRef(ptr, ByVal (ptr + BACKWARD_SHIFT), LONGPTR_SIZE)
-                Next i
-        End Select
-        i = StrPtr(sKey)
+        If ind > col.Count Then
+            Err.Raise 9
+        ElseIf (ind <= (col.Count + 1) / 2) Or colChange Then
+            Call CopyMemoryByRef(ptr, ByVal (ObjPtr(col) + FOWARD_SHIFT), LONGPTR_SIZE)
+            For i = 2 To ind
+                Call CopyMemoryByRef(ptr, ByVal (ptr + FOWARD_SHIFT), LONGPTR_SIZE)
+            Next
+        Else
+            Call CopyMemoryByRef(ptr, ByVal (ObjPtr(col) + BACKWARD_SHIFT), LONGPTR_SIZE)
+            For i = col.Count - 1 To ind Step -1
+                Call CopyMemoryByRef(ptr, ByVal (ptr + BACKWARD_SHIFT), LONGPTR_SIZE)
+            Next
+        End If
+
+        Dim tmp As LongPtr
+        tmp = StrPtr(sKey)
         Call CopyMemoryByRef(ByVal VarPtr(sKey), ByVal (ptr + KEY_POS), LONGPTR_SIZE)
         
         GetCollectionKeyByIndex = sKey
-        Call CopyMemoryByRef(ByVal VarPtr(sKey), i, LONGPTR_SIZE)
+        Call CopyMemoryByRef(ByVal VarPtr(sKey), tmp, LONGPTR_SIZE)
     End If
 End Function
 
@@ -288,6 +292,41 @@ Public Function GetCollectionIndexByKey(ByVal Key As String, col As Collection, 
     End If
 End Function
 
+'******************************************************************************
+'* [概  要] GetCollectionKeys メソッド
+'* [詳  細] コレクションのキーを配列で取得する。
+'*
+'* @param col コレクション
+'* @return キー名
+'*
+'******************************************************************************
+Public Function GetCollectionKeys(col As Collection) As Variant
+    Dim ptr As LongPtr
+    Dim tmpptr As LongPtr
+    Dim sKey As String
+    Dim arrex As ArrayEx: Set arrex = New ArrayEx
+    
+    If col Is Nothing Then
+        Err.Raise 91
+    Else
+        Call CopyMemoryByRef(ptr, ByVal (ObjPtr(col) + FOWARD_SHIFT), LONGPTR_SIZE)
+        tmpptr = StrPtr(sKey)
+        Call CopyMemoryByRef(ByVal VarPtr(sKey), ByVal (ptr + KEY_POS), LONGPTR_SIZE)
+        arrex.Add sKey
+        Call CopyMemoryByRef(ByVal VarPtr(sKey), tmpptr, LONGPTR_SIZE)
+        
+        Dim i As Long
+        For i = 2 To col.Count
+            Call CopyMemoryByRef(ptr, ByVal (ptr + FOWARD_SHIFT), LONGPTR_SIZE)
+            tmpptr = StrPtr(sKey)
+            Call CopyMemoryByRef(ByVal VarPtr(sKey), ByVal (ptr + KEY_POS), LONGPTR_SIZE)
+            arrex.Add sKey
+            Call CopyMemoryByRef(ByVal VarPtr(sKey), tmpptr, LONGPTR_SIZE)
+        Next
+    End If
+    GetCollectionKeys = arrex.ToArray
+End Function
+
 '*******************************************************************************
 '* [概  要] CollectionToString
 '* [詳  細] Collectionを文字列変換する。
@@ -303,7 +342,7 @@ Public Function CollectionToString(ByVal col As Collection) As String
 End Function
 
 '*******************************************************************************
-'* [概  要] ObjectToString
+'* [概  要] DictionaryToString
 '* [詳  細] Dictionaryを文字列変換する。
 '*          VBA-WEB内のVBA-JSONを利用。
 '*
@@ -315,3 +354,193 @@ Public Function DictionaryToString(ByVal dic As Object) As String
     WebHelpers.JsonOptions.NonEncode = True
     DictionaryToString = WebHelpers.ConvertToJson(dic)
 End Function
+
+
+'*******************************************************************************
+'* [概  要] CollectionSwap
+'* [詳  細] Collection内の値の交換を行う。
+'* [参  考] https://thom.hateblo.jp/entry/2015/11/29/212934
+'*
+'* @param col 対象のCollection
+'* @param index1 交換対象となるインデックス1
+'* @param index2 交換対象となるインデックス2
+'*
+'*******************************************************************************
+Public Sub CollectionSwap(ByVal col As Collection, ByVal index1 As Long, ByVal index2 As Long)
+    If index1 = index2 Then Exit Sub
+
+    Dim ind1 As Long, ind2 As Long
+    If index1 > index2 Then
+        ind1 = index2
+        ind2 = index1
+    Else
+        ind1 = index1
+        ind2 = index2
+    End If
+
+    Dim Item1 As Variant, Item2 As Variant
+    Dim key1 As String, key2 As String
+
+    Call VariantUtils.SetItem(Item1, col.Item(ind1))
+    Call VariantUtils.SetItem(Item2, col.Item(ind2))
+
+    key1 = GetCollectionKeyByIndex(ind1, col, True)
+    key2 = GetCollectionKeyByIndex(ind2, col, True)
+    
+    If Abs(ind1 - ind2) = 1 Then
+        col.Remove ind2
+        col.Remove ind1
+        
+        If col.Count < ind1 Then
+            Dim insNo As Long: insNo = col.Count
+            If key1 <> "" Then
+                col.Add Item1, key1, After:=insNo
+            Else
+                col.Add Item1, After:=insNo
+            End If
+            If key2 <> "" Then
+                col.Add Item2, key2, After:=insNo
+            Else
+                col.Add Item2, After:=insNo
+            End If
+        Else
+            If key1 <> "" Then
+                col.Add Item1, key1, Before:=ind1
+            Else
+                col.Add Item1, Before:=ind1
+            End If
+            If key2 <> "" Then
+                col.Add Item2, key2, Before:=ind1
+            Else
+                col.Add Item2, Before:=ind1
+            End If
+        End If
+    Else
+        col.Remove ind2
+        If key2 <> "" Then
+            col.Add Item2, key2, After:=ind1
+        Else
+            col.Add Item2, After:=ind1
+        End If
+        col.Remove ind1
+        If key1 <> "" Then
+            col.Add Item1, key1, After:=ind2 - 1
+        Else
+            col.Add Item1, After:=ind2 - 1
+        End If
+    End If
+End Sub
+
+'*******************************************************************************
+'* [概  要] CollectionSort
+'* [詳  細] Collectionのソートを行う。標準はバブルソート。
+'* [参  考] https://thom.hateblo.jp/entry/2015/11/29/212934
+'*
+'* @param col 対象のCollection
+'* @param fnc ソート比較用の関数名、またはFuncオブジェクト、または
+'*        Compare（x1, x2）As Booleanメソッドを持つオブジェクト
+'*
+'*******************************************************************************
+Public Sub CollectionSort(ByVal col As Collection, Optional ByVal fnc, Optional useQuickSort As Boolean = False)
+    If useQuickSort Then
+        Call QuickSort(col, 1, col.Count, fnc)
+        Exit Sub
+    End If
+    
+    Dim i As Long, j As Long
+    For i = 1 To col.Count
+        For j = col.Count To i Step -1
+            If IsMissing(fnc) Then
+                If col(i) > col(j) Then
+                    CollectionSwap col, i, j
+                End If
+            ElseIf ValidateUtils.IsFunc(fnc) Then
+                If fnc.Apply(col(i), col(j)) Then
+                    CollectionSwap col, i, j
+                End If
+            ElseIf ValidateUtils.IsString(fnc) And fnc <> "" Then
+                If Application.Run(fnc, col(i), col(j)) Then
+                    CollectionSwap col, i, j
+                End If
+            ElseIf IsObject(fnc) Then
+                If fnc.Compare(col(i), col(j)) Then
+                    CollectionSwap col, i, j
+                End If
+            Else
+                If col(i) > col(j) Then
+                    CollectionSwap col, i, j
+                End If
+            End If
+        Next
+    Next
+End Sub
+
+
+'*******************************************************************************
+'* [概  要] QuickSort
+'* [詳  細] Collectionのクイックソートを行う。
+'*
+'* @param col      対象のCollection
+'* @param startInd 開始インデックス
+'* @param endInd   終了インデックス
+'* @param fnc      ソート比較用の関数名、またはFuncオブジェクト、または
+'*                 Compare（x1, x2, ByVal flg As Boolean）As Booleanメソッドを
+'*                 持つオブジェクト
+'*                 第3引数のflgで条件を反転させる。軸要素は反転前、反転後の条件
+'*                 のどちらにも含まれないようにする必要がある。
+'*
+'* [fncの指定関数例]
+'*   Function Compare(val1, val2, ByVal flg As Boolean) As Boolean
+'*       If flg Then
+'*           Compare = val1(2) > val2(2)
+'*       Else
+'*           Compare = val1(2) < val2(2)
+'*       End If
+'*   End Function
+'*
+'*******************************************************************************
+Private Sub QuickSort(ByVal col As Collection, ByVal startInd As Long, ByVal endInd As Long, Optional ByVal fnc)
+    If startInd >= endInd Then
+        Exit Sub
+    End If
+    
+    ' 軸要素の選択
+    Dim pivot As Variant
+    pivot = col(Int((startInd + endInd) / 2))
+    
+    ' パーティション分割
+    Dim i As Long: i = startInd
+    Dim j As Long: j = endInd
+    Do
+        If IsMissing(fnc) Then
+            Do While i <= endInd And col(i) < pivot: i = i + 1: Loop
+            Do While j >= startInd And col(j) > pivot: j = j - 1: Loop
+            
+        ElseIf ValidateUtils.IsFunc(fnc) Then
+            Do While i <= endInd And fnc.Apply(col(i), pivot, True): i = i + 1: Loop
+            Do While j >= startInd And fnc.Apply(col(j), pivot, False): j = j - 1: Loop
+            
+        ElseIf ValidateUtils.IsString(fnc) And fnc <> "" Then
+            Do While i <= endInd And Application.Run(fnc, col(i), pivot, True): i = i + 1: Loop
+            Do While j >= startInd And Application.Run(fnc, col(j), pivot, False): j = j - 1: Loop
+            
+        ElseIf IsObject(fnc) Then
+            Do While i <= endInd And fnc.Compare(col(i), pivot, True): i = i + 1: Loop
+            Do While j >= startInd And fnc.Compare(col(j), pivot, False): j = j - 1: Loop
+            
+        Else
+            Do While i <= endInd And col(i) < pivot: i = i + 1: Loop
+            Do While j >= startInd And col(j) > pivot: j = j - 1: Loop
+            
+        End If
+        If i >= j Then Exit Do
+        
+        CollectionSwap col, i, j
+        i = i + 1
+        j = j - 1
+    Loop
+    
+    ' 再帰実行
+    Call QuickSort(col, startInd, i - 1, fnc)
+    Call QuickSort(col, j + 1, endInd, fnc)
+End Sub

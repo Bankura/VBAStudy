@@ -72,9 +72,41 @@ Public Function DefaultIfMissing(ByVal arg, ByVal defaultValue) As Variant
     DefaultIfMissing = arg
 End Function
 
+'******************************************************************************
+'* [概  要] EmptyArrayIfParamArrayMissing
+'* [詳  細] ParamArray引数が省略されている場合、空配列に変換する｡
+'*
+'* @param arg 引数（ParamArray引数を渡す）
+'* @return Variant 変換後Variant
+'*
+'******************************************************************************
+Public Function EmptyArrayIfParamArrayMissing(ByVal arg) As Variant
+    If ValidateUtils.IsParamArrayMissing(arg) Then
+        EmptyArrayIfParamArrayMissing = ArrayUtils.EmptyVariantArray
+    Else
+        EmptyArrayIfParamArrayMissing = arg
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] DefaultIfParamArrayMissing
+'* [詳  細] ParamArray引数が省略されている場合、デフォルト値に変換する｡
+'*
+'* @param arg 引数（ParamArray引数を渡す）
+'* @param defaultValue デフォルト値
+'* @return Variant 変換後Variant
+'*
+'******************************************************************************
+Public Function DefaultIfParamArrayMissing(ByVal arg, ByVal defaultValue) As Variant
+    If ValidateUtils.IsParamArrayMissing(arg) Then
+        DefaultIfParamArrayMissing = ArrayUtils.EmptyVariantArray
+    Else
+        DefaultIfParamArrayMissing = defaultValue
+    End If
+End Function
 
 '*******************************************************************************
-'* [概  要] ToJsonString
+'* [概  要] ToString
 '* [詳  細] オブジェクト、プリミティブ型を文字列変換する。
 '*          JSON形式を意識した文字列に変換するが、完全にJSON形式
 '*          に準拠はしていない。
@@ -124,8 +156,11 @@ Public Function ObjectToString(ByVal var As Variant) As String
             ObjectToString = "Nothing"
         
         ElseIf ValidateUtils.IsArrayEx(var) Then
-            ObjectToString = ArrayUtils.ToString(var.ToArray)
+            ObjectToString = var.ToString()
         
+        ElseIf ValidateUtils.IsArray2DEx(var) Then
+            ObjectToString = var.ToString()
+                
         ElseIf ValidateUtils.IsStringEx(var) Then
             ObjectToString = """" & var.ToString & """"
         
@@ -143,4 +178,20 @@ Public Function ObjectToString(ByVal var As Variant) As String
     End If
 End Function
 
+'*******************************************************************************
+'* [概  要] SetItem
+'* [詳  細] 指定Variant項目に値を設定する。
+'*          値がオブジェクトかどうかを判別して設定を行う。
 
+'*
+'* @param vItem Variant項目
+'* @param val   設定する値
+'*
+'*******************************************************************************
+Public Sub SetItem(ByRef vItem As Variant, ByRef val As Variant)
+    If IsObject(val) Then
+        Set vItem = val
+    Else
+        Let vItem = val
+    End If
+End Sub

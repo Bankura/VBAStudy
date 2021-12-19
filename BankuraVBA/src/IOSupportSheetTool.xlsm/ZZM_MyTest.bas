@@ -26,32 +26,32 @@ Sub TestArray2DEx001_Init()
     Dim arr2dex As Array2DEx
     Set arr2dex = Core.Init(New Array2DEx, arr2d)
     Debug.Print "2次元配列から初期化"
-    DebugUtils.PrintVariantArray arr2dex.To2DArray
+    DebugUtils.PrintArray arr2dex.To2DArray
     
     Dim arr2dex2 As Array2DEx
     Set arr2dex2 = Core.Init(New Array2DEx, arr2dex)
     Debug.Print "Array2DExから初期化"
-    DebugUtils.PrintVariantArray arr2dex.To2DArray
+    DebugUtils.PrintArray arr2dex.To2DArray
 
     Dim arr2dex3 As Array2DEx
     Set arr2dex3 = Core.Init(New Array2DEx, Array(1, 2, 3))
     Debug.Print "1次元配列から初期化"
-    DebugUtils.PrintVariantArray arr2dex3.To2DArray
+    DebugUtils.PrintArray arr2dex3.To2DArray
     
     Dim arr2dex4 As Array2DEx
     Set arr2dex4 = Core.Init(New Array2DEx, arr2dex2.ToArrayExOfArrayEx)
     Debug.Print "ArrayExOfArrayExから初期化"
-    DebugUtils.PrintVariantArray arr2dex4.To2DArray
+    DebugUtils.PrintArray arr2dex4.To2DArray
     
     Dim arr2dex5 As Array2DEx
     Set arr2dex5 = Core.Init(New Array2DEx, Core.Init(New ArrayEx, Array(1, 2, 3)))
     Debug.Print "ArrayExから初期化"
-    DebugUtils.PrintVariantArray arr2dex5.To2DArray
+    DebugUtils.PrintArray arr2dex5.To2DArray
     
     Dim arr2dex6 As Array2DEx
     Set arr2dex6 = Core.Init(New Array2DEx, "test")
     Debug.Print "文字列から初期化"
-    DebugUtils.PrintVariantArray arr2dex6.To2DArray
+    DebugUtils.PrintArray arr2dex6.To2DArray
 End Sub
 
 Sub TestArray2DEx002_Add()
@@ -72,7 +72,7 @@ Sub TestArray2DEx002_Add()
     arr2dex(1, 2) = 5
     arr2dex.AddColumns arr2d
     arr2dex.Sort 0, False
-    DebugUtils.PrintVariantArray arr2dex.To2DArray
+    DebugUtils.PrintArray arr2dex.To2DArray
 End Sub
 
 Sub TestArray2DEx003_Add()
@@ -80,7 +80,7 @@ Sub TestArray2DEx003_Add()
     Set arr2dex = Core.Init(New Array2DEx)
     arr2dex.DefaultInitValue = 0
     arr2dex.AddColumns Array(1, 2, 3, 4, 5), Array(1, 2, 3, 4, 5), ArrayUtils.Create2DArrayWithValue(Array(1, 2, 3), Array(4, 5, 6), Array(7, 8, 9))
-    DebugUtils.PrintVariantArray arr2dex.To2DArray
+    DebugUtils.PrintArray arr2dex.To2DArray
 End Sub
 
 Sub TestArray2DEx004_Expand()
@@ -88,13 +88,13 @@ Sub TestArray2DEx004_Expand()
     Set arr2dex = Core.Init(New Array2DEx)
     arr2dex.DefaultInitValue = 0
     arr2dex.Expand 5, 5
-    DebugUtils.PrintVariantArray arr2dex.To2DArray
+    DebugUtils.PrintArray arr2dex.To2DArray
 End Sub
 
 Sub TestArray2DEx005()
     Dim arr2dex As Array2DEx
     Set arr2dex = Core.Init(New Array2DEx).Range(10, 5, 5)
-    DebugUtils.PrintVariantArray arr2dex.To2DArray
+    DebugUtils.PrintArray arr2dex.To2DArray
     Debug.Print arr2dex.Contains(9)
     Debug.Print arr2dex.Contains(10)
     Debug.Print arr2dex.Contains(11)
@@ -125,54 +125,54 @@ Sub TestArray2DEx006()
     Set arr2dex = Core.Init(New Array2DEx)
     arr2dex.DefaultInitValue = 0
     arr2dex.AddRows Array(1, 2, 3), Array(1, 2, 3), Array(1, 2, 3), Array(1, 4, 6)
-    DebugUtils.PrintVariantArray arr2dex.Uniq.To2DArray
+    DebugUtils.PrintArray arr2dex.Uniq.To2DArray
     
     Dim arr2dex2 As Array2DEx, arr2dex3 As Array2DEx
     Set arr2dex2 = Core.Init(New Array2DEx).Range(10, 2, 2)
     Set arr2dex3 = arr2dex.Concat(arr2dex2)
     Debug.Print "Concat"
-    DebugUtils.PrintVariantArray arr2dex3.To2DArray
+    DebugUtils.PrintArray arr2dex3.To2DArray
     
     Set arr2dex3 = arr2dex.RowSlice(3, 3)
     Debug.Print "RowSlice"
-    DebugUtils.PrintVariantArray arr2dex3.To2DArray
+    DebugUtils.PrintArray arr2dex3.To2DArray
     
     Set arr2dex3 = arr2dex.ColSlice(2, 2)
     Debug.Print "ColSlice"
-    DebugUtils.PrintVariantArray arr2dex3.To2DArray
+    DebugUtils.PrintArray arr2dex3.To2DArray
     
     Debug.Print "Range 0"
-    DebugUtils.PrintVariantArray Core.Init(New Array2DEx).Range(10, 0, 0).To2DArray
+    DebugUtils.PrintArray Core.Init(New Array2DEx).Range(10, 0, 0).To2DArray
     
     Debug.Print "Map"
     Dim fun As Func
     Set fun = Core.Init(New Func, vbLong, AddressOf TestFuctionSquere)
-    DebugUtils.PrintVariantArray arr2dex.Map(fun).To2DArray
+    DebugUtils.PrintArray arr2dex.Map(fun).To2DArray
     
     Debug.Print "Zip"
     Set arr2dex3 = arr2dex3.Range(1, 3, 2)
     Set fun = Core.Init(New Func, vbLong, AddressOf TestFuctionSumUp)
-    DebugUtils.PrintVariantArray arr2dex.Zip(fun, arr2dex3.To2DArray).To2DArray
+    DebugUtils.PrintArray arr2dex.Zip(fun, arr2dex3.To2DArray).To2DArray
     
     Debug.Print "RowFilter"
     Set fun = Core.Init(New Func, vbBoolean, AddressOf TestFuctionMyFilter)
-    DebugUtils.PrintVariantArray arr2dex.RowFilter(fun).To2DArray
+    DebugUtils.PrintArray arr2dex.RowFilter(fun).To2DArray
     
     Debug.Print "ColFilter"
-    DebugUtils.PrintVariantArray arr2dex.ColFilter(fun).To2DArray
+    DebugUtils.PrintArray arr2dex.ColFilter(fun).To2DArray
 
     Debug.Print "RowFold"
     Set fun = Core.Init(New Func, vbLong, AddressOf TestFuctionMyFold)
-    DebugUtils.PrintVariantArray arr2dex.RowFold(fun).ToArray
+    DebugUtils.PrintArray arr2dex.RowFold(fun).ToArray
     
     Debug.Print "ColFold"
-    DebugUtils.PrintVariantArray arr2dex.ColFold(fun).ToArray
+    DebugUtils.PrintArray arr2dex.ColFold(fun).ToArray
 
     Debug.Print "RowScan"
-    DebugUtils.PrintVariantArray arr2dex.RowScan(fun).To2DArray
+    DebugUtils.PrintArray arr2dex.RowScan(fun).To2DArray
     
     Debug.Print "ColScan"
-    DebugUtils.PrintVariantArray arr2dex.ColScan(fun).To2DArray
+    DebugUtils.PrintArray arr2dex.ColScan(fun).To2DArray
 End Sub
 Public Function TestFuctionSquere(ByVal Source As Long) As Long
     TestFuctionSquere = Source * Source
@@ -205,7 +205,7 @@ Sub TestArray2DEx007()
     DebugUtils.Show arr2dex.ColLastIndexOf(2, 2)
     Dim p As Array2DIndex: p = arr2dex.LastIndexOf(2)
     DebugUtils.Show p.x & " " & p.y
-    DebugUtils.PrintVariantArray arr2dex.To2DArray
+    DebugUtils.PrintArray arr2dex.To2DArray
     
     Debug.Print "Join"
     Debug.Print arr2dex.Join(",")
@@ -221,16 +221,16 @@ Sub TestArray2DEx008()
     Set arr2dex = Core.Init(New Array2DEx)
     arr2dex.DefaultInitValue = "none"
     arr2dex.AddRows Array("山田太郎", "鈴木史郎", "竹田伸二"), Array("舞山記理子", "三原静子", "前山裕次郎"), Array("徳田綾子", "霧島司", "松尾三太夫"), Array("モリソン", "ローゼマイン", "フェルディナンド")
-    DebugUtils.PrintVariantArray arr2dex.To2DArray
+    DebugUtils.PrintArray arr2dex.To2DArray
     
-    DebugUtils.PrintVariantArray arr2dex.RowSearch(1, "郎").ToArray
-    DebugUtils.PrintVariantArray arr2dex.ColSearch(0, "子").ToArray
-    DebugUtils.PrintVariantArray arr2dex.Search("郎").ToArray
+    DebugUtils.PrintArray arr2dex.RowSearch(1, "郎").ToArray
+    DebugUtils.PrintArray arr2dex.ColSearch(0, "子").ToArray
+    DebugUtils.PrintArray arr2dex.Search("郎").ToArray
     
     DebugUtils.Show "[正規表現]"
-    DebugUtils.PrintVariantArray arr2dex.RowRegexSearch(0, "^.*田.*$").ToArray
-    DebugUtils.PrintVariantArray arr2dex.ColRegexSearch(0, ".*子$").ToArray
-    DebugUtils.PrintVariantArray arr2dex.RegexSearch(".*子$").ToArray
+    DebugUtils.PrintArray arr2dex.RowRegexSearch(0, "^.*田.*$").ToArray
+    DebugUtils.PrintArray arr2dex.ColRegexSearch(0, ".*子$").ToArray
+    DebugUtils.PrintArray arr2dex.RegexSearch(".*子$").ToArray
 End Sub
 
 Sub TestArray2DEx009()
@@ -239,7 +239,7 @@ Sub TestArray2DEx009()
     arr2dex.DefaultInitValue = 0
     arr2dex.AddRows Array(1, 2, 3), Array(1, 2, 3), Array(1, 2, 3), Array(1, 4, 6)
 
-    DebugUtils.Show arr2dex.ToString
+    DebugUtils.Show arr2dex
 End Sub
 
 
@@ -330,8 +330,8 @@ Sub TestHoge()
     
     Debug.Print GetExcelBookProc
     Dim i As Long
-    For i = 0 To UBound(WinApiFunctions.wD)
-        Debug.Print WinApiFunctions.wD(i).wkb.Name
+    For i = 0 To UBound(WinApiFunctions.wd)
+        Debug.Print WinApiFunctions.wd(i).wkb.Name
     Next
     
 End Sub
@@ -566,7 +566,7 @@ Sub dumpnanka()
     Dim d As LongPtr
     
     Debug.Print "-----------"
-    For i = 0 To 16
+    For i = 0 To 64
         Call DebugUtils.DumpMemory(ObjPtr(v3) + 8 * i, 8, "dec") 'オブジェクトのアドレス
     Next
     
@@ -664,7 +664,7 @@ Sub ColUtils_Test()
     For Each v In col
         Debug.Print v
     Next
-    Debug.Print CollectionUtils.GetCollectionKeyByIndex(4, col)
+    Debug.Print CollectionUtils.GetCollectionKeyByIndex(3, col)
     
     Debug.Print CollectionUtils.GetCollectionIndexByKey("E", col)
     
@@ -719,7 +719,7 @@ Sub DosCommander_Test001()
 '    For Each v In cmdr.CmdDir("C:\dev\vba", "/R", "/A")
 '        Debug.Print v
 '    Next
-    For Each v In cmdr.GetFilePathsRecursive("C:\dev\vba")
+    For Each v In cmdr.GetFilePathsRecursive("C:\develop\data")
         Debug.Print v
     Next
 End Sub
@@ -727,21 +727,25 @@ End Sub
 Sub PowershellCommander_Test001()
     Dim cmdr As New PowerShellCommander
     Dim v
-    For Each v In cmdr.GetCommandResultAsArray("Get-ChildItem | Select-Object CreationTime,LastWriteTime,LastAccessTime,Name")
+    For Each v In cmdr.Exec("Get-ChildItem | Select-Object CreationTime,LastWriteTime,LastAccessTime,Name", False)
         Debug.Print v
     Next
 
 End Sub
 
 Sub RowEnumerator_Test001()
+    On Error GoTo ErrorHandler
     Dim myTest As New ZZC_MyTest
     myTest.Main
-
+    Exit Sub
+    
+ErrorHandler:
+    Base.ErrorProcess
 End Sub
 
 Sub DebugUtils_Test001()
     'DebugUtils.PrintVariantArray Array(1, 2, 3)
-    DebugUtils.PrintVariantArray ArrayUtils.Copy2DArray(ArrayUtils.Create2DArrayWithValue(Array(1, 2, 3), Array(2, 2, 3), Array(3, 2, 3)), 1, 1, 1, 1)
+    DebugUtils.PrintArray ArrayUtils.Copy2DArray(ArrayUtils.Create2DArrayWithValue(Array(1, 2, 3), Array(2, 2, 3), Array(3, 2, 3)), 1, 1, 1, 1)
 End Sub
 
 Sub CollectionUtils_Test001()
@@ -782,10 +786,10 @@ Sub ArrayUtils_Test001()
     dic.Add "k4", "4"
     dic.Add "k5", Array("a", "b", "c")
     
-    Dim arr
-    arr = Array("ara", "yada", "cyo", 2020, col, dic, Core.Wsh)
+    Dim Arr
+    Arr = Array("ara", "yada", "cyo", 2020, col, dic, Core.Wsh)
     
-    Debug.Print ArrayUtils.ToString(arr)
+    Debug.Print ArrayUtils.ToString(Arr)
 End Sub
 
 
@@ -1007,4 +1011,401 @@ Sub TextDBConnect_Test001()
 End Sub
 
 
+Sub TextCollectionSort_Test001()
+    Dim col As Collection
+    Set col = New Collection
 
+    Call col.Add(Array(1, "Kimetu", 200), "aaa")
+    Call col.Add(Array(2, "ゴブリン", 300), "bbb")
+    Call col.Add(Array(3, "スライム", 10), "ccc")
+    Call col.Add(Array(4, "キングだむ", 37499900), "ddd")
+    Call col.Add(Array(5, "フリー連", 9910), "eee")
+    Call col.Add(Array(6, "おおい涼真", 320), "fff")
+
+    Dim v
+    For Each v In CollectionUtils.GetCollectionKeys(col)
+        DebugUtils.Show v
+    Next
+
+    Dim fnc As Func
+    Set fnc = Core.Init(New Func, vbBoolean, AddressOf CompareTesTesQuick)
+    
+    'Call CollectionUtils.CollectionSort(col, fnc, True)
+    Call CollectionUtils.CollectionSort(col, "CompareTesTesQuick", True)
+
+    For Each v In col
+        DebugUtils.Show v
+    Next
+    
+    For Each v In CollectionUtils.GetCollectionKeys(col)
+        DebugUtils.Show v
+    Next
+
+End Sub
+
+
+Function CompareTesTes(val1, val2) As Boolean
+    CompareTesTes = val1(2) > val2(2)
+End Function
+
+Function CompareTesTesQuick(val1, val2, ByVal flg As Boolean) As Boolean
+'    If flg Then
+'        CompareTesTesQuick = val1(1) > val2(1)
+'    Else
+'        CompareTesTesQuick = val1(1) < val2(1)
+'    End If
+    
+    If flg Then
+        If val1(1) = val2(1) Then
+            CompareTesTesQuick = val1(2) < val2(2)
+            Exit Function
+        End If
+        CompareTesTesQuick = val1(1) < val2(1)
+    Else
+        If val1(1) = val2(1) Then
+            CompareTesTesQuick = val1(2) > val2(2)
+            Exit Function
+        End If
+        CompareTesTesQuick = val1(1) > val2(1)
+    End If
+End Function
+
+
+Sub Array2DSortTest001()
+    
+    Dim wsex As WorkSheetEx: Set wsex = Core.Init(New WorkSheetEx, "Sheet1")
+    'Dim var As Variant: var = wsex.ExportArray(1, 1, , True)
+    Dim arr2dex As Array2DEx
+    Set arr2dex = wsex.ExportArray2DEx(1, 3)
+
+    'Dim fnc As Func
+    'Set fnc = Core.Init(New Func, vbBoolean, AddressOf CompareTesTesQuick)
+    
+    'Call ArrayUtils.Array2DSort(var, fnc)
+    
+    'Call ArrayUtils.Array2DSort(var, Array("0 asc", "1 desc", "2"))
+    'DebugUtils.PrintArray var
+    
+    'DebugUtils.PrintArray arr2dex.SortBy(fnc)
+    'arr2dex.SortBy fnc
+    
+    DebugUtils.PrintArray arr2dex.SortBy(Array("0 desc", "1 desc", "2 desc")).RowSlice(0, 4)
+
+End Sub
+
+Sub MesureExcuteTime_Test()
+    DebugUtils.MesureExcuteTime Core.Init(New Func, VbVarType.vbVariant, AddressOf PythonCommander_Test002)
+End Sub
+
+Sub CodeModuleUtils_Test001()
+    Debug.Print ArrayUtils.GetLength(Split(VBCodeModuleUtils.GetComponentAllCodes("ClipBoardUtils"), vbNewLine))
+
+    Debug.Print "行数：" & VBCodeModuleUtils.CountOfLines("ClipBoardUtils") & _
+                " 空行：" & VBCodeModuleUtils.CountOfEmptyLines("ClipBoardUtils") & _
+                " コメント行：" & VBCodeModuleUtils.CountOfCommentLines("ClipBoardUtils") & _
+                " 実行数：" & VBCodeModuleUtils.CountOfLogicalLines("ClipBoardUtils")
+                
+                
+    DebugUtils.Show VBCodeModuleUtils.GetProcNames("Item")
+    
+    DebugUtils.Show VBCodeModuleUtils.CountOfProc("Item")
+    
+    'DebugUtils.PrintVariantArray VBCodeModuleUtils.GetComponentsInfo().SortBy(Array("1 asc", "0 asc"))
+    Dim arr2d As Variant: arr2d = VBCodeModuleUtils.GetComponentsInfo().SortBy(Array("1 asc", "0 asc")).To2DArray
+    
+    DebugUtils.PrintArray arr2d
+End Sub
+
+
+Sub CodeModuleUtils_Test002()
+    DebugUtils.WashImmediateWindow
+    DebugUtils.Show VBCodeModuleUtils.GetProcKindName("Item", "Name")
+    DebugUtils.Show VBCodeModuleUtils.GetProcStartLine("Item", "Name")
+    DebugUtils.Show VBCodeModuleUtils.GetProcCountLines("Item", "Name")
+    DebugUtils.Show VBCodeModuleUtils.GetProcNameOfLine("Item", 92)
+    
+End Sub
+
+Sub CodeModuleUtils_Test003()
+    VBCodeModuleUtils.ClearImmediateWindow
+End Sub
+
+
+Sub PythonCommander_Test001()
+
+    Dim cmder As PyCommander
+    Set cmder = New PyCommander
+    Debug.Print cmder.ExecCommand("print('aaa')")
+    
+    cmder.ScriptMode
+    'Debug.Print cmder.ExecScript("C:\develop\python\csvread_pandas_test.py")
+    cmder.ExecScript ("C:\develop\python\createForm.py")
+End Sub
+
+Sub PythonCommander_Test002()
+
+    Dim cmder As PyCommander
+    Set cmder = New PyCommander
+    
+    Dim arrex As ArrayEx
+    Set arrex = New ArrayEx
+    arrex.Add "import pandas as pd"
+    arrex.Add "csv_input = pd.read_csv(filepath_or_buffer='C:/develop/data/csv/test_stock.csv', encoding='utf_8', sep=',')"
+    arrex.Add "print(csv_input[['コード', '銘柄名']]) "
+    
+    Debug.Print cmder.WriteScriptAndRun(arrex.ToArray)
+    
+End Sub
+
+
+
+Sub powershellTest001()
+    Dim cmder As PowerShellCommander
+    Set cmder = New PowerShellCommander
+    Dim v
+    'For Each v In cmder.Exec("gsv -c localhost|?{$_.status -like 'r*'}", False)
+    '    Debug.Print v
+    'Next
+    DebugUtils.PrintArray cmder.Exec("gsv -c localhost|?{$_.status -like 'r*'}", False)
+End Sub
+
+Sub powershellTest002()
+
+    Dim cmder As PowerShellCommander
+    Set cmder = New PowerShellCommander
+    
+    Dim arrex As ArrayEx
+    Set arrex = New ArrayEx
+    arrex.Add "cd C:\develop\powershell"
+    arrex.Add "$cnt = (Get-ChildItem -Recurse).count"
+    arrex.Add "$allsize = 0"
+    arrex.Add "Get-ChildItem -Recurse | ForEach-Object { $allsize += $_.Length }"
+    arrex.Add "$average = $allsize / $cnt"
+    arrex.Add "Write-Output ""ファイルサイズの平均は ${average} byteです。"""
+    Debug.Print cmder.WriteScriptAndRun(arrex.ToArray)
+    
+End Sub
+
+Sub powershellTest003()
+
+    Dim cmder As PowerShellCommander
+    Set cmder = New PowerShellCommander
+    
+    Dim dic As DictionaryEx
+    Set dic = cmder.PSVersionTable
+
+    DebugUtils.Show dic
+
+    Debug.Print dic("PSVersion")("Major") & "." & dic("PSVersion")("Minor") & "." & dic("PSVersion")("Build") & "." & dic("PSVersion")("Revision")
+
+    Debug.Print cmder.GetExecutionPolicy
+    
+    
+End Sub
+
+
+Sub PsqlCommander_Test001()
+
+    Dim cmder As PsqlCommander
+    Set cmder = New PsqlCommander
+    cmder.DbHost = "localhost"
+    cmder.DbPort = 5433
+    cmder.dbName = "ban"
+    cmder.DbUserName = "ban"
+    cmder.DbPassword = "ban"
+    'cmder.TuplesOnly = True
+
+    Dim strSQL As String: strSQL = "select id as ""ユーザID"", name as ""名前"" from table1"
+    Dim vArr
+    
+    vArr = cmder.Exec(strSQL)
+    
+    DebugUtils.PrintArray vArr
+End Sub
+
+Sub DosCommander_Test901()
+    Dim cmder As DosCommander
+    Set cmder = New DosCommander
+
+    Debug.Print cmder.Exec("C:\develop\powershell\fuga.bat")
+End Sub
+
+Sub DosCommander_Test902()
+
+    Dim cmder As DosCommander
+    Set cmder = New DosCommander
+    
+    Dim arrex As ArrayEx
+    Set arrex = New ArrayEx
+    arrex.Add "@echo off"
+    arrex.Add "echo ふがあ"
+
+    Debug.Print cmder.WriteBatchAndRun(arrex.ToArray)
+End Sub
+
+Sub foooooooo()
+    Dim mysheet As New WorkSheetEx
+    Call mysheet.Init("Sheet1")
+    
+    Dim v
+    Set v = mysheet.GetRowToArrayEx(1)
+    DebugUtils.Show v
+End Sub
+
+
+Sub ApplyFunc2ExcelFiles_Test001()
+    Dim fnc As Func
+    Set fnc = Core.Init(New Func, vbBoolean, AddressOf BookA1Print)
+    'Call XlBookUtils.ApplyProc2Books("C:\develop\data\xls", fnc, True)
+    Call XlBookUtils.ApplyProc2Books("C:\develop\data\xls", "BookA1Print", True)
+End Sub
+
+Sub BookA1Print(ByVal bookObj As Workbook)
+    Debug.Print bookObj.Worksheets(1).Cells(1, 1).Value
+    bookObj.Worksheets(1).Cells(1, 1).Value = bookObj.Worksheets(1).Cells(1, 1).Value & "X"
+    bookObj.Save
+
+End Sub
+
+Sub ForEach_Test001()
+    Dim fnc As Func
+    Set fnc = Core.Init(New Func, vbBoolean, AddressOf PrintNameTes)
+    Call ForEach(ThisWorkbook.Worksheets, fnc)
+
+End Sub
+Sub PrintNameTes(ByVal obj As Object)
+    Debug.Print obj.Name
+End Sub
+
+Sub munuuu()
+    Dim v
+    
+'    For Each v In SystemUtils.ExecWmiQuery("Select * from Win32_BIOS")
+'        Debug.Print "Build Number         : " & v.Properties_("BuildNumber")
+'        Debug.Print "Current Language     : " & v.Properties_("CurrentLanguage")
+'        Debug.Print "Installable Languages: " & v.Properties_("InstallableLanguages")
+'        Debug.Print "Manufacturer         : " & v.Properties_("Manufacturer")
+'        Debug.Print "Name                 : " & v.Properties_("Name")
+'        Debug.Print "Primary BIOS         : " & v.Properties_("PrimaryBIOS")
+'        Debug.Print "Serial Number        : " & v.Properties_("SerialNumber")
+'        Debug.Print "SMBIOS Version       : " & v.Properties_("SMBIOSBIOSVersion")
+'        Debug.Print "SMBIOS Major Version : " & v.Properties_("SMBIOSMajorVersion")
+'        Debug.Print "SMBIOS Minor Version : " & v.Properties_("SMBIOSMinorVersion")
+'        Debug.Print "SMBIOS Present       : " & v.Properties_("SMBIOSPresent")
+'        Debug.Print "Status               : " & v.Properties_("Status")
+'    Next
+    For Each v In SystemUtils.ExecWmiQuery("Select * From Win32_NTLogEvent Where Logfile='System' And TimeGenerated > '2021/11/01'" & _
+                                           " And (Eventcode = '6005' Or Eventcode = '6006' Or Eventcode = '7001' Or Eventcode = '7002')")
+        Debug.Print Format(Mid(v.TimeGenerated, 1, 14), "####/##/## ##:##:##"), v.EventCode, v.message
+    Next
+End Sub
+
+Public Sub UXUtils_IconTest001()
+    Call UXUtils.AddIcon(Application.hWnd, "アイコンてすと") 'システムトレイにアイコンを登録
+End Sub
+
+Public Sub UXUtils_IconTest002()
+    Call UXUtils.ShowBalloon("バルーンメッセージてすと", "バルーンタイトル", 1, 10)       'バルーンチップの表示
+End Sub
+
+Public Sub UXUtils_IconTest003()
+    Call UXUtils.ModifyIcon("C:\windows\system32\notepad.exe") 'アイコンの変更
+End Sub
+
+Public Sub UXUtils_IconTest004()
+    Call UXUtils.DeleteIcon 'アイコンの削除
+End Sub
+Public Sub UXUtils_IconTest005()
+    Call UXUtils.NotifyToast("Excelからの通知", "私がやってきた！", , 30)
+End Sub
+
+Public Sub WorkSheetEx_Test001()
+    Dim ws As WorkSheetEx: Set ws = Core.Init(New WorkSheetEx, "Sheet1")
+    Call ws.SetAutoFilter(1, 3, 1, 6).FilterOn(1, "4")
+End Sub
+Public Sub WorkSheetEx_Test002()
+    Dim ws As WorkSheetEx: Set ws = Core.Init(New WorkSheetEx, "Sheet1")
+    Call ws.FilterOff
+End Sub
+Public Sub WorkSheetEx_Test003()
+    Dim ws As WorkSheetEx: Set ws = Core.Init(New WorkSheetEx, "Sheet1")
+    Call ws.RemoveAutoFilter
+End Sub
+
+Public Sub BaseParallel_Test001()
+    Call Base.ParallelExec("testFunc", 3, "C:\develop\tmp\test0.txt", "C:\develop\tmp\test1.txt", "C:\develop\tmp\test2.txt")
+End Sub
+
+Public Sub testFunc(n As Long, ParamArray paParams())
+    Call FileUtils.CreateNullCharFile(CStr(paParams(n)), 500000000)
+    Application.DisplayAlerts = False
+    ThisWorkbook.Close False
+End Sub
+
+Public Sub OnTimeForClass_Test001()
+    Dim tesObj As ZZC_MyTest
+    Set tesObj = New ZZC_MyTest
+    
+    Call Base.OnTimeForClass(1, tesObj, "DebugPrintLong", 1)
+    Call Base.OnTimeForClass(2, tesObj, "DebugPrintLong", 2)
+    Call Base.OnTimeForClass(3, tesObj, "DebugPrintLong", 3)
+    Call Base.OnTimeForClass(4, tesObj, "DebugPrintLong", 4)
+    Call Base.OnTimeForClass(5, tesObj, "DebugPrintLong", 5)
+     
+End Sub
+Public Sub OnTimeForClass_Test002()
+    Dim tesObj As ZZC_MyTest
+    Set tesObj = New ZZC_MyTest
+    
+    Dim k1 As String: k1 = Base.OnTimeForClass(1, tesObj, "DebugPrintLongR", 1)
+    Dim k2 As String: k2 = Base.OnTimeForClass(2, tesObj, "DebugPrintLongR", 2)
+    Dim k3 As String: k3 = Base.OnTimeForClass(3, tesObj, "DebugPrintLongR", 3)
+    Dim k4 As String: k4 = Base.OnTimeForClass(4, tesObj, "DebugPrintLongR", 4)
+    Dim k5 As String: k5 = Base.OnTimeForClass(5, tesObj, "DebugPrintLongR", 5)
+
+    Debug.Print "ResultKey1: " & k1
+    Debug.Print "ResultKey2: " & k2
+    Debug.Print "ResultKey3: " & k3
+    Debug.Print "ResultKey4: " & k4
+    Debug.Print "ResultKey5: " & k5
+End Sub
+Public Sub OnTimeForClass_Test003()
+
+    Call Base.OnTimeForClass(1, DebugUtils, "Show", 111)
+End Sub
+
+
+Sub ProgressBarFormTest001()
+    Debug.Print "開始"
+    Dim pBarForm As ProgressBarForm
+    Debug.Print "New前"
+    Set pBarForm = New ProgressBarForm
+    Debug.Print "New後"
+    With pBarForm
+        Debug.Print "プロパティ設定前"
+        .MaxValue = 100
+        Debug.Print "プロパティ設定後"
+        .BarColor = rgb(128, 0, 0)
+        .Interactive = True '割込み不可
+        .SelfDoEvents = True
+        Debug.Print "ShowModeless実行前"
+        .ShowModeless "開始します"
+    End With
+  
+    Dim i As Long, j As Long
+    For i = 1 To pBarForm.MaxValue
+        pBarForm.SetProgressValue i, , i & "/" & pBarForm.MaxValue
+
+        If pBarForm.IsCancel Then
+            MsgBox "処理が中断されました。"
+            Exit Sub
+        End If
+        
+        'いろいろ処理の代わり
+        For j = 1 To 10000000
+        Next
+    Next
+
+    pBarForm.Unload
+    Debug.Print "終了"
+End Sub

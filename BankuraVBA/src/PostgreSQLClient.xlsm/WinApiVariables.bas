@@ -13598,7 +13598,7 @@ End Type
 Public Type DRAGINFO
         uSize As Long                 '  init with sizeof(DRAGINFO)
         pt As POINTAPI
-        fNC As Long
+        fnc As Long
         lpFileList As String
         grfKeyState As Long
 End Type

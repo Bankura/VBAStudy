@@ -562,7 +562,7 @@ Sub dumpnanka()
     
     Dim a As LongPtr, i As Long
     Dim b As LongPtr
-    Dim C As LongPtr
+    Dim c As LongPtr
     Dim d As LongPtr
     
     Debug.Print "-----------"
@@ -595,20 +595,20 @@ Sub dumpnanka()
         Call DebugUtils.DumpMemory(a + 8 * i, 8, "dec") 'オブジェクトのアドレス
     Next
     Debug.Print "==========="
-    C = DebugUtils.DumpMemory(a + 40, 8, "dec")
+    c = DebugUtils.DumpMemory(a + 40, 8, "dec")
     For i = 0 To 6
-        Call DebugUtils.DumpMemory(C + 8 * i, 8, "dec") 'オブジェクトのアドレス
+        Call DebugUtils.DumpMemory(c + 8 * i, 8, "dec") 'オブジェクトのアドレス
     Next
     
     Debug.Print "-----------"
     Debug.Print "■Snd Value"
-    d = DebugUtils.DumpMemory(C + 8 * 1, 8, "dec")
+    d = DebugUtils.DumpMemory(c + 8 * 1, 8, "dec")
     Call DebugUtils.DumpMemory(d, 8, "dec")
     Call DebugUtils.DumpMemory(d, 8, "str")
     
     Debug.Print "-----------"
     Debug.Print "■Snd Key"
-    d = DebugUtils.DumpMemory(C + 8 * 3, 8, "dec")
+    d = DebugUtils.DumpMemory(c + 8 * 3, 8, "dec")
     Call DebugUtils.DumpMemory(d, 8, "dec")
     Call DebugUtils.DumpMemory(d, 8, "str")
     
@@ -636,14 +636,14 @@ Sub dumpnanka()
         Call DebugUtils.DumpMemory(a + 8 * i, 8, "dec") 'オブジェクトのアドレス
     Next
     Debug.Print "==========="
-    C = DebugUtils.DumpMemory(a + 48, 8, "dec")
+    c = DebugUtils.DumpMemory(a + 48, 8, "dec")
     For i = 0 To 6
-        Call DebugUtils.DumpMemory(C + 8 * i, 8, "dec") 'オブジェクトのアドレス
+        Call DebugUtils.DumpMemory(c + 8 * i, 8, "dec") 'オブジェクトのアドレス
     Next
 
     Debug.Print "-----------"
     Debug.Print "■Fourth Value"
-    d = DebugUtils.DumpMemory(C + 8 * 1, 8, "dec")
+    d = DebugUtils.DumpMemory(c + 8 * 1, 8, "dec")
     Call DebugUtils.DumpMemory(d, 8, "dec")
     Call DebugUtils.DumpMemory(d, 8, "str")
     
@@ -659,7 +659,7 @@ Sub ColUtils_Test()
     col.Add "ddd", "D"
     col.Add "e", "E"
 
-    Debug.Print col.count
+    Debug.Print col.Count
     Dim v
     For Each v In col
         Debug.Print v
@@ -734,9 +734,13 @@ Sub PowershellCommander_Test001()
 End Sub
 
 Sub RowEnumerator_Test001()
+    On Error GoTo ErrorHandler
     Dim myTest As New ZZC_MyTest
     myTest.Main
-
+    Exit Sub
+    
+ErrorHandler:
+    Base.ErrorProcess
 End Sub
 
 Sub DebugUtils_Test001()
@@ -1292,12 +1296,12 @@ Sub munuuu()
 '    Next
     For Each v In SystemUtils.ExecWmiQuery("Select * From Win32_NTLogEvent Where Logfile='System' And TimeGenerated > '2021/11/01'" & _
                                            " And (Eventcode = '6005' Or Eventcode = '6006' Or Eventcode = '7001' Or Eventcode = '7002')")
-        Debug.Print Format(Mid(v.TimeGenerated, 1, 14), "####/##/## ##:##:##"), v.EventCode, v.Message
+        Debug.Print Format(Mid(v.TimeGenerated, 1, 14), "####/##/## ##:##:##"), v.EventCode, v.message
     Next
 End Sub
 
 Public Sub UXUtils_IconTest001()
-    Call UXUtils.AddIcon(Application.hwnd, "アイコンてすと") 'システムトレイにアイコンを登録
+    Call UXUtils.AddIcon(Application.hWnd, "アイコンてすと") 'システムトレイにアイコンを登録
 End Sub
 
 Public Sub UXUtils_IconTest002()
@@ -1368,4 +1372,40 @@ End Sub
 Public Sub OnTimeForClass_Test003()
 
     Call Base.OnTimeForClass(1, DebugUtils, "Show", 111)
+End Sub
+
+
+Sub ProgressBarFormTest001()
+    Debug.Print "開始"
+    Dim pBarForm As ProgressBarForm
+    Debug.Print "New前"
+    Set pBarForm = New ProgressBarForm
+    Debug.Print "New後"
+    With pBarForm
+        Debug.Print "プロパティ設定前"
+        .MaxValue = 100
+        Debug.Print "プロパティ設定後"
+        .BarColor = rgb(128, 0, 0)
+        .Interactive = True '割込み不可
+        .SelfDoEvents = True
+        Debug.Print "ShowModeless実行前"
+        .ShowModeless "開始します"
+    End With
+  
+    Dim i As Long, j As Long
+    For i = 1 To pBarForm.MaxValue
+        pBarForm.SetProgressValue i, , i & "/" & pBarForm.MaxValue
+
+        If pBarForm.IsCancel Then
+            MsgBox "処理が中断されました。"
+            Exit Sub
+        End If
+        
+        'いろいろ処理の代わり
+        For j = 1 To 10000000
+        Next
+    Next
+
+    pBarForm.Unload
+    Debug.Print "終了"
 End Sub

@@ -741,7 +741,7 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
 
     Dim i As Long
     Dim strBuf As String
-    Dim C As String
+    Dim c As String
     Dim strRet As String
     Dim strBefore As String
     Dim strChr As String
@@ -754,7 +754,7 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
 
     For i = 1 To Len(strSource)
 
-        C = Mid$(strSource, i, 1)
+        c = Mid$(strSource, i, 1)
         
         If i = Len(strSource) Then
             strNext = ""
@@ -762,7 +762,7 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
             strNext = Mid$(strSource, i + 1, 1)
         End If
 
-        Select Case C
+        Select Case c
             'ëSäpÇÃÅè
             Case "Åè"
                 If (Conv And vbNarrow) > 0 Then
@@ -770,7 +770,7 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
                     strRet = strRet & VBA.StrConv(strBuf, Conv) & strChr
                     strBuf = ""
                 Else
-                    strBuf = strBuf & C
+                    strBuf = strBuf & c
                 End If
            
             'îºäpÇÃ\
@@ -780,12 +780,12 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
                     strRet = strRet & VBA.StrConv(strBuf, Conv) & strChr
                     strBuf = ""
                 Else
-                    strBuf = strBuf & C
+                    strBuf = strBuf & c
                 End If
             'ëSäpÇÃë˜ì_ÅAîºë˜ì_
             Case "ÅK", "ÅJ"
                 If (Conv And vbNarrow) > 0 Then
-                    If C = "ÅK" Then
+                    If c = "ÅK" Then
                         strChr = "ﬂ"
                     Else
                         strChr = "ﬁ"
@@ -793,7 +793,7 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
                     strRet = strRet & VBA.StrConv(strBuf, Conv) & strChr
                     strBuf = ""
                 Else
-                    strBuf = strBuf & C
+                    strBuf = strBuf & c
                 End If
                 
             'îºäpÇÃîºë˜ì_
@@ -801,14 +801,14 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
                 'ÇPÇ¬ëOÇÃï∂éö
                 Select Case strBefore
                     Case " " To "Œ"
-                        strBuf = strBuf & C
+                        strBuf = strBuf & c
                     Case Else
                         If (Conv And vbWide) > 0 Then
                              strChr = "ÅK"
                             strRet = strRet & VBA.StrConv(strBuf, Conv) & strChr
                             strBuf = ""
                         Else
-                            strBuf = strBuf & C
+                            strBuf = strBuf & c
                         End If
                 End Select
                 
@@ -817,14 +817,14 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
                 'ÇPÇ¬ëOÇÃï∂éö
                 Select Case strBefore
                     Case "≥", "∂" To "∫", "ª" To "ø", "¿" To "ƒ", " " To "Œ"
-                        strBuf = strBuf & C
+                        strBuf = strBuf & c
                     Case Else
                         If (Conv And vbWide) > 0 Then
                             strChr = "ÅJ"
                             strRet = strRet & VBA.StrConv(strBuf, Conv) & strChr
                             strBuf = ""
                         Else
-                            strBuf = strBuf & C
+                            strBuf = strBuf & c
                         End If
                 End Select
             'Éî
@@ -838,7 +838,7 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
                     strRet = strRet & VBA.StrConv(strBuf, Conv) & strChr
                     strBuf = ""
                 Else
-                    strBuf = strBuf & C
+                    strBuf = strBuf & c
                 End If
             'Ç§ÅJ
             Case "Ç§"
@@ -848,42 +848,42 @@ Public Function StrConvU(ByVal strSource As String, Conv As VbStrConv) As String
                     strBuf = ""
                     i = i + 1
                 Else
-                    strBuf = strBuf & C
+                    strBuf = strBuf & c
                 End If
 
             'ÉñÉï
             Case "Éñ", "Éï"
                 If (Conv And vbHiragana) > 0 Then
-                    strRet = strRet & VBA.StrConv(strBuf, Conv) & C
+                    strRet = strRet & VBA.StrConv(strBuf, Conv) & c
                     strBuf = ""
                 Else
-                    strBuf = strBuf & C
+                    strBuf = strBuf & c
                 End If
 
             'ÇªÇÃëº
             Case Else
                 'ëÊìÒêÖèÄìôStrConvÇ≈ï∂éöâªÇØÇ∑ÇÈÇ‡ÇÃÇëﬁî
-                If Asc(C) = 63 And C <> "?" Then
-                    strRet = strRet & VBA.StrConv(strBuf, Conv) & C
+                If Asc(c) = 63 And c <> "?" Then
+                    strRet = strRet & VBA.StrConv(strBuf, Conv) & c
                     strBuf = ""
                 Else
                     'Ç§Åh
-                    If AscW(C) = &H3094 Then
+                    If AscW(c) = &H3094 Then
                         If Conv = vbKatakana Then
                             strRet = strRet & VBA.StrConv(strBuf, Conv) & "Éî"
                             strBuf = ""
                         Else
-                            strRet = strRet & VBA.StrConv(strBuf, Conv) & C
+                            strRet = strRet & VBA.StrConv(strBuf, Conv) & c
                             strBuf = ""
                         End If
                     Else
-                        strBuf = strBuf & C
+                        strBuf = strBuf & c
                     End If
                 End If
         End Select
         
         'ÇPå¬ëOÇÃï∂éö
-        strBefore = C
+        strBefore = c
 
     Next
 
@@ -1397,16 +1397,16 @@ Public Function CountMatches(ByVal str As String, ByVal searchStr As String) As 
         CountMatches = 0
         Exit Function
     End If
-    Dim count As Long: count = 0
+    Dim Count As Long: Count = 0
     Dim idx As Long: idx = 0
     
     idx = Me.IndexOf(str, searchStr, idx)
     Do While idx <> INDEX_NOT_FOUND
-        count = count + 1
+        Count = Count + 1
         idx = idx + Len(searchStr)
         idx = Me.IndexOf(str, searchStr, idx)
     Loop
-    CountMatches = count
+    CountMatches = Count
 End Function
 
 '******************************************************************************
@@ -3397,7 +3397,7 @@ Public Function ReplaceIgnoreCase(ByVal str As String, ByVal searchString As Str
     Dim sb As StringEx: Set sb = New StringEx
     Dim pos As Long: pos = 1
     Dim nextpos As Long: nextpos = InStr(strIc, searchStringIc)
-    Dim count As Long: count = 0
+    Dim Count As Long: Count = 0
     
     Do Until nextpos = 0
         Call sb.Append(Mid(str, pos, nextpos - pos)) _
@@ -3405,9 +3405,9 @@ Public Function ReplaceIgnoreCase(ByVal str As String, ByVal searchString As Str
         
         pos = nextpos + Len(searchStringIc)
         nextpos = InStr(pos, strIc, searchStringIc)
-        count = count + 1
+        Count = Count + 1
     Loop
-    If count = 0 Then
+    If Count = 0 Then
         ReplaceIgnoreCase = str
         Exit Function
     Else

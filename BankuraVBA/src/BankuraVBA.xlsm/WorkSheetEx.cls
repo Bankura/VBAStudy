@@ -1196,8 +1196,8 @@ End Function
 '* ・セルまたはセル範囲を表す Range オブジェクトを返す。
 '* ・Range(Cells(x1, y1), Cells(x2, y2))を簡易指定できるようにしたもの
 '*-----------------------------------------------------------------------------
-Property Get Range2(startRow As Long, startCol As Long, endRow As Long, endCol As Long) As Range
-    Set Range2 = mOrigin.Range(mOrigin.Cells(startRow, startCol), mOrigin.Cells(endRow, endCol))
+Property Get Range2(startRow As Long, startCol As Long, EndRow As Long, EndCol As Long) As Range
+    Set Range2 = mOrigin.Range(mOrigin.Cells(startRow, startCol), mOrigin.Cells(EndRow, EndCol))
 End Property
 
 '******************************************************************************
@@ -1391,8 +1391,12 @@ End Function
 Public Function GetActualUsedRangeToArray2DEx(lStartRow As Long, lStartCol As Long, Optional colCount As Long, Optional ignoreColnum As Long) As Array2DEx
     Dim rng As Range, vArr As Variant
     Set rng = XlWorkSheetUtils.GetActualUsedRangeFromSheet(mOrigin, lStartRow, lStartCol, colCount, ignoreColnum)
-    vArr = rng
-    Set GetActualUsedRangeToArray2DEx = Core.Init(New Array2DEx, vArr)
+    If rng Is Nothing Then
+        Set GetActualUsedRangeToArray2DEx = New Array2DEx
+    Else
+        vArr = rng
+        Set GetActualUsedRangeToArray2DEx = Core.Init(New Array2DEx, vArr)
+    End If
 End Function
 
 '******************************************************************************
@@ -1436,18 +1440,18 @@ Public Sub StoreFilterCriterias()
     Dim clms As Filters: Set clms = fltr.Filters
     
     If fltr.FilterMode Then
-        ReDim mCriterias(1 To clms.count)
+        ReDim mCriterias(1 To clms.Count)
         Dim i As Long
-        For i = 1 To clms.count
+        For i = 1 To clms.Count
             Set mCriterias(i) = New Collection
 
             If clms.Item(i).On Then
                 mCriterias(i).Add clms.Item(i).Operator, "operator"
 
-                If clms.Item(i).count > 0 Then
+                If clms.Item(i).Count > 0 Then
                     mCriterias(i).Add clms.Item(i).Criteria1, "Criteria1"
                 End If
-                If (7 <> clms.Item(i).Operator) And (clms.Item(i).count > 1) Then
+                If (7 <> clms.Item(i).Operator) And (clms.Item(i).Count > 1) Then
                     mCriterias(i).Add clms.Item(i).Criteria2, "Criteria2"
                 End If
             End If
@@ -1530,14 +1534,14 @@ End Sub
 '******************************************************************************
 Public Function CountOfFilter(Optional choiceTable As Boolean = False, Optional tblNo As Long = 1) As Long
     If choiceTable Then
-        If mOrigin.ListObjects.count < tblNo Then Exit Function
-        CountOfFilter = mOrigin.ListObjects(tblNo).AutoFilter.Range.Columns(1).SpecialCells(xlCellTypeVisible).count - 1
+        If mOrigin.ListObjects.Count < tblNo Then Exit Function
+        CountOfFilter = mOrigin.ListObjects(tblNo).AutoFilter.Range.Columns(1).SpecialCells(xlCellTypeVisible).Count - 1
     Else
         If mOrigin.AutoFilter Is Nothing Then Exit Function
         
         ' ActiveCellがテーブル（ListObject）の中にある時、AutoFilterはListObject.AutoFilterを返すため
         ' 非テーブルの表からの結果が得られないことに注意
-        CountOfFilter = mOrigin.AutoFilter.Range.Columns(1).SpecialCells(xlCellTypeVisible).count - 1
+        CountOfFilter = mOrigin.AutoFilter.Range.Columns(1).SpecialCells(xlCellTypeVisible).Count - 1
     End If
 End Function
 
@@ -1553,7 +1557,7 @@ Public Sub ReConstructFilter()
     
     Dim rng As Range: Set rng = mOrigin.AutoFilter.Range
     Dim i As Long
-    For i = 1 To mOrigin.AutoFilter.Filters.count
+    For i = 1 To mOrigin.AutoFilter.Filters.Count
         With mCriterias(i)
             If CollectionUtils.HasKey(mCriterias(i), "Criteria2") Then
                 rng.AutoFilter Field:=i, _
@@ -1677,10 +1681,10 @@ End Sub
 '* @param rowIdx    挿入先セル行インデックス
 '* @param colIdx    挿入先セル列インデックス
 '******************************************************************************
-Public Function SaveFileOLEObject(ByVal filePath As String, _
+Public Function SaveFileOLEObject(ByVal FilePath As String, _
                              ByVal rowIdx As Long, _
                              ByVal colIdx As Long) As OLEObject
-    Set SaveFileOLEObject = XlWorkSheetUtils.SaveFileOLEObject(filePath, rowIdx, colIdx, mOrigin.Name, mOrigin.Parent)
+    Set SaveFileOLEObject = XlWorkSheetUtils.SaveFileOLEObject(FilePath, rowIdx, colIdx, mOrigin.Name, mOrigin.Parent)
 End Function
 
 '******************************************************************************

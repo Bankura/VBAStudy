@@ -189,15 +189,15 @@ End Sub
 '******************************************************************************
 Public Sub OpenOracle(ByVal serverName As String, _
                           ByVal portNo As Integer, _
-                          ByVal serviceName As String, _
+                          ByVal ServiceName As String, _
                           Optional ByVal userId As String, _
                           Optional ByVal Password As String, _
                           Optional ByVal connectType As String = "oledb")
     Dim cnnStr As String
     If LCase(connectType) = "odbc" Then
-        cnnStr = StringUtils.PlaceHolder(CONN_STR_ODBC_ORACLE_ORA, GetOracleODBCDriverName(), serverName, portNo, serviceName)
+        cnnStr = StringUtils.PlaceHolder(CONN_STR_ODBC_ORACLE_ORA, GetOracleODBCDriverName(), serverName, portNo, ServiceName)
     Else
-        cnnStr = StringUtils.PlaceHolder(CONN_STR_OLE_ORACLE_ORA, serverName, portNo, serviceName)
+        cnnStr = StringUtils.PlaceHolder(CONN_STR_OLE_ORACLE_ORA, serverName, portNo, ServiceName)
     End If
     Call mConn.Open(cnnStr, userId, Password)
 End Sub
@@ -745,6 +745,21 @@ End Sub
 Public Sub Rollback()
     mConn.RollbackTrans
 End Sub
+
+'******************************************************************************
+'* [概  要] AccessCompactDB
+'* [詳  細] Accessデータベースを最適化する｡
+'*
+'* @param accDbPath Accessデータベースファイルパス
+'******************************************************************************
+Public Sub AccessCompactDB(accDbPath As String)
+    Dim newAccDbPath As String: newAccDbPath = IO.GetTempFilePath()
+    Dim dbe As Object: Set dbe = CreateObject("DAO.DBEngine.120")
+    dbe.CompactDatabase accDbPath, newAccDbPath
+    IO.DeleteFile accDbPath
+    IO.MoveFile newAccDbPath, accDbPath
+End Sub
+
 
 '******************************************************************************
 '* [概  要] SQL表示処理。

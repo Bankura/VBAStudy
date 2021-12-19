@@ -118,8 +118,8 @@ End Function
 '* @param arr As Variant(Of Array(Of T))
 '* @return As Collection(Of T)
 '******************************************************************************
-Public Function ArrayToCollection(ByVal arr As Variant) As Collection
-    Set ArrayToCollection = Core.ArrToClct(arr)
+Public Function ArrayToCollection(ByVal Arr As Variant) As Collection
+    Set ArrayToCollection = Core.ArrToClct(Arr)
 End Function
 
 '******************************************************************************
@@ -187,7 +187,7 @@ Public Function IsEmpty(ByRef col As Collection) As Boolean
     IsEmpty = True
     If col Is Nothing Then
         Exit Function
-    ElseIf col.count = 0 Then
+    ElseIf col.Count = 0 Then
         Exit Function
     End If
     IsEmpty = False
@@ -214,16 +214,16 @@ Public Function GetCollectionKeyByIndex(ByVal ind As Long, col As Collection, Op
     If col Is Nothing Then
         Err.Raise 91
     Else
-        If ind > col.count Then
+        If ind > col.Count Then
             Err.Raise 9
-        ElseIf (ind <= (col.count + 1) / 2) Or colChange Then
+        ElseIf (ind <= (col.Count + 1) / 2) Or colChange Then
             Call CopyMemoryByRef(ptr, ByVal (ObjPtr(col) + FOWARD_SHIFT), LONGPTR_SIZE)
             For i = 2 To ind
                 Call CopyMemoryByRef(ptr, ByVal (ptr + FOWARD_SHIFT), LONGPTR_SIZE)
             Next
         Else
             Call CopyMemoryByRef(ptr, ByVal (ObjPtr(col) + BACKWARD_SHIFT), LONGPTR_SIZE)
-            For i = col.count - 1 To ind Step -1
+            For i = col.Count - 1 To ind Step -1
                 Call CopyMemoryByRef(ptr, ByVal (ptr + BACKWARD_SHIFT), LONGPTR_SIZE)
             Next
         End If
@@ -247,7 +247,7 @@ End Function
 '* @return Index
 '*
 '******************************************************************************
-Public Function GetCollectionIndexByKey(ByVal key As String, col As Collection, Optional ByVal comp As VbCompareMethod = vbTextCompare) As Long
+Public Function GetCollectionIndexByKey(ByVal Key As String, col As Collection, Optional ByVal comp As VbCompareMethod = vbTextCompare) As Long
     Dim ptr   As LongPtr
     Dim sKey  As String
     Dim aKey  As LongPtr
@@ -255,7 +255,7 @@ Public Function GetCollectionIndexByKey(ByVal key As String, col As Collection, 
     If col Is Nothing Then
         Err.Raise 91
     Else
-        If col.count Then
+        If col.Count Then
             'save StrPtr
             aKey = StrPtr(sKey)
             'first Ptr
@@ -265,7 +265,7 @@ Public Function GetCollectionIndexByKey(ByVal key As String, col As Collection, 
             ' walk items upwards from first
             Do
                 Call CopyMemoryByRef(ByVal VarPtr(sKey), ByVal (ptr + KEY_POS), LONGPTR_SIZE)
-                If StrComp(key, sKey, comp) = 0 Then
+                If StrComp(Key, sKey, comp) = 0 Then
                     'found
                     Exit Do
                 End If
@@ -273,7 +273,7 @@ Public Function GetCollectionIndexByKey(ByVal key As String, col As Collection, 
                 GetCollectionIndexByKey = GetCollectionIndexByKey + 1
                 
                 ' –³ŒÀƒ‹[ƒv‘Îô
-                If GetCollectionIndexByKey > col.count Then
+                If GetCollectionIndexByKey > col.Count Then
                     GetCollectionIndexByKey = -1
                     Exit Function
                 End If
@@ -316,7 +316,7 @@ Public Function GetCollectionKeys(col As Collection) As Variant
         Call CopyMemoryByRef(ByVal VarPtr(sKey), tmpptr, LONGPTR_SIZE)
         
         Dim i As Long
-        For i = 2 To col.count
+        For i = 2 To col.Count
             Call CopyMemoryByRef(ptr, ByVal (ptr + FOWARD_SHIFT), LONGPTR_SIZE)
             tmpptr = StrPtr(sKey)
             Call CopyMemoryByRef(ByVal VarPtr(sKey), ByVal (ptr + KEY_POS), LONGPTR_SIZE)
@@ -378,11 +378,11 @@ Public Sub CollectionSwap(ByVal col As Collection, ByVal index1 As Long, ByVal i
         ind2 = index2
     End If
 
-    Dim item1 As Variant, item2 As Variant
+    Dim Item1 As Variant, Item2 As Variant
     Dim key1 As String, key2 As String
 
-    Call VariantUtils.SetItem(item1, col.Item(ind1))
-    Call VariantUtils.SetItem(item2, col.Item(ind2))
+    Call VariantUtils.SetItem(Item1, col.Item(ind1))
+    Call VariantUtils.SetItem(Item2, col.Item(ind2))
 
     key1 = GetCollectionKeyByIndex(ind1, col, True)
     key2 = GetCollectionKeyByIndex(ind2, col, True)
@@ -391,42 +391,42 @@ Public Sub CollectionSwap(ByVal col As Collection, ByVal index1 As Long, ByVal i
         col.Remove ind2
         col.Remove ind1
         
-        If col.count < ind1 Then
-            Dim insNo As Long: insNo = col.count
+        If col.Count < ind1 Then
+            Dim insNo As Long: insNo = col.Count
             If key1 <> "" Then
-                col.Add item1, key1, After:=insNo
+                col.Add Item1, key1, After:=insNo
             Else
-                col.Add item1, After:=insNo
+                col.Add Item1, After:=insNo
             End If
             If key2 <> "" Then
-                col.Add item2, key2, After:=insNo
+                col.Add Item2, key2, After:=insNo
             Else
-                col.Add item2, After:=insNo
+                col.Add Item2, After:=insNo
             End If
         Else
             If key1 <> "" Then
-                col.Add item1, key1, Before:=ind1
+                col.Add Item1, key1, Before:=ind1
             Else
-                col.Add item1, Before:=ind1
+                col.Add Item1, Before:=ind1
             End If
             If key2 <> "" Then
-                col.Add item2, key2, Before:=ind1
+                col.Add Item2, key2, Before:=ind1
             Else
-                col.Add item2, Before:=ind1
+                col.Add Item2, Before:=ind1
             End If
         End If
     Else
         col.Remove ind2
         If key2 <> "" Then
-            col.Add item2, key2, After:=ind1
+            col.Add Item2, key2, After:=ind1
         Else
-            col.Add item2, After:=ind1
+            col.Add Item2, After:=ind1
         End If
         col.Remove ind1
         If key1 <> "" Then
-            col.Add item1, key1, After:=ind2 - 1
+            col.Add Item1, key1, After:=ind2 - 1
         Else
-            col.Add item1, After:=ind2 - 1
+            col.Add Item1, After:=ind2 - 1
         End If
     End If
 End Sub
@@ -443,13 +443,13 @@ End Sub
 '*******************************************************************************
 Public Sub CollectionSort(ByVal col As Collection, Optional ByVal fnc, Optional useQuickSort As Boolean = False)
     If useQuickSort Then
-        Call QuickSort(col, 1, col.count, fnc)
+        Call QuickSort(col, 1, col.Count, fnc)
         Exit Sub
     End If
     
     Dim i As Long, j As Long
-    For i = 1 To col.count
-        For j = col.count To i Step -1
+    For i = 1 To col.Count
+        For j = col.Count To i Step -1
             If IsMissing(fnc) Then
                 If col(i) > col(j) Then
                     CollectionSwap col, i, j

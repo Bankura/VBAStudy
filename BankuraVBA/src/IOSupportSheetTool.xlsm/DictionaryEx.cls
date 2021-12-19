@@ -41,6 +41,9 @@ Private dict_pDictionary As Object
 
 #End If
 
+'Add Bankura
+Private mKeys As Collection
+
 ' --------------------------------------------- '
 ' Types
 ' --------------------------------------------- '
@@ -103,6 +106,12 @@ Attribute Item.VB_UserMemId = 0
         ' Not found -> Returns Empty
     End If
 #Else
+    'Add Bankura
+    If Not dict_pDictionary.Exists(Key) Then
+        ' Not found -> Returns Empty
+        Exit Property
+    End If
+    
     If VBA.IsObject(dict_pDictionary.Item(Key)) Then
         Set Item = dict_pDictionary.Item(Key)
     Else
@@ -143,7 +152,21 @@ Attribute Key.VB_Description = "Change a key to a different key."
         dict_ReplaceKeyValue dict_KeyValue, Updated, dict_KeyValue(2)
     End If
 #Else
-    dict_pDictionary.Key(Previous) = Updated
+    'Mod Bankura
+    'dict_pDictionary.Key(Previous) = Updated
+    
+    If dict_pDictionary.Exists(Previous) Then
+        dict_pDictionary.Key(Previous) = Updated
+        
+        Dim i As Long
+        For i = 1 To mKeys.Count
+            If mKeys(i) = Previous Then
+                mKeys.Add Updated, After:=i
+                mKeys.Remove i
+                Exit Property
+            End If
+        Next
+    End If
 #End If
 End Property
 
@@ -168,6 +191,9 @@ Attribute Add.VB_Description = "Add a new key and item to the dictionary."
     End If
 #Else
     dict_pDictionary.Add Key, Item
+    
+    'Add Bankura
+    Call mKeys.Add(Key)
 #End If
 End Sub
 
@@ -242,7 +268,24 @@ Attribute Remove.VB_Description = "Remove a given key from the dictionary."
         Err.Raise 32811
     End If
 #Else
-    dict_pDictionary.Remove Key
+
+    'Mod Bankura
+    'dict_pDictionary.Remove Key
+
+    If TypeName(Key) = "String" Then
+        Call dict_pDictionary.Remove(Key)
+        Call mKeys.Remove(Key)
+    Else
+        Dim k
+        For Each k In dict_pDictionary.keys
+            If mKeys(Key) = k Then
+                Call dict_pDictionary.Remove(k)
+                mKeys.Remove Key
+                Exit Sub
+            End If
+        Next
+    End If
+
 #End If
 End Sub
 
@@ -258,6 +301,10 @@ Attribute RemoveAll.VB_Description = "Remove all information from the dictionary
     Erase dict_pItems
 #Else
     dict_pDictionary.RemoveAll
+    
+    'Add Bankura
+    Set mKeys = Nothing
+    Set mKeys = New Collection
 #End If
 End Sub
 
@@ -461,6 +508,9 @@ Private Sub Class_Initialize()
     Set dict_pObjectKeys = New Collection
 #Else
     Set dict_pDictionary = CreateObject("Scripting.Dictionary")
+    
+    'Add Bankura
+    Set mKeys = New Collection
 #End If
 End Sub
 
@@ -470,5 +520,45 @@ Private Sub Class_Terminate()
     Set dict_pObjectKeys = Nothing
 #Else
     Set dict_pDictionary = Nothing
+    
+    'Add Bankura
+    Set mKeys = Nothing
 #End If
 End Sub
+
+
+'*-----------------------------------------------------------------------------
+'* 拡張メソッド
+'*-----------------------------------------------------------------------------
+'******************************************************************************
+'* [概  要] Init メソッド
+'* [詳  細] Dictionaryオブジェクトを指定して初期化する。
+'*
+'* @return DictionaryEx 本オブジェクト
+'******************************************************************************
+Public Function Init(dic As Object) As DictionaryEx
+    Set dict_pDictionary = dic
+    Set mKeys = New Collection
+    
+    Dim k
+    For Each k In dict_pDictionary.keys
+        mKeys.Add k
+    Next
+    Set Init = Me
+End Function
+
+'******************************************************************************
+'* [概  要] NewEnum メソッド
+'* [詳  細] For Each 構文でイテレーターを返すためのメソッド。
+'*
+'* @return イテレーター
+'******************************************************************************
+Public Function NewEnum() As stdole.IUnknown
+Attribute NewEnum.VB_UserMemId = -4
+Attribute NewEnum.VB_MemberFlags = "40"
+#If Mac Or Not UseScriptingDictionaryIfAvailable Then
+    Set NewEnum = dict_pKeyValues.[_NewEnum]
+#Else
+    Set NewEnum = mKeys.[_NewEnum]
+#End If
+End Function

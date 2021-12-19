@@ -656,8 +656,8 @@ End Function
 '* @param count €–Ú
 '* @return Variant 1ŸŒ³”z—ñ
 '******************************************************************************
-Public Function Repeat(ByVal itm As Variant, ByVal count As Long) As ArrayEx
-    Set Repeat = Init(ArrayUtils.Repeat(itm, count))
+Public Function Repeat(ByVal itm As Variant, ByVal Count As Long) As ArrayEx
+    Set Repeat = Init(ArrayUtils.Repeat(itm, Count))
 End Function
 
 '******************************************************************************

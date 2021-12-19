@@ -190,7 +190,11 @@ End Function
 '******************************************************************************
 Public Function ShowCsvFileDialog(Optional ByVal initialFile As String) As String
     mFilePath = UXUtils.ShowCsvFileDialog(initialFile)
-    mSize = IO.GetFile(mFilePath).size
+    If mFilePath <> "" Then
+        mSize = IO.GetFile(mFilePath).size
+    Else
+        mSize = 0
+    End If
     ShowCsvFileDialog = mFilePath
 End Function
 
@@ -250,6 +254,7 @@ Public Function Read() As Array2DEx
 ErrorHandler:
     If Err.Number = 9998 Then
         mValidFormat = False
+        Set Read = arr2dex
     ElseIf Err.Number = 9997 Then
         Set Read = arr2dex
     Else
@@ -312,7 +317,7 @@ Private Sub StartProcess(enumerator As Object)
         End If
         mColumnCount = UBound(vRow)
     End With
-    rEnumerator.StartRow = 2
+    rEnumerator.startRow = 2
 End Sub
 
 '******************************************************************************
@@ -346,6 +351,15 @@ Private Sub EndProcess(enumerator As Object)
 End Sub
 
 '******************************************************************************
+'* [概  要] CancelProcess
+'* [詳  細] キャンセル時の処理を行う。
+'*
+'******************************************************************************
+Private Sub CancelProcess(enumerator As Object)
+    enumerator.SourceData.Close
+End Sub
+
+'******************************************************************************
 '* インタフェース実装
 '******************************************************************************
 '*-----------------------------------------------------------------------------
@@ -369,3 +383,11 @@ End Sub
 Private Sub IRowEditor_EndProcess(enumerator As Object)
     EndProcess enumerator
 End Sub
+'*-----------------------------------------------------------------------------
+'* IRowEditor#CancelProcess
+'*
+'*-----------------------------------------------------------------------------
+Public Sub IRowEditor_CancelProcess(enumerator As Object)
+    CancelProcess enumerator
+End Sub
+

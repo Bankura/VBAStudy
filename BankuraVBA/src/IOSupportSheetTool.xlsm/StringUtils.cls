@@ -28,7 +28,7 @@ Option Explicit
 '*          https://guava.dev/releases/19.0/api/docs/com/google/common/base/Strings.html
 '*
 '* @author Bankura
-'* Copyright (c) 2019-2020 Bankura
+'* Copyright (c) 2019-2021 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 
@@ -48,7 +48,6 @@ Private Declare PtrSafe Function WideCharToMultiByte Lib "kernel32" (ByVal CodeP
 Private Const CP_UTF8 As Long = 65001
 Private Const MB_PRECOMPOSED As Long = &H1
 Private Const INDEX_NOT_FOUND As Long = -1
-Private Const PAD_LIMIT As Long = 8192
 
 '******************************************************************************
 '* 変数定義
@@ -368,7 +367,7 @@ End Function
 '*
 '******************************************************************************
 Public Function StartsWith(ByVal str As String, ByVal startStr As String) As Boolean
-   StartsWith = (startStr = Left$(str, Len(startStr)))
+    StartsWith = (startStr = Left$(str, Len(startStr)))
 End Function
 
 
@@ -403,7 +402,7 @@ End Function
 '******************************************************************************
 Public Function PlaceHolder(ByVal str As String, ParamArray p() As Variant) As String
     Dim strMsg As String
-    strMsg = StringUtils.Unescape(str)
+    strMsg = str
     If UBound(p) >= 0 Then
         Dim tmp: tmp = p
         Dim vArr: vArr = ArrayUtils.ToVArrayFlattened(tmp)
@@ -413,6 +412,29 @@ Public Function PlaceHolder(ByVal str As String, ParamArray p() As Variant) As S
         Next
     End If
     PlaceHolder = strMsg
+End Function
+
+'******************************************************************************
+'* [概  要] PlaceHolderWithEscape
+'* [詳  細] 文字列にエスケープ処理実行後文字列のプレースホルダー{x}に値を埋め込む｡
+'*
+'* @param str 文字列
+'* @param p 埋込文字列の配列
+'* @return String 埋込後文字列
+'*
+'******************************************************************************
+Public Function PlaceHolderWithEscape(ByVal str As String, ParamArray p() As Variant) As String
+    Dim strMsg As String
+    strMsg = StringUtils.Unescape(str)
+    If UBound(p) >= 0 Then
+        Dim tmp: tmp = p
+        Dim vArr: vArr = ArrayUtils.ToVArrayFlattened(tmp)
+        Dim i As Long
+        For i = 0 To UBound(vArr)
+            strMsg = VBA.Replace(strMsg, "{" & CStr(i) & "}", vArr(i))
+        Next
+    End If
+    PlaceHolderWithEscape = strMsg
 End Function
 
 '******************************************************************************
@@ -608,10 +630,10 @@ End Function
 '******************************************************************************
 '* [概  要] AscLeft
 '* [詳  細] 文字列の左端から指定した文字数分の文字列を返す。
-'*          漢字2バイト､半角1バイト｡
+'*          半角1文字、全角2文字換算｡
 '*
 '* @param var 文字列
-'* @param lngSize 桁数
+'* @param lngSize 桁数（文字）
 '* @return String 結果文字列
 '*
 '*
@@ -642,6 +664,61 @@ Public Function AscLeft(ByVal var As Variant, ByVal lngSize As Long) As String
 
     Next
     AscLeft = strResult
+End Function
+
+'******************************************************************************
+'* [概  要] AscRight
+'* [詳  細] 文字列の右端から指定した文字数分の文字列を返す。
+'*          半角1文字、全角2文字換算｡
+'*
+'* @param var 文字列
+'* @param lngSize 桁数（文字）
+'* @return String 結果文字列
+'*
+'******************************************************************************
+Public Function AscRight(ByVal var As Variant, ByVal lngSize As Long) As String
+    Dim revText As String: revText = reverse(CStr(var))
+    AscRight = reverse(AscLeft(revText, lngSize))
+End Function
+
+'******************************************************************************
+'* [概  要] AscMid
+'* [詳  細] 文字列の指定した位置から指定した文字数分の文字列を返す。
+'*          半角1文字、全角2文字換算｡
+'*
+'* @param var 文字列
+'* @param lngStart 開始位置（バイト） ※1始まり
+'* @param lngSize 桁数（文字）
+'* @return String 結果文字列
+'*
+'******************************************************************************
+Public Function AscMid(ByVal var As Variant, ByVal lngStart As Long, ByVal lngSize As Long) As String
+    If lngStart < 1 Then
+        Exit Function
+    End If
+
+    Dim lngLen As Long: lngLen = Len(var)
+    Dim strResult As String: strResult = ""
+    Dim i As Long, cnt As Long: cnt = 1
+    Dim cntAppend As Long
+    For i = 1 To lngLen
+        Dim strChr As String: strChr = Mid$(var, i, 1)
+        
+        If cntAppend + AscLen(strChr) > lngSize Then
+            Exit For
+        End If
+       
+        If cnt >= lngStart Then
+            strResult = strResult & strChr
+            cntAppend = cntAppend + AscLen(strChr)
+            
+        ElseIf (cnt + AscLen(strChr)) > lngStart Then
+            cntAppend = cntAppend + 1
+            
+        End If
+        cnt = cnt + AscLen(strChr)
+    Next
+    AscMid = strResult
 End Function
 
 '******************************************************************************
@@ -846,7 +923,7 @@ Public Function AppendIfMissing(ByVal str As String, ByVal suffix As String, Par
         AppendIfMissing = str
         Exit Function
     End If
-    If Not IsMissing(suffixes) Then
+    If Not ValidateUtils.IsParamArrayMissing(suffixes) Then
         Dim tmp: tmp = suffixes ' ParamArrayを別関数に渡すための対応
         Dim v
         For Each v In ArrayUtils.ToVArrayFlattened(tmp)
@@ -888,7 +965,7 @@ Public Function AppendIfMissingIgnoreCase(ByVal str As String, ByVal suffix As S
         AppendIfMissingIgnoreCase = str
         Exit Function
     End If
-    If Not IsMissing(suffixes) Then
+    If Not ValidateUtils.IsParamArrayMissing(suffixes) Then
         Dim tmp: tmp = suffixes ' ParamArrayを別関数に渡すための対応
         Dim v
         For Each v In ArrayUtils.ToVArrayFlattened(tmp)
@@ -1149,7 +1226,7 @@ End Function
 '*
 '******************************************************************************
 Public Function ContainsAll(ByVal str As String, ParamArray searchStr()) As Boolean
-    If Me.IsEmpty(str) Or VBA.IsMissing(searchStr) Then
+    If Me.IsEmpty(str) Or ValidateUtils.IsParamArrayMissing(searchStr) Then
         ContainsAll = False
         Exit Function
     End If
@@ -1183,7 +1260,7 @@ End Function
 '*
 '******************************************************************************
 Public Function ContainsAny(ByVal str As String, ParamArray searchStr()) As Boolean
-    If Me.IsEmpty(str) Or VBA.IsMissing(searchStr) Then
+    If Me.IsEmpty(str) Or ValidateUtils.IsParamArrayMissing(searchStr) Then
         ContainsAny = False
         Exit Function
     End If
@@ -1386,6 +1463,27 @@ Public Function DeleteWhitespace(ByVal str As String) As String
 End Function
 
 '******************************************************************************
+'* [概  要] DeleteWhitespace
+'* [詳  細] 文字列からすべての半角スペースを削除｡
+'*   StringUtils.DeleteWhitespace("") = ""
+'*   StringUtils.DeleteWhitespace("abc") = "abc"
+'*   StringUtils.DeleteWhitespace("   ab  c  ") = "abc"
+'*
+'* [用  例]
+'*
+'* @param str 文字列
+'* @return String 削除後文字列
+'*
+'******************************************************************************
+Public Function DeleteMultiWhitespace(ByVal str As String) As String
+    DeleteMultiWhitespace = str
+    Do Until InStr(DeleteMultiWhitespace, "  ") = 0
+        DeleteMultiWhitespace = VBA.Replace(DeleteMultiWhitespace, "  ", " ")
+    Loop
+End Function
+
+
+'******************************************************************************
 '* [概  要] Difference
 '* [詳  細] 2つの文字列を比較し、それらが異なる部分を返す。
 '*          より正確には、最初の文字列とは異なる場所から、2番目の文字列の残りを返す。
@@ -1440,7 +1538,7 @@ End Function
 '******************************************************************************
 Public Function EndsWithAny(ByVal str As String, ParamArray endStr() As Variant) As Boolean
 
-    If Me.IsEmpty(str) Or VBA.IsMissing(endStr) Then
+    If Me.IsEmpty(str) Or ValidateUtils.IsParamArrayMissing(endStr) Then
         EndsWithAny = False
         Exit Function
     End If
@@ -1471,10 +1569,6 @@ End Function
 '*
 '******************************************************************************
 Public Function EndsWithIgnoreCase(ByVal str As String, ByVal endStr As String) As Boolean
-    If Me.IsEmpty(str) Or Me.IsEmpty(endStr) Then
-        EndsWithIgnoreCase = False
-        Exit Function
-    End If
     Dim strIc As String: strIc = Me.LowerCase(str)
     Dim endStrIc As String: endStrIc = Me.LowerCase(endStr)
     EndsWithIgnoreCase = Me.EndsWith(strIc, endStrIc)
@@ -1531,7 +1625,7 @@ End Function
 '*
 '******************************************************************************
 Public Function EqualsAny(ByVal str As String, ParamArray searchStrings() As Variant) As Boolean
-    If VBA.IsMissing(searchStrings) Then
+    If ValidateUtils.IsParamArrayMissing(searchStrings) Then
         EqualsAny = False
         Exit Function
     End If
@@ -1561,7 +1655,7 @@ End Function
 '*
 '******************************************************************************
 Public Function EqualsAnyIgnoreCase(ByVal str As String, ParamArray searchStrings() As Variant) As Boolean
-    If VBA.IsMissing(searchStrings) Then
+    If ValidateUtils.IsParamArrayMissing(searchStrings) Then
         EqualsAnyIgnoreCase = False
         Exit Function
     End If
@@ -1593,7 +1687,7 @@ End Function
 '*
 '******************************************************************************
 Public Function FirstNonBlank(ParamArray values() As Variant) As String
-    If IsMissing(values) Then
+    If ValidateUtils.IsParamArrayMissing(values) Then
         FirstNonBlank = ""
         Exit Function
     End If
@@ -1626,7 +1720,7 @@ End Function
 '*
 '******************************************************************************
 Public Function FirstNonEmpty(ParamArray values() As Variant) As String
-    If IsMissing(values) Then
+    If ValidateUtils.IsParamArrayMissing(values) Then
         FirstNonEmpty = ""
         Exit Function
     End If
@@ -1695,7 +1789,7 @@ End Function
 '*
 '******************************************************************************
 Public Function GetCommonPrefix(ParamArray strs() As Variant) As String
-    If IsMissing(strs) Then
+    If ValidateUtils.IsParamArrayMissing(strs) Then
         GetCommonPrefix = ""
         Exit Function
     End If
@@ -1867,7 +1961,7 @@ End Function
 '*
 '******************************************************************************
 Public Function IndexOfAny(ByVal str As String, ParamArray searchStrs() As Variant) As Long
-    If IsMissing(searchStrs) Then
+    If ValidateUtils.IsParamArrayMissing(searchStrs) Then
         IndexOfAny = INDEX_NOT_FOUND
          Exit Function
     End If
@@ -1887,6 +1981,33 @@ Public Function IndexOfAny(ByVal str As String, ParamArray searchStrs() As Varia
     IndexOfAny = IIf(ret = MAX_LONG, INDEX_NOT_FOUND, ret)
 End Function
 
+'******************************************************************************
+'* [概  要] IndexOfAnyAll
+'* [詳  細] 指定された文字セット内の任意の文字のインデックス（文字位置）を
+'*          すべて検索する｡
+'*
+'* @param str 文字列
+'* @param searchStrs 検索文字列（複数指定）
+'* @return Variant 文字列のインデックス。一致がない場合、空配列入力の場合は空配列
+'*
+'******************************************************************************
+Public Function IndexOfAnyAll(ByVal str As String, ParamArray searchStrs() As Variant) As Variant
+    If Me.IsEmpty(str) Or ValidateUtils.IsParamArrayMissing(searchStrs) Then
+        IndexOfAnyAll = ArrayUtils.EmptyVariantArray
+        Exit Function
+    End If
+    Dim strLen As Long: strLen = Len(str)
+    Dim tmp: tmp = searchStrs ' ParamArrayを別関数に渡すための対応
+    Dim v, i As Long: i = 0
+    Dim arrex As ArrayEx: Set arrex = New ArrayEx
+    For Each v In Me.ToCharArray(str)
+        If Me.EqualsAny(CStr(v), tmp) Then
+            arrex.Add i
+        End If
+        i = i + 1
+    Next
+    IndexOfAnyAll = arrex.ToArray
+End Function
 
 '******************************************************************************
 '* [概  要] IndexOfAnyBut
@@ -1894,11 +2015,11 @@ End Function
 '*          を検索する｡
 '*
 '* [用  例]
-'*   StringUtils.indexOfAnyBut("", *)                                = -1
-'*   StringUtils.indexOfAnyBut(*, [])                                = -1
-'*   StringUtils.indexOfAnyBut("zzabyycdxx", new char[] {'z', 'a'} ) = 3
-'*   StringUtils.indexOfAnyBut("aba", new char[] {'z'} )             = 0
-'*   StringUtils.indexOfAnyBut("aba", new char[] {'a', 'b'} )        = -1
+'*   StringUtils.IndexOfAnyBut("", *)                  = -1
+'*   StringUtils.IndexOfAnyBut(*, "")                  = -1
+'*   StringUtils.IndexOfAnyBut("zzabyycdxx", "z", "a") = 3
+'*   StringUtils.IndexOfAnyBut("aba", "z")             = 0
+'*   StringUtils.IndexOfAnyBut("aba", "a","b")         = -1
 '*
 '* @param str 文字列
 '* @param searchStrs 検索文字（１文字。複数指定）
@@ -1906,7 +2027,7 @@ End Function
 '*
 '******************************************************************************
 Public Function IndexOfAnyBut(ByVal str As String, ParamArray searchStrs() As Variant) As Long
-    If Me.IsEmpty(str) Or IsMissing(searchStrs) Then
+    If Me.IsEmpty(str) Or ValidateUtils.IsParamArrayMissing(searchStrs) Then
         IndexOfAnyBut = INDEX_NOT_FOUND
         Exit Function
     End If
@@ -1914,7 +2035,7 @@ Public Function IndexOfAnyBut(ByVal str As String, ParamArray searchStrs() As Va
     Dim tmp: tmp = searchStrs ' ParamArrayを別関数に渡すための対応
     Dim v, i As Long: i = 0
     For Each v In Me.ToCharArray(str)
-        If Me.EqualsAny(CStr(v), tmp) Then
+        If Not Me.EqualsAny(CStr(v), tmp) Then
             Exit For
         Else
             i = i + 1
@@ -1947,7 +2068,7 @@ End Function
 '*
 '******************************************************************************
 Public Function IndexOfDifference(ParamArray strs() As Variant) As Long
-    If IsMissing(strs) Then
+    If ValidateUtils.IsParamArrayMissing(strs) Then
         IndexOfDifference = INDEX_NOT_FOUND
         Exit Function
     End If
@@ -2080,7 +2201,7 @@ End Function
 '*
 '******************************************************************************
 Public Function IsAllBlank(ParamArray strs() As Variant) As Boolean
-    If VBA.IsMissing(strs) Then
+    If ValidateUtils.IsParamArrayMissing(strs) Then
         IsAllBlank = True
         Exit Function
     End If
@@ -2113,7 +2234,7 @@ End Function
 '*
 '******************************************************************************
 Public Function IsAllEmpty(ParamArray strs() As Variant) As Boolean
-    If VBA.IsMissing(strs) Then
+    If ValidateUtils.IsParamArrayMissing(strs) Then
         IsAllEmpty = True
         Exit Function
     End If
@@ -2332,7 +2453,7 @@ End Function
 '*
 '******************************************************************************
 Public Function IsAnyBlank(ParamArray strs() As Variant) As Boolean
-    If IsMissing(strs) Then
+    If ValidateUtils.IsParamArrayMissing(strs) Then
         IsAnyBlank = False
         Exit Function
     End If
@@ -2364,7 +2485,7 @@ End Function
 '*
 '******************************************************************************
 Public Function IsAnyEmpty(ParamArray strs() As Variant) As Boolean
-    If IsMissing(strs) Then
+    If ValidateUtils.IsParamArrayMissing(strs) Then
         IsAnyEmpty = False
         Exit Function
     End If
@@ -2458,8 +2579,12 @@ End Function
 '* @return Boolean チェック結果（True:該当）
 '*
 '******************************************************************************
-Public Function IsEmpty(ByVal str As String) As Boolean
-    IsEmpty = (str = "")
+Public Function IsEmpty(str) As Boolean
+    If Not ValidateUtils.IsString(str) Then
+        IsEmpty = False
+        Exit Function
+    End If
+    IsEmpty = (CStr(str) = "")
 End Function
 
 '******************************************************************************
@@ -2680,12 +2805,14 @@ Public Function LastIndexOf(ByVal str As String, ByVal searchStr As String, Opti
         End If
         Exit Function
     End If
-    If IsMissing(startPos) Or startPos >= Len(str) Then
+    If IsMissing(startPos) Then
+        LastIndexOf = InStrRev(str, searchStr) - 1
+        Exit Function
+    ElseIf startPos >= Len(str) Then
         LastIndexOf = InStrRev(str, searchStr) - 1
         Exit Function
     ElseIf startPos < 0 Then
         startPos = 0
-
     End If
     LastIndexOf = InStrRev(str, searchStr, startPos + 1) - 1
 End Function
@@ -2752,15 +2879,23 @@ End Function
 '* @return String 変換後文字列
 '*
 '******************************************************************************
-Public Function LeftPad(ByVal str As String, ByVal size As Long, Optional ByVal padStr As String = " ") As String
-    Dim padLen As Long: padLen = Len(padStr)
-    Dim strLen As Long: strLen = Len(str)
+Public Function LeftPad(ByVal str As String, ByVal size As Long, Optional ByVal padStr As String = " ", Optional useZenkaku2Width As Boolean = False) As String
+    Dim padLen As Long
+    Dim strLen As Long
+    If useZenkaku2Width Then
+        padLen = GetTextWidth(padStr)
+        strLen = GetTextWidth(str)
+    Else
+        padLen = CheckLength(padStr)
+        strLen = CheckLength(str)
+    End If
+
     Dim pads As Long: pads = size - strLen
     If pads <= 0 Then
         LeftPad = str '  returns original String when possible
         Exit Function
     End If
-    If padLen = 1 And pads <= PAD_LIMIT Then
+    If padLen = 1 Then
         LeftPad = Me.Repeat(padStr, pads) & str
         Exit Function
     End If
@@ -2777,7 +2912,7 @@ Public Function LeftPad(ByVal str As String, ByVal size As Long, Optional ByVal 
     For i = 0 To pads - 1
         padding(i) = padChars(i Mod padLen)
     Next
-    LeftPad = VBA.Join(padding) & str
+    LeftPad = VBA.Join(padding, "") & str
 End Function
 
 
@@ -2803,7 +2938,7 @@ End Function
 '* [詳  細] 全角文字を半角文字に変換する｡
 '*
 '* [用  例]
-'*   StringUtils.Proper("Ｈａｐｐｙ　Ｂｉｒｔｈｄａｙ！") = "happy birthday!"
+'*   StringUtils.Narrow("Ｈａｐｐｙ　Ｂｉｒｔｈｄａｙ！") = "happy birthday!"
 '*
 '* @param str 文字列
 '* @return String 変換後文字列
@@ -2811,6 +2946,30 @@ End Function
 '******************************************************************************
 Public Function Narrow(ByVal str As String) As String
     Narrow = StrConv(str, vbNarrow)
+End Function
+
+'******************************************************************************
+'* [概  要] NarrowNumber
+'* [詳  細] 全角数字を半角数字に変換する｡
+'*
+'* [用  例]
+'*   StringUtils.NarrowNumber("Ｈａｐｐｙ７") = "Ｈａｐｐｙ7"
+'*
+'* @param str 文字列
+'* @return String 変換後文字列
+'*
+'******************************************************************************
+Public Function NarrowNumber(ByVal str As String) As String
+    Dim v, s As String, buf As StringEx: Set buf = New StringEx
+    For Each v In ToCharArray(str)
+        s = CStr(v)
+        If s Like "[０-９]" Then
+            buf.Append Narrow(s)
+        Else
+            buf.Append s
+        End If
+    Next
+    NarrowNumber = buf.ToString
 End Function
 
 '******************************************************************************
@@ -2841,7 +3000,7 @@ Public Function PrependIfMissing(ByVal str As String, ByVal prefix As String, Pa
         PrependIfMissing = str
         Exit Function
     End If
-    If Not IsMissing(prefixes) Then
+    If Not ValidateUtils.IsParamArrayMissing(prefixes) Then
         Dim tmp: tmp = prefixes ' ParamArrayを別関数に渡すための対応
         Dim v
         For Each v In ArrayUtils.ToVArrayFlattened(tmp)
@@ -2884,7 +3043,7 @@ Public Function PrependIfMissingIgnoreCase(ByVal str As String, ByVal prefix As 
         PrependIfMissingIgnoreCase = str
         Exit Function
     End If
-    If Not IsMissing(prefixes) Then
+    If Not ValidateUtils.IsParamArrayMissing(prefixes) Then
         Dim tmp: tmp = prefixes ' ParamArrayを別関数に渡すための対応
         Dim v
         For Each v In ArrayUtils.ToVArrayFlattened(tmp)
@@ -2986,7 +3145,6 @@ Public Function RemoveEnd(ByVal str As String, ByVal removeStr As String) As Str
     End If
     RemoveEnd = str
 End Function
-
 
 '******************************************************************************
 '* [概  要] RemoveEndIgnoreCase
@@ -3108,7 +3266,6 @@ Public Function RemoveStartIgnoreCase(ByVal str As String, ByVal removeStr As St
 
 End Function
 
-
 '******************************************************************************
 '* [概  要] Repeat
 '* [詳  細] 文字列を繰返し回数分繰返し、新しい文字列を形成する。
@@ -3146,7 +3303,7 @@ Public Function Repeat(ByVal str As String, ByVal repeatCount As Long, Optional 
         Repeat = ""
         Exit Function
     End If
-    If inputLength = 1 And repeatCount <= PAD_LIMIT Then
+    If inputLength = 1 Then
         Repeat = String(repeatCount, str)
         Exit Function
     End If
@@ -3156,14 +3313,14 @@ Public Function Repeat(ByVal str As String, ByVal repeatCount As Long, Optional 
             Repeat = String(repeatCount, str)
         Case 2
             Dim ch0: ch0 = Me.CharAt(str, 0)
-            Dim ch1: ch0 = Me.CharAt(str, 1)
+            Dim ch1: ch1 = Me.CharAt(str, 1)
             Dim output2: ReDim output2(outputLength - 1)
             Dim i As Long
             For i = repeatCount * 2 - 2 To 0 Step -2
                 output2(i) = ch0
                 output2(i + 1) = ch1
             Next
-            Repeat = VBA.Join(output2)
+            Repeat = VBA.Join(output2, "")
         Case Else
             Dim buf As StringEx: Set buf = Core.Init(New StringEx, outputLength)
             Dim j As Long
@@ -3273,8 +3430,8 @@ End Function
 '* @return String 変換後文字列
 '*
 '******************************************************************************
-Public Function Reverse(ByVal str As String) As String
-    Reverse = VBA.StrReverse(str)
+Public Function reverse(ByVal str As String) As String
+    reverse = VBA.StrReverse(str)
 End Function
 
 
@@ -3302,15 +3459,23 @@ End Function
 '* @return String 変換後文字列
 '*
 '******************************************************************************
-Public Function RightPad(ByVal str As String, ByVal size As Long, Optional ByVal padStr As String = " ") As String
-    Dim padLen As Long: padLen = Len(padStr)
-    Dim strLen As Long: strLen = Len(str)
+Public Function RightPad(ByVal str As String, ByVal size As Long, Optional ByVal padStr As String = " ", Optional useZenkaku2Width As Boolean = False) As String
+    Dim padLen As Long
+    Dim strLen As Long
+    If useZenkaku2Width Then
+        padLen = GetTextWidth(padStr)
+        strLen = GetTextWidth(str)
+    Else
+        padLen = CheckLength(padStr)
+        strLen = CheckLength(str)
+    End If
+
     Dim pads As Long: pads = size - strLen
     If pads <= 0 Then
         RightPad = str '  returns original String when possible
         Exit Function
     End If
-    If padLen = 1 And pads <= PAD_LIMIT Then
+    If padLen = 1 Then
         RightPad = str & Me.Repeat(padStr, pads)
         Exit Function
     End If
@@ -3327,7 +3492,7 @@ Public Function RightPad(ByVal str As String, ByVal size As Long, Optional ByVal
     For i = 0 To pads - 1
         padding(i) = padChars(i Mod padLen)
     Next
-    RightPad = str & VBA.Join(padding)
+    RightPad = str & VBA.Join(padding, "")
 End Function
 
 
@@ -3379,7 +3544,7 @@ End Function
 '*
 '******************************************************************************
 Public Function StartsWithAny(ByVal str As String, ParamArray searchStrings() As Variant) As Boolean
-    If Me.IsEmpty(str) Or VBA.IsMissing(searchStrings) Then
+    If Me.IsEmpty(str) Or ValidateUtils.IsParamArrayMissing(searchStrings) Then
         StartsWithAny = False
         Exit Function
     End If
@@ -3434,7 +3599,7 @@ End Function
 '*   StringUtils.Substring("abc", 4) = ""
 '*   StringUtils.Substring("abc", -2) = "bc"
 '*   StringUtils.Substring("abc", -4) = "abc"
-'*   StringUtils.substring("", * ,  *)    = "";
+'*   StringUtils.Substring("", * ,  *)    = "";
 '*   StringUtils.Substring("abc", 0, 2) = "ab"
 '*   StringUtils.Substring("abc", 2, 0) = ""
 '*   StringUtils.Substring("abc", 2, 4) = "c"
@@ -3455,7 +3620,7 @@ Public Function Substring(ByVal str As String, ByVal startPos As Long, Optional 
         Exit Function
     End If
     If IsMissing(endPos) Then
-        endPos = Len(str) - 1
+        endPos = Len(str)
     End If
     ' handle negatives
     If endPos < 0 Then
@@ -3478,7 +3643,7 @@ Public Function Substring(ByVal str As String, ByVal startPos As Long, Optional 
     If endPos < 0 Then
         endPos = 0
     End If
-    Substring = Mid(str, startPos + 1, CLng(endPos) - startPos + 1)
+    Substring = Mid(str, startPos + 1, CLng(endPos) - startPos)
 End Function
 
 
@@ -3487,7 +3652,7 @@ End Function
 '* [詳  細] セパレータが最初に出現した後の部分文字列を取得する。
 '*
 '* [用  例]
-'*   StringUtils.substringAfter("", *)        = ""
+'*   StringUtils.SubstringAfter("", *)        = ""
 '*   StringUtils.SubstringAfter("abc", "a") = "bc"
 '*   StringUtils.SubstringAfter("abcba", "b") = "cba"
 '*   StringUtils.SubstringAfter("abc", "c") = ""
@@ -3522,8 +3687,8 @@ End Function
 '* [詳  細] セパレータが最後に出現した後の部分文字列を取得する｡
 '*
 '* [用  例]
-'*   StringUtils.substringAfterLast("", *)        = ""
-'*   StringUtils.substringAfterLast(*, "")        = ""
+'*   StringUtils.SubstringAfterLast("", *)        = ""
+'*   StringUtils.SubstringAfterLast(*, "")        = ""
 '*   StringUtils.SubstringAfterLast("abc", "a") = "bc"
 '*   StringUtils.SubstringAfterLast("abcba", "b") = "a"
 '*   StringUtils.SubstringAfterLast("abc", "c") = ""
@@ -3632,16 +3797,16 @@ End Function
 '*   StringUtils.SubstringBetween("", "tag") = ""
 '*   StringUtils.SubstringBetween("tagabctag", "") = ""
 '*   StringUtils.SubstringBetween("tagabctag", "tag") = "abc"
-'*   StringUtils.substringBetween("wx[b]yz", "[", "]") = "b"
-'*   StringUtils.substringBetween("", *, *)          = ""
-'*   StringUtils.substringBetween(*, "", *)          = ""
+'*   StringUtils.SubstringBetween("wx[b]yz", "[", "]") = "b"
+'*   StringUtils.SubstringBetween("", *, *)          = ""
+'*   StringUtils.SubstringBetween(*, "", *)          = ""
 '*   StringUtils.SubstringBetween("tagabctag", "tag", "") = "abc"
-'*   StringUtils.substringBetween("", "", "")          = ""
-'*   StringUtils.substringBetween("", "", "]")         = ""
-'*   StringUtils.substringBetween("", "[", "]")        = ""
-'*   StringUtils.substringBetween("yabcz", "", "")     = ""
-'*   StringUtils.substringBetween("yabcz", "y", "z")   = "abc"
-'*   StringUtils.substringBetween("yabczyabcz", "y", "z")   = "abc"
+'*   StringUtils.SubstringBetween("", "", "")          = ""
+'*   StringUtils.SubstringBetween("", "", "]")         = ""
+'*   StringUtils.SubstringBetween("", "[", "]")        = ""
+'*   StringUtils.SubstringBetween("yabcz", "", "")     = ""
+'*   StringUtils.SubstringBetween("yabcz", "y", "z")   = "abc"
+'*   StringUtils.SubstringBetween("yabczyabcz", "y", "z")   = "abc"
 '*
 '* @param str 文字列
 '* @param openStr 部分文字列の開始を識別する文字列
@@ -3801,7 +3966,7 @@ End Function
 '* [詳  細] 半角文字を全角文字に変換する｡
 '*
 '* [用  例]
-'*   StringUtils.Proper("happy birthday!") = "Ｈａｐｐｙ　Ｂｉｒｔｈｄａｙ！"
+'*   StringUtils.Wide("happy birthday!") = "Ｈａｐｐｙ　Ｂｉｒｔｈｄａｙ！"
 '*
 '* @param str 文字列
 '* @return String 変換後文字列
@@ -3829,12 +3994,12 @@ End Function
 '* @return String 変換後文字列
 '*
 '******************************************************************************
-Public Function Wrap(ByVal str As String, ByVal wrapWith As String) As String
+Public Function wrap(ByVal str As String, ByVal wrapWith As String) As String
     If Me.IsEmpty(str) Or Me.IsEmpty(wrapWith) Then
-        Wrap = str
+        wrap = str
         Exit Function
     End If
-    Wrap = wrapWith & str & wrapWith
+    wrap = wrapWith & str & wrapWith
 End Function
 
 '******************************************************************************
@@ -3903,16 +4068,16 @@ End Function
 '*
 '******************************************************************************
 Public Function ToCharArray(ByVal str As String) As Variant
-    Dim arr As ArrayEx: Set arr = New ArrayEx
+    Dim Arr As ArrayEx: Set Arr = New ArrayEx
     If Me.IsEmpty(str) Then
-        ToCharArray = arr.ToArray
+        ToCharArray = Arr.ToArray
         Exit Function
     End If
     Dim i As Long
     For i = 1 To Len(str)
-        arr.AddVal Mid(str, i, 1)
+        Arr.AddVal Mid(str, i, 1)
     Next
-    ToCharArray = arr.ToArray
+    ToCharArray = Arr.ToArray
 End Function
 
 '******************************************************************************
@@ -3930,16 +4095,16 @@ End Function
 '*
 '******************************************************************************
 Public Function ToCharArrayReverse(ByVal str As String) As Variant
-    Dim arr As ArrayEx: Set arr = New ArrayEx
+    Dim Arr As ArrayEx: Set Arr = New ArrayEx
     If Me.IsEmpty(str) Then
-        ToCharArrayReverse = arr.ToArray
+        ToCharArrayReverse = Arr.ToArray
         Exit Function
     End If
     Dim i As Long
     For i = Len(str) To 1 Step -1
-        arr.AddVal Mid(str, i, 1)
+        Arr.AddVal Mid(str, i, 1)
     Next
-    ToCharArrayReverse = arr.ToArray
+    ToCharArrayReverse = Arr.ToArray
 End Function
 
 '******************************************************************************
@@ -3983,8 +4148,8 @@ End Function
 '* @return String 左ゼロ埋めした値
 '*
 '*******************************************************************************
-Public Function LeftPad0(ByVal str As String, ByVal size As Long) As String
-    LeftPad0 = Me.LeftPad(str, size, "0")
+Public Function LeftPad0(ByVal str As String, ByVal size As Long, Optional useZenkaku2Width As Boolean = False) As String
+    LeftPad0 = Me.LeftPad(str, size, "0", useZenkaku2Width)
 End Function
 
 '*******************************************************************************
@@ -3996,8 +4161,8 @@ End Function
 '* @return String 右ゼロ埋めした値
 '*
 '*******************************************************************************
-Public Function RightPad0(ByVal str As String, ByVal size As Long) As String
-    RightPad0 = Me.RightPad(str, size, "0")
+Public Function RightPad0(ByVal str As String, ByVal size As Long, Optional useZenkaku2Width As Boolean = False) As String
+    RightPad0 = Me.RightPad(str, size, "0", useZenkaku2Width)
 End Function
 
 '*******************************************************************************
@@ -4034,11 +4199,11 @@ Public Function SplitByLength(ByVal str As String, ByVal cutLength) As Variant
         Exit Function
     End If
     Dim i As Long
-    Dim arr As ArrayEx: Set arr = New ArrayEx
+    Dim Arr As ArrayEx: Set Arr = New ArrayEx
     For i = 1 To Len(str) / cutLength
-        Call arr.AddVal(Mid(str, 1 + ((i - 1) * cutLength), cutLength))
+        Call Arr.AddVal(Mid(str, 1 + ((i - 1) * cutLength), cutLength))
     Next
-    SplitByLength = arr.ToArray
+    SplitByLength = Arr.ToArray
 End Function
 
 '*******************************************************************************
@@ -4114,7 +4279,7 @@ Public Function SplitCsvRow(csvLine As String, Optional ByVal QuotExists As Bool
         End If
         SplitCsvRow = v
     Else
-        SplitCsvRow = Split(csvLine, itmDelimiter)
+        SplitCsvRow = VBA.Split(csvLine, itmDelimiter)
     End If
 End Function
 
@@ -4158,4 +4323,166 @@ End Function
 '******************************************************************************
 Public Function EscapeDoubleQuote(ByVal val As String) As String
     EscapeDoubleQuote = VBA.Replace(val, """", """""")
+End Function
+
+'******************************************************************************
+'* [概  要] EscapeSingleQuote
+'* [詳  細] シングルクォーテーションエスケープ処理
+'*
+'* @param val 文字列
+'* @return 編集後文字列
+'******************************************************************************
+Public Function EscapeSingleQuote(ByVal val As String) As String
+    EscapeSingleQuote = VBA.Replace(val, "'", "''")
+End Function
+
+'******************************************************************************
+'* [概  要] GetTextWidth
+'* [詳  細] 文字幅を取得｡全角文字を2でカウント、半角文字を1でカウントする。
+'*
+'* @param strBuf 文字列
+'* @return Long 文字幅（全角文字を2でカウント）
+'*
+'******************************************************************************
+Public Function GetTextWidth(ByVal strBuf As String) As Long
+    Dim bytBuf() As Byte
+    Dim lngBuf As Long
+    Dim i As Long
+    Dim lngLen As Long
+
+    lngLen = 0
+
+    If Len(strBuf) = 0 Then
+        GetTextWidth = 0
+        Exit Function
+    End If
+
+    bytBuf = strBuf
+
+    For i = LBound(bytBuf) To UBound(bytBuf) Step 2
+        lngBuf = MathUtils.LShift(bytBuf(i + 1), 8) + bytBuf(i)
+
+        Select Case lngBuf
+            '上位サロゲート
+            Case &HD800& To &HDBFF&
+                lngLen = lngLen + 2
+            '下位サロゲート
+            Case &HDC00& To &HDFFF&
+                'カウントしない
+            '半角英数記号・半角カタカナ
+            Case &H20& To &H7E&, &HFF61& To &HFF7E&
+                lngLen = lngLen + 1
+            Case Else
+                lngLen = lngLen + 2
+        End Select
+    Next
+    GetTextWidth = lngLen
+End Function
+
+'*******************************************************************************
+'* [概  要] Split
+'* [詳  細] 指定した文字で文字列を分割する。
+'*
+'* @param str      文字列
+'* @param delim    デリミタ文字（配列で複数指定可能, 要素値は1キャラクタのみ）
+'* @return Variant 分割後配列
+'*
+'*******************************************************************************
+Public Function Split(ByVal str As String, delim As Variant) As Variant
+    Split = Split2ArrayEx(str, delim).ToArray
+End Function
+
+'******************************************************************************
+'* [概  要] Split2ArrayEx
+'* [詳  細] 指定した文字で文字列を分割する。
+'*
+'* @param str      文字列
+'* @param delim    デリミタ文字（配列で複数指定可能, 要素値は1キャラクタのみ）
+'* @return ArrayEx 分割後配列
+'*
+'******************************************************************************
+Public Function Split2ArrayEx(ByVal str As String, delim As Variant) As ArrayEx
+    Dim Arr As ArrayEx: Set Arr = New ArrayEx
+    
+    If Me.IsEmpty(str) Or Me.IsEmpty(delim) Or (VBA.IsArray(delim) And VBA.IsEmpty(delim)) Then
+        Arr.Add str
+        Set Split2ArrayEx = Arr
+        Exit Function
+    End If
+
+    Dim inds As Variant: inds = IndexOfAnyAll(str, delim)
+    If ArrayUtils.IsEmptyArray(inds) Then
+        Arr.Add str
+        Set Split2ArrayEx = Arr
+        Exit Function
+    End If
+    Dim ind1 As Long: ind1 = 0
+    Dim ind2 As Long: ind2 = 0
+    Dim endi As Long: endi = UBound(inds)
+    Dim i As Long
+
+    For i = 0 To endi + 1
+        If i = 0 Then
+            ind1 = 0
+            ind2 = inds(i)
+        ElseIf i = endi + 1 Then
+            ind1 = inds(i - 1) + 1
+            ind2 = Len(str)
+        Else
+            ind1 = inds(i - 1) + 1
+            ind2 = inds(i)
+        End If
+        
+        Call Arr.Add(Substring(str, ind1, ind2))
+    Next
+    Set Split2ArrayEx = Arr
+End Function
+
+'******************************************************************************
+'* [概  要] SplitNumber
+'* [詳  細] 数字とそれ以外を分割する。
+'* [参  考] https://www.excel-chunchun.com/entry/AutoFilterPlus
+'*
+'* [用  例]
+'*   StringUtils.SplitNumber("abc")          = ["abc"]
+'*   StringUtils.SplitNumber("abc123")       = ["abc", "123"]
+'*   StringUtils.SplitNumber("abc123def")    = ["abc", "123", "def"]
+'*   StringUtils.SplitNumber("123def")       = ["123", "def"]
+'*   StringUtils.SplitNumber("123def456")    = ["123", "def", "456"]
+'*   StringUtils.SplitNumber("abc123def456") = ["abc", "123", "def", "456"]
+'*
+'* @param str      文字列
+'* @return Variant 分割後配列
+'*
+'******************************************************************************
+Public Function SplitNumber(str As String) As Variant
+    Dim arrex As ArrayEx: Set arrex = New ArrayEx
+
+    With Base.GetRegExp
+        .Pattern = "[^\d]+|[\d]+"
+        .IgnoreCase = False
+        .Global = True
+
+        Dim v
+        For Each v In .Execute(str)
+            arrex.Add v.Value
+        Next
+    End With
+    SplitNumber = arrex.ToArray
+End Function
+
+'******************************************************************************
+'* [概  要] RemoveNullChar
+'* [詳  細] 文字列から左端より検索して見つかったNull文字以降の文字を除去する。
+'*          WinAPI等での戻り値に対して使用することを想定。
+'*
+'* @param text 文字列
+'* @return String 変換後文字列
+'*
+'******************************************************************************
+Public Function RemoveNullChar(ByVal text As String) As String
+    Dim txtLength As Long: txtLength = InStr(text, vbNullChar) - 1
+    If txtLength > 0 Then
+        RemoveNullChar = Trim$(Left$(text, txtLength))
+    End If
 End Function

@@ -39,8 +39,10 @@ Private mIsActionable As Long
 Private mRowProcessFunction As Func
 Private mStartProcessFunction As Func
 Private mEndProcessFunction As Func
+Private mCancelProcessFunction As Func
 Private mRowEditor As IRowEditor
-
+Private mIsCancel As Boolean
+Private mIsError As Boolean
 
 '******************************************************************************
 '* イベント定義
@@ -48,6 +50,7 @@ Private mRowEditor As IRowEditor
 Public Event StartAction(sender As RowEnumerator)
 Public Event RowProcessAction(sender As RowEnumerator)
 Public Event EndAction(sender As RowEnumerator)
+Public Event CancelAction(sender As RowEnumerator)
 
 '******************************************************************************
 '* プロパティ定義
@@ -106,10 +109,10 @@ End Property
 '*
 '* 開始行番号
 '*-----------------------------------------------------------------------------
-Public Property Get StartRow() As Long
-    StartRow = mStartRow
+Public Property Get startRow() As Long
+    startRow = mStartRow
 End Property
-Public Property Let StartRow(arg As Long)
+Public Property Let startRow(arg As Long)
     mStartRow = arg
 End Property
 
@@ -258,6 +261,13 @@ Public Sub Start()
         
         ' 進捗レポート
         Call ReportProgress(i)
+        
+        If mIsCancel Then
+            Call CancelProcess
+            Exit Sub
+        ElseIf mIsError Then
+            Err.Raise Err.Number, Err.Source, Err.Description
+        End If
     Next
     
     ' 終了時の処理
@@ -328,6 +338,23 @@ Private Sub EndProcess()
 End Sub
 
 '******************************************************************************
+'* [概  要] CancelProcess
+'* [詳  細] キャンセル時の処理を行う（出力処理等）。
+'*
+'******************************************************************************
+Private Sub CancelProcess()
+    If IsActionable Then
+        RaiseEvent CancelAction(Me)
+    End If
+    If Not mCancelProcessFunction Is Nothing Then
+        Call mCancelProcessFunction.Apply(Me)
+    End If
+    If Not mRowEditor Is Nothing Then
+        Call mRowEditor.CancelProcess(Me)
+    End If
+End Sub
+
+'******************************************************************************
 '* インタフェース実装
 '******************************************************************************
 '*-----------------------------------------------------------------------------
@@ -358,6 +385,28 @@ Private Property Get IEnumerator_MaxReportCount() As Long
 End Property
 Private Property Let IEnumerator_MaxReportCount(arg As Long)
     mMaxReportCount = arg
+End Property
+
+'*-----------------------------------------------------------------------------
+'* IEnumerator#IsCancel
+'*
+'*-----------------------------------------------------------------------------
+Private Property Get IEnumerator_IsCancel() As Boolean
+    IEnumerator_IsCancel = mIsCancel
+End Property
+Private Property Let IEnumerator_IsCancel(arg As Boolean)
+    mIsCancel = arg
+End Property
+
+'*-----------------------------------------------------------------------------
+'* IEnumerator#IsError
+'*
+'*-----------------------------------------------------------------------------
+Private Property Get IEnumerator_IsError() As Boolean
+    IEnumerator_IsError = mIsError
+End Property
+Private Property Let IEnumerator_IsError(arg As Boolean)
+    mIsError = arg
 End Property
 
 '*-----------------------------------------------------------------------------

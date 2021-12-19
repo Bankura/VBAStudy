@@ -34,6 +34,16 @@ End Property
 Public Property Let MaxReportCount(arg As Long)
 End Property
 
+Public Property Get IsCancel() As Boolean
+End Property
+Public Property Let IsCancel(arg As Boolean)
+End Property
+
+Public Property Get IsError() As Boolean
+End Property
+Public Property Let IsError(arg As Boolean)
+End Property
+
 Public Sub Start()
 End Sub
 

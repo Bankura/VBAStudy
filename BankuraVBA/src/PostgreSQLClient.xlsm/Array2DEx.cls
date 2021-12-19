@@ -20,7 +20,7 @@ Option Explicit
 '*           Ariawase Core, Ext, ArrayEx
 '*
 '* @author Bankura
-'* Copyright (c) 2020 Bankura
+'* Copyright (c) 2020-2021 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 '******************************************************************************
@@ -177,7 +177,7 @@ End Sub
 '* @return ArrayExオブジェクト
 '*
 '******************************************************************************
-Public Function Init(Optional ByVal val) As Array2DEx
+Public Function Init(Optional ByVal val, Optional ByVal Transpose As Boolean = False) As Array2DEx
     If VBA.IsMissing(val) Then
         Call Clear
         Set Init = Me
@@ -222,7 +222,11 @@ Public Function Init(Optional ByVal val) As Array2DEx
         Next
     ElseIf ArrayUtils.Is1DArray(val) Or ValidateUtils.IsArrayEx(val) Then
         Call Clear
-        Call Me.AddRow(val)
+        If Transpose Then
+            Call Me.AddColumn(val)
+        Else
+            Call Me.AddRow(val)
+        End If
     Else
         Call Clear
         Call Me.AddRow(ArrayUtils.CreateArrayEx().Add(val))
@@ -257,7 +261,7 @@ Private Function IsInvalidColIndex(ByVal idx As Long) As Boolean
     IsInvalidColIndex = (idx < 0 Or mColMaxIndex < idx)
 End Function
 Private Function IsInvalidRowIndexes(ParamArray idxs() As Variant) As Boolean
-    If IsMissing(idxs) Then
+    If ValidateUtils.IsParamArrayMissing(idxs) Then
         IsInvalidRowIndexes = True
         Exit Function
     End If
@@ -271,7 +275,7 @@ Private Function IsInvalidRowIndexes(ParamArray idxs() As Variant) As Boolean
     IsInvalidRowIndexes = False
 End Function
 Private Function IsInvalidColIndexes(ParamArray idxs() As Variant) As Boolean
-    If IsMissing(idxs) Then
+    If ValidateUtils.IsParamArrayMissing(idxs) Then
         IsInvalidColIndexes = True
         Exit Function
     End If
@@ -403,20 +407,20 @@ End Sub
 '*
 '******************************************************************************
 Public Function AddRow(ByVal var As Variant) As Array2DEx
-    Dim colLen As Long
+    Dim collen As Long
     Dim arrex As ArrayEx
     If ArrayUtils.Is1DArray(var) Then
-        colLen = ArrayUtils.GetLength(var)
+        collen = ArrayUtils.GetLength(var)
         Set arrex = Core.Init(New ArrayEx, var)
     ElseIf ValidateUtils.IsArrayEx(var) Then
-        colLen = var.Length
+        collen = var.Length
         Set arrex = var
     Else
         Err.Raise 9999, "Array2DEx#AddRow", "Invalid argument."
     End If
 
-    If mColLength < colLen Then
-        Dim addCount As Long: addCount = colLen - mColLength
+    If mColLength < collen Then
+        Dim addCount As Long: addCount = collen - mColLength
         Call ExpandColumns(addCount)
     End If
     
@@ -439,13 +443,13 @@ End Function
 '*
 '******************************************************************************
 Public Function AddRows(ByVal var As Variant, ParamArray vars() As Variant) As Array2DEx
-    Dim colLen As Long
+    Dim collen As Long
     Dim arr2dex As Array2DEx
     Set arr2dex = Core.Init(New Array2DEx, var)
-    colLen = arr2dex.ColLength
+    collen = arr2dex.ColLength
 
-    If mColLength < colLen Then
-        Dim addCount As Long: addCount = colLen - mColLength
+    If mColLength < collen Then
+        Dim addCount As Long: addCount = collen - mColLength
         Call ExpandColumns(addCount)
     End If
     
@@ -461,7 +465,7 @@ Public Function AddRows(ByVal var As Variant, ParamArray vars() As Variant) As A
     mRowLength = mRowLength + arr2dex.RowLength
     mRowMaxIndex = mRowMaxIndex + arr2dex.RowLength
     
-    If Not VBA.IsMissing(vars) Then
+    If Not ValidateUtils.IsParamArrayMissing(vars) Then
         Dim v
         For Each v In vars
             Call AddRows(v)
@@ -517,7 +521,7 @@ End Function
 Public Function AddColumns(ByVal var As Variant, ParamArray vars() As Variant) As Array2DEx
     Dim rowLen As Long
     Dim arr2dex As Array2DEx
-    Set arr2dex = Core.Init(New Array2DEx, var)
+    Set arr2dex = Core.Init(New Array2DEx, var, True)
     rowLen = arr2dex.RowLength
     
     If mRowLength < rowLen Then
@@ -539,7 +543,7 @@ Public Function AddColumns(ByVal var As Variant, ParamArray vars() As Variant) A
     mColLength = mColLength + arr2dex.ColLength
     mColMaxIndex = mColMaxIndex + arr2dex.ColLength
     
-    If Not VBA.IsMissing(vars) Then
+    If Not ValidateUtils.IsParamArrayMissing(vars) Then
         Dim v
         For Each v In vars
             Call AddColumns(v)
@@ -568,19 +572,19 @@ End Function
 '* @return Boolean 比較結果
 '******************************************************************************
 Public Function Equals(ByVal arr2 As Variant) As Boolean
-    Dim rowLen As Long, colLen As Long
+    Dim rowLen As Long, collen As Long
     
     If ArrayUtils.Is2DArray(arr2) Then
         rowLen = ArrayUtils.GetLength(arr2)
-        colLen = ArrayUtils.GetLength(arr2, 2)
+        collen = ArrayUtils.GetLength(arr2, 2)
     ElseIf ValidateUtils.IsArray2DEx(arr2) Then
         rowLen = arr2.RowLength
-        colLen = arr2.ColLength
+        collen = arr2.ColLength
     Else
         Err.Raise 9999, "Array2DEx#Equals", "Invalid argument."
     End If
     
-    If mRowLength <> rowLen Or mColLength <> colLen Then
+    If mRowLength <> rowLen Or mColLength <> collen Then
         Equals = False
         Exit Function
     End If
@@ -637,11 +641,11 @@ End Function
 '* @param cnt 要素数
 '* @return Long 行インデックス（一致なしの場合は-1）
 '******************************************************************************
-Public Function ColIndexOf(ByVal colidx As Variant, ByVal val As Variant, Optional ByVal ixStart As Long = 0, Optional ByVal cnt As Variant) As Long
-    If IsInvalidColIndex(colidx) Then
+Public Function ColIndexOf(ByVal colIdx As Variant, ByVal val As Variant, Optional ByVal ixStart As Long = 0, Optional ByVal cnt As Variant) As Long
+    If IsInvalidColIndex(colIdx) Then
         Err.Raise 9999, "Array2DEx#ColIndexOf", "Invalid argument."
     End If
-    ColIndexOf = Core.ArrIndexOf(YColumn(colidx).ToArray, val, ixStart, cnt)
+    ColIndexOf = Core.ArrIndexOf(YColumn(colIdx).ToArray, val, ixStart, cnt)
     If ColIndexOf < ixStart Then ColIndexOf = -1
 End Function
 
@@ -689,18 +693,18 @@ Public Function EntireRowIndexOf(ByVal rowData As Variant, Optional ByVal ixStar
         Err.Raise 9999, "Array2DEx#RowsIndexOf", "Invalid argument."
     End If
     
-    Dim arr As Variant
+    Dim Arr As Variant
     If ArrayUtils.Is1DArray(rowData) Then
-        arr = rowData
+        Arr = rowData
     ElseIf ValidateUtils.IsArrayEx(rowData) Then
-        arr = rowData.ToArray
+        Arr = rowData.ToArray
     Else
         Err.Raise 9999, "Array2DEx#RowsIndexOf", "Invalid argument."
     End If
     
     Dim x As Long
     For x = ixStart To mRowMaxIndex
-        If m2DItems(x).Equals(arr) Then
+        If m2DItems(x).Equals(Arr) Then
             EntireRowIndexOf = x
             Exit Function
         End If
@@ -735,7 +739,7 @@ Public Sub ReverseColumns()
     Dim x As Long: x = 0
     Dim tmprow As ArrayEx
     For x = 0 To mRowMaxIndex
-        m2DItems(x).Reverse
+        m2DItems(x).reverse
     Next
 End Sub
 
@@ -744,7 +748,7 @@ End Sub
 '* [詳  細] 2次元配列の行列の並び順を反転させる。
 '*
 '******************************************************************************
-Public Sub Reverse()
+Public Sub reverse()
     Call ReverseRow
     Call ReverseColumns
 End Sub
@@ -756,12 +760,12 @@ End Sub
 '* @param colIdx 列インデックス
 '* @param orderAsc 昇順ソートかどうか
 '******************************************************************************
-Public Sub Sort(ByVal colidx As Long, Optional ByVal orderAsc As Boolean = True)
-    If IsInvalidColIndex(colidx) Then
+Public Sub Sort(ByVal colIdx As Long, Optional ByVal orderAsc As Boolean = True)
+    If IsInvalidColIndex(colIdx) Then
         Err.Raise 9999, "Array2DEx#Sort", "Invalid argument."
     End If
-    Dim arr: arr = YColumn(colidx).ToArray
-    Dim idxArr: idxArr = ArrSort(arr, orderAsc)
+    Dim Arr: Arr = YColumn(colIdx).ToArray
+    Dim idxArr: idxArr = ArrSort(Arr, orderAsc)
     
     Dim arrex As ArrayEx: Set arrex = New ArrayEx
     Call arrex.Expand(mRowLength)
@@ -774,29 +778,29 @@ End Sub
 
 ''' @param arr As Variant(Of Array(Of T))
 ''' @param orderAsc As Boolean
-Private Function ArrSort(ByRef arr As Variant, ByVal orderAsc As Boolean) As Variant
+Private Function ArrSort(ByRef Arr As Variant, ByVal orderAsc As Boolean) As Variant
 
-    If Not IsArray(arr) Then Err.Raise 13
-    If ArrLen(arr) <= 1 Then GoTo Escape
+    If Not IsArray(Arr) Then Err.Raise 13
+    If ArrLen(Arr) <= 1 Then GoTo Escape
 
-    Dim ix0 As Long: ix0 = LBound(arr)
+    Dim ix0 As Long: ix0 = LBound(Arr)
     
-    Dim idxArr: idxArr = ArrayUtils.Range(ix0, UBound(arr))
-    If IsObject(arr(ix0)) Then
-        ObjArrMSort arr, ix0, idxArr, orderAsc
+    Dim idxArr: idxArr = ArrayUtils.Range(ix0, UBound(Arr))
+    If IsObject(Arr(ix0)) Then
+        ObjArrMSort Arr, ix0, idxArr, orderAsc
     Else
-        ValArrMSort arr, ix0, idxArr, orderAsc
+        ValArrMSort Arr, ix0, idxArr, orderAsc
     End If
     ArrSort = idxArr
 Escape:
 End Function
-Private Sub ObjArrMSort(arr As Variant, lb As Long, idxArr As Variant, orderAsc As Boolean)
-    Dim aLen As Long: aLen = ArrLen(arr)
+Private Sub ObjArrMSort(Arr As Variant, lb As Long, idxArr As Variant, orderAsc As Boolean)
+    Dim aLen As Long: aLen = ArrLen(Arr)
     If aLen <= 1 Then GoTo Escape
     
     '' optimization
     If aLen <= 8 Then
-        ObjArrISort arr, lb, idxArr, orderAsc
+        ObjArrISort Arr, lb, idxArr, orderAsc
         GoTo Escape
     End If
     
@@ -806,14 +810,14 @@ Private Sub ObjArrMSort(arr As Variant, lb As Long, idxArr As Variant, orderAsc 
     
     Dim ub1 As Long:   ub1 = lb + l1 - 1
     Dim a1 As Variant: ReDim a1(lb To ub1)
-    For i = lb To ub1: Set a1(i) = arr(i): Next
+    For i = lb To ub1: Set a1(i) = Arr(i): Next
     Dim idx1 As Variant: ReDim idx1(lb To ub1)
     For i = lb To ub1: idx1(i) = idxArr(i): Next
     ObjArrMSort a1, lb, idx1, orderAsc
     
     Dim ub2 As Long:   ub2 = lb + l2 - 1
     Dim a2 As Variant: ReDim a2(lb To ub2)
-    For i = lb To ub2: Set a2(i) = arr(l1 + i): Next
+    For i = lb To ub2: Set a2(i) = Arr(l1 + i): Next
     Dim idx2 As Variant: ReDim idx2(lb To ub2)
     For i = lb To ub2: idx2(i) = idxArr(l1 + i): Next
     ObjArrMSort a2, lb, idx2, orderAsc
@@ -822,23 +826,23 @@ Private Sub ObjArrMSort(arr As Variant, lb As Long, idxArr As Variant, orderAsc 
     Dim i2 As Long: i2 = lb
     While i1 <= ub1 Or i2 <= ub2
         If ArrMergeSw(a1, i1, ub1, a2, i2, ub2, orderAsc) Then
-            Set arr(i1 + i2 - lb) = a1(i1)
+            Set Arr(i1 + i2 - lb) = a1(i1)
             idxArr(i1 + i2 - lb) = idx1(IncrPst(i1))
         Else
-            Set arr(i1 + i2 - lb) = a2(i2)
+            Set Arr(i1 + i2 - lb) = a2(i2)
             idxArr(i1 + i2 - lb) = idx2(IncrPst(i2))
         End If
     Wend
     
 Escape:
 End Sub
-Private Sub ValArrMSort(arr As Variant, lb As Long, idxArr As Variant, orderAsc As Boolean)
-    Dim aLen As Long: aLen = ArrLen(arr)
+Private Sub ValArrMSort(Arr As Variant, lb As Long, idxArr As Variant, orderAsc As Boolean)
+    Dim aLen As Long: aLen = ArrLen(Arr)
     If aLen <= 1 Then GoTo Escape
     
     '' optimization
     If aLen <= 8 Then
-        ValArrISort arr, lb, idxArr, orderAsc
+        ValArrISort Arr, lb, idxArr, orderAsc
         GoTo Escape
     End If
     
@@ -848,14 +852,14 @@ Private Sub ValArrMSort(arr As Variant, lb As Long, idxArr As Variant, orderAsc 
     
     Dim ub1 As Long:   ub1 = lb + l1 - 1
     Dim a1 As Variant: ReDim a1(lb To ub1)
-    For i = lb To ub1: Let a1(i) = arr(i): Next
+    For i = lb To ub1: Let a1(i) = Arr(i): Next
     Dim idx1 As Variant: ReDim idx1(lb To ub1)
     For i = lb To ub1: idx1(i) = idxArr(i): Next
     ValArrMSort a1, lb, idxArr, orderAsc
     
     Dim ub2 As Long:   ub2 = lb + l2 - 1
     Dim a2 As Variant: ReDim a2(lb To ub2)
-    For i = lb To ub2: Let a2(i) = arr(l1 + i): Next
+    For i = lb To ub2: Let a2(i) = Arr(l1 + i): Next
     Dim idx2 As Variant: ReDim idx2(lb To ub2)
     For i = lb To ub2: idx2(i) = idxArr(l1 + i): Next
     ValArrMSort a2, lb, idxArr, orderAsc
@@ -864,35 +868,35 @@ Private Sub ValArrMSort(arr As Variant, lb As Long, idxArr As Variant, orderAsc 
     Dim i2 As Long: i2 = lb
     While i1 <= ub1 Or i2 <= ub2
         If ArrMergeSw(a1, i1, ub1, a2, i2, ub2, orderAsc) Then
-            Let arr(i1 + i2 - lb) = a1(i1)
+            Let Arr(i1 + i2 - lb) = a1(i1)
             idxArr(i1 + i2 - lb) = idx1(IncrPst(i1))
         Else
-            Let arr(i1 + i2 - lb) = a2(i2)
+            Let Arr(i1 + i2 - lb) = a2(i2)
             idxArr(i1 + i2 - lb) = idx2(IncrPst(i2))
         End If
     Wend
     
 Escape:
 End Sub
-Private Sub ObjArrISort(arr As Variant, lb As Long, idxArr As Variant, orderAsc As Boolean)
+Private Sub ObjArrISort(Arr As Variant, lb As Long, idxArr As Variant, orderAsc As Boolean)
     Dim i As Long, j As Long, x As Variant, idx As Variant
-    For i = lb + 1 To UBound(arr)
+    For i = lb + 1 To UBound(Arr)
         j = i
         Do While j > lb
-            If Core.Compare(arr(j - 1), arr(j), True) * (Abs(orderAsc) * 2 - 1) <= 0 Then Exit Do
-            Set x = arr(j): Set arr(j) = arr(j - 1): Set arr(j - 1) = x
+            If Core.Compare(Arr(j - 1), Arr(j), True) * (Abs(orderAsc) * 2 - 1) <= 0 Then Exit Do
+            Set x = Arr(j): Set Arr(j) = Arr(j - 1): Set Arr(j - 1) = x
             idx = idxArr(j): idxArr(j) = idxArr(j - 1): idxArr(j - 1) = idx
             j = j - 1
         Loop
     Next
 End Sub
-Private Sub ValArrISort(arr As Variant, lb As Long, idxArr As Variant, orderAsc As Boolean)
+Private Sub ValArrISort(Arr As Variant, lb As Long, idxArr As Variant, orderAsc As Boolean)
     Dim i As Long, j As Long, x As Variant, idx As Variant
-    For i = lb + 1 To UBound(arr)
+    For i = lb + 1 To UBound(Arr)
         j = i
         Do While j > lb
-            If Core.Compare(arr(j - 1), arr(j), True) * (Abs(orderAsc) * 2 - 1) <= 0 Then Exit Do
-            Let x = arr(j): Let arr(j) = arr(j - 1): Let arr(j - 1) = x
+            If Core.Compare(Arr(j - 1), Arr(j), True) * (Abs(orderAsc) * 2 - 1) <= 0 Then Exit Do
+            Let x = Arr(j): Let Arr(j) = Arr(j - 1): Let Arr(j - 1) = x
             idx = idxArr(j): idxArr(j) = idxArr(j - 1): idxArr(j - 1) = idx
             j = j - 1
         Loop
@@ -1340,20 +1344,20 @@ Public Function RowInsert(ByVal idx As Long, ByVal row As Variant) As Array2DEx
         Err.Raise 9999, "Array2DEx#RowInsert", "Invalid argument."
     End If
 
-    Dim colLen As Long
+    Dim collen As Long
     Dim arrex As ArrayEx
     If ArrayUtils.Is1DArray(row) Then
-        colLen = ArrayUtils.GetLength(row)
+        collen = ArrayUtils.GetLength(row)
         Set arrex = Core.Init(New ArrayEx, row)
     ElseIf ValidateUtils.IsArrayEx(row) Then
-        colLen = row.Length
+        collen = row.Length
         Set arrex = row
     Else
         Err.Raise 9999, "Array2DEx#RowInsert", "Invalid argument."
     End If
 
-    If mColLength < colLen Then
-        Dim addCount As Long: addCount = colLen - mColLength
+    If mColLength < collen Then
+        Dim addCount As Long: addCount = collen - mColLength
         Call ExpandColumns(addCount)
     End If
 
@@ -1416,19 +1420,19 @@ Public Function RowsInsert(ByVal idx As Long, ByVal Rows As Variant, ParamArray 
         Err.Raise 9999, "Array2DEx#RowsInsert", "Invalid argument."
     End If
     
-    Dim colLen As Long
+    Dim collen As Long
     Dim arr2dex As Array2DEx
-    If Not VBA.IsMissing(rows2) Then
+    If Not ValidateUtils.IsParamArrayMissing(rows2) Then
         Dim tmp: tmp = rows2
         Set arr2dex = New Array2DEx
         arr2dex.AddRows Rows, tmp
     Else
         Set arr2dex = Core.Init(New Array2DEx, Rows)
     End If
-    colLen = arr2dex.ColLength
+    collen = arr2dex.ColLength
 
-    If mColLength < colLen Then
-        Dim addCount As Long: addCount = colLen - mColLength
+    If mColLength < collen Then
+        Dim addCount As Long: addCount = collen - mColLength
         Call ExpandColumns(addCount)
     End If
     
@@ -1458,7 +1462,7 @@ Public Function ColsInsert(ByVal idx As Long, ByVal cols As Variant, ParamArray 
     
     Dim rowLen As Long
     Dim arr2dex As Array2DEx
-    If Not VBA.IsMissing(cols2) Then
+    If Not ValidateUtils.IsParamArrayMissing(cols2) Then
         Dim tmp: tmp = cols2
         Set arr2dex = New Array2DEx
         arr2dex.AddColumns cols, tmp
@@ -1515,11 +1519,11 @@ End Function
 '* @param cnt 要素数
 '* @return Long 行インデックス（一致なしの場合は-1）
 '******************************************************************************
-Public Function ColLastIndexOf(ByVal colidx As Variant, ByVal val As Variant, Optional ByVal ixStart As Variant, Optional ByVal cnt As Variant) As Long
-    If IsInvalidColIndex(colidx) Then
+Public Function ColLastIndexOf(ByVal colIdx As Variant, ByVal val As Variant, Optional ByVal ixStart As Variant, Optional ByVal cnt As Variant) As Long
+    If IsInvalidColIndex(colIdx) Then
         Err.Raise 9999, "Array2DEx#ColLastIndexOf", "Invalid argument."
     End If
-    ColLastIndexOf = ArrayUtils.LastIndexOf(YColumn(colidx).ToArray, val, ixStart, cnt)
+    ColLastIndexOf = ArrayUtils.LastIndexOf(YColumn(colIdx).ToArray, val, ixStart, cnt)
 End Function
 
 '******************************************************************************
@@ -1582,11 +1586,11 @@ End Function
 '* @param reverseOrder リストの並びを逆順にするか
 '* @return Variant インデックスリスト（1次元配列）
 '******************************************************************************
-Public Function ColIndexListOf(ByVal colidx As Variant, ByVal val As Variant, Optional ByVal reverseOrder As Boolean = False) As Variant
-    If IsInvalidColIndex(colidx) Then
+Public Function ColIndexListOf(ByVal colIdx As Variant, ByVal val As Variant, Optional ByVal reverseOrder As Boolean = False) As Variant
+    If IsInvalidColIndex(colIdx) Then
         Err.Raise 9999, "Array2DEx#ColIndexListOf", "Invalid argument."
     End If
-    ColIndexListOf = YColumn(colidx).IndexListOf(val, reverseOrder)
+    ColIndexListOf = YColumn(colIdx).IndexListOf(val, reverseOrder)
 End Function
 
 '******************************************************************************
@@ -1634,12 +1638,12 @@ End Function
 '* @param keyvalue キー値
 '* @return Array2DEx 削除後2次元配列
 '******************************************************************************
-Public Function RowRemove(ByVal colidx As Long, ByVal keyvalue) As Array2DEx
-    If IsInvalidColIndex(colidx) Then
+Public Function RowRemove(ByVal colIdx As Long, ByVal keyvalue) As Array2DEx
+    If IsInvalidColIndex(colIdx) Then
         Err.Raise 9999, "Array2DEx#RowRemove", "Invalid argument."
     End If
     Dim v
-    For Each v In Me.ColIndexListOf(colidx, keyvalue, True)
+    For Each v In Me.ColIndexListOf(colIdx, keyvalue, True)
         Me.RowRemoveAt v
     Next
     Set RowRemove = Me
@@ -1751,11 +1755,11 @@ End Function
 '* @param searchVal 検索文字列（配列で複数指定可）
 '* @return ArrayEx 検索結果
 '******************************************************************************
-Public Function ColSearch(ByVal colidx As Variant, ByVal searchVal As Variant) As ArrayEx
-    If IsInvalidColIndex(colidx) Then
+Public Function ColSearch(ByVal colIdx As Variant, ByVal searchVal As Variant) As ArrayEx
+    If IsInvalidColIndex(colIdx) Then
         Err.Raise 9999, "Array2DEx#ColSearch", "Invalid argument."
     End If
-    Set ColSearch = YColumn(colidx).Search(searchVal)
+    Set ColSearch = YColumn(colIdx).Search(searchVal)
 End Function
 
 '******************************************************************************
@@ -1803,11 +1807,11 @@ End Function
 '* @param igCase 大文字小文字の区別
 '* @return ArrayEx 検索結果
 '******************************************************************************
-Public Function ColRegexSearch(ByVal colidx As Variant, ByVal searchStr As String, Optional ByVal igCase As Boolean = False) As ArrayEx
-    If IsInvalidColIndex(colidx) Then
+Public Function ColRegexSearch(ByVal colIdx As Variant, ByVal searchStr As String, Optional ByVal igCase As Boolean = False) As ArrayEx
+    If IsInvalidColIndex(colIdx) Then
         Err.Raise 9999, "Array2DEx#ColRegexSearch", "Invalid argument."
     End If
-    Set ColRegexSearch = YColumn(colidx).RegexSearch(searchStr, igCase)
+    Set ColRegexSearch = YColumn(colIdx).RegexSearch(searchStr, igCase)
 End Function
 
 '******************************************************************************
@@ -1839,3 +1843,66 @@ Public Function ToString() As String
     ToString = ArrayUtils.ToString(Me.ToJagArray)
 End Function
 
+'******************************************************************************
+'* [概  要] FromCsvString
+'* [詳  細] CSVファイルを行単位で読込み、Array2DExに設定して返却する。
+'*
+'* @param filePath CSVファイルパス
+'* @param headerExists ヘッダ行の有無
+'* @param quotExists ""で括っているか
+'* @param separator 改行コード
+'* @return Array2DEx
+'******************************************************************************
+Public Function FromCsvString(ByVal csvData As String, _
+                              Optional ByVal HeaderExists As Boolean = True, _
+                              Optional ByVal QuotExists As Boolean = False, _
+                              Optional ByVal separator As LineSeparatorsEnum = adCRLF) As Array2DEx
+    Set FromCsvString = Init(ArrayUtils.CsvStringToArray(csvData, HeaderExists, QuotExists, separator))
+End Function
+
+'******************************************************************************
+'* [概  要] SortBy
+'* [詳  細] 2次元配列のクイックソートを行う。
+'*
+'* @param keyNoOrFunc ソートに使用する列番号。もしくは、
+'*                    ソート比較用の関数名、またはFuncオブジェクト、または
+'*                    Compare（x1, x2, ByVal flg As Boolean）As Booleanメソッドを
+'*                    持つオブジェクト。
+'*                    第3引数のflgで条件を反転させる。軸要素は反転前、反転後の条件
+'*                    のどちらにも含まれないようにする必要がある。
+'* @return ソート済み2次元配列
+'*
+'* [keyColOrFuncの指定関数例]
+'*   Function Compare(val1, val2, ByVal flg As Boolean) As Boolean
+'*       If flg Then
+'*           Compare = val1(2) > val2(2)
+'*       Else
+'*           Compare = val1(2) < val2(2)
+'*       End If
+'*   End Function
+'*
+'*******************************************************************************
+Public Function SortBy(ByVal keyNoOrFunc) As Array2DEx
+    Set SortBy = Init(ArrayUtils.Array2DSort(Me.To2DArray, keyNoOrFunc))
+End Function
+
+'*******************************************************************************
+'* [概  要] MaxTxtLength
+'* [詳  細] 2次元配列の指定した列の項目について、最大の文字数を返す。
+'*
+'* @param colnum 列番号
+'* @return Long 最大文字数
+'*******************************************************************************
+Public Function MaxTxtLength(ByVal colnum As Long, Optional useZenkaku2Width As Boolean = False) As Long
+    MaxTxtLength = ArrayUtils.Array2DMaxTxtLength(Me.To2DArray, colnum, useZenkaku2Width)
+End Function
+
+'******************************************************************************
+'* [概  要] RemoveEmpty
+'* [詳  細] 配列の空行を除去する。
+'*
+'* @return Variant 変更後配列
+'******************************************************************************
+Public Function RemoveEmpty() As Variant
+    Set RemoveEmpty = Init(ArrayUtils.RemoveEmpty(Me.To2DArray))
+End Function

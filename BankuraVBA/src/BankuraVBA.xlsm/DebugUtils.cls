@@ -148,19 +148,20 @@ Public Sub PrintEnumerator(obj)
     Next
 End Sub
 
-
 '******************************************************************************
 '* [概  要] Print2DArrayRow
 '* [詳  細] Variant2次元配列の指定した行（1次元インデックス）の内容を
 '*          イミディエイトウィンドウに出力する。
 '*
 '* @param vArr Variant配列
-'* @param row 行（1次元インデックス）
+'* @param rowNum 行（1次元インデックス）
 '******************************************************************************
-Public Sub Print2DArrayRow(vArr, ByVal row As Long)
+Public Sub Print2DArrayRow(vArr, ByVal rowNum As Long)
+    If Not ArrayUtils.Is2DArray(vArr) Then Exit Sub
+    If Not ArrayUtils.IsCorrectRange(vArr, rowNum) Then Exit Sub
     Dim j As Long, tmp As String
     For j = LBound(vArr, 2) To UBound(vArr, 2)
-        tmp = tmp & vArr(row, j) & " | "
+        tmp = tmp & vArr(rowNum, j) & " | "
     Next
     Debug.Print tmp
     tmp = ""
@@ -384,9 +385,9 @@ Public Function MesureExcuteTime(fnc As Func, _
     Optional ByRef arg8 As Variant _
     ) As Variant
     
-    Dim startTime, endTime
+    Dim StartTime, endTime
     Dim startMs As Double, endMs As Double, excuteMs As Double
-    startTime = DateTimeUtils.GetTimestampString
+    StartTime = DateTimeUtils.GetTimestampString
     startMs = DateTimeUtils.GetMilliSecond
     
     Dim ret
@@ -404,7 +405,7 @@ Public Function MesureExcuteTime(fnc As Func, _
     endTime = DateTimeUtils.GetTimestampString
     excuteMs = endMs - startMs
     
-    Debug.Print "処理開始： " & startTime
+    Debug.Print "処理開始： " & StartTime
     Debug.Print "処理終了： " & endTime
     Debug.Print "実行時間： " & excuteMs & " ms"
     

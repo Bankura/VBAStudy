@@ -16,9 +16,10 @@ Option Explicit
 '*          Excel.Worksheetクラスを使用したユーティリティを提供する。
 '*
 '* @author Bankura
-'* Copyright (c) 2020 Bankura
+'* Copyright (c) 2020-2021 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
+#Const XLVERSION = 2013
 
 '******************************************************************************
 '* Enum定義
@@ -28,6 +29,7 @@ Option Explicit
 '* 内部変数定義
 '******************************************************************************
 Private mOrigin As Worksheet
+Private mCriterias() As Collection
 
 '******************************************************************************
 '* プロパティ定義
@@ -144,6 +146,7 @@ Property Get Comments() As Comments
     Set Comments = mOrigin.Comments
 End Property
 
+#If XLVERSION >= 2016 Then
 '*-----------------------------------------------------------------------------
 '* CommentsThreaded プロパティ（読み取り専用）
 '*
@@ -155,6 +158,7 @@ End Property
 Property Get CommentsThreaded() As CommentsThreaded
     Set CommentsThreaded = mOrigin.CommentsThreaded
 End Property
+#End If
 
 '*-----------------------------------------------------------------------------
 '* ConsolidationFunction プロパティ（読み取り専用）
@@ -426,6 +430,7 @@ Property Let Name(arg As String)
     mOrigin.Name = arg
 End Property
 
+#If XLVERSION >= 2016 Then
 '*-----------------------------------------------------------------------------
 '* NamedSheetViews プロパティ（読み取り専用）
 '*
@@ -437,6 +442,7 @@ End Property
 Property Get NamedSheetViews() As NamedSheetViewCollection
     Set NamedSheetViews = mOrigin.NamedSheetViews
 End Property
+#End If
     
 '*-----------------------------------------------------------------------------
 '* Names プロパティ（読み取り専用）
@@ -888,6 +894,7 @@ Function Evaluate(Name)
     Evaluate = mOrigin.Evaluate(Name)
 End Function
 
+#If XLVERSION >= 2016 Then
 '******************************************************************************
 '* [概  要] ExportAsFixedFormat メソッド
 '* [詳  細] 指定された形式のファイルにエクスポートします。
@@ -907,6 +914,7 @@ End Function
 Sub ExportAsFixedFormat(Type_ As XlFixedFormatType, Optional fileName, Optional Quality, Optional IncludeDocProperties, Optional IgnorePrintAreas, Optional From, Optional To_, Optional OpenAfterPublish, Optional FixedFormatExtClassPtr, Optional WorkIdentity)
     Call mOrigin.ExportAsFixedFormat(Type_, fileName, Quality, IncludeDocProperties, IgnorePrintAreas, From, To_, OpenAfterPublish, FixedFormatExtClassPtr, WorkIdentity)
 End Sub
+#End If
 
 '******************************************************************************
 '* [概  要] Move メソッド
@@ -957,8 +965,8 @@ End Sub
 '* @param NoHTMLFormatting True を設定すると、HTML から書式設定、ハイパーリンク、およびイメージを削除。省略可能。既定値は False。
 '*
 '******************************************************************************
-Sub PasteSpecial(Optional Format, Optional Link, Optional DisplayAsIcon, Optional IconFileName, Optional IconIndex, Optional IconLabel, Optional NoHTMLFormatting)
-    Call mOrigin.PasteSpecial(Format, Link, DisplayAsIcon, IconFileName, IconIndex, IconLabel, NoHTMLFormatting)
+Sub PasteSpecial(Optional Format, Optional Link, Optional DisplayAsIcon, Optional IconFileName, Optional iconIndex, Optional IconLabel, Optional NoHTMLFormatting)
+    Call mOrigin.PasteSpecial(Format, Link, DisplayAsIcon, IconFileName, iconIndex, IconLabel, NoHTMLFormatting)
 End Sub
 
 '******************************************************************************
@@ -1181,25 +1189,43 @@ End Function
 '*-----------------------------------------------------------------------------
 '* 拡張メソッド/プロパティ
 '*-----------------------------------------------------------------------------
+'*-----------------------------------------------------------------------------
+'* Range2 プロパティ（読み取り専用）
+'*
+'* [補  足]
+'* ・セルまたはセル範囲を表す Range オブジェクトを返す。
+'* ・Range(Cells(x1, y1), Cells(x2, y2))を簡易指定できるようにしたもの
+'*-----------------------------------------------------------------------------
+Property Get Range2(startRow As Long, startCol As Long, EndRow As Long, EndCol As Long) As Range
+    Set Range2 = mOrigin.Range(mOrigin.Cells(startRow, startCol), mOrigin.Cells(EndRow, EndCol))
+End Property
+
 '******************************************************************************
-'* [概  要] シート貼り付け処理。
+'* [概  要] ImportArray シート貼り付け処理。
 '* [詳  細] Variant配列データをシートに出力する。
 '*
 '* @param vArray Variant配列データ
 '* @param lStartRow データ開始行番号
 '* @param lStartCol データ開始列番号
+'* @param transpose Trueにすると1次元配列を列方向に設定する
 '*
 '******************************************************************************
-Public Sub ImportArray(vArray, lStartRow As Long, lStartCol As Long)
+Public Sub ImportArray(vArray, lStartRow As Long, lStartCol As Long, Optional Transpose As Boolean = True)
     If ValidateUtils.IsArray2DEx(vArray) Then
         Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, vArray.To2DArray, lStartRow, lStartCol)
     ElseIf ArrayUtils.Is2DArray(vArray) Then
         Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, vArray, lStartRow, lStartCol)
+    ElseIf ValidateUtils.IsArrayEx(vArray) Then
+        Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, vArray.To2DArray(Transpose), lStartRow, lStartCol)
+    ElseIf ArrayUtils.Is1DArray(vArray) Then
+        Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, ArrayUtils.ArrayTo2DArray(vArray, Transpose), lStartRow, lStartCol)
+    ElseIf ValidateUtils.IsPrimitive(vArray) Then
+        mOrigin.Cells(lStartRow, lStartCol).Value = vArray
     End If
 End Sub
 
 '******************************************************************************
-'* [概  要] 項番設定処理。
+'* [概  要] NumbersToIndexCells 項番設定処理。
 '* [詳  細] 項番に連番を出力する。
 '*
 '* @param lStartRow データ開始行番号
@@ -1207,12 +1233,12 @@ End Sub
 '* @param rowNum 番号数
 '*
 '******************************************************************************
-Public Sub NumbersToIndexCells(lStartRow As Long, lStartCol As Long, rownum As Long)
-    Call XlWorkSheetUtils.InjectNumbersToIndexCells(mOrigin, lStartRow, lStartCol, rownum)
+Public Sub NumbersToIndexCells(lStartRow As Long, lStartCol As Long, rowNum As Long)
+    Call XlWorkSheetUtils.InjectNumbersToIndexCells(mOrigin, lStartRow, lStartCol, rowNum)
 End Sub
 
 '******************************************************************************
-'* [概  要] 最終行取得処理。
+'* [概  要] GetFinalRow 最終行取得処理。
 '* [詳  細] WorksheetのUsedRangeを下から走査し、最終行番号を取得する｡
 '*
 '* @param ignoreColnum 走査対象外の列番号
@@ -1224,7 +1250,7 @@ Public Function GetFinalRow(Optional ignoreColnum As Long) As Long
 End Function
 
 '******************************************************************************
-'* [概  要] 最終列取得処理。
+'* [概  要] GetFinalCol 最終列取得処理。
 '* [詳  細] WorksheetのUsedRangeを右から走査し、最終列番号を取得する｡
 '*
 '* @return 最終列番号
@@ -1235,7 +1261,7 @@ Public Function GetFinalCol() As Long
 End Function
 
 '******************************************************************************
-'* [概  要] 指定列最終入力行取得処理。
+'* [概  要] GetFinalKeyRow 指定列最終入力行取得処理。
 '* [詳  細] 指定列の最終入力行番号を取得する｡
 '*
 '* @param dataSheet ワークシート
@@ -1243,12 +1269,12 @@ End Function
 '* @return 最終行番号
 '*
 '******************************************************************************
-Public Function GetFinalKeyRow(StartCol As Long) As Long
-    GetFinalKeyRow = XlWorkSheetUtils.GetFinalKeyRow(mOrigin, StartCol)
+Public Function GetFinalKeyRow(startCol As Long) As Long
+    GetFinalKeyRow = XlWorkSheetUtils.GetFinalKeyRow(mOrigin, startCol)
 End Function
 
 '******************************************************************************
-'* [概  要] 指定行最終入力列取得処理。
+'* [概  要] GetFinalKeyCol 指定行最終入力列取得処理。
 '* [詳  細] 指定行の最終入力列番号を取得する｡
 '*
 '* @param dataSheet ワークシート
@@ -1256,25 +1282,71 @@ End Function
 '* @return 最終列番号
 '*
 '******************************************************************************
-Public Function GetFinalKeyCol(StartRow As Long) As Long
-    GetFinalKeyCol = XlWorkSheetUtils.GetFinalKeyCol(mOrigin, StartRow)
+Public Function GetFinalKeyCol(startRow As Long) As Long
+    GetFinalKeyCol = XlWorkSheetUtils.GetFinalKeyCol(mOrigin, startRow)
 End Function
 
 '******************************************************************************
-'* [概  要] 表情報取得処理。
+'* [概  要] ExportArray 表情報取得処理。
 '* [詳  細] worksheetの表から情報を取得し、Variant配列を返却｡
 '*
 '* @param lStartRow データ開始行番号
 '* @param lStartCol データ開始列番号
 '* @param itemCount 項目列数
+'* @return Variant2次元配列
 '*
 '******************************************************************************
-Public Function ExportArray(lStartRow As Long, lStartCol As Long, Optional colCount As Long)
+Public Function ExportArray(lStartRow As Long, lStartCol As Long, Optional colCount As Long, Optional startZeroIndex As Boolean = False)
     ExportArray = XlWorkSheetUtils.GetVariantDataFromSheet(mOrigin, lStartRow, lStartCol, colCount)
+    If startZeroIndex Then
+        ExportArray = ArrayUtils.Copy2DArray(ExportArray)
+    End If
 End Function
 
 '******************************************************************************
-'* [概  要] 使用セル範囲クリア処理。
+'* [概  要] ExportArray2DEx 表情報取得処理。
+'* [詳  細] worksheetの表から情報を取得し、Array2DExを返却｡
+'*
+'* @param lStartRow データ開始行番号
+'* @param lStartCol データ開始列番号
+'* @param itemCount 項目列数
+'* @return Array2DEx
+'*
+'******************************************************************************
+Public Function ExportArray2DEx(lStartRow As Long, lStartCol As Long, Optional colCount As Long) As Array2DEx
+    Set ExportArray2DEx = Core.Init(New Array2DEx, XlWorkSheetUtils.GetVariantDataFromSheet(mOrigin, lStartRow, lStartCol, colCount))
+End Function
+
+'******************************************************************************
+'* [概  要] GetRowData 表情報取得処理。
+'* [詳  細] worksheetの表から1行分の情報を取得し、Variant配列を返却｡
+'*
+'* @param lStartRow データ開始行番号
+'* @param lStartCol データ開始列番号
+'* @param itemCount 項目列数
+'* @return Variant 1行分のデータ
+'*
+'******************************************************************************
+Public Function GetRowData(lStartRow As Long, Optional lStartCol As Long, Optional colCount As Long) As Variant
+    GetRowData = XlWorkSheetUtils.GetRowData(mOrigin, lStartRow, lStartCol, colCount)
+End Function
+
+'******************************************************************************
+'* [概  要] GetRowToArrayEx 表情報取得処理。
+'* [詳  細] worksheetの表から1行分の情報を取得し、Variant配列を返却｡
+'*
+'* @param lStartRow データ開始行番号
+'* @param lStartCol データ開始列番号
+'* @param itemCount 項目列数
+'* @return ArrayEx 1行分のデータ
+'*
+'******************************************************************************
+Public Function GetRowToArrayEx(lStartRow As Long, Optional lStartCol As Long, Optional colCount As Long) As ArrayEx
+    Set GetRowToArrayEx = Core.Init(New ArrayEx, XlWorkSheetUtils.GetRowData(mOrigin, lStartRow, lStartCol, colCount))
+End Function
+
+'******************************************************************************
+'* [概  要] ClearActualUsedRange 使用セル範囲クリア処理。
 '* [詳  細] worksheetのデータ表の使用セル範囲をクリア｡
 '*
 '* @param lStartRow data表データ開始行番号
@@ -1291,7 +1363,7 @@ Public Sub ClearActualUsedRange(lStartRow As Long, _
 End Sub
 
 '******************************************************************************
-'* [概  要] 未使用範囲行削除処理。
+'* [概  要] DeleteNoUsedRange 未使用範囲行削除処理。
 '* [詳  細] worksheetのデータ表の未使用範囲行を削除（UsedRangeを縮小）｡
 '*
 '* @param lStartRow data表データ開始行番号
@@ -1302,7 +1374,7 @@ Public Sub DeleteNoUsedRange(lStartRow As Long)
 End Sub
 
 '******************************************************************************
-'* [概  要] 使用セル範囲取得処理。
+'* [概  要] GetActualUsedRange 使用セル範囲取得処理。
 '* [詳  細] worksheetのデータ表の使用セル範囲を取得する｡
 '*
 '* @param lStartRow data表データ開始行番号
@@ -1337,7 +1409,7 @@ Public Sub SetHyperLink(sh As Worksheet, row As Long, col As Long, strLinkAddres
 End Sub
 
 '******************************************************************************
-'* [概  要] シートコピー処理
+'* [概  要] CopySheet シートコピー処理
 '* [詳  細] シートをコピーし、シート名+ nの名称
 '*          （nは重複しない番号）をつけて、対象のWorksheetオブジェクトを返却。
 '*
@@ -1350,3 +1422,327 @@ Public Function CopySheet(ByVal destSheetName As String, _
                    Optional ByRef wb As Workbook, Optional ByVal countAppend As Boolean = False) As Worksheet
     Set CopySheet = XlWorkSheetUtils.CopySheet(mOrigin.Name, destSheetName, wb, countAppend)
 End Function
+
+'******************************************************************************
+'* [概  要] StoreFilterCriterias
+'* [詳  細] オートフィルタの条件を記憶する。
+'* [参  考] http://yamav102.cocolog-nifty.com/blog/2018/02/post-82ac.html
+'*
+'******************************************************************************
+Public Sub StoreFilterCriterias()
+    If mOrigin.AutoFilter Is Nothing Then Exit Sub
+
+    Dim fltr As AutoFilter: Set fltr = mOrigin.AutoFilter
+    Dim clms As Filters: Set clms = fltr.Filters
+    
+    If fltr.FilterMode Then
+        ReDim mCriterias(1 To clms.Count)
+        Dim i As Long
+        For i = 1 To clms.Count
+            Set mCriterias(i) = New Collection
+
+            If clms.Item(i).On Then
+                mCriterias(i).Add clms.Item(i).Operator, "operator"
+
+                If clms.Item(i).Count > 0 Then
+                    mCriterias(i).Add clms.Item(i).Criteria1, "Criteria1"
+                End If
+                If (7 <> clms.Item(i).Operator) And (clms.Item(i).Count > 1) Then
+                    mCriterias(i).Add clms.Item(i).Criteria2, "Criteria2"
+                End If
+            End If
+        Next
+    End If
+End Sub
+
+'******************************************************************************
+'* [概  要] SetAutoFilter
+'* [詳  細] オートフィルタを設定する。
+'*
+'* @param startRowNo 開始行番号
+'* @param startColNo 開始列番号
+'* @param endRowNo   終了行番号
+'* @param endColNo   終了列番号
+'*
+'******************************************************************************
+Public Function SetAutoFilter(ByVal startRowNo As Long, ByVal startColNo As Long, ByVal endRowNo As Long, endColNo As Long) As WorkSheetEx
+    If mOrigin.AutoFilterMode = True Then
+        Set SetAutoFilter = Me
+        Exit Function
+    End If
+
+    Dim rng As Range
+    Set rng = Range2(startRowNo, startColNo, startRowNo, endColNo)
+    Call rng.AutoFilter
+    Set SetAutoFilter = Me
+End Function
+
+'******************************************************************************
+'* [概  要] RemoveAutoFilter
+'* [詳  細] オートフィルタを解除する。
+'*
+'******************************************************************************
+Public Sub RemoveAutoFilter()
+    If mOrigin.AutoFilterMode = False Then
+        Exit Sub
+    End If
+
+    mOrigin.AutoFilter.Range.AutoFilter
+End Sub
+
+'******************************************************************************
+'* [概  要] FilterOn
+'* [詳  細] オートフィルタのフィルタ条件を指定する。
+'*
+'* @param choiceTable テーブルオブジェクトの行数を取得するか
+'* @param choiceTable テーブルオブジェクト
+'******************************************************************************
+Public Sub FilterOn(Optional Field, Optional Criteria1, Optional Operator As XlAutoFilterOperator = xlAnd, Optional Criteria2, Optional VisibleDropDown)
+    If mOrigin.AutoFilter Is Nothing Then Exit Sub
+    If mOrigin.AutoFilterMode = False Then
+        Exit Sub
+    End If
+    
+    Call mOrigin.AutoFilter.Range.AutoFilter(Field, Criteria1, Operator, Criteria2, VisibleDropDown)
+End Sub
+
+'******************************************************************************
+'* [概  要] FilterOff
+'* [詳  細] オートフィルタのフィルタ条件を解除して全行表示する。
+'* [参  考] http://yamav102.cocolog-nifty.com/blog/2018/02/post-82ac.html
+'*
+'******************************************************************************
+Public Sub FilterOff()
+    If mOrigin.AutoFilter Is Nothing Then Exit Sub
+    
+    If mOrigin.FilterMode Then
+        mOrigin.ShowAllData
+    End If
+End Sub
+'******************************************************************************
+'* [概  要] CountOfFilter
+'* [詳  細] オートフィルタで絞り込んだ行数を取得する。
+'* [参  考] https://www.excel-chunchun.com/entry/20200613-excel-vba-autofilter-rows-count
+'*
+'* @param choiceTable テーブルオブジェクトの行数を取得するか
+'* @param choiceTable テーブルオブジェクト
+'* @return オートフィルタで絞り込んだ行数
+'******************************************************************************
+Public Function CountOfFilter(Optional choiceTable As Boolean = False, Optional tblNo As Long = 1) As Long
+    If choiceTable Then
+        If mOrigin.ListObjects.Count < tblNo Then Exit Function
+        CountOfFilter = mOrigin.ListObjects(tblNo).AutoFilter.Range.Columns(1).SpecialCells(xlCellTypeVisible).Count - 1
+    Else
+        If mOrigin.AutoFilter Is Nothing Then Exit Function
+        
+        ' ActiveCellがテーブル（ListObject）の中にある時、AutoFilterはListObject.AutoFilterを返すため
+        ' 非テーブルの表からの結果が得られないことに注意
+        CountOfFilter = mOrigin.AutoFilter.Range.Columns(1).SpecialCells(xlCellTypeVisible).Count - 1
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] ReConstructFilter
+'* [詳  細] フィルタ条件を復元する。
+'* [参  考] http://yamav102.cocolog-nifty.com/blog/2018/02/post-82ac.html
+'*
+'******************************************************************************
+Public Sub ReConstructFilter()
+    If mOrigin.AutoFilter Is Nothing Then Exit Sub
+    If ArrayUtils.IsEmptyArray(mCriterias) Then Exit Sub
+    
+    Dim rng As Range: Set rng = mOrigin.AutoFilter.Range
+    Dim i As Long
+    For i = 1 To mOrigin.AutoFilter.Filters.Count
+        With mCriterias(i)
+            If CollectionUtils.HasKey(mCriterias(i), "Criteria2") Then
+                rng.AutoFilter Field:=i, _
+                               Criteria1:=.Item("Criteria1"), _
+                               Criteria2:=.Item("Criteria2"), _
+                               Operator:=.Item("operator")
+
+            ElseIf CollectionUtils.HasKey(mCriterias(i), "Criteria1") Then
+                rng.AutoFilter Field:=i, _
+                               Criteria1:=.Item("Criteria1"), _
+                               Operator:=.Item("operator")
+            End If
+        End With
+    Next
+End Sub
+
+'******************************************************************************
+'* [概  要] SetCenterAcrossSelection
+'* [詳  細] 指定範囲に「選択範囲内で中央揃え」を設定する。
+'*
+'* @param startRowNo 開始行番号
+'* @param startColNo 開始列番号
+'* @param endRowNo   終了行番号
+'* @param endColNo   終了列番号
+'*
+'******************************************************************************
+Public Sub SetCenterAcrossSelection(startRowNo As Long, startColNo As Long, endRowNo As Long, endColNo As Long)
+    Dim targetRng As Range
+    Set targetRng = Range2(startRowNo, startColNo, endRowNo, endColNo)
+    Call XlWorkSheetUtils.SetCenterAcrossSelection(targetRng)
+End Sub
+
+'******************************************************************************
+'* [概  要] SetValidateList
+'* [詳  細] 指定範囲に入力規則のリストを設定する。
+'*
+'* @param startRowNo 開始行番号
+'* @param startColNo 開始列番号
+'* @param endRowNo   終了行番号
+'* @param endColNo   終了列番号
+'* @param vlist 入力規則のリスト（1次元配列）
+'* @param resetVl  設定を解除するか（True:解除）
+'*
+'******************************************************************************
+Public Sub SetValidateList(startRowNo As Long, startColNo As Long, endRowNo As Long, endColNo As Long, Optional vlist, Optional ByVal resetVl As Boolean = False)
+    Dim targetRng As Range
+    Set targetRng = Range2(startRowNo, startColNo, endRowNo, endColNo)
+    Call XlWorkSheetUtils.SetValidateList(vlist, targetRng, resetVl)
+End Sub
+
+'******************************************************************************
+'* [概  要] ChangeDisplayGridlines
+'* [詳  細] 罫線の表示・非表示を切り替える。
+'*
+'******************************************************************************
+Public Sub ChangeDisplayGridlines()
+    Call XlWorkSheetUtils.ChangeDisplayGridlines(mOrigin.Name, mOrigin.Parent)
+End Sub
+
+'******************************************************************************
+'* [概  要] ChangeDisplayHeadings
+'* [詳  細] 行列番号の表示・非表示を切り替える。
+'*
+'******************************************************************************
+Public Sub ChangeDisplayHeadings()
+    Call XlWorkSheetUtils.ChangeDisplayHeadings(mOrigin.Name, mOrigin.Parent)
+End Sub
+
+'******************************************************************************
+'* [概  要] ChangeDisplayFormulas
+'* [詳  細] 数式の表示・非表示を切り替える。
+'*
+'******************************************************************************
+Public Sub ChangeDisplayFormulas()
+    Call XlWorkSheetUtils.ChangeDisplayFormulas(mOrigin.Name, mOrigin.Parent)
+End Sub
+
+'******************************************************************************
+'* [概  要] ChangeDisplayOutline
+'* [詳  細] アウトライン記号の表示・非表示を切り替える。
+'*
+'******************************************************************************
+Public Sub ChangeDisplayOutline()
+    Call XlWorkSheetUtils.ChangeDisplayOutline(mOrigin.Name, mOrigin.Parent)
+End Sub
+
+'******************************************************************************
+'* [概  要] ChangeDisplayZeros
+'* [詳  細] ゼロ値の表示・非表示を切り替える。
+'*
+'******************************************************************************
+Public Sub ChangeDisplayZeros()
+    Call XlWorkSheetUtils.ChangeDisplayZeros(mOrigin.Name, mOrigin.Parent)
+End Sub
+
+'******************************************************************************
+'* [概  要] ChangeZoom
+'* [詳  細] 表示倍率を変更する。
+'*
+'* @param zoomVal 表示倍率
+'******************************************************************************
+Public Sub ChangeZoom(ByVal zoomVal As Long)
+    Call XlWorkSheetUtils.ChangeZoom(zoomVal, mOrigin.Name, mOrigin.Parent)
+End Sub
+
+'******************************************************************************
+'* [概  要] MergeRangeSilently
+'* [詳  細] セルを結合する。結合時の警告は無視する。
+'*
+'* @param rngAddress 結合するセル範囲のアドレス
+'******************************************************************************
+Public Sub MergeRangeSilently(ByVal rngAddress As String)
+    Call XlWorkSheetUtils.MergeRangeSilently(rngAddress, mOrigin.Name, mOrigin.Parent)
+End Sub
+
+'******************************************************************************
+'* [概  要] SaveFileOLEObject
+'* [詳  細] ファイルを指定したセル位置にOLEObjectとして保存する。
+'*
+'* @param filePath  対象となるファイルのフルパス
+'* @param rowIdx    挿入先セル行インデックス
+'* @param colIdx    挿入先セル列インデックス
+'******************************************************************************
+Public Function SaveFileOLEObject(ByVal filePath As String, _
+                             ByVal rowIdx As Long, _
+                             ByVal colIdx As Long) As OLEObject
+    Set SaveFileOLEObject = XlWorkSheetUtils.SaveFileOLEObject(filePath, rowIdx, colIdx, mOrigin.Name, mOrigin.Parent)
+End Function
+
+'******************************************************************************
+'* [概  要] LoadFileOLEObject
+'* [詳  細] ブック内のOLEObjectをファイルに保存する。
+'*
+'* @param folderPath 保存先フォルダのフルパス
+'* @param oleName    OLEObject名
+'* @param sheetName 対象のシート名（省略すると選択中のシートで処理）
+'* @param wb         ワークブックオブジェクト
+'* @param oleObj     OLEObject（指定するとこのOLEObjectを保存）
+'******************************************************************************
+Public Sub LoadFileOLEObject(ByVal folderPath As String, _
+                             ByVal oleName As String, _
+                             Optional ByVal sheetName As String, _
+                             Optional ByRef wb As Workbook, _
+                             Optional ByVal oleObj As OLEObject)
+    Call XlWorkSheetUtils.LoadFileOLEObject(folderPath, oleName, mOrigin.Name, mOrigin.Parent, oleObj)
+End Sub
+
+'******************************************************************************
+'* [概  要] InsertPicture
+'* [詳  細] シートに画像を挿入する。
+'*          挿入位置（上端/左端）、幅、高さは数値以外に、Rangeオブジェクトや
+'*          A1形式セルアドレス文字列を指定可能（指定したセルの位置、幅、高さ
+'*          で設定を行う）。
+'*
+'* @param imgFilePath      画像ファイルのフルパス
+'* @param topPos           挿入位置（上端）
+'* @param leftPos          挿入位置（左端）
+'* @param widthVal         画像幅
+'* @param heightVal        画像高さ
+'* @param pLockAspectRatio 縦横比を固定にするか
+'* @param pPlacement       セルにあわせて移動やサイズ変更するか
+'* @return Shape 挿入した画像オブジェクト
+'******************************************************************************
+Public Function InsertPicture(ByVal imgFilePath As String, _
+                              ByRef topPos As Variant, _
+                              ByRef leftPos As Variant, _
+                              ByRef widthVal As Variant, _
+                              ByRef heightVal As Variant, _
+                              Optional ByVal pLockAspectRatio As MsoTriState = msoTrue, _
+                              Optional ByVal pPlacement As XlPlacement = xlMoveAndSize) As Shape
+    Set InsertPicture = XlWorkSheetUtils.InsertPicture(imgFilePath, topPos, leftPos, widthVal, heightVal, pLockAspectRatio, pPlacement, mOrigin.Name, mOrigin.Parent)
+End Function
+
+'******************************************************************************
+'* [概  要] RemoveDuplicates
+'* [詳  細] 対象の範囲で指定した列の重複をチェックし、重複行を削除する。
+'*
+'* @param startRowNo 開始行番号
+'* @param startColNo 開始列番号
+'* @param endRowNo   終了行番号
+'* @param endColNo   終了列番号
+'* @param colnums() 重複をチェックする列（Excel列番号ではなく、範囲内の番号）
+'*
+'******************************************************************************
+Public Sub RemoveDuplicates(startRowNo As Long, startColNo As Long, endRowNo As Long, endColNo As Long, ParamArray colnums() As Variant)
+    Dim rng As Range
+    Set rng = Range2(startRowNo, startColNo, endRowNo, endColNo)
+    Dim tmp: tmp = colnums
+    Dim Arr: Arr = ArrayUtils.ToVArrayFlattened(tmp)
+    
+    Call XlWorkSheetUtils.RemoveDuplicates(rng, Arr)
+End Sub
