@@ -441,8 +441,8 @@ Public Function IsNotRecordFormat(obj) As Boolean
     IsNotRecordFormat = Not IsRecordFormat(obj)
 End Function
 
-Public Function IsParamArrayMissing(ByVal Arr) As Boolean
-    IsParamArrayMissing = LBound(Arr) > UBound(Arr)
+Public Function IsParamArrayMissing(ByVal arr) As Boolean
+    IsParamArrayMissing = LBound(arr) > UBound(arr)
 End Function
 
 '******************************************************************************
@@ -921,9 +921,9 @@ End Function
 '* @param arr Variant配列
 '* @return Boolean チェック結果（True：どれかが空、False：全て値あり）
 '******************************************************************************
-Public Function IsEmptyAny(ByRef Arr As Variant) As Boolean
-    If IsNotArray(Arr) Then
-        If Arr = "" Then
+Public Function IsEmptyAny(ByRef arr As Variant) As Boolean
+    If IsNotArray(arr) Then
+        If arr = "" Then
             IsEmptyAny = True
             Exit Function
         End If
@@ -931,7 +931,7 @@ Public Function IsEmptyAny(ByRef Arr As Variant) As Boolean
         Exit Function
     End If
     Dim v
-    For Each v In Arr
+    For Each v In arr
         If v = "" Then
             IsEmptyAny = True
             Exit Function
@@ -947,9 +947,9 @@ End Function
 '* @param arr Variant配列
 '* @return Boolean チェック結果（True：全てが空、False：どれかに値あり）
 '******************************************************************************
-Public Function IsEmptyAll(ByRef Arr As Variant) As Boolean
-    If IsNotArray(Arr) Then
-        If Arr = "" Then
+Public Function IsEmptyAll(ByRef arr As Variant) As Boolean
+    If IsNotArray(arr) Then
+        If arr = "" Then
             IsEmptyAll = True
             Exit Function
         End If
@@ -957,7 +957,7 @@ Public Function IsEmptyAll(ByRef Arr As Variant) As Boolean
         Exit Function
     End If
     Dim v
-    For Each v In Arr
+    For Each v In arr
         If v <> "" Then
             IsEmptyAll = False
             Exit Function
@@ -973,8 +973,8 @@ End Function
 '* @param arr Variant配列
 '* @return Boolean チェック結果（True：どれかに設定、False：全て設定なし）
 '******************************************************************************
-Public Function IsFilledAny(ByRef Arr As Variant) As Boolean
-    IsFilledAny = Not IsEmptyAll(Arr)
+Public Function IsFilledAny(ByRef arr As Variant) As Boolean
+    IsFilledAny = Not IsEmptyAll(arr)
 End Function
 
 '******************************************************************************
@@ -984,8 +984,8 @@ End Function
 '* @param arr Variant配列
 '* @return Boolean チェック結果（True：全て設定、False：どれかが空）
 '******************************************************************************
-Public Function IsFilledAll(ByRef Arr As Variant) As Boolean
-    IsFilledAll = Not IsEmptyAny(Arr)
+Public Function IsFilledAll(ByRef arr As Variant) As Boolean
+    IsFilledAll = Not IsEmptyAny(arr)
 End Function
 
 '******************************************************************************

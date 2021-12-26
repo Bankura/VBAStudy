@@ -62,7 +62,7 @@ End Sub
 '******************************************************************************
 Public Sub InjectVariantArrayToCells(ByVal dataSheet As Worksheet, vArray, lStartRow As Long, lStartCol As Long)
     If ArrayUtils.IsEmptyArray(vArray) Then Exit Sub
-    dataSheet.Cells(lStartRow, lStartCol).Resize(UBound(vArray, 1) + 1, UBound(vArray, 2) + 1).Value = vArray
+    dataSheet.Cells(lStartRow, lStartCol).Resize(UBound(vArray, 1) - LBound(vArray, 1) + 1, UBound(vArray, 2) - LBound(vArray, 2) + 1).Value = vArray
 End Sub
 
 '******************************************************************************
@@ -159,8 +159,8 @@ End Sub
 '*
 '* @param varMakeSheets 作成するシート名の配列
 '* @param varFormSheets 作成するシートのフォーマットとなるシート名の配列
-'* @param strAfShName     作成位置の基準となるシートの名称
-'*                        （このシートの右側に作成する）
+'* @param strAfShName   作成位置の基準となるシートの名称
+'*                      （このシートの右側に作成する）
 '* @return Boolean 処理結果（True:正常 False：異常）
 '******************************************************************************
 Public Function InitializeWorkSheets(varMakeSheets As Variant, _
@@ -474,7 +474,7 @@ End Function
 '* [詳  細] 指定列の最終入力行番号を取得する｡
 '*
 '* @param dataSheet ワークシート
-'* @param startRow 対象列の番号
+'* @param startCol 対象列の番号
 '* @return 最終行番号
 '*
 '******************************************************************************
@@ -942,16 +942,9 @@ End Sub
 '* @param wb ワークブックオブジェクト
 '******************************************************************************
 Public Sub MergeRangeSilently(ByVal rngAddress As String, Optional ByVal sheetName As String, Optional ByRef wb As Workbook)
-    If wb Is Nothing Then
-        Set wb = ThisWorkbook
-    End If
-    
     Dim ws As Worksheet
-    If sheetName <> "" Then
-        If Not SheetExists(sheetName, wb) Then Exit Sub
-        Set ws = wb.Sheets(sheetName)
-    Else
-        Set ws = wb.ActiveSheet
+    If Not SetWorkbookAndSheetDefault(wb, ws, sheetName) Then
+        Exit Sub
     End If
     
     Dim dAlerts As Boolean: dAlerts = wb.Application.DisplayAlerts
@@ -980,16 +973,9 @@ Public Function SaveFileOLEObject(ByVal filePath As String, _
         Err.Raise 9999, "XlWorkSheetUtils#SaveFileOLEObject", "File not found. [" & filePath & "]"
     End If
     
-    If wb Is Nothing Then
-        Set wb = ThisWorkbook
-    End If
-    
     Dim ws As Worksheet
-    If sheetName <> "" Then
-        If Not SheetExists(sheetName, wb) Then Exit Function
-        Set ws = wb.Sheets(sheetName)
-    Else
-        Set ws = wb.ActiveSheet
+    If Not SetWorkbookAndSheetDefault(wb, ws, sheetName) Then
+        Exit Function
     End If
     
     ws.Activate
@@ -1021,18 +1007,10 @@ Public Sub LoadFileOLEObject(ByVal folderPath As String, _
             Exit Sub
     End If
     
-    If wb Is Nothing Then
-        Set wb = ThisWorkbook
-    End If
-    
     Dim ws As Worksheet
-    If sheetName <> "" Then
-        If Not SheetExists(sheetName, wb) Then Exit Sub
-        Set ws = wb.Sheets(sheetName)
-    Else
-        Set ws = wb.ActiveSheet
+    If Not SetWorkbookAndSheetDefault(wb, ws, sheetName) Then
+        Exit Sub
     End If
-
     
     For Each oleObj In ws.OLEObjects
         If oleObj.Name = oleName Then
@@ -1075,16 +1053,9 @@ Public Function InsertPicture(ByVal imgFilePath As String, _
         Err.Raise 9999, "XlWorkSheetUtils#InsertPicture", "File not found. [" & imgFilePath & "]"
     End If
     
-    If wb Is Nothing Then
-        Set wb = ThisWorkbook
-    End If
-    
     Dim ws As Worksheet
-    If sheetName <> "" Then
-        If Not SheetExists(sheetName, wb) Then Exit Function
-        Set ws = wb.Sheets(sheetName)
-    Else
-        Set ws = wb.ActiveSheet
+    If Not SetWorkbookAndSheetDefault(wb, ws, sheetName) Then
+        Exit Function
     End If
     
     Dim sp As Shape
@@ -1145,8 +1116,8 @@ Public Sub RemoveDuplicates(targetRng As Range, ParamArray colnums() As Variant)
         End If
     End If
     Dim tmp: tmp = colnums
-    Dim Arr: Arr = ArrayUtils.ToVArrayFlattened(tmp)
-    targetRng.RemoveDuplicates Columns:=CVar(Arr), Header:=xlNo
+    Dim arr: arr = ArrayUtils.ToVArrayFlattened(tmp)
+    targetRng.RemoveDuplicates Columns:=CVar(arr), Header:=xlNo
 End Sub
 
 '******************************************************************************
@@ -1157,16 +1128,9 @@ End Sub
 '* @param wb ワークブックオブジェクト
 '******************************************************************************
 Public Function GetActiveCell(Optional ByVal sheetName As String, Optional ByRef wb As Workbook) As Range
-    If wb Is Nothing Then
-        Set wb = ThisWorkbook
-    End If
-
     Dim ws As Worksheet
-    If sheetName <> "" Then
-        If Not SheetExists(sheetName, wb) Then Exit Function
-        Set ws = wb.Sheets(sheetName)
-    Else
-        Set ws = wb.ActiveSheet
+    If Not SetWorkbookAndSheetDefault(wb, ws, sheetName) Then
+        Exit Function
     End If
     
     Dim orgActiveSheet As Worksheet: Set orgActiveSheet = wb.ActiveSheet
@@ -1187,18 +1151,12 @@ End Function
 '*
 '* @param sheetName 対象のシート名（省略すると選択中のシートで処理）
 '* @param wb ワークブックオブジェクト
+'* @return Range 選択中のセル範囲
 '******************************************************************************
 Public Function GetRangeSelection(Optional ByVal sheetName As String, Optional ByRef wb As Workbook) As Range
-    If wb Is Nothing Then
-        Set wb = ThisWorkbook
-    End If
-
     Dim ws As Worksheet
-    If sheetName <> "" Then
-        If Not SheetExists(sheetName, wb) Then Exit Function
-        Set ws = wb.Sheets(sheetName)
-    Else
-        Set ws = wb.ActiveSheet
+    If Not SetWorkbookAndSheetDefault(wb, ws, sheetName) Then
+        Exit Function
     End If
 
     Dim orgActiveSheet As Worksheet: Set orgActiveSheet = wb.ActiveSheet
@@ -1258,6 +1216,54 @@ Function ColumnATo1(ByVal colLabel As String) As Long
 End Function
 
 '******************************************************************************
+'* [概  要] NumbersToRangeAdress
+'* [詳  細] 指定した行列番号をRangeアドレスに変換する。
+'*          （1, 1 → A1   1,1,2,2 → A1:B2）
+'*
+'* @param startRowNo 開始行番号
+'* @param startColNo 開始列番号
+'* @param endRowNo   終了行番号
+'* @param endColNo   終了列番号
+'* @return String Rangeアドレス
+'******************************************************************************
+Function NumbersToRangeAdress(ByVal startRowNo As Long, ByVal startColNo As Long, Optional ByVal endRowNo As Long, Optional ByVal endColNo As Long) As String
+    Dim retAddress As String
+    retAddress = Column1ToA(startColNo) & startRowNo
+    If endRowNo > 0 Then
+        retAddress = retAddress & ":" & Column1ToA(endColNo) & endRowNo
+    End If
+    NumbersToRangeAdress = retAddress
+End Function
+
+'******************************************************************************
+'* [概  要] DataRangeAdress
+'* [詳  細] 指定した開始行列番号を起点に、表データの終了行列番号を検索し
+'*          表データのデータ範囲を示すRangeアドレスに変換する。
+'*
+'* @param startRowNo 開始行番号
+'* @param startColNo 開始列番号
+'* @param sheetName  対象のシート名（省略すると選択中のシートで処理）
+'* @param wb         ワークブックオブジェクト
+'* @return String Rangeアドレス
+'******************************************************************************
+Public Function DataRangeAdress(ByVal startRowNo As Long, ByVal startColNo As Long, Optional ByVal sheetName As String, Optional ByRef wb As Workbook) As String
+    Dim ws As Worksheet
+    If Not SetWorkbookAndSheetDefault(wb, ws, sheetName) Then
+        Exit Function
+    End If
+    
+    Dim endRowNo As Long: endRowNo = GetFinalKeyRow(ws, startColNo)
+    Dim endColNo As Long: endColNo = GetFinalKeyCol(ws, startRowNo)
+    
+    'レコードが存在しない場合
+    If endRowNo < startRowNo Or endColNo < startColNo Then
+        DataRangeAdress = ""
+        Exit Function
+    End If
+    DataRangeAdress = NumbersToRangeAdress(startRowNo, startColNo, endRowNo, endColNo)
+End Function
+
+'******************************************************************************
 '* [概  要] DeleteRowBlank
 '* [詳  細] 対象の列範囲でセルが空白の行を削除する。
 '*
@@ -1269,18 +1275,11 @@ End Function
 '*
 '******************************************************************************
 Public Sub DeleteRowBlank(colNo As Long, startRowNo As Long, endRowNo As Long, Optional ByVal sheetName As String, Optional ByRef wb As Workbook)
-    If wb Is Nothing Then
-        Set wb = ThisWorkbook
-    End If
-    
     Dim ws As Worksheet
-    If sheetName <> "" Then
-        If Not SheetExists(sheetName, wb) Then Exit Sub
-        Set ws = wb.Sheets(sheetName)
-    Else
-        Set ws = wb.ActiveSheet
+    If Not SetWorkbookAndSheetDefault(wb, ws, sheetName) Then
+        Exit Sub
     End If
-    
+
     With ws.Range(ws.Cells(startRowNo, colNo), ws.Cells(endRowNo, colNo)).SpecialCells(xlCellTypeBlanks).EntireRow
         .Hidden = True
         .Delete
@@ -1300,17 +1299,11 @@ End Sub
 '*
 '******************************************************************************
 Public Sub CellToPng(ByVal saveDirPath As String, ByVal rngAddress As String, Optional baseFileName As String = "PNG_", Optional ByVal sheetName As String, Optional ByRef wb As Workbook)
-    If wb Is Nothing Then
-        Set wb = ThisWorkbook
+    Dim ws As Worksheet
+    If Not SetWorkbookAndSheetDefault(wb, ws, sheetName) Then
+        Exit Sub
     End If
     
-    Dim ws As Worksheet
-    If sheetName <> "" Then
-        If Not SheetExists(sheetName, wb) Then Exit Sub
-        Set ws = wb.Sheets(sheetName)
-    Else
-        Set ws = wb.ActiveSheet
-    End If
     Dim orgActiveSheet As Worksheet: Set orgActiveSheet = wb.ActiveSheet
     
     Dim rng As Range: Set rng = ws.Range(rngAddress)
@@ -1384,3 +1377,234 @@ Public Sub CellToPng(ByVal saveDirPath As String, ByVal rngAddress As String, Op
         .ScreenUpdating = tmpScrUpd
     End With
 End Sub
+
+'******************************************************************************
+'* [概  要] GetVisibleRangeData
+'* [詳  細] Range範囲の表示領域のデータを2次元配列で取得する。
+'* [参  考] https://www.excel-chunchun.com/entry/readcellvalue3
+'*
+'* @param rngAddress  対象とするアドレス。
+'* @param sheetName   対象のシート名（省略すると選択中のシートで処理）
+'* @param wb          ワークブックオブジェクト
+'* @return Variant 対象範囲の表示領域データ（2次元配列）
+'*
+'******************************************************************************
+Public Function GetVisibleRangeData(ByVal rngAddress As String, Optional ByVal sheetName As String, Optional ByRef wb As Workbook) As Variant
+    Dim ws As Worksheet
+    If Not SetWorkbookAndSheetDefault(wb, ws, sheetName) Then
+        Exit Function
+    End If
+
+    Dim targetAreas As Areas
+    Set targetAreas = ws.Range(rngAddress).SpecialCells(xlCellTypeVisible).Areas
+
+    Dim totalRowsCount As Long, totalColsCount As Long
+    Dim areasRowsCount As Long, areasColsCount As Long
+    Call CountDataOfAreas(targetAreas, areasRowsCount, areasColsCount, totalRowsCount, totalColsCount)
+    
+    Dim v
+    Dim vData: ReDim vData(0 To totalRowsCount - 1, 0 To totalColsCount - 1)
+    Dim cnt As Long, x As Long, y As Long: cnt = 1: x = 0: y = 0
+    Dim baseRowNum As Long, baseColNum As Long: baseRowNum = 0: baseColNum = 0
+    Dim rowNum As Long: rowNum = 0
+    Dim rng As Range
+    For Each rng In targetAreas
+        If areasColsCount = 1 Or (cnt Mod areasColsCount) = 1 Then
+             baseRowNum = baseRowNum + rowNum
+             baseColNum = 0
+        End If
+        
+        v = rng.Value
+        For x = LBound(v, 1) To UBound(v, 1)
+            For y = LBound(v, 2) To UBound(v, 2)
+                 vData(baseRowNum + x - 1, baseColNum + y - 1) = v(x, y)
+            Next
+        Next
+        rowNum = UBound(v, 1)
+        baseColNum = baseColNum + UBound(v, 2)
+        cnt = cnt + 1
+    Next
+    GetVisibleRangeData = vData
+End Function
+
+'******************************************************************************
+'* [概  要] GetVisibleRangeToArray2DEx
+'* [詳  細] Range範囲の表示領域のデータをArray2DExで取得する。
+'*
+'* @param rngAddress  対象とするアドレス。
+'* @param sheetName   対象のシート名（省略すると選択中のシートで処理）
+'* @param wb          ワークブックオブジェクト
+'* @return Array2DEx 対象範囲の表示領域データ
+'*
+'******************************************************************************
+Public Function GetVisibleRangeToArray2DEx(ByVal rngAddress As String, Optional ByVal sheetName As String, Optional ByRef wb As Workbook) As Array2DEx
+    Dim ws As Worksheet
+    If Not SetWorkbookAndSheetDefault(wb, ws, sheetName) Then
+        Set GetVisibleRangeToArray2DEx = New Array2DEx
+        Exit Function
+    End If
+
+    Dim targetAreas As Areas
+    Set targetAreas = ws.Range(rngAddress).SpecialCells(xlCellTypeVisible).Areas
+    
+    Dim arr2dex As Array2DEx: Set arr2dex = New Array2DEx
+    Dim tmpArr2dex As Array2DEx: Set tmpArr2dex = New Array2DEx
+    Dim lastRow As Long: lastRow = targetAreas(1).row
+    Dim rng As Range
+    For Each rng In targetAreas
+        If rng.Item(1, 1).row <> lastRow Then
+            arr2dex.AddRows tmpArr2dex
+            Set tmpArr2dex = New Array2DEx
+            tmpArr2dex.AddColumns rng.Value
+        Else
+            tmpArr2dex.AddColumns rng.Value
+        End If
+        lastRow = rng.Item(1, 1).row
+    Next
+    arr2dex.AddRows tmpArr2dex
+
+    Set GetVisibleRangeToArray2DEx = arr2dex
+End Function
+
+'******************************************************************************
+'* [概  要] InjectDataToVisibleRange
+'* [詳  細] 配列データを、指定したRange範囲の表示領域に出力する。
+'*
+'* @param vArray     Variant配列データ
+'* @param startRowNo データ開始行番号
+'* @param startColNo データ開始列番号
+'* @param rowCount   行項目数
+'* @param colCount   列項目数
+'* @param wb         ワークブックオブジェクト
+'* @return Array2DEx 対象範囲の表示領域データ
+'*
+'******************************************************************************
+Public Sub InjectDataToVisibleRange(vArray, startRowNo As Long, startColNo As Long, Optional rowCount As Long, Optional colCount As Long, Optional ByVal sheetName As String, Optional ByRef wb As Workbook)
+    Dim dataArray
+    If ValidateUtils.IsArray2DEx(vArray) Then
+        dataArray = vArray.To2DArray
+    ElseIf ArrayUtils.Is2DArray(vArray) Then
+        If ArrayUtils.IsEmptyArray(vArray) Then Exit Sub
+        dataArray = vArray
+    ElseIf ValidateUtils.IsArrayEx(vArray) Then
+        dataArray = vArray.To2DArray()
+    ElseIf ArrayUtils.Is1DArray(vArray) Then
+        If ArrayUtils.IsEmptyArray(vArray) Then Exit Sub
+        dataArray = ArrayUtils.ArrayTo2DArray(vArray)
+    ElseIf ValidateUtils.IsPrimitive(vArray) Then
+        dataArray = ArrayUtils.Create2DArrayWithValue(Array(vArray))
+    End If
+
+    Dim ws As Worksheet
+    If Not SetWorkbookAndSheetDefault(wb, ws, sheetName) Then
+        Exit Sub
+    End If
+
+    Dim endRowNo As Long
+    If rowCount = 0 Then
+        endRowNo = GetFinalKeyRow(ws, startColNo)
+    Else
+        endRowNo = startRowNo + rowCount - 1
+    End If
+    Dim endColNo As Long
+    If colCount = 0 Then
+        endColNo = GetFinalKeyCol(ws, startRowNo)
+    Else
+        endColNo = startColNo + colCount - 1
+    End If
+    
+    ' レコードが存在しない場合
+    If endRowNo < startRowNo Or endColNo < startColNo Then
+        Exit Sub
+    End If
+    
+    Dim targetAreas As Areas
+    Set targetAreas = ws.Range(ws.Cells(startRowNo, startColNo), ws.Cells(endRowNo, endColNo)).SpecialCells(xlCellTypeVisible).Areas
+
+    Dim areasRowsCount As Long, areasColsCount As Long
+    Call CountDataOfAreas(targetAreas, areasRowsCount, areasColsCount)
+    
+    Dim v
+    Dim cnt As Long: cnt = 1
+    Dim baseRowNum As Long, baseColNum As Long: baseRowNum = 0: baseColNum = 0
+    Dim rowNum As Long, colNum As Long: rowNum = 0: colNum = 0
+    Dim rng As Range
+    For Each rng In targetAreas
+        If areasColsCount = 1 Or (cnt Mod areasColsCount) = 1 Then
+             baseRowNum = baseRowNum + rowNum
+             baseColNum = 0
+        End If
+        
+        rowNum = rng.Rows.Count
+        colNum = rng.Columns.Count
+        v = ArrayUtils.Copy2DArray(dataArray, LBound(dataArray, 1) + baseRowNum, _
+                                              LBound(dataArray, 2) + baseColNum, _
+                                              LBound(dataArray, 1) + baseRowNum + rowNum - 1, _
+                                              LBound(dataArray, 2) + baseColNum + colNum - 1)
+        rng.Value = v
+        baseColNum = baseColNum + colNum
+        cnt = cnt + 1
+    Next
+End Sub
+
+'******************************************************************************
+'* [概  要] CountDataOfAreas
+'* [詳  細] Areasオブジェクトに含まれるAreaの行列数、総行列数を取得する。
+'*
+'* @param targetAreas  対象とするAreasオブジェクト
+'* @param areasRowsCount Areaの行数
+'* @param areasColsCount Areaの列数
+'* @param totalRowsCount 総行数
+'* @param totalColsCount 総列数
+'*
+'******************************************************************************
+Private Sub CountDataOfAreas(targetAreas As Areas, areasRowsCount As Long, areasColsCount As Long, Optional totalRowsCount As Long, Optional totalColsCount As Long)
+    areasRowsCount = 0
+    areasColsCount = 0
+    totalRowsCount = 0
+    totalColsCount = 0
+    
+    Dim lastRow As Long: lastRow = targetAreas(1).row
+    Dim rng As Range
+    For Each rng In targetAreas
+        If rng.Item(1, 1).row <> lastRow Then Exit For
+        areasColsCount = areasColsCount + 1
+        totalColsCount = totalColsCount + rng.Columns.Count
+        lastRow = rng.Item(1, 1).row
+    Next
+
+    For Each rng In targetAreas
+        totalRowsCount = totalRowsCount + rng.Rows.Count
+    Next
+
+    areasRowsCount = targetAreas.Count / areasColsCount
+    totalRowsCount = totalRowsCount / areasColsCount
+End Sub
+
+'******************************************************************************
+'* [概  要] SetWorkbookAndSheetDefault
+'* [詳  細] ワークブック/ワークシートオブジェクトにデフォルトの値を設定する。
+'*          指定したパラメータに結果を設定して返却する。
+'*
+'* @param wb        ワークブックオブジェクト（未設定の場合、ThisWorkbookを設定）
+'* @param ws        ワークシートオブジェクト（シート名未設定の場合、選択中のシートを設定）
+'* @param sheetName 対象のシート名
+'* @return Boolean 存在しないシート名の場合、False
+'*
+'******************************************************************************
+Private Function SetWorkbookAndSheetDefault(ByRef wb As Workbook, ByRef ws As Worksheet, ByVal sheetName As String) As Boolean
+    If wb Is Nothing Then
+        Set wb = ThisWorkbook
+    End If
+
+    If sheetName <> "" Then
+        If Not SheetExists(sheetName, wb) Then
+            SetWorkbookAndSheetDefault = False
+            Exit Function
+        End If
+        Set ws = wb.Sheets(sheetName)
+    Else
+        Set ws = wb.ActiveSheet
+    End If
+    SetWorkbookAndSheetDefault = True
+End Function

@@ -1211,6 +1211,9 @@ End Property
 '*
 '******************************************************************************
 Public Sub ImportArray(vArray, lStartRow As Long, lStartCol As Long, Optional Transpose As Boolean = True)
+    Call StoreFilterCriterias
+    Call FilterOff
+
     If ValidateUtils.IsArray2DEx(vArray) Then
         Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, vArray.To2DArray, lStartRow, lStartCol)
     ElseIf ArrayUtils.Is2DArray(vArray) Then
@@ -1222,6 +1225,8 @@ Public Sub ImportArray(vArray, lStartRow As Long, lStartCol As Long, Optional Tr
     ElseIf ValidateUtils.IsPrimitive(vArray) Then
         mOrigin.Cells(lStartRow, lStartCol).Value = vArray
     End If
+    
+    Call ReConstructFilter
 End Sub
 
 '******************************************************************************
@@ -1403,13 +1408,13 @@ End Function
 '* [概  要] SetHyperLink
 '* [詳  細] ハイパーリンクを追加する（フォント・フォントサイズの変更をしない）
 '*
-'* @param row 行番号
-'* @param col 列番号
+'* @param rowNo 行番号
+'* @param colNo 列番号
 '* @param strLinkAddress リンクアドレス
 '*
 '******************************************************************************
-Public Sub SetHyperLink(sh As Worksheet, row As Long, col As Long, strLinkAddress As String)
-    Call XlWorkSheetUtils.SetHyperLink(mOrigin, row, col, strLinkAddress)
+Public Sub SetHyperLink(rowNo As Long, colNo As Long, strLinkAddress As String)
+    Call XlWorkSheetUtils.SetHyperLink(mOrigin, rowNo, colNo, strLinkAddress)
 End Sub
 
 '******************************************************************************
@@ -1681,10 +1686,10 @@ End Sub
 '* @param rowIdx    挿入先セル行インデックス
 '* @param colIdx    挿入先セル列インデックス
 '******************************************************************************
-Public Function SaveFileOLEObject(ByVal FilePath As String, _
+Public Function SaveFileOLEObject(ByVal filePath As String, _
                              ByVal rowIdx As Long, _
                              ByVal colIdx As Long) As OLEObject
-    Set SaveFileOLEObject = XlWorkSheetUtils.SaveFileOLEObject(FilePath, rowIdx, colIdx, mOrigin.Name, mOrigin.Parent)
+    Set SaveFileOLEObject = XlWorkSheetUtils.SaveFileOLEObject(filePath, rowIdx, colIdx, mOrigin.Name, mOrigin.Parent)
 End Function
 
 '******************************************************************************
@@ -1746,7 +1751,75 @@ Public Sub RemoveDuplicates(startRowNo As Long, startColNo As Long, endRowNo As 
     Dim rng As Range
     Set rng = Range2(startRowNo, startColNo, endRowNo, endColNo)
     Dim tmp: tmp = colnums
-    Dim Arr: Arr = ArrayUtils.ToVArrayFlattened(tmp)
+    Dim arr: arr = ArrayUtils.ToVArrayFlattened(tmp)
     
-    Call XlWorkSheetUtils.RemoveDuplicates(rng, Arr)
+    Call XlWorkSheetUtils.RemoveDuplicates(rng, arr)
 End Sub
+
+'******************************************************************************
+'* [概  要] DataRangeAdress
+'* [詳  細] 指定した開始行列番号を起点に、表データの終了行列番号を検索し
+'*          表データのデータ範囲を示すRangeアドレスに変換する。
+'*
+'* @param startRowNo 開始行番号
+'* @param startColNo 開始列番号
+'* @return String Rangeアドレス
+'******************************************************************************
+Public Function DataRangeAdress(ByVal startRowNo As Long, ByVal startColNo As Long) As String
+    DataRangeAdress = XlWorkSheetUtils.DataRangeAdress(startRowNo, startColNo, mOrigin.Name, mOrigin.Parent)
+End Function
+
+'******************************************************************************
+'* [概  要] DeleteRowBlank
+'* [詳  細] 対象の列範囲でセルが空白の行を削除する。
+'*
+'* @param colNo      列番号
+'* @param startRowNo 開始行番号
+'* @param endRowNo   終了行番号
+'*
+'******************************************************************************
+Public Sub DeleteRowBlank(colNo As Long, startRowNo As Long, endRowNo As Long)
+    Call XlWorkSheetUtils.DeleteRowBlank(colNo, startRowNo, endRowNo, mOrigin.Name, mOrigin.Parent)
+End Sub
+
+'******************************************************************************
+'* [概  要] GetVisibleRangeData
+'* [詳  細] Range範囲の表示領域のデータを2次元配列で取得する。
+'*
+'* @param rngAddress  対象とするアドレス。
+'* @return Variant 対象範囲の表示領域データ（2次元配列）
+'*
+'******************************************************************************
+Public Function GetVisibleRangeData(ByVal rngAddress As String) As Variant
+    GetVisibleRangeData = XlWorkSheetUtils.GetVisibleRangeData(rngAddress, mOrigin.Name, mOrigin.Parent)
+End Function
+
+'******************************************************************************
+'* [概  要] GetVisibleRangeToArray2DEx
+'* [詳  細] Range範囲の表示領域のデータをArray2DExで取得する。
+'*
+'* @param rngAddress  対象とするアドレス。
+'* @param sheetName   対象のシート名（省略すると選択中のシートで処理）
+'* @param wb          ワークブックオブジェクト
+'* @return Array2DEx 対象範囲の表示領域データ
+'*
+'******************************************************************************
+Public Function GetVisibleRangeToArray2DEx(ByVal rngAddress As String) As Array2DEx
+    Set GetVisibleRangeToArray2DEx = XlWorkSheetUtils.GetVisibleRangeToArray2DEx(rngAddress, mOrigin.Name, mOrigin.Parent)
+End Function
+
+'******************************************************************************
+'* [概  要] InjectDataToVisibleRange
+'* [詳  細] 配列データを、指定したRange範囲の表示領域に出力する。
+'*
+'* @param vArray     Variant配列データ
+'* @param startRowNo データ開始行番号
+'* @param startColNo データ開始列番号
+'* @param rowCount   行項目数
+'* @param colCount   列項目数
+'*
+'******************************************************************************
+Public Sub InjectDataToVisibleRange(vArray, startRowNo As Long, startColNo As Long, Optional rowCount As Long, Optional colCount As Long, Optional ByVal sheetName As String, Optional ByRef wb As Workbook)
+    Call XlWorkSheetUtils.InjectDataToVisibleRange(vArray, startRowNo, startColNo, rowCount, colCount, mOrigin.Name, mOrigin.Parent)
+End Sub
+

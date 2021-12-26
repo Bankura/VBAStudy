@@ -78,25 +78,25 @@ End Function
 '******************************************************************************
 Public Function Min(ParamArray parr() As Variant) As Variant
     Dim tmp: tmp = parr
-    Dim Arr: Arr = ArrayUtils.ToVArrayFlattened(tmp)
+    Dim arr: arr = ArrayUtils.ToVArrayFlattened(tmp)
     Dim ret: ret = Empty
     
-    Dim ub As Variant: ub = UBound(Arr)
+    Dim ub As Variant: ub = UBound(arr)
     If ub < 0 Then
         Min = ret
         Exit Function
     End If
     
     Dim i As Long
-    If IsObject(Arr(0)) Then
-        Set ret = Arr(0)
+    If IsObject(arr(0)) Then
+        Set ret = arr(0)
         For i = 1 To ub
-            If Compare(Arr(i), ret) = -1 Then Set ret = Arr(i)
+            If Compare(arr(i), ret) = -1 Then Set ret = arr(i)
         Next
     Else
-        Let ret = Arr(0)
+        Let ret = arr(0)
         For i = 1 To ub
-            If Compare(Arr(i), ret) = -1 Then Let ret = Arr(i)
+            If Compare(arr(i), ret) = -1 Then Let ret = arr(i)
         Next
     End If
     Min = ret
@@ -111,25 +111,25 @@ End Function
 '******************************************************************************
 Public Function Max(ParamArray parr() As Variant) As Variant
     Dim tmp: tmp = parr
-    Dim Arr: Arr = ArrayUtils.ToVArrayFlattened(tmp)
+    Dim arr: arr = ArrayUtils.ToVArrayFlattened(tmp)
     Dim ret: ret = Empty
     
-    Dim ub As Variant: ub = UBound(Arr)
+    Dim ub As Variant: ub = UBound(arr)
     If ub < 0 Then
         Max = ret
         Exit Function
     End If
     
     Dim i As Long
-    If IsObject(Arr(0)) Then
-        Set ret = Arr(0)
+    If IsObject(arr(0)) Then
+        Set ret = arr(0)
         For i = 1 To ub
-            If Compare(Arr(i), ret) = 1 Then Set ret = Arr(i)
+            If Compare(arr(i), ret) = 1 Then Set ret = arr(i)
         Next
     Else
-        Let ret = Arr(0)
+        Let ret = arr(0)
         For i = 1 To ub
-            If Compare(Arr(i), ret) = 1 Then Let ret = Arr(i)
+            If Compare(arr(i), ret) = 1 Then Let ret = arr(i)
         Next
     End If
     Max = ret
@@ -194,10 +194,10 @@ End Function
 '******************************************************************************
 Public Function Sum(ParamArray parr() As Variant) As Double
     Dim tmp: tmp = parr
-    Dim Arr: Arr = ArrayUtils.ToVArrayFlattened(tmp)
+    Dim arr: arr = ArrayUtils.ToVArrayFlattened(tmp)
 
     Dim total As Double, v
-    For Each v In Arr
+    For Each v In arr
         total = total + CDbl(v)
     Next
     Sum = total

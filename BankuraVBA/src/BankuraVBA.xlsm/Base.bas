@@ -641,8 +641,8 @@ End Function
 '* @return Variant ƒ‰ƒ“ƒ_ƒ€‚È—v‘f
 '*
 '******************************************************************************
-Public Function GetArrayDataRandom(Arr As Variant, Optional willRandomize As Boolean = False) As Variant
-    GetArrayDataRandom = Arr(Int((UBound(Arr) - LBound(Arr) + 1) * GetRandom(willRandomize) + LBound(Arr)))
+Public Function GetArrayDataRandom(arr As Variant, Optional willRandomize As Boolean = False) As Variant
+    GetArrayDataRandom = arr(Int((UBound(arr) - LBound(arr) + 1) * GetRandom(willRandomize) + LBound(arr)))
 End Function
 
 '******************************************************************************
@@ -674,36 +674,36 @@ Public Function GetRandomIntArray(numOfItems As Long, _
         noOverLap = False
     End If
     
-    Dim Arr() As Long: ReDim Arr(0 To numOfItems - 1)
+    Dim arr() As Long: ReDim arr(0 To numOfItems - 1)
     Dim i As Long, j As Long, numVal As Long
     For i = 0 To numOfItems - 1
         If Not noOverLap Then
-            Arr(i) = GetRandomInt(minVal, maxVal)
+            arr(i) = GetRandomInt(minVal, maxVal)
         Else
             Do
                 Dim flg As Boolean: flg = True
                 numVal = GetRandomInt(minVal, maxVal)
                 
                 If i = 0 Then
-                    Arr(i) = numVal
+                    arr(i) = numVal
                     Exit Do
                 End If
                 
                 For j = 0 To i - 1
-                    If Arr(j) = numVal Then
+                    If arr(j) = numVal Then
                        flg = False
                        Exit For
                     End If
                 Next
                 
                 If flg Then
-                    Arr(i) = numVal
+                    arr(i) = numVal
                     Exit Do
                 End If
             Loop
         End If
     Next
-    GetRandomIntArray = Arr
+    GetRandomIntArray = arr
 End Function
 
 '******************************************************************************

@@ -178,7 +178,7 @@ End Sub
 '*
 '******************************************************************************
 Public Function Init(Optional ByVal val, Optional ByVal Transpose As Boolean = False) As Array2DEx
-    If VBA.IsMissing(val) Then
+    If VBA.IsMissing(val) Or IsEmpty(val) Then
         Call Clear
         Set Init = Me
         Exit Function
@@ -693,18 +693,18 @@ Public Function EntireRowIndexOf(ByVal rowData As Variant, Optional ByVal ixStar
         Err.Raise 9999, "Array2DEx#RowsIndexOf", "Invalid argument."
     End If
     
-    Dim Arr As Variant
+    Dim arr As Variant
     If ArrayUtils.Is1DArray(rowData) Then
-        Arr = rowData
+        arr = rowData
     ElseIf ValidateUtils.IsArrayEx(rowData) Then
-        Arr = rowData.ToArray
+        arr = rowData.ToArray
     Else
         Err.Raise 9999, "Array2DEx#RowsIndexOf", "Invalid argument."
     End If
     
     Dim x As Long
     For x = ixStart To mRowMaxIndex
-        If m2DItems(x).Equals(Arr) Then
+        If m2DItems(x).Equals(arr) Then
             EntireRowIndexOf = x
             Exit Function
         End If
@@ -764,8 +764,8 @@ Public Sub Sort(ByVal colIdx As Long, Optional ByVal orderAsc As Boolean = True)
     If IsInvalidColIndex(colIdx) Then
         Err.Raise 9999, "Array2DEx#Sort", "Invalid argument."
     End If
-    Dim Arr: Arr = YColumn(colIdx).ToArray
-    Dim idxArr: idxArr = ArrSort(Arr, orderAsc)
+    Dim arr: arr = YColumn(colIdx).ToArray
+    Dim idxArr: idxArr = ArrSort(arr, orderAsc)
     
     Dim arrex As ArrayEx: Set arrex = New ArrayEx
     Call arrex.Expand(mRowLength)
@@ -778,29 +778,29 @@ End Sub
 
 ''' @param arr As Variant(Of Array(Of T))
 ''' @param orderAsc As Boolean
-Private Function ArrSort(ByRef Arr As Variant, ByVal orderAsc As Boolean) As Variant
+Private Function ArrSort(ByRef arr As Variant, ByVal orderAsc As Boolean) As Variant
 
-    If Not IsArray(Arr) Then Err.Raise 13
-    If ArrLen(Arr) <= 1 Then GoTo Escape
+    If Not IsArray(arr) Then Err.Raise 13
+    If ArrLen(arr) <= 1 Then GoTo Escape
 
-    Dim ix0 As Long: ix0 = LBound(Arr)
+    Dim ix0 As Long: ix0 = LBound(arr)
     
-    Dim idxArr: idxArr = ArrayUtils.Range(ix0, UBound(Arr))
-    If IsObject(Arr(ix0)) Then
-        ObjArrMSort Arr, ix0, idxArr, orderAsc
+    Dim idxArr: idxArr = ArrayUtils.Range(ix0, UBound(arr))
+    If IsObject(arr(ix0)) Then
+        ObjArrMSort arr, ix0, idxArr, orderAsc
     Else
-        ValArrMSort Arr, ix0, idxArr, orderAsc
+        ValArrMSort arr, ix0, idxArr, orderAsc
     End If
     ArrSort = idxArr
 Escape:
 End Function
-Private Sub ObjArrMSort(Arr As Variant, lb As Long, idxArr As Variant, orderAsc As Boolean)
-    Dim aLen As Long: aLen = ArrLen(Arr)
+Private Sub ObjArrMSort(arr As Variant, lb As Long, idxArr As Variant, orderAsc As Boolean)
+    Dim aLen As Long: aLen = ArrLen(arr)
     If aLen <= 1 Then GoTo Escape
     
     '' optimization
     If aLen <= 8 Then
-        ObjArrISort Arr, lb, idxArr, orderAsc
+        ObjArrISort arr, lb, idxArr, orderAsc
         GoTo Escape
     End If
     
@@ -810,14 +810,14 @@ Private Sub ObjArrMSort(Arr As Variant, lb As Long, idxArr As Variant, orderAsc 
     
     Dim ub1 As Long:   ub1 = lb + l1 - 1
     Dim a1 As Variant: ReDim a1(lb To ub1)
-    For i = lb To ub1: Set a1(i) = Arr(i): Next
+    For i = lb To ub1: Set a1(i) = arr(i): Next
     Dim idx1 As Variant: ReDim idx1(lb To ub1)
     For i = lb To ub1: idx1(i) = idxArr(i): Next
     ObjArrMSort a1, lb, idx1, orderAsc
     
     Dim ub2 As Long:   ub2 = lb + l2 - 1
     Dim a2 As Variant: ReDim a2(lb To ub2)
-    For i = lb To ub2: Set a2(i) = Arr(l1 + i): Next
+    For i = lb To ub2: Set a2(i) = arr(l1 + i): Next
     Dim idx2 As Variant: ReDim idx2(lb To ub2)
     For i = lb To ub2: idx2(i) = idxArr(l1 + i): Next
     ObjArrMSort a2, lb, idx2, orderAsc
@@ -826,23 +826,23 @@ Private Sub ObjArrMSort(Arr As Variant, lb As Long, idxArr As Variant, orderAsc 
     Dim i2 As Long: i2 = lb
     While i1 <= ub1 Or i2 <= ub2
         If ArrMergeSw(a1, i1, ub1, a2, i2, ub2, orderAsc) Then
-            Set Arr(i1 + i2 - lb) = a1(i1)
+            Set arr(i1 + i2 - lb) = a1(i1)
             idxArr(i1 + i2 - lb) = idx1(IncrPst(i1))
         Else
-            Set Arr(i1 + i2 - lb) = a2(i2)
+            Set arr(i1 + i2 - lb) = a2(i2)
             idxArr(i1 + i2 - lb) = idx2(IncrPst(i2))
         End If
     Wend
     
 Escape:
 End Sub
-Private Sub ValArrMSort(Arr As Variant, lb As Long, idxArr As Variant, orderAsc As Boolean)
-    Dim aLen As Long: aLen = ArrLen(Arr)
+Private Sub ValArrMSort(arr As Variant, lb As Long, idxArr As Variant, orderAsc As Boolean)
+    Dim aLen As Long: aLen = ArrLen(arr)
     If aLen <= 1 Then GoTo Escape
     
     '' optimization
     If aLen <= 8 Then
-        ValArrISort Arr, lb, idxArr, orderAsc
+        ValArrISort arr, lb, idxArr, orderAsc
         GoTo Escape
     End If
     
@@ -852,14 +852,14 @@ Private Sub ValArrMSort(Arr As Variant, lb As Long, idxArr As Variant, orderAsc 
     
     Dim ub1 As Long:   ub1 = lb + l1 - 1
     Dim a1 As Variant: ReDim a1(lb To ub1)
-    For i = lb To ub1: Let a1(i) = Arr(i): Next
+    For i = lb To ub1: Let a1(i) = arr(i): Next
     Dim idx1 As Variant: ReDim idx1(lb To ub1)
     For i = lb To ub1: idx1(i) = idxArr(i): Next
     ValArrMSort a1, lb, idxArr, orderAsc
     
     Dim ub2 As Long:   ub2 = lb + l2 - 1
     Dim a2 As Variant: ReDim a2(lb To ub2)
-    For i = lb To ub2: Let a2(i) = Arr(l1 + i): Next
+    For i = lb To ub2: Let a2(i) = arr(l1 + i): Next
     Dim idx2 As Variant: ReDim idx2(lb To ub2)
     For i = lb To ub2: idx2(i) = idxArr(l1 + i): Next
     ValArrMSort a2, lb, idxArr, orderAsc
@@ -868,35 +868,35 @@ Private Sub ValArrMSort(Arr As Variant, lb As Long, idxArr As Variant, orderAsc 
     Dim i2 As Long: i2 = lb
     While i1 <= ub1 Or i2 <= ub2
         If ArrMergeSw(a1, i1, ub1, a2, i2, ub2, orderAsc) Then
-            Let Arr(i1 + i2 - lb) = a1(i1)
+            Let arr(i1 + i2 - lb) = a1(i1)
             idxArr(i1 + i2 - lb) = idx1(IncrPst(i1))
         Else
-            Let Arr(i1 + i2 - lb) = a2(i2)
+            Let arr(i1 + i2 - lb) = a2(i2)
             idxArr(i1 + i2 - lb) = idx2(IncrPst(i2))
         End If
     Wend
     
 Escape:
 End Sub
-Private Sub ObjArrISort(Arr As Variant, lb As Long, idxArr As Variant, orderAsc As Boolean)
+Private Sub ObjArrISort(arr As Variant, lb As Long, idxArr As Variant, orderAsc As Boolean)
     Dim i As Long, j As Long, x As Variant, idx As Variant
-    For i = lb + 1 To UBound(Arr)
+    For i = lb + 1 To UBound(arr)
         j = i
         Do While j > lb
-            If Core.Compare(Arr(j - 1), Arr(j), True) * (Abs(orderAsc) * 2 - 1) <= 0 Then Exit Do
-            Set x = Arr(j): Set Arr(j) = Arr(j - 1): Set Arr(j - 1) = x
+            If Core.Compare(arr(j - 1), arr(j), True) * (Abs(orderAsc) * 2 - 1) <= 0 Then Exit Do
+            Set x = arr(j): Set arr(j) = arr(j - 1): Set arr(j - 1) = x
             idx = idxArr(j): idxArr(j) = idxArr(j - 1): idxArr(j - 1) = idx
             j = j - 1
         Loop
     Next
 End Sub
-Private Sub ValArrISort(Arr As Variant, lb As Long, idxArr As Variant, orderAsc As Boolean)
+Private Sub ValArrISort(arr As Variant, lb As Long, idxArr As Variant, orderAsc As Boolean)
     Dim i As Long, j As Long, x As Variant, idx As Variant
-    For i = lb + 1 To UBound(Arr)
+    For i = lb + 1 To UBound(arr)
         j = i
         Do While j > lb
-            If Core.Compare(Arr(j - 1), Arr(j), True) * (Abs(orderAsc) * 2 - 1) <= 0 Then Exit Do
-            Let x = Arr(j): Let Arr(j) = Arr(j - 1): Let Arr(j - 1) = x
+            If Core.Compare(arr(j - 1), arr(j), True) * (Abs(orderAsc) * 2 - 1) <= 0 Then Exit Do
+            Let x = arr(j): Let arr(j) = arr(j - 1): Let arr(j - 1) = x
             idx = idxArr(j): idxArr(j) = idxArr(j - 1): idxArr(j - 1) = idx
             j = j - 1
         Loop
@@ -1329,6 +1329,21 @@ End Function
 '******************************************************************************
 Public Function Clone() As Array2DEx
     Set Clone = Core.Init(New Array2DEx, Me.To2DArray)
+End Function
+
+'******************************************************************************
+'* [概  要] Copy
+'* [詳  細] 指定範囲をコピーして新しいArray2DExを作成する。
+'*
+'* @param start1DIdx 1次元開始インデックス
+'* @param start2DIdx 2次元開始インデックス
+'* @param end1DIdx   1次元終了インデックス
+'* @param end2DIdx   2次元終了インデックス
+'* @return Array2DEx 新しいArray2DEx
+'******************************************************************************
+Public Function Copy(Optional ByVal start1DIdx As Long = -1, Optional ByVal start2DIdx As Long = -1, _
+                     Optional ByVal end1DIdx As Long = -1, Optional ByVal end2DIdx As Long = -1) As Array2DEx
+    Set Copy = Core.Init(New Array2DEx, ArrayUtils.Copy2DArray(Me.To2DArray, start1DIdx, start2DIdx, end1DIdx, end2DIdx))
 End Function
 
 '******************************************************************************
@@ -1893,8 +1908,8 @@ End Function
 '* @param colnum 列番号
 '* @return Long 最大文字数
 '*******************************************************************************
-Public Function MaxTxtLength(ByVal colnum As Long, Optional useZenkaku2Width As Boolean = False) As Long
-    MaxTxtLength = ArrayUtils.Array2DMaxTxtLength(Me.To2DArray, colnum, useZenkaku2Width)
+Public Function MaxTxtLength(ByVal colNum As Long, Optional useZenkaku2Width As Boolean = False) As Long
+    MaxTxtLength = ArrayUtils.Array2DMaxTxtLength(Me.To2DArray, colNum, useZenkaku2Width)
 End Function
 
 '******************************************************************************

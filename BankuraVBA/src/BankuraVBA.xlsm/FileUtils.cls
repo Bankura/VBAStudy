@@ -1811,10 +1811,10 @@ Public Function Grep(ByVal dirPath As String, _
         .Global = True
     End With
     
-    Dim Arr As ArrayEx: Set Arr = New ArrayEx
+    Dim arr As ArrayEx: Set arr = New ArrayEx
     Dim folder As Object: Set folder = IO.GetFolder(dirPath)
-    Call GrepImpl(folder, reg, wildCards, Arr, cSet, showConsole, separator)
-    Grep = Arr.ToArray
+    Call GrepImpl(folder, reg, wildCards, arr, cSet, showConsole, separator)
+    Grep = arr.ToArray
 End Function
 
 '******************************************************************************
@@ -1833,7 +1833,7 @@ End Function
 Private Sub GrepImpl(ByVal folder As Object, _
                      ByVal reg As Object, _
                      ByVal wildCards As String, _
-                     ByRef Arr As ArrayEx, _
+                     ByRef arr As ArrayEx, _
                      Optional ByVal cSet As String = "auto", _
                      Optional ByVal showConsole As Boolean = True, _
                      Optional ByVal separator As Long)
@@ -1854,12 +1854,12 @@ Private Sub GrepImpl(ByVal folder As Object, _
             End If
             
             If tmpCSet = "" Then
-                Call GrepTextFile(f.Path, reg, Arr, , showConsole, tmpSep)
+                Call GrepTextFile(f.Path, reg, arr, , showConsole, tmpSep)
             ElseIf tmpCSet <> "BINARY" Then
                 If separator = 0 Then
                     tmpSep = GetFileLineSeparator(f.Path)
                 End If
-                Call GrepTextFile(f.Path, reg, Arr, tmpCSet, showConsole, tmpSep)
+                Call GrepTextFile(f.Path, reg, arr, tmpCSet, showConsole, tmpSep)
             Else
                 Debug.Print tmpCSet, f.Path
             End If
@@ -1867,7 +1867,7 @@ Private Sub GrepImpl(ByVal folder As Object, _
     Next
     Dim sFolder As Object
     For Each sFolder In folder.SubFolders
-        Call GrepImpl(sFolder, reg, wildCards, Arr, cSet, showConsole, separator)
+        Call GrepImpl(sFolder, reg, wildCards, arr, cSet, showConsole, separator)
     Next
 End Sub
 
@@ -1888,7 +1888,7 @@ End Sub
 '******************************************************************************
 Private Sub GrepTextFile(ByVal filePath As String, _
                          ByVal reg As Object, _
-                         ByRef Arr As ArrayEx, _
+                         ByRef arr As ArrayEx, _
                          Optional ByVal cSet As String = "_autodetect_all", _
                          Optional ByVal showConsole As Boolean = True, _
                          Optional ByVal separator As LineSeparatorsEnum = LineSeparatorsEnum.adCRLF)
@@ -1905,7 +1905,7 @@ Private Sub GrepTextFile(ByVal filePath As String, _
             txt = TryReadText(stream, filePath, tmpCSet, separator)
             If reg.test(txt) Then
                 If showConsole Then Debug.Print filePath & "(" & cnt & ")  [" & tmpCSet & "]: " & txt
-                Arr.Add Array(filePath, cnt, txt)
+                arr.Add Array(filePath, cnt, txt)
             End If
             cnt = cnt + 1
         Loop
@@ -2312,10 +2312,10 @@ Public Function GrepAndReplace(ByVal dirPath As String, _
         .Global = True
     End With
     
-    Dim Arr As ArrayEx: Set Arr = New ArrayEx
+    Dim arr As ArrayEx: Set arr = New ArrayEx
     Dim folder As Object: Set folder = IO.GetFolder(dirPath)
-    Call GrepAndReplaceImpl(folder, reg, replaceString, wildCards, Arr, cSet, showConsole, separator)
-    GrepAndReplace = Arr.ToArray
+    Call GrepAndReplaceImpl(folder, reg, replaceString, wildCards, arr, cSet, showConsole, separator)
+    GrepAndReplace = arr.ToArray
 End Function
 
 '******************************************************************************
@@ -2336,7 +2336,7 @@ Private Sub GrepAndReplaceImpl(ByVal folder As Object, _
                      ByVal reg As Object, _
                      ByVal replaceString As String, _
                      ByVal wildCards As String, _
-                     ByRef Arr As ArrayEx, _
+                     ByRef arr As ArrayEx, _
                      Optional ByVal cSet As String = "auto", _
                      Optional ByVal showConsole As Boolean = True, _
                      Optional ByVal separator As Long)
@@ -2359,12 +2359,12 @@ Private Sub GrepAndReplaceImpl(ByVal folder As Object, _
             End If
             
             If tmpCSet = "" Then
-                Call GrepAndReplaceTextFile(f.Path, reg, replaceString, Arr, , showConsole, True, tmpSep)
+                Call GrepAndReplaceTextFile(f.Path, reg, replaceString, arr, , showConsole, True, tmpSep)
             ElseIf tmpCSet <> "BINARY" Then
                 If separator = 0 Then
                     tmpSep = GetFileLineSeparator(f.Path)
                 End If
-                Call GrepAndReplaceTextFile(f.Path, reg, replaceString, Arr, tmpCSet, showConsole, bomInclude, tmpSep)
+                Call GrepAndReplaceTextFile(f.Path, reg, replaceString, arr, tmpCSet, showConsole, bomInclude, tmpSep)
             Else
                 Debug.Print tmpCSet, f.Path
             End If
@@ -2372,7 +2372,7 @@ Private Sub GrepAndReplaceImpl(ByVal folder As Object, _
     Next
     Dim sFolder As Object
     For Each sFolder In folder.SubFolders
-        Call GrepAndReplaceImpl(sFolder, reg, replaceString, wildCards, Arr, cSet, showConsole, separator)
+        Call GrepAndReplaceImpl(sFolder, reg, replaceString, wildCards, arr, cSet, showConsole, separator)
     Next
 End Sub
 
@@ -2392,7 +2392,7 @@ End Sub
 Private Sub GrepAndReplaceTextFile(ByVal filePath As String, _
                                    ByVal reg As Object, _
                                    ByVal replaceString As String, _
-                                   ByRef Arr As ArrayEx, _
+                                   ByRef arr As ArrayEx, _
                                    Optional ByVal cSet As String = "_autodetect_all", _
                                    Optional ByVal showConsole As Boolean = True, _
                                    Optional ByVal bomInclude As Boolean = True, _
@@ -2419,7 +2419,7 @@ Private Sub GrepAndReplaceTextFile(ByVal filePath As String, _
             If reg.test(txt) Then
                 wtxt = reg.Replace(txt, replaceString)
                 If showConsole Then Debug.Print filePath & "(" & cnt & ")  [" & tmpCSet & "]: " & txt & " ÅÀ " & wtxt
-                Arr.Add Array(filePath, cnt, txt, wtxt)
+                arr.Add Array(filePath, cnt, txt, wtxt)
                 hitcnt = hitcnt + 1
             Else
                 wtxt = txt
@@ -2488,10 +2488,10 @@ Public Function SearchFile2ArrayEx(ByVal dirPath As String, _
                            Optional ByVal wildCards As String = "*.txt", _
                            Optional ByVal igCase As Boolean = False, _
                            Optional ByVal recursive As Boolean = True) As ArrayEx
-    Dim Arr As ArrayEx: Set Arr = New ArrayEx
+    Dim arr As ArrayEx: Set arr = New ArrayEx
     
     If Not IO.FolderExists(dirPath) Then
-        Set SearchFile2ArrayEx = Arr
+        Set SearchFile2ArrayEx = arr
         Exit Function
     End If
     If searchFileName = "" Then
@@ -2516,8 +2516,8 @@ Public Function SearchFile2ArrayEx(ByVal dirPath As String, _
     
     
     Dim folder As Object: Set folder = IO.GetFolder(dirPath)
-    Call SearchFileImpl(folder, reg, wildCards, Arr, recursive)
-    Set SearchFile2ArrayEx = Arr
+    Call SearchFileImpl(folder, reg, wildCards, arr, recursive)
+    Set SearchFile2ArrayEx = arr
 End Function
 
 '******************************************************************************
@@ -2534,20 +2534,20 @@ End Function
 Private Sub SearchFileImpl(ByVal folder As Object, _
                            ByVal reg As Object, _
                            ByVal wildCards As String, _
-                           ByRef Arr As ArrayEx, _
+                           ByRef arr As ArrayEx, _
                            Optional ByVal recursive As Boolean = True)
     Dim f As Object
     For Each f In folder.Files
         If f.Name Like wildCards Then
             If reg.test(f.Name) Then
-                Arr.Add f.Path
+                arr.Add f.Path
             End If
         End If
     Next
     If recursive Then
         Dim sFolder As Object
         For Each sFolder In folder.SubFolders
-            Call SearchFileImpl(sFolder, reg, wildCards, Arr, recursive)
+            Call SearchFileImpl(sFolder, reg, wildCards, arr, recursive)
         Next
     End If
 End Sub

@@ -118,8 +118,8 @@ End Function
 '* @param arr As Variant(Of Array(Of T))
 '* @return As Collection(Of T)
 '******************************************************************************
-Public Function ArrayToCollection(ByVal Arr As Variant) As Collection
-    Set ArrayToCollection = Core.ArrToClct(Arr)
+Public Function ArrayToCollection(ByVal arr As Variant) As Collection
+    Set ArrayToCollection = Core.ArrToClct(arr)
 End Function
 
 '******************************************************************************

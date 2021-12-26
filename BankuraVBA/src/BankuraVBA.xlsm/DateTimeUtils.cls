@@ -904,13 +904,13 @@ Public Function LapTimes() As Variant
     If mStartNum = 0 Or mLapTimes.Count = 0 Then
         LapTimes = Split(vbNullString)
     Else
-        Dim Arr() As Variant
-        ReDim Arr(1 To mLapTimes.Count)
+        Dim arr() As Variant
+        ReDim arr(1 To mLapTimes.Count)
         Dim i As Long
         For i = 1 To mLapTimes.Count
-            Arr(i) = mLapTimes(i)
+            arr(i) = mLapTimes(i)
         Next
-        LapTimes = Arr
+        LapTimes = arr
     End If
 End Function
 

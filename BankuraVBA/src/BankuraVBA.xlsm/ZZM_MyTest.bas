@@ -786,10 +786,10 @@ Sub ArrayUtils_Test001()
     dic.Add "k4", "4"
     dic.Add "k5", Array("a", "b", "c")
     
-    Dim Arr
-    Arr = Array("ara", "yada", "cyo", 2020, col, dic, Core.Wsh)
+    Dim arr
+    arr = Array("ara", "yada", "cyo", 2020, col, dic, Core.Wsh)
     
-    Debug.Print ArrayUtils.ToString(Arr)
+    Debug.Print ArrayUtils.ToString(arr)
 End Sub
 
 
@@ -1408,4 +1408,33 @@ Sub ProgressBarFormTest001()
 
     pBarForm.Unload
     Debug.Print "èIóπ"
+End Sub
+
+Sub GetVisibleRangeData_Test001()
+'    DebugUtils.Show XlWorkSheetUtils.DataRangeAdress(3, 2)
+'    DebugUtils.PrintArray XlWorkSheetUtils.GetVisibleRangeData( _
+'        XlWorkSheetUtils.DataRangeAdress(3, 2) _
+'    )
+    
+    With Base.ActiveSheetEx
+        DebugUtils.Show .DataRangeAdress(3, 2)
+        DebugUtils.PrintArray .GetVisibleRangeData(.DataRangeAdress(3, 2))
+    End With
+End Sub
+
+Sub InjectDataToVisibleRange_Test001()
+
+    Dim arr As Array2DEx, arr2 As Array2DEx
+    With Base.ActiveSheetEx
+
+        'arr = .ExportArray(2, 1)
+        'DebugUtils.PrintArray arr
+        'Call .ImportArray(arr, 2, 3)
+        
+        Set arr = .GetVisibleRangeToArray2DEx(.DataRangeAdress(2, 1))
+        Set arr2 = .ExportArray2DEx(2, 1)
+        DebugUtils.PrintArray arr
+        'Call XlWorkSheetUtils.InjectDataToVisibleRange(arr, 2, 3, ArrayUtils.GetLength(arr2, 1), ArrayUtils.GetLength(arr2, 2))
+        Call .InjectDataToVisibleRange(arr, 2, 3, arr2.RowLength, arr2.ColLength)
+    End With
 End Sub

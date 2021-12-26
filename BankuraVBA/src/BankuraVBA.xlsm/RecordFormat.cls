@@ -266,12 +266,12 @@ End Function
 '* @param colnum エラー発生データ列番号
 '*
 '******************************************************************************
-Private Sub SetErrorMessage(ByVal itm As Item, ByVal rowNum As Long, ByVal colnum As Long)
-    mErrMessage = "[行" + CStr(rowNum) + " 列" + CStr(colnum) + "]  " + itm.Name _
+Private Sub SetErrorMessage(ByVal itm As Item, ByVal rowNum As Long, ByVal colNum As Long)
+    mErrMessage = "[行" + CStr(rowNum) + " 列" + CStr(colNum) + "]  " + itm.Name _
                   + vbNewLine + "[" + itm.Value + "]" + vbNewLine + vbNewLine + _
                     itm.GetErrorMessage
     mErrRowNo = rowNum
-    mErrColNo = colnum
+    mErrColNo = colNum
 End Sub
 
 '******************************************************************************

@@ -4068,16 +4068,16 @@ End Function
 '*
 '******************************************************************************
 Public Function ToCharArray(ByVal str As String) As Variant
-    Dim Arr As ArrayEx: Set Arr = New ArrayEx
+    Dim arr As ArrayEx: Set arr = New ArrayEx
     If Me.IsEmpty(str) Then
-        ToCharArray = Arr.ToArray
+        ToCharArray = arr.ToArray
         Exit Function
     End If
     Dim i As Long
     For i = 1 To Len(str)
-        Arr.AddVal Mid(str, i, 1)
+        arr.AddVal Mid(str, i, 1)
     Next
-    ToCharArray = Arr.ToArray
+    ToCharArray = arr.ToArray
 End Function
 
 '******************************************************************************
@@ -4095,16 +4095,16 @@ End Function
 '*
 '******************************************************************************
 Public Function ToCharArrayReverse(ByVal str As String) As Variant
-    Dim Arr As ArrayEx: Set Arr = New ArrayEx
+    Dim arr As ArrayEx: Set arr = New ArrayEx
     If Me.IsEmpty(str) Then
-        ToCharArrayReverse = Arr.ToArray
+        ToCharArrayReverse = arr.ToArray
         Exit Function
     End If
     Dim i As Long
     For i = Len(str) To 1 Step -1
-        Arr.AddVal Mid(str, i, 1)
+        arr.AddVal Mid(str, i, 1)
     Next
-    ToCharArrayReverse = Arr.ToArray
+    ToCharArrayReverse = arr.ToArray
 End Function
 
 '******************************************************************************
@@ -4199,11 +4199,11 @@ Public Function SplitByLength(ByVal str As String, ByVal cutLength) As Variant
         Exit Function
     End If
     Dim i As Long
-    Dim Arr As ArrayEx: Set Arr = New ArrayEx
+    Dim arr As ArrayEx: Set arr = New ArrayEx
     For i = 1 To Len(str) / cutLength
-        Call Arr.AddVal(Mid(str, 1 + ((i - 1) * cutLength), cutLength))
+        Call arr.AddVal(Mid(str, 1 + ((i - 1) * cutLength), cutLength))
     Next
-    SplitByLength = Arr.ToArray
+    SplitByLength = arr.ToArray
 End Function
 
 '*******************************************************************************
@@ -4402,18 +4402,18 @@ End Function
 '*
 '******************************************************************************
 Public Function Split2ArrayEx(ByVal str As String, delim As Variant) As ArrayEx
-    Dim Arr As ArrayEx: Set Arr = New ArrayEx
+    Dim arr As ArrayEx: Set arr = New ArrayEx
     
     If Me.IsEmpty(str) Or Me.IsEmpty(delim) Or (VBA.IsArray(delim) And VBA.IsEmpty(delim)) Then
-        Arr.Add str
-        Set Split2ArrayEx = Arr
+        arr.Add str
+        Set Split2ArrayEx = arr
         Exit Function
     End If
 
     Dim inds As Variant: inds = IndexOfAnyAll(str, delim)
     If ArrayUtils.IsEmptyArray(inds) Then
-        Arr.Add str
-        Set Split2ArrayEx = Arr
+        arr.Add str
+        Set Split2ArrayEx = arr
         Exit Function
     End If
     Dim ind1 As Long: ind1 = 0
@@ -4433,9 +4433,9 @@ Public Function Split2ArrayEx(ByVal str As String, delim As Variant) As ArrayEx
             ind2 = inds(i)
         End If
         
-        Call Arr.Add(Substring(str, ind1, ind2))
+        Call arr.Add(Substring(str, ind1, ind2))
     Next
-    Set Split2ArrayEx = Arr
+    Set Split2ArrayEx = arr
 End Function
 
 '******************************************************************************
