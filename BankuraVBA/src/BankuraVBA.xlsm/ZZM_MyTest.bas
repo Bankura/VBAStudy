@@ -113,7 +113,7 @@ Sub TestArray2DEx005()
     Debug.Print arr2dex.ColIndexOf(1, 35)
     Debug.Print arr2dex.RowIndexOf(4, 35)
     
-    Dim xy As Array2DIndex
+    Dim xy As Index2D
     xy = arr2dex.IndexOf(35)
     Debug.Print xy.x, xy.y
     
@@ -203,7 +203,7 @@ Sub TestArray2DEx007()
     Call arr2dex.ColRemoveAt(1)
     DebugUtils.Show arr2dex.RowLastIndexOf(1, 2)
     DebugUtils.Show arr2dex.ColLastIndexOf(2, 2)
-    Dim p As Array2DIndex: p = arr2dex.LastIndexOf(2)
+    Dim p As Index2D: p = arr2dex.LastIndexOf(2)
     DebugUtils.Show p.x & " " & p.y
     DebugUtils.PrintArray arr2dex.To2DArray
     

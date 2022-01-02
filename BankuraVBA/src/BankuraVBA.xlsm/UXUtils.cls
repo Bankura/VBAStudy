@@ -16,9 +16,10 @@ Option Explicit
 '*          Staticクラス（Attribute VB_PredeclaredId = True）とする。
 '* [参  考]
 '*          http://tetsucom.blogspot.com/2011/03/vba_621.html
+'*          http://home.att.ne.jp/zeta/gen/excel/c04p06.htm
 '*
 '* @author Bankura
-'* Copyright (c) 2019-2021 Bankura
+'* Copyright (c) 2019-2022 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 '******************************************************************************
@@ -43,6 +44,11 @@ Private Declare PtrSafe Function GetWindowLong Lib "user32" Alias "GetWindowLong
 Private Declare PtrSafe Function SetWindowLong Lib "user32" Alias "SetWindowLongA" (ByVal hWnd As LongPtr, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
 Private Declare PtrSafe Function GetActiveWindow Lib "user32" () As LongPtr
 Private Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As LongPtr
+Private Declare PtrSafe Function GetDesktopWindow Lib "user32" () As Long
+Private Declare PtrSafe Function GetDC Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare PtrSafe Function GetDeviceCaps Lib "gdi32" (ByVal hDc As Long, ByVal nIndex As Long) As Long
+Private Declare PtrSafe Function ReleaseDC Lib "user32" (ByVal hWnd As Long, ByVal hDc As Long) As Long
+Private Declare PtrSafe Function GetAsyncKeyState Lib "user32" (ByVal vKey As Long) As Integer
 
 '******************************************************************************
 '* Enum定義
@@ -63,17 +69,23 @@ End Enum
 Private Const NIM_ADD = &H0
 Private Const NIM_MODIFY = &H1
 Private Const NIM_DELETE = &H2
-Private Const NIF_MESSAGE = &H1 'uCallbackMessage
-Private Const NIF_ICON = &H2    'hIcon
-Private Const NIF_TIP = &H4     'szTip
-Private Const NIF_STATE = &H8   'Version 5.0 以降： dwState, dwStateMask
-Private Const NIF_INFO = &H10   'Version 5.0 以降： szInfo, uTimeout, szInfoTitle, dwInfoFlags
-Private Const NIF_GUID = &H20   'Version 6.0 以降： 予約されています。
+Private Const NIF_MESSAGE = &H1 ' uCallbackMessage
+Private Const NIF_ICON = &H2    ' hIcon
+Private Const NIF_TIP = &H4     ' szTip
+Private Const NIF_STATE = &H8   ' Version 5.0 以降： dwState, dwStateMask
+Private Const NIF_INFO = &H10   ' Version 5.0 以降： szInfo, uTimeout, szInfoTitle, dwInfoFlags
+Private Const NIF_GUID = &H20   ' Version 6.0 以降： 予約されています。
 Private Const NOTIFYICONDATA_V3_SIZE As Long = 504
 Private Const GWL_STYLE = (-16)
 Private Const WS_MAXIMIZEBOX = &H10000
 Private Const WS_MINIMIZEBOX = &H20000
 Private Const WS_THICKFRAME = &H40000
+Private Const PPI As Long = 72 ' Excel内で用いるポイント:72dpi
+Private Const LOGPIXELSX As Long = 88
+Private Const LOGPIXELSY As Long = 90
+Private Const KEY_PRESSED = -32768
+Private Const VK_LBUTTON = &H1 ' LeftClick
+Private Const VK_RBUTTON = &H2 ' RightClick
 
 '******************************************************************************
 '構造体定義
@@ -112,6 +124,27 @@ Private mIcon As NOTIFYICONDATA
 '******************************************************************************
 '* プロパティ定義
 '******************************************************************************
+'*-----------------------------------------------------------------------------
+'* DPI プロパティ（読み取り専用）
+'*
+'* [補  足]
+'* ・DPIとは、解像度を示す単位。
+'* ・dots per inchの略で、1インチの幅の中にどれだけのドットを表現できるかを表す。
+'* ・Windowsでは96dpiが標準とされている。
+'*-----------------------------------------------------------------------------
+Public Property Get DPI() As Long
+    'デスクトップのウィンドウハンドル
+    Dim hWnd As Long: hWnd = GetDesktopWindow()
+  
+    'デバイスコンテキストを取得
+    Dim hDc As Long: hDc = GetDC(hWnd)
+  
+    'デバイス固有情報を取得
+    DPI = GetDeviceCaps(hDc, LOGPIXELSX)
+  
+    'デバイスコンテキストを解放
+    Call ReleaseDC(hWnd, hDc)
+End Property
 
 '******************************************************************************
 '* コンストラクタ・デストラクタ
@@ -127,9 +160,10 @@ End Sub
 '* [概  要] DoEvents実行処理
 '* [詳  細] DoEventsを最適なタイミングで実行する。
 '*
+'* @param second DoEventsを行う間隔（秒）
 '******************************************************************************
-Public Sub CheckEvents()
-    If GetInputState() Or (DateDiff("s", mTime, time) > 3) Then
+Public Sub CheckEvents(Optional ByVal second As Integer = 3)
+    If GetInputState() Or (DateDiff("s", mTime, time) > second) Then
         DoEvents
         mTime = time
     End If
@@ -308,24 +342,164 @@ Public Sub ChangeNumLockOn()
 End Sub
 
 '******************************************************************************
-'* [概  要] ChangeMousePoint
+'* [概  要] ChangeMousePixelPosition
 '* [詳  細] マウスカーソルの位置を変更する。
 '*
+'* @param x 横位置（Pixel）
+'* @param y 縦位置（Pixel）
 '******************************************************************************
-Public Sub ChangeMousePoint(x As Long, y As Long)
+Public Sub ChangeMousePixelPosition(x As Long, y As Long)
+    ' マウスカーソル位置指定
+    Call SetCursorPos(x, y)
+End Sub
+
+'******************************************************************************
+'* [概  要] GetMousePixelPosition
+'* [詳  細] マウスカーソルの位置を取得する。
+'*
+'* @param x 横位置（Pixel）
+'* @param y 縦位置（Pixel）
+'******************************************************************************
+Public Sub GetMousePixelPosition(x As Long, y As Long)
     Dim mousePoint As POINTAPI
-    Dim mousePSet As Long
+
+    ' マウスカーソル位置取得
+    Call GetCursorPos(mousePoint)
+    With mousePoint
+        x = .x
+        y = .y
+    End With
+End Sub
+
+'******************************************************************************
+'* [概  要] ChangeMousePointPosition
+'* [詳  細] マウスカーソルの位置を変更する（Point指定）。
+'*
+'* @param x 横位置（Point）
+'* @param y 縦位置（Point）
+'******************************************************************************
+Public Sub ChangeMousePointPosition(x As Long, y As Long)
+    Dim srcPixel As POINTAPI, destPoint As POINTAPI
+    With srcPixel
+        .x = x
+        .y = y
+    End With
+    destPoint = ChangeScreenPixelToXlPoint(srcPixel)
     
     ' マウスカーソル位置指定
-    mousePSet = SetCursorPos(x, y)
-    
-'    ' マウスカーソル位置取得
-'    Call GetCursorPos(mousePoint)
-'    With mousePoint
-'        x = .x
-'        y = .y
-'    End With
+    Call SetCursorPos(destPoint.x, destPoint.y)
 End Sub
+
+'******************************************************************************
+'* [概  要] GetMousePointPosition
+'* [詳  細] マウスカーソルの位置を取得する。
+'*
+'* @param x 横位置（Point）
+'* @param y 縦位置（Point）
+'******************************************************************************
+Public Sub GetMousePointPosition(x As Long, y As Long)
+    Dim mousePixel As POINTAPI, destPoint As POINTAPI
+
+    ' マウスカーソル位置取得
+    Call GetCursorPos(mousePixel)
+    destPoint = ChangeScreenPixelToXlPoint(mousePixel)
+    With destPoint
+        x = .x
+        y = .y
+    End With
+End Sub
+
+'******************************************************************************
+'* [概  要] ChangeXlPointToScreenPixel
+'* [詳  細] Excel内で使う座標（単位：Point）から、スクリーン座標（単位：Pixel）
+'*          に変換する。
+'*          ActiveWindow情報シート上の位置（単位：Point）を、
+'*          Windows 画面上の位置（単位：Pixel）に変換するため
+'*          A1 セルの左上の位置をWindows 画面上のPixel位置で取得し、
+'*          それに、シート上の位置（単位：Point）をPixelに変換して加算する。
+'*
+'* @param xlPoint Excel座標（Point）
+'* @return POINTAPI Screen座標（Pixel）
+'******************************************************************************
+Public Function ChangeXlPointToScreenPixel(xlPoint As POINTAPI) As POINTAPI
+    Dim xR1C1 As Long: xR1C1 = ActiveWindow.PointsToScreenPixelsX(0)
+    Dim yR1C1 As Long: yR1C1 = ActiveWindow.PointsToScreenPixelsY(0)
+
+    ChangeXlPointToScreenPixel.x = xR1C1 + PointToPixel(xlPoint.x)
+    ChangeXlPointToScreenPixel.y = yR1C1 + PointToPixel(xlPoint.y)
+End Function
+
+'******************************************************************************
+'* [概  要] ChangeScreenPixelToXlPoint
+'* [詳  細] スクリーン座標（単位：Pixel）から、Excel内で使う座標（単位：Point）
+'*          に変換する。
+'*          Windows 画面上の位置（単位：Pixel）を、
+'*          ActiveWindow情報シート上の位置（単位：Point）に変換するため
+'*          A1 セルの左上の位置をWindows 画面上のPixel位置で取得し、
+'*          シート上の位置（単位：Pixel）から減算後、Pointに変換する。
+'*
+'* @param xlPoint Excel座標（Point）
+'* @return POINTAPI Screen座標（Pixel）
+'******************************************************************************
+Public Function ChangeScreenPixelToXlPoint(scPixel As POINTAPI) As POINTAPI
+    Dim xR1C1 As Long: xR1C1 = ActiveWindow.PointsToScreenPixelsX(0)
+    Dim yR1C1 As Long: yR1C1 = ActiveWindow.PointsToScreenPixelsY(0)
+
+    ChangeScreenPixelToXlPoint.x = PixelToPoint(scPixel.x - xR1C1)
+    ChangeScreenPixelToXlPoint.y = PixelToPoint(scPixel.y - yR1C1)
+End Function
+
+'******************************************************************************
+'* [概  要] PointToPixel
+'* [詳  細] Point値から、Pixel値に変換する。
+'*
+'* @param pointValue Pointの値
+'* @return Long Pixelの値
+'******************************************************************************
+Public Function PointToPixel(ByVal pointValue As Long) As Long
+    PointToPixel = (pointValue / PPI * DPI) * (ActiveWindow.Zoom / 100)
+End Function
+
+'******************************************************************************
+'* [概  要] PixelToPoint
+'* [詳  細] Pixel値から、Point値に変換する。
+'*
+'* @param pointValue Pixelの値
+'* @return Long Pointの値
+'******************************************************************************
+Public Function PixelToPoint(ByVal pixelValue As Long) As Long
+    PixelToPoint = pixelValue * PPI / DPI ' * (100 / ActiveWindow.Zoom)
+End Function
+
+'******************************************************************************
+'* [概  要] IsMouseLeftClicked
+'* [詳  細] マウスの左クリックが行われたか判定する。
+'*
+'* @return Boolean 左クリックが行われたか（True:Yes, False:No）
+'******************************************************************************
+Public Function IsMouseLeftClicked() As Boolean
+    IsMouseLeftClicked = IsKeyPressed(VK_LBUTTON)
+End Function
+
+'******************************************************************************
+'* [概  要] IsMouseRightClicked
+'* [詳  細] マウスの右クリックが行われたか判定する。
+'*
+'* @return Boolean 右クリックが行われたか（True:Yes, False:No）
+'******************************************************************************
+Public Function IsMouseRightClicked() As Boolean
+    IsMouseRightClicked = IsKeyPressed(VK_RBUTTON)
+End Function
+
+'******************************************************************************
+'* [概  要] IsKeyPressed
+'* [詳  細] 指定したキーが押されているか判定する。
+'*
+'* @return Boolean 右クリックが行われたか（True:Yes, False:No）
+'******************************************************************************
+Public Function IsKeyPressed(keyCd As Long) As Boolean
+    IsKeyPressed = (GetAsyncKeyState(keyCd) And KEY_PRESSED) = KEY_PRESSED
+End Function
 
 '******************************************************************************
 '* [概  要] NotifyToast

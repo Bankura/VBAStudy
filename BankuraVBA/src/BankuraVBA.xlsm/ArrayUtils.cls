@@ -801,30 +801,36 @@ End Function
 '******************************************************************************
 '* [概  要] Copy2DArray
 '* [詳  細] 2次元配列をコピーして新しい2次元配列を作成する。
-'*          開始インデックスは0固定。
 '*
-'* @param source2DArr コピー元2次元配列
-'* @param start1DIdx 1次元開始インデックス
-'* @param start2DIdx 2次元開始インデックス
-'* @param end1DIdx   1次元終了インデックス
-'* @param end2DIdx   2次元終了インデックス
+'* @param source2DArr    コピー元2次元配列
+'* @param start1DIdx     1次元開始インデックス
+'* @param start2DIdx     2次元開始インデックス
+'* @param end1DIdx       1次元終了インデックス
+'* @param end2DIdx       2次元終了インデックス
+'* @param destStart1DIdx コピー先1次元開始インデックス
+'* @param destStart2DIdx コピー先2次元開始インデックス
 '* @return Variant 2次元配列
 '******************************************************************************
 Public Function Copy2DArray(ByRef source2DArr As Variant, _
                             Optional ByVal start1DIdx As Long = -1, Optional ByVal start2DIdx As Long = -1, _
-                            Optional ByVal end1DIdx As Long = -1, Optional ByVal end2DIdx As Long = -1) As Variant
+                            Optional ByVal end1DIdx As Long = -1, Optional ByVal end2DIdx As Long = -1, _
+                            Optional ByVal destStart1DIdx As Long = -1, Optional ByVal destStart2DIdx As Long = -1) As Variant
     If start1DIdx < 0 Then start1DIdx = LBound(source2DArr, 1)
     If start2DIdx < 0 Then start2DIdx = LBound(source2DArr, 2)
     If end1DIdx < 0 Then end1DIdx = UBound(source2DArr, 1)
     If end2DIdx < 0 Then end2DIdx = UBound(source2DArr, 2)
-
-    Dim vNew2DArr As Variant: vNew2DArr = Create2DArray(0, end1DIdx - start1DIdx, 0, end2DIdx - start2DIdx)
+    If destStart1DIdx < 0 Then destStart1DIdx = 0
+    If destStart2DIdx < 0 Then destStart2DIdx = 0
+    
+    Dim vNew2DArr As Variant
+    vNew2DArr = Create2DArray(destStart1DIdx, destStart1DIdx + end1DIdx - start1DIdx, _
+                              destStart2DIdx, destStart2DIdx + end2DIdx - start2DIdx)
     
     Dim i As Long, j As Long
     Dim x As Long, y As Long
-    x = 0
+    x = destStart1DIdx
     For i = start1DIdx To end1DIdx
-        y = 0
+        y = destStart2DIdx
         For j = start2DIdx To end2DIdx
             vNew2DArr(x, y) = source2DArr(i, j)
             y = y + 1
@@ -904,6 +910,24 @@ Public Function ContainsLike(ByRef vArr As Variant, ByVal searchStr As String, O
         End If
     Next
     ContainsLike = False
+End Function
+
+'******************************************************************************
+'* [概  要] CountOf
+'* [詳  細] 配列に指定した項目が含まれる数をカウントする。
+'*
+'* @param varr 配列
+'* @param itm 項目
+'* @return Long カウント結果
+'******************************************************************************
+Public Function CountOf(ByRef vArr As Variant, ByVal itm As Variant) As Long
+    Dim v As Variant, cnt As Long
+    For Each v In vArr
+        If Core.Eq(v, itm) Then
+            cnt = cnt + 1
+        End If
+    Next
+    CountOf = cnt
 End Function
 
 '******************************************************************************
@@ -1830,3 +1854,4 @@ Public Sub NaturalSort(ByRef arr As Variant)
        Next
     Next
 End Sub
+

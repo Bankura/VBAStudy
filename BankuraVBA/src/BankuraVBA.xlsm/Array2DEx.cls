@@ -349,9 +349,10 @@ End Function
 '*          追加した行の値はDefaultInitValueの値を設定する。
 '*
 '* @param xAddRowCount 追加行数
+'* @return Array2DEx
 '*
 '******************************************************************************
-Public Sub ExpandRows(ByVal xAddRowCount As Long)
+Public Function ExpandRows(ByVal xAddRowCount As Long) As Array2DEx
     Dim i As Long, j As Long
     For i = 1 To xAddRowCount
         Dim row As ArrayEx: Set row = New ArrayEx
@@ -362,7 +363,8 @@ Public Sub ExpandRows(ByVal xAddRowCount As Long)
     Next
     mRowLength = mRowLength + xAddRowCount
     mRowMaxIndex = mRowMaxIndex + xAddRowCount
-End Sub
+    Set ExpandRows = Me
+End Function
 
 '******************************************************************************
 '* [概  要] ExpandColumns
@@ -370,9 +372,10 @@ End Sub
 '*          追加した列の値はDefaultInitValueの値を設定する。
 '*
 '* @param yAddColCount 追加列数
+'* @return Array2DEx
 '*
 '******************************************************************************
-Public Sub ExpandColumns(ByVal yAddColCount As Long)
+Public Function ExpandColumns(ByVal yAddColCount As Long) As Array2DEx
     Dim i As Long, j As Long
     For i = 0 To mRowMaxIndex
         Dim row As ArrayEx: Set row = m2DItems(i)
@@ -382,7 +385,8 @@ Public Sub ExpandColumns(ByVal yAddColCount As Long)
     Next
     mColLength = mColLength + yAddColCount
     mColMaxIndex = mColMaxIndex + yAddColCount
-End Sub
+    Set ExpandColumns = Me
+End Function
 
 '******************************************************************************
 '* [概  要] Expand
@@ -391,12 +395,14 @@ End Sub
 '*
 '* @param xAddRowCount 追加行数
 '* @param yAddColCount 追加列数
+'* @return Array2DEx
 '*
 '******************************************************************************
-Public Sub Expand(ByVal xAddRowCount As Long, ByVal yAddColCount As Long)
+Public Function Expand(ByVal xAddRowCount As Long, ByVal yAddColCount As Long) As Array2DEx
     Call ExpandRows(xAddRowCount)
     Call ExpandColumns(yAddColCount)
-End Sub
+    Set Expand = Me
+End Function
 
 '******************************************************************************
 '* [概  要] AddRow
@@ -656,14 +662,14 @@ End Function
 '*
 '* @param val 値
 '* @param ixStart 捜査開始行インデックス
-'* @return Array2DIndex 行列インデックス（一致なしの場合は行列ともに-1）
+'* @return Index2D 行列インデックス（一致なしの場合は行列ともに-1）
 '******************************************************************************
-Public Function IndexOf(ByVal val As Variant, Optional ByVal ixStart As Long) As Array2DIndex
+Public Function IndexOf(ByVal val As Variant, Optional ByVal ixStart As Long) As Index2D
     If IsInvalidRowIndex(ixStart) Then
         Err.Raise 9999, "Array2DEx#IndexOf", "Invalid argument."
     End If
 
-    Dim x As Long, y As Long, arr2dIdx As Array2DIndex
+    Dim x As Long, y As Long, arr2dIdx As Index2D
     For x = ixStart To mRowMaxIndex
         y = Core.ArrIndexOf(m2DItems(x).ToArray, val)
         If y <> -1 Then
@@ -1322,6 +1328,17 @@ Public Function Contains(ByVal itm As Variant) As Boolean
 End Function
 
 '******************************************************************************
+'* [概  要] CountOf
+'* [詳  細] 配列に指定した項目が含まれる数をカウントする。
+'*
+'* @param itm 項目
+'* @return Long カウント結果
+'******************************************************************************
+Public Function CountOf(ByVal itm As Variant) As Long
+    CountOf = ArrayUtils.CountOf(Me.To2DArray, itm)
+End Function
+
+'******************************************************************************
 '* [概  要] Clone
 '* [詳  細] Array2DExオブジェクトを複製する。
 '*
@@ -1551,7 +1568,7 @@ End Function
 '* @param ixStart 捜査開始行インデックス
 '* @return Array2DIndex 行列インデックス（一致なしの場合は行列ともに-1）
 '******************************************************************************
-Public Function LastIndexOf(ByVal val As Variant, Optional ByVal ixStart) As Array2DIndex
+Public Function LastIndexOf(ByVal val As Variant, Optional ByVal ixStart) As Index2D
     If VBA.IsMissing(ixStart) Then
         ixStart = mRowMaxIndex
     End If
@@ -1559,7 +1576,7 @@ Public Function LastIndexOf(ByVal val As Variant, Optional ByVal ixStart) As Arr
         Err.Raise 9999, "Array2DEx#LastIndexOf", "Invalid argument."
     End If
 
-    Dim x As Long, y As Long, arr2dIdx As Array2DIndex
+    Dim x As Long, y As Long, arr2dIdx As Index2D
     For x = ixStart To 0 Step -1
         y = ArrayUtils.LastIndexOf(m2DItems(x).ToArray, val)
         If y <> -1 Then

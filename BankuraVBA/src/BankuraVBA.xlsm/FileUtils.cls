@@ -19,7 +19,7 @@ Option Explicit
 '*          https://popozure.info/20190515/14201
 '*
 '* @author Bankura
-'* Copyright (c) 2019-2021 Bankura
+'* Copyright (c) 2019-2022 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 '******************************************************************************
@@ -119,15 +119,15 @@ End Type
 '* CurrentDirectory プロパティ
 '*-----------------------------------------------------------------------------
 Public Property Get CurrentDirectory() As String
-    CurrentDirectory = IO.fso.GetAbsolutePathName("./")
+    CurrentDirectory = IO.GetAbsolutePathName("./")
 End Property
-
 
 '******************************************************************************
 '* コンストラクタ・デストラクタ
 '******************************************************************************
 Private Sub Class_Initialize()
 End Sub
+
 '******************************************************************************
 '* メソッド定義
 '******************************************************************************
@@ -145,6 +145,25 @@ Public Function AddPathSeparator(strDirPath As String) As String
     Else
         AddPathSeparator = strDirPath
     End If
+End Function
+
+'******************************************************************************
+'* [概  要] ChangeDirectory メソッド
+'* [詳  細] カレントディレクトリを変更する｡
+'*          ドライブも合わせて変更。
+'*
+'* @param targetDirPath ディレクトリパス
+'* @return 実行結果（True:成功）
+'*
+'******************************************************************************
+Public Function ChangeDirectory(ByVal targetDirPath As String) As Boolean
+    If IsValidFolderPath(targetDirPath) Then
+        ChDrive Left(targetDirPath, 1)
+        ChDir targetDirPath
+        ChangeDirectory = True
+        Exit Function
+    End If
+    ChangeDirectory = False
 End Function
 
 '******************************************************************************

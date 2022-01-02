@@ -1379,6 +1379,42 @@ Public Sub CellToPng(ByVal saveDirPath As String, ByVal rngAddress As String, Op
 End Sub
 
 '******************************************************************************
+'* [概  要] GetMousePointPosition
+'* [詳  細] マウスカーソルのあるセル位置を取得する。
+'*
+'* @param rowNo  マウスカーソルのあるセル位置行
+'* @param colNo  マウスカーソルのあるセル位置列
+'* @param sheetName  対象のシート名（省略すると選択中のシートで処理）
+'* @param wb         ワークブックオブジェクト
+'******************************************************************************
+Public Sub GetMouseCellPosition(rowNo As Long, colNo As Long, Optional ByVal sheetName As String, Optional ByRef wb As Workbook)
+    Dim ws As Worksheet
+    If Not SetWorkbookAndSheetDefault(wb, ws, sheetName) Then
+        Err.Raise 9999, "XlWorkSheetUtils#GetMouseCellPosition", "シート名の指定に誤りがあります。"
+    End If
+    
+    Dim xMousePoint As Long, yMousePoint As Long
+    Call UXUtils.GetMousePointPosition(xMousePoint, yMousePoint)
+    If xMousePoint < 0 Or yMousePoint < 0 Then
+        rowNo = 0
+        colNo = 0
+        Exit Sub
+    End If
+    
+    With ws
+        colNo = 0
+        Do
+            colNo = colNo + 1
+        Loop Until xMousePoint >= .Cells(1, colNo).Left And xMousePoint < .Cells(1, colNo + 1).Left
+        
+        rowNo = 0
+        Do
+            rowNo = rowNo + 1
+        Loop Until yMousePoint >= .Cells(rowNo, 1).Top And yMousePoint < .Cells(rowNo + 1, 1).Top
+    End With
+End Sub
+
+'******************************************************************************
 '* [概  要] GetVisibleRangeData
 '* [詳  細] Range範囲の表示領域のデータを2次元配列で取得する。
 '* [参  考] https://www.excel-chunchun.com/entry/readcellvalue3
@@ -1580,6 +1616,7 @@ Private Sub CountDataOfAreas(targetAreas As Areas, areasRowsCount As Long, areas
     areasRowsCount = targetAreas.Count / areasColsCount
     totalRowsCount = totalRowsCount / areasColsCount
 End Sub
+
 
 '******************************************************************************
 '* [概  要] SetWorkbookAndSheetDefault

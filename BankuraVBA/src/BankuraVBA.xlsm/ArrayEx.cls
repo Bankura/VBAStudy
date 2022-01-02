@@ -532,6 +532,17 @@ Public Function ContainsLike(ByVal searchStr As String, Optional ByVal igCase As
 End Function
 
 '******************************************************************************
+'* [概  要] CountOf
+'* [詳  細] 配列に指定した項目が含まれる数をカウントする。
+'*
+'* @param itm 項目
+'* @return Long カウント結果
+'******************************************************************************
+Public Function CountOf(ByVal itm As Variant) As Long
+    CountOf = ArrayUtils.CountOf(Me.ToArray, itm)
+End Function
+
+'******************************************************************************
 '* [概  要] Clone
 '* [詳  細] ArrayExオブジェクトを複製する。
 '*
