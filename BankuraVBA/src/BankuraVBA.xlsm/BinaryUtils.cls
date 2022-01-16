@@ -338,8 +338,8 @@ End Function
 '*                 「HKEY_CLASSES_ROOT\MIME\Database\Charset」参照。
 '* @return 変換後バイトデータ
 '******************************************************************************
-Public Function TxtString2ByteArray(ByVal text As String, Optional ByVal cSet As String = "UTF-8") As Byte()
-    TxtString2ByteArray = StringUtils.GetBytes(text, cSet)
+Public Function TxtString2ByteArray(ByVal Text As String, Optional ByVal cSet As String = "UTF-8") As Byte()
+    TxtString2ByteArray = StringUtils.GetBytes(Text, cSet)
 End Function
 
 '******************************************************************************

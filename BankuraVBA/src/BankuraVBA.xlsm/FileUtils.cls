@@ -157,9 +157,8 @@ End Function
 '*
 '******************************************************************************
 Public Function ChangeDirectory(ByVal targetDirPath As String) As Boolean
-    If IsValidFolderPath(targetDirPath) Then
-        ChDrive Left(targetDirPath, 1)
-        ChDir targetDirPath
+    If IO.FolderExists(targetDirPath) Then
+        Core.Wsh.CurrentDirectory = targetDirPath
         ChangeDirectory = True
         Exit Function
     End If
@@ -1513,11 +1512,11 @@ Public Function ReplaceFileName(ByVal filePath As String, ByVal searchStr As Str
     End If
             
     Dim dirPath As String:  dirPath = IO.GetParentFolderName(filePath)
-    Dim fileName As String: fileName = IO.GetBaseName(filePath)
+    Dim FileName As String: FileName = IO.GetBaseName(filePath)
     Dim extention As String:  extention = IO.GetExtensionName(filePath)
     
     Dim destFileName As String
-    destFileName = IO.BuildPath(dirPath, Replace(fileName, searchStr, replaceStr) & "." & extention)
+    destFileName = IO.BuildPath(dirPath, Replace(FileName, searchStr, replaceStr) & "." & extention)
     
     IO.GetFile(filePath).Move destFileName
     
@@ -1696,8 +1695,8 @@ Public Function IsValidFilePath(ByVal fPath As String, Optional ByVal pathSepara
     Next
     
     ' ファイル名妥当性チェック
-    Dim fileName As String: fileName = ArrayUtils.GetLast(pathElements)
-    If ValidateUtils.ValidatePattern(fileName, _
+    Dim FileName As String: FileName = ArrayUtils.GetLast(pathElements)
+    If ValidateUtils.ValidatePattern(FileName, _
         "[\x00-\x1f<>:""/\\|?*]|^(CON|PRN|AUX|NUL|COM[0-9]|LPT[0-9]|CLOCK\$)(\.|$)|[\. ]$", True) Then
         IsValidFilePath = False
         Exit Function
@@ -1989,18 +1988,18 @@ End Function
 '* @param fileName 対象となるテキストファイルのファイルパス
 '* @return LineSeparatorsEnum 改行コード
 '******************************************************************************
-Public Function GetFileLineSeparator(ByVal fileName As String) As LineSeparatorsEnum
+Public Function GetFileLineSeparator(ByVal FileName As String) As LineSeparatorsEnum
     GetFileLineSeparator = adCRLF
 
     Dim fNo As Long, fLen As Long, buf() As Byte
-    fLen = FileLen(fileName)
+    fLen = FileLen(FileName)
     If fLen > 2048 Then
         fLen = 2048
     End If
     ReDim buf(fLen - 1)
 
     fNo = FreeFile()
-    Open fileName For Binary As fNo
+    Open FileName For Binary As fNo
     Get fNo, , buf
     Close #fNo
     If (Err.Number <> 0) Then
@@ -2051,7 +2050,7 @@ End Function
 '*　[参  考] https://popozure.info/20190515/14201
 '*           https://dobon.net/vb/dotnet/string/detectcode.html
 '******************************************************************************
-Public Function GetFileCharset(ByVal fileName As String, Optional ByRef bomInclude As Boolean = False) As String
+Public Function GetFileCharset(ByVal FileName As String, Optional ByRef bomInclude As Boolean = False) As String
     Const bEscape As Byte = &H1B
     Const bAt As Byte = &H40
     Const bDollar As Byte = &H24
@@ -2075,14 +2074,14 @@ Public Function GetFileCharset(ByVal fileName As String, Optional ByRef bomInclu
     Dim lngEUC              As Long
     On Error Resume Next
     'ファイル読み込み
-    lngFileLen = FileLen(fileName)
+    lngFileLen = FileLen(FileName)
     If lngFileLen > 1024 Then
         lngFileLen = 1024 - 1
     End If
     ReDim bytFile(lngFileLen)
 
     hdlFile = FreeFile()
-    Open fileName For Binary As #hdlFile
+    Open FileName For Binary As #hdlFile
     Get #hdlFile, , bytFile
     Close #hdlFile
     If (Err.Number <> 0) Then
@@ -2639,9 +2638,9 @@ Public Function CreateZipFile(filePath As String, ParamArray targetFiles() As Va
     Dim zipFolder As Object: Set zipFolder = shellObj.NameSpace(IO.GetAbsolutePathName(filePath))
     Dim targetFilePath As Variant
     For Each targetFilePath In targetFiles
-        Dim fileName As String: fileName = fso.GetFileName(targetFilePath)
+        Dim FileName As String: FileName = fso.GetFileName(targetFilePath)
         Dim sFolderItem As Object
-        Set sFolderItem = shellObj.NameSpace(IO.GetParentFolderName(IO.GetAbsolutePathName(targetFilePath))).ParseName(fileName)
+        Set sFolderItem = shellObj.NameSpace(IO.GetParentFolderName(IO.GetAbsolutePathName(targetFilePath))).ParseName(FileName)
         Dim skip As Boolean: skip = False
         If sFolderItem Is Nothing Then
             Debug.Print "Nothing: " & targetFilePath
@@ -2656,7 +2655,7 @@ Public Function CreateZipFile(filePath As String, ParamArray targetFiles() As Va
         If Not skip Then
             Dim retryCnt0 As Long: retryCnt0 = 0
             Do
-                Dim zFolderItem As Object: Set zFolderItem = zipFolder.ParseName(fileName)
+                Dim zFolderItem As Object: Set zFolderItem = zipFolder.ParseName(FileName)
                 If zFolderItem Is Nothing Then
                     Dim cnt As Long: cnt = zipFolder.items().Count
                     zipFolder.CopyHere sFolderItem, &H4 Or &H10

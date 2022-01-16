@@ -90,7 +90,7 @@ End Property
 '* ・現在使用しているVBProjectのファイル名を返す。
 '*-----------------------------------------------------------------------------
 Property Get ThisVBProjectFilename() As String
-    ThisVBProjectFilename = ThisWorkbook.VBProject.fileName
+    ThisVBProjectFilename = ThisWorkbook.VBProject.FileName
 End Property
 
 '*-----------------------------------------------------------------------------
@@ -568,14 +568,14 @@ End Function
 '* @param book          対象のブック（未指定時はThisWorbook）
 '*
 '******************************************************************************
-Public Sub AddFromFile(ByVal componentName As String, ByVal fileName As String, Optional book As Workbook)
+Public Sub AddFromFile(ByVal componentName As String, ByVal FileName As String, Optional book As Workbook)
     Dim mybook As Workbook
     If book Is Nothing Then
         Set mybook = ThisWorkbook
     Else
         Set mybook = book
     End If
-    mybook.VBProject.VBComponents(componentName).CodeModule.AddFromFile fileName
+    mybook.VBProject.VBComponents(componentName).CodeModule.AddFromFile FileName
 End Sub
 
 '******************************************************************************

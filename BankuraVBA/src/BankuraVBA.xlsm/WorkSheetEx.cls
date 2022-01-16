@@ -911,8 +911,8 @@ End Function
 '* @param WorkIdentity xxxxx。省略可能。
 '*
 '******************************************************************************
-Sub ExportAsFixedFormat(Type_ As XlFixedFormatType, Optional fileName, Optional Quality, Optional IncludeDocProperties, Optional IgnorePrintAreas, Optional From, Optional To_, Optional OpenAfterPublish, Optional FixedFormatExtClassPtr, Optional WorkIdentity)
-    Call mOrigin.ExportAsFixedFormat(Type_, fileName, Quality, IncludeDocProperties, IgnorePrintAreas, From, To_, OpenAfterPublish, FixedFormatExtClassPtr, WorkIdentity)
+Sub ExportAsFixedFormat(Type_ As XlFixedFormatType, Optional FileName, Optional Quality, Optional IncludeDocProperties, Optional IgnorePrintAreas, Optional From, Optional To_, Optional OpenAfterPublish, Optional FixedFormatExtClassPtr, Optional WorkIdentity)
+    Call mOrigin.ExportAsFixedFormat(Type_, FileName, Quality, IncludeDocProperties, IgnorePrintAreas, From, To_, OpenAfterPublish, FixedFormatExtClassPtr, WorkIdentity)
 End Sub
 #End If
 
@@ -1090,8 +1090,8 @@ End Sub
 '* @param Local_ Trueは、Excel の言語 (コントロールパネルの設定を含む) に対してファイルを保存します。省略可能。
 '*
 '******************************************************************************
-Sub SaveAs(fileName As String, Optional FileFormat, Optional Password, Optional WriteResPassword, Optional ReadOnlyRecommended, Optional CreateBackup, Optional AddToMru, Optional TextCodepage, Optional TextVisualLayout, Optional Local_)
-    Call mOrigin.SaveAs(fileName, FileFormat, Password, WriteResPassword, ReadOnlyRecommended, CreateBackup, AddToMru, TextCodepage, TextVisualLayout, Local_)
+Sub SaveAs(FileName As String, Optional FileFormat, Optional Password, Optional WriteResPassword, Optional ReadOnlyRecommended, Optional CreateBackup, Optional AddToMru, Optional TextCodepage, Optional TextVisualLayout, Optional Local_)
+    Call mOrigin.SaveAs(FileName, FileFormat, Password, WriteResPassword, ReadOnlyRecommended, CreateBackup, AddToMru, TextCodepage, TextVisualLayout, Local_)
 End Sub
 
 '******************************************************************************
@@ -1124,8 +1124,8 @@ End Sub
 '* @param fileName 表示するグラフィック ファイルを指定
 '*
 '******************************************************************************
-Sub SetBackgroundPicture(fileName As String)
-    Call mOrigin.SetBackgroundPicture(fileName)
+Sub SetBackgroundPicture(FileName As String)
+    Call mOrigin.SetBackgroundPicture(FileName)
 End Sub
 
 '******************************************************************************
@@ -1196,8 +1196,90 @@ End Function
 '* ・セルまたはセル範囲を表す Range オブジェクトを返す。
 '* ・Range(Cells(x1, y1), Cells(x2, y2))を簡易指定できるようにしたもの
 '*-----------------------------------------------------------------------------
-Property Get Range2(startRow As Long, startCol As Long, EndRow As Long, EndCol As Long) As Range
-    Set Range2 = mOrigin.Range(mOrigin.Cells(startRow, startCol), mOrigin.Cells(EndRow, EndCol))
+Public Property Get Range2(startRow As Long, startCol As Long, endRow As Long, endCol As Long) As Range
+    Set Range2 = mOrigin.Range(mOrigin.Cells(startRow, startCol), mOrigin.Cells(endRow, endCol))
+End Property
+
+'*-----------------------------------------------------------------------------
+'* SpecialCells プロパティ（読み取り専用）
+'*
+'* [補  足]
+'* ・特定の種類の Range オブジェクトを返す。
+'* ・指定した種類のセルがない場合は、 Nothing を返す。
+'* ・Range(Cells(x1, y1), Cells(x2, y2)).SpecialCells を簡易指定できるようにしたもの
+'*-----------------------------------------------------------------------------
+Public Property Get SpecialCells(startRow As Long, startCol As Long, endRow As Long, endCol As Long, typeOfCell As XlCellType, Optional typeOfval As XlSpecialCellsValue = 0) As Range
+    Dim rng As Range
+    On Error Resume Next
+    If typeOfval = 0 Then
+        Set rng = Range2(startRow, startCol, endRow, endCol).SpecialCells(typeOfCell)
+    Else
+        Set rng = Range2(startRow, startCol, endRow, endCol).SpecialCells(typeOfCell, typeOfval)
+    End If
+    On Error GoTo 0
+    Err.Clear
+    Set SpecialCells = rng
+End Property
+
+'*-----------------------------------------------------------------------------
+'* CurrentRegion プロパティ（読み取り専用）
+'*
+'* [補  足]
+'* ・アクティブセル領域の Range オブジェクトを返す。
+'* ・Cells(x, y).CurrentRegion を簡易指定できるようにしたもの
+'*-----------------------------------------------------------------------------
+Public Property Get CurrentRegion(rowNo As Long, colNo As Long) As Range
+    Set CurrentRegion = mOrigin.Cells(rowNo, colNo).CurrentRegion
+End Property
+
+'*-----------------------------------------------------------------------------
+'* EntireRow プロパティ（読み取り専用）
+'*
+'* [補  足]
+'* ・行全体を表す Range オブジェクトを返す。
+'* ・Cells(x, 1).EntireRow を簡易指定できるようにしたもの
+'*-----------------------------------------------------------------------------
+Public Property Get EntireRow(rowNo As Long, Optional endRowNo As Long) As Range
+    If endRowNo = 0 Then
+        Set EntireRow = mOrigin.Cells(rowNo, 1).EntireRow
+    Else
+        Set EntireRow = Range2(rowNo, 1, endRowNo, 1).EntireRow
+    End If
+End Property
+
+'*-----------------------------------------------------------------------------
+'* EntireColumn プロパティ（読み取り専用）
+'*
+'* [補  足]
+'* ・列全体を表す Range オブジェクトを返す。
+'* ・Cells(1, y).EntireColumn を簡易指定できるようにしたもの
+'*-----------------------------------------------------------------------------
+Public Property Get EntireColumn(colNo As Long, Optional endColNo As Long) As Range
+    If endColNo = 0 Then
+        Set EntireColumn = mOrigin.Cells(1, colNo).EntireColumn
+    Else
+        Set EntireColumn = Range2(1, colNo, 1, endColNo).EntireColumn
+    End If
+End Property
+
+'*-----------------------------------------------------------------------------
+'* RangeSelection プロパティ（読み取り専用）
+'*
+'* [補  足]
+'* ・選択中のセル範囲を返却する。
+'*-----------------------------------------------------------------------------
+Public Property Get RangeSelection() As Range
+    Set RangeSelection = XlWorkSheetUtils.GetRangeSelection(mOrigin.Name, mOrigin.Parent)
+End Property
+
+'*-----------------------------------------------------------------------------
+'* VisibleRange プロパティ（読み取り専用）
+'*
+'* [補  足]
+'* ・表示中のセル範囲を返却する。
+'*-----------------------------------------------------------------------------
+Public Property Get VisibleRange() As Range
+    Set VisibleRange = XlWorkSheetUtils.GetVisibleRange(mOrigin.Name, mOrigin.Parent)
 End Property
 
 '******************************************************************************
@@ -1757,6 +1839,17 @@ Public Sub RemoveDuplicates(startRowNo As Long, startColNo As Long, endRowNo As 
 End Sub
 
 '******************************************************************************
+'* [概  要] Scroll
+'* [詳  細] 指定したセルアドレスが画面左上隅に表示されるようにスクロールする。
+'*
+'* @param rowNo  スクロール先セル位置行
+'* @param colNo  スクロール先セル位置列
+'******************************************************************************
+Public Sub Scroll(ByVal rowNo As Long, ByVal colNo As Long)
+    Call XlWorkSheetUtils.Scroll(rowNo, colNo, mOrigin.Name, mOrigin.Parent)
+End Sub
+
+'******************************************************************************
 '* [概  要] DataRangeAdress
 '* [詳  細] 指定した開始行列番号を起点に、表データの終了行列番号を検索し
 '*          表データのデータ範囲を示すRangeアドレスに変換する。
@@ -1821,5 +1914,63 @@ End Function
 '******************************************************************************
 Public Sub InjectDataToVisibleRange(vArray, startRowNo As Long, startColNo As Long, Optional rowCount As Long, Optional colCount As Long, Optional ByVal sheetName As String, Optional ByRef wb As Workbook)
     Call XlWorkSheetUtils.InjectDataToVisibleRange(vArray, startRowNo, startColNo, rowCount, colCount, mOrigin.Name, mOrigin.Parent)
+End Sub
+
+'******************************************************************************
+'* [概  要] HasHiddenCells
+'* [詳  細] 非表示のセル（行・列）が存在するかチェックする。
+'*
+'* @param sheetName  対象のシート名（省略すると選択中のシートで処理）
+'* @param wb         ワークブックオブジェクト
+'* @return Boolean 存在する場合、True
+'******************************************************************************
+Public Function HasHiddenCells() As Boolean
+    HasHiddenCells = XlWorkSheetUtils.HasHiddenCells(mOrigin.Name, mOrigin.Parent)
+End Function
+
+'******************************************************************************
+'* [概  要] DeleteRow
+'* [詳  細] 指定した行番号の行を削除する。
+'*
+'* @param rowNo    削除する行の行番号
+'* @param endRowNo 終了行番号（範囲指定時）
+'******************************************************************************
+Public Sub DeleteRow(rowNo As Long, Optional endRowNo As Long)
+    Call EntireRow(rowNo, endRowNo).Delete
+End Sub
+
+'******************************************************************************
+'* [概  要] DeleteColumn
+'* [詳  細] 指定した列番号の列を削除する。
+'*
+'* @param colNo    削除する列の列番号
+'* @param endColNo 終了列番号（範囲指定時）
+'******************************************************************************
+Public Sub DeleteColumn(colNo As Long, Optional endColNo As Long)
+    Call EntireColumn(colNo, endColNo).Delete
+End Sub
+
+'******************************************************************************
+'* [概  要] InsertRow
+'* [詳  細] 指定した行番号の行を基準に空行を追加する。
+'*
+'* @param rowNo    追加する行位置の行番号
+'* @param cntOfAdd 追加行数
+'* @param cpOrigin 挿入行の形式コピー元の方向（上／下）を指定
+'******************************************************************************
+Public Sub InsertRow(rowNo As Long, Optional cntOfAdd As Long = 1, Optional cpOrigin As XlInsertFormatOrigin = xlFormatFromLeftOrAbove)
+    Call EntireRow(rowNo, rowNo + cntOfAdd - 1).Insert(, cpOrigin)
+End Sub
+
+'******************************************************************************
+'* [概  要] InsertColumn
+'* [詳  細] 指定した列番号の列を基準に空列を追加する。
+'*
+'* @param colNo    追加する列位置の列番号
+'* @param cntOfAdd 追加列数
+'* @param cpOrigin 挿入列の形式コピー元の方向（左／右）を指定
+'******************************************************************************
+Public Sub InsertColumn(colNo As Long, Optional cntOfAdd As Long = 1, Optional cpOrigin As XlInsertFormatOrigin = xlFormatFromLeftOrAbove)
+    Call EntireColumn(colNo, colNo + cntOfAdd - 1).Insert(, cpOrigin)
 End Sub
 

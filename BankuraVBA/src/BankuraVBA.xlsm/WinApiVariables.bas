@@ -12038,7 +12038,7 @@ Public Type ACCEL
 End Type
 
 Public Type PAINTSTRUCT
-        hdc As LongPtr
+        hDc As LongPtr
         fErase As Long
         rcPaint As RECT
         fRestore As Long
@@ -12094,7 +12094,7 @@ Public Type DRAWITEMSTRUCT
         itemAction As Long
         itemState As Long
         hwndItem As LongPtr
-        hdc As LongPtr
+        hDc As LongPtr
         rcItem As RECT
         itemData As LongPtr
 End Type
@@ -12949,7 +12949,7 @@ End Type
 Public Type MCI_ANIM_UPDATE_PARMS
         dwCallback As LongPtr
         rc As RECT
-        hdc As LongPtr
+        hDc As LongPtr
 End Type
 
 Public Type MCI_OVLY_OPEN_PARMS
@@ -13920,7 +13920,7 @@ End Type
 Public Type ChooseFont
         lStructSize As Long
         hwndOwner As LongPtr       '  caller's window handle
-        hdc As LongPtr             '  printer DC/IC or NULL
+        hDc As LongPtr             '  printer DC/IC or NULL
         lpLogFont As LongPtr       '  ptr. to a LOGFONT struct
         iPointSize As Long         '  10 * size in points of selected font
         Flags As Long              '  enum. type flags
@@ -13946,7 +13946,7 @@ Public Type PrintDlg
         hwndOwner As LongPtr
         hDevMode As LongPtr
         hDevNames As LongPtr
-        hdc As LongPtr
+        hDc As LongPtr
         Flags As Long
         nFromPage As Integer
         nToPage As Integer

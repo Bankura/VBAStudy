@@ -107,31 +107,33 @@ Public Sub PrintArray(vArr)
     
     Dim i As Long, j As Long, tmp As StringEx, v
     If ArrayUtils.Is2DArray(arr) Then
-    
-        Dim collen() As Long
-        ReDim collen(LBound(arr, 2) To UBound(arr, 2)) As Long
-        Dim colNumAttr() As Boolean
-        ReDim colNumAttr(LBound(arr, 2) To UBound(arr, 2)) As Boolean
-        
-        For j = LBound(arr, 2) To UBound(arr, 2)
-            collen(j) = ArrayUtils.Array2DMaxTxtLength(arr, j, True)
-            v = arr(LBound(arr, 1), j)
-            colNumAttr(j) = ValidateUtils.IsNumericType(v)
-        Next
-
-        For i = LBound(arr, 1) To UBound(arr, 1)
-            Set tmp = New StringEx
-            Call tmp.Append("| ")
-            For j = LBound(arr, 2) To UBound(arr, 2)
-                If colNumAttr(j) Then
-                    Call tmp.Append(StringUtils.LeftPad(arr(i, j), collen(j), , True))
-                Else
-                    Call tmp.Append(StringUtils.RightPad(arr(i, j), collen(j), , True))
-                End If
-                Call tmp.Append(" | ")
-            Next
-            Debug.Print tmp.ToString
-        Next
+         For Each v In ArrayUtils.Array2DToSVList(arr)
+             Debug.Print CStr(v)
+         Next
+'        Dim collen() As Long
+'        ReDim collen(LBound(arr, 2) To UBound(arr, 2)) As Long
+'        Dim colNumAttr() As Boolean
+'        ReDim colNumAttr(LBound(arr, 2) To UBound(arr, 2)) As Boolean
+'
+'        For j = LBound(arr, 2) To UBound(arr, 2)
+'            collen(j) = ArrayUtils.Array2DMaxTxtLength(arr, j, True)
+'            v = arr(LBound(arr, 1), j)
+'            colNumAttr(j) = ValidateUtils.IsNumericType(v)
+'        Next
+'
+'        For i = LBound(arr, 1) To UBound(arr, 1)
+'            Set tmp = New StringEx
+'            Call tmp.Append("| ")
+'            For j = LBound(arr, 2) To UBound(arr, 2)
+'                If colNumAttr(j) Then
+'                    Call tmp.Append(StringUtils.LeftPad(arr(i, j), collen(j), , True))
+'                Else
+'                    Call tmp.Append(StringUtils.RightPad(arr(i, j), collen(j), , True))
+'                End If
+'                Call tmp.Append(" | ")
+'            Next
+'            Debug.Print tmp.ToString
+'        Next
     Else
         For i = LBound(arr, 1) To UBound(arr, 1)
             Debug.Print arr(i)

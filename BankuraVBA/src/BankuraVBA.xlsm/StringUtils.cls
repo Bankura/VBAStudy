@@ -3105,16 +3105,16 @@ End Function
 '* @return String 変換後文字列
 '*
 '******************************************************************************
-Public Function RemoveEach(ByVal text As String, ByVal searchList As Variant) As String
-    If Me.IsEmpty(text) Or Not VBA.IsArray(searchList) Then
-        RemoveEach = text
+Public Function RemoveEach(ByVal Text As String, ByVal searchList As Variant) As String
+    If Me.IsEmpty(Text) Or Not VBA.IsArray(searchList) Then
+        RemoveEach = Text
         Exit Function
     End If
     Dim i As Long, j As Long
     For i = LBound(searchList) To UBound(searchList)
-        text = Remove(text, searchList(i))
+        Text = Remove(Text, searchList(i))
     Next
-    RemoveEach = text
+    RemoveEach = Text
 End Function
 
 '******************************************************************************
@@ -3351,20 +3351,20 @@ End Function
 '* @return String 変換後文字列
 '*
 '******************************************************************************
-Public Function ReplaceEach(ByVal text As String, ByVal searchList As Variant, ByVal replacementList As Variant) As String
-    If Me.IsEmpty(text) Or Not VBA.IsArray(searchList) Or Not VBA.IsArray(replacementList) Then
-        ReplaceEach = text
+Public Function ReplaceEach(ByVal Text As String, ByVal searchList As Variant, ByVal replacementList As Variant) As String
+    If Me.IsEmpty(Text) Or Not VBA.IsArray(searchList) Or Not VBA.IsArray(replacementList) Then
+        ReplaceEach = Text
         Exit Function
     End If
     If (UBound(searchList) <> UBound(replacementList)) Or (LBound(searchList) <> LBound(replacementList)) Then
-        ReplaceEach = text
+        ReplaceEach = Text
         Exit Function
     End If
     Dim i As Long, j As Long
     For i = LBound(searchList) To UBound(searchList)
-        text = VBA.Replace(text, searchList(i), replacementList(i))
+        Text = VBA.Replace(Text, searchList(i), replacementList(i))
     Next
-    ReplaceEach = text
+    ReplaceEach = Text
 End Function
 
 '******************************************************************************
@@ -4291,13 +4291,13 @@ End Function
 '* @param text ダブルクォート入り項目
 '* @return 編集後項目
 '******************************************************************************
-Private Function EditIncludeQuotItem(ByVal text As String) As String
-    text = Replace(text, """""", """")
-    If Left(text, 1) = """" And Right(text, 1) = """" Then
-        If Len(text) <= 2 Then
+Private Function EditIncludeQuotItem(ByVal Text As String) As String
+    Text = Replace(Text, """""", """")
+    If Left(Text, 1) = """" And Right(Text, 1) = """" Then
+        If Len(Text) <= 2 Then
             EditIncludeQuotItem = ""
         Else
-            EditIncludeQuotItem = Mid(text, 2, Len(text) - 2)
+            EditIncludeQuotItem = Mid(Text, 2, Len(Text) - 2)
             
         End If
     End If
@@ -4480,9 +4480,9 @@ End Function
 '* @return String 変換後文字列
 '*
 '******************************************************************************
-Public Function RemoveNullChar(ByVal text As String) As String
-    Dim txtLength As Long: txtLength = InStr(text, vbNullChar) - 1
+Public Function RemoveNullChar(ByVal Text As String) As String
+    Dim txtLength As Long: txtLength = InStr(Text, vbNullChar) - 1
     If txtLength > 0 Then
-        RemoveNullChar = Trim$(Left$(text, txtLength))
+        RemoveNullChar = Trim$(Left$(Text, txtLength))
     End If
 End Function

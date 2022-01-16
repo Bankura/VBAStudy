@@ -736,6 +736,64 @@ Public Function GetTimestampString() As String
 End Function
 
 '******************************************************************************
+'* [概  要] mSecTohhmmssfff
+'* [詳  細] ミリ秒を「HH:NN:SS.fff」形式の
+'*          文字列で取得する。
+'*
+'* @param totalMSec ミリ秒
+'* @param omitZeroHour 「HH」部分が0の場合、省略するか
+'* @return String 「HH:NN:SS.fff」形式時間文字列
+'******************************************************************************
+Public Function mSecTohhmmnnssfff(totalMSec As Long, Optional omitZeroHour As Boolean = False) As String
+    Dim hour As Integer
+    Dim minute As Integer
+    Dim second As Integer
+    Dim mSec As Long
+
+    hour = (totalMSec \ 1000) \ 3600
+    minute = ((totalMSec \ 1000) Mod 3600) \ 60
+    second = ((totalMSec \ 1000) Mod 3600) Mod 60
+    mSec = totalMSec - ((totalMSec \ 1000) * 1000)
+    
+    Dim hourStr As String
+    If (hour = 0 And Not omitZeroHour) Or (hour > 0) Then
+        hourStr = Format(hour, "00") & ":"
+    End If
+        
+    mSecTohhmmnnssfff = hourStr & Format(minute, "00") & ":" & Format(second, "00") & "." & Format(mSec, "000")
+End Function
+
+'******************************************************************************
+'* [概  要] hhmmnnssfffToMSec
+'* [詳  細] 「HH:NN:SS.fff」形式の文字列をミリ秒に変換する。
+'*
+'* @param aTimeOfHhmmnnssfff 「HH:NN:SS.fff」形式時間文字列
+'* @return Long ミリ秒
+'******************************************************************************
+Public Function hhmmnnssfffToMSec(aTimeOfHhmmnnssfff As String) As Long
+    Dim hour As Long
+    Dim minute As Long
+    Dim second As Long
+    Dim mSec As Long
+    Dim tmpData As Variant
+    tmpData = Split(aTimeOfHhmmnnssfff, ":")
+    
+    If ValidateUtils.ValidatePattern(aTimeOfHhmmnnssfff, "^[0-9]{2}:[0-9]{2}\.[0-9]{3}$") Then
+        hour = 0
+        minute = CLng(tmpData(0)) * 60 * 1000
+        second = CLng(Split(CStr(tmpData(1)), ".")(0)) * 1000
+        mSec = CLng(Split(CStr(tmpData(1)), ".")(1))
+    ElseIf ValidateUtils.ValidatePattern(aTimeOfHhmmnnssfff, "^[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}$") Then
+        hour = CLng(tmpData(0)) * 60 * 60 * 1000
+        minute = CLng(tmpData(1)) * 60 * 1000
+        second = CLng(Split(CStr(tmpData(2)), ".")(0)) * 1000
+        mSec = CLng(Split(CStr(tmpData(2)), ".")(1))
+    End If
+
+    hhmmnnssfffToMSec = hour + minute + second + mSec
+End Function
+
+'******************************************************************************
 '* [概  要] Get10Kan12Shi
 '* [詳  細] 十干十二支を取得する。
 '*

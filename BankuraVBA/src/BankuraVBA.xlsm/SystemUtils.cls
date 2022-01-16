@@ -217,8 +217,8 @@ End Sub
 '* @param RootFolder ルートフォルダのパス、もしくは特殊フォルダを示す値
 '* @return Object(of Folder)
 '******************************************************************************
-Public Function BrowseForFolder(hWnd As Long, Title As String, options As Long, Optional RootFolder) As Object
-    Set BrowseForFolder = Base.GetShell.BrowseForFolder(hWnd, Title, options, RootFolder)
+Public Function BrowseForFolder(hWnd As Long, Title As String, options As Long, Optional rootFolder) As Object
+    Set BrowseForFolder = Base.GetShell.BrowseForFolder(hWnd, Title, options, rootFolder)
 End Function
 
 '******************************************************************************

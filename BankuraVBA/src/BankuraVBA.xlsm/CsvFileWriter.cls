@@ -419,19 +419,19 @@ Private Sub StartProcess(enumerator As Object)
     If ValidateUtils.IsArray2DEx(records) Then
         rEnumerator.MaxReportCount = records.RowLength
         rEnumerator.startRow = 0
-        rEnumerator.EndRow = records.RowMaxIndex
+        rEnumerator.endRow = records.RowMaxIndex
         mRowCount = records.RowLength
         mColumnCount = records.ColLength
     ElseIf ArrayUtils.Is2DArray(records) Then
         rEnumerator.MaxReportCount = ArrayUtils.GetLength(records)
         rEnumerator.startRow = LBound(records)
-        rEnumerator.EndRow = UBound(records)
+        rEnumerator.endRow = UBound(records)
         mRowCount = ArrayUtils.GetLength(records)
         mColumnCount = ArrayUtils.GetLength(records, 2)
     ElseIf ValidateUtils.IsRecordFormat(records) Then
         rEnumerator.MaxReportCount = records.RecordSet.Count
         rEnumerator.startRow = 1
-        rEnumerator.EndRow = records.RecordSet.Count
+        rEnumerator.endRow = records.RecordSet.Count
         mRowCount = records.RecordSet.Count
         If mHeaderExists Then
             mColumnCount = records.RecordDefinition.Count

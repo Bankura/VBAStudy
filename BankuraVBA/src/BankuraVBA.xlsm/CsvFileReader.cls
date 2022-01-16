@@ -232,7 +232,7 @@ Public Function Read() As Array2DEx
     rEnumerator.DestTarget = arr2dex
     rEnumerator.IsActionable = False
     rEnumerator.MaxReportCount = lSize
-    rEnumerator.EndRow = lSize
+    rEnumerator.endRow = lSize
     mRowCount = lSize
     
     ' ProgressControllerÇÃê›íË

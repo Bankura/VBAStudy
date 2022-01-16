@@ -60,7 +60,7 @@ Option Explicit
 Public Sub SetClipBoard(ByVal str As String)
     With CreateObject("Forms.TextBox.1")
         .MultiLine = True
-        .text = str
+        .Text = str
         .SelStart = 0
         .SelLength = .textLength
         .Copy
@@ -78,6 +78,6 @@ Public Function GetClipBoard() As String
     With CreateObject("Forms.TextBox.1")
         .MultiLine = True
         If .CanPaste = True Then .Paste
-        GetClipBoard = .text
+        GetClipBoard = .Text
     End With
 End Function

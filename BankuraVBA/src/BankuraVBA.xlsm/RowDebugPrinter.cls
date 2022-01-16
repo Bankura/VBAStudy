@@ -56,7 +56,7 @@ Public Sub Edit(enumerator As Object)
     Dim msg As New StringEx
     msg.Append " 現在行　:" & enumerator.CurrentRow
     msg.Append " 開始行　:" & enumerator.startRow
-    msg.Append " 終了行　:" & enumerator.EndRow
+    msg.Append " 終了行　:" & enumerator.endRow
     msg.Append " 処理件数:" & enumerator.CurrentReportCount
     msg.Append " 最大件数:" & enumerator.MaxReportCount
     DebugUtils.Show msg.ToString

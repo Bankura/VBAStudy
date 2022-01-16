@@ -1371,8 +1371,10 @@ End Function
 '* @param arr2dex Array2DExオブジェクト
 '* @return Variant 2次元配列
 '******************************************************************************
-Public Function Array2DExTo2DArray(ByVal arr2dex As Array2DEx) As Variant
+Public Function Array2DExTo2DArray(ByVal arr2dex As Array2DEx, Optional ByVal destStart1DIdx As Long = -1, Optional ByVal destStart2DIdx As Long = -1) As Variant
     Dim arr2d As Variant: arr2d = ArrayUtils.EmptyVariant2DArray
+    If destStart1DIdx < 0 Then destStart1DIdx = 0
+    If destStart2DIdx < 0 Then destStart2DIdx = 0
     
     Dim ixOut As Long, ixInn As Long
     Dim lbOut As Long, lbInn As Long, lbInnFst As Long
@@ -1385,18 +1387,18 @@ Public Function Array2DExTo2DArray(ByVal arr2dex As Array2DEx) As Variant
     lbInnFst = 0
     ubInnFst = arr2dex.ColMaxIndex
     
-    ReDim arr2d(lbOut To ubOut, lbInnFst To ubInnFst)
+    ReDim arr2d(lbOut + destStart1DIdx To ubOut + destStart1DIdx, lbInnFst + destStart2DIdx To ubInnFst + destStart2DIdx)
     If IsObject(arr2dex(lbOut, lbInnFst)) Then
         For ixOut = lbOut To ubOut
             lbInn = 0
             ubInn = arr2dex.ColMaxIndex
-            For ixInn = lbInn To ubInn: Set arr2d(ixOut, ixInn) = arr2dex(ixOut, ixInn): Next
+            For ixInn = lbInn To ubInn: Set arr2d(ixOut + destStart1DIdx, ixInn + destStart2DIdx) = arr2dex(ixOut, ixInn): Next
         Next
     Else
         For ixOut = lbOut To ubOut
             lbInn = 0
             ubInn = arr2dex.ColMaxIndex
-            For ixInn = lbInn To ubInn: arr2d(ixOut, ixInn) = arr2dex(ixOut, ixInn): Next
+            For ixInn = lbInn To ubInn: arr2d(ixOut + destStart1DIdx, ixInn + destStart2DIdx) = arr2dex(ixOut, ixInn): Next
         Next
     End If
 
@@ -1428,6 +1430,39 @@ Public Function ArrayTo2DArrayEx(ByVal arr As Variant, Optional ByVal Transpose 
     Dim arr2dex As Array2DEx: Set arr2dex = New Array2DEx
     Set ArrayTo2DArrayEx = arr2dex.Init(arr, Transpose)
 End Function
+
+'******************************************************************************
+'* [概  要] ArrayExToArray
+'* [詳  細] ArrayExを1次元配列に変換する。
+'*
+'* @param arrex ArrayExオブジェクト
+'* @param destStartIdx コピー先1次元インデックス
+'* @return Variant 1次元配列
+'******************************************************************************
+Public Function ArrayExToArray(ByVal arrex As ArrayEx, Optional ByVal destStartIdx As Long = -1) As Variant
+    If destStartIdx < 0 Then destStartIdx = 0
+    If arrex.IsEmptyArray() Then
+        ArrayExToArray = EmptyVariantArray
+        Exit Function
+    End If
+    
+    Dim vNewArr As Variant
+    vNewArr = Create1DArray(destStartIdx, arrex.LastIndex + destStartIdx)
+    Dim i As Long
+    Dim x As Long
+    x = destStartIdx
+    For i = 0 To arrex.LastIndex
+        If IsObject(arrex(i)) Then
+            Set vNewArr(x) = arrex(i)
+        Else
+            vNewArr(x) = arrex(i)
+        End If
+        x = x + 1
+    Next
+                              
+    ArrayExToArray = vNewArr
+End Function
+
 
 '******************************************************************************
 '* [概  要] ArrayTo2DArray
@@ -1553,6 +1588,88 @@ Public Function CsvStringToArray(ByVal csvData As String, _
         lCount = lCount + 1
     Next
     CsvStringToArray = vArr
+End Function
+
+'******************************************************************************
+'* [概  要] Array2DToSVList
+'* [詳  細] 2次元配列をセパレータで区切られた文字データのリストに変換する。
+'*
+'* @param arr2d             2次元配列
+'* @param separator         セパレータ
+'* @param allowSpaceArrange 半角スペースで間隔を調整するか
+'* @param allowAppendEdge   両端にセパレータを付与するか
+'* @return Variant 1次元配列（行毎にセパレータ区切り(SV)で連結した文字列を格納）
+'******************************************************************************
+Public Function Array2DToSVList(arr2d As Variant, Optional ByVal separator As String = "|", _
+                                Optional ByVal allowSpaceArrange As Boolean = True, _
+                                Optional ByVal allowAppendEdge As Boolean = True) As Variant
+    Dim arrSvList As ArrayEx: Set arrSvList = New ArrayEx
+    Dim arr2dData As Variant
+    
+    If ValidateUtils.IsArray2DEx(arr2d) Then
+        arr2dData = arr2d.To2DArray
+    ElseIf ArrayUtils.Is2DArray(arr2d) Then
+        arr2dData = arr2d
+    Else
+        Array2DToSVList = arrSvList.ToArray
+        Exit Function
+    End If
+    
+    If ArrayUtils.IsEmptyArray(arr2dData) Then
+        Array2DToSVList = arrSvList.ToArray
+        Exit Function
+    End If
+    
+    Dim i As Long, j As Long, tmp As StringEx, v
+    
+    Dim lb1 As Long: lb1 = LBound(arr2dData, 1)
+    Dim ub1 As Long: ub1 = UBound(arr2dData, 1)
+    Dim lb2 As Long: lb2 = LBound(arr2dData, 2)
+    Dim ub2 As Long: ub2 = UBound(arr2dData, 2)
+
+    Dim collen() As Long
+    Dim colNumAttr() As Boolean
+    If allowSpaceArrange Then
+        ReDim collen(lb2 To ub2) As Long
+        ReDim colNumAttr(lb2 To ub2) As Boolean
+        For j = lb2 To ub2
+            collen(j) = ArrayUtils.Array2DMaxTxtLength(arr2dData, j, True)
+            v = arr2dData(lb1, j)
+            colNumAttr(j) = ValidateUtils.IsNumericType(v)
+        Next
+    End If
+
+    For i = lb1 To ub1
+        Set tmp = New StringEx
+        If allowAppendEdge Then
+             Call tmp.Append(separator)
+             If allowSpaceArrange Then Call tmp.Append(" ")
+        End If
+        
+        For j = lb2 To ub2
+            If allowSpaceArrange Then
+                If colNumAttr(j) Then
+                    Call tmp.Append(StringUtils.LeftPad(arr2dData(i, j), collen(j), , True))
+                Else
+                    Call tmp.Append(StringUtils.RightPad(arr2dData(i, j), collen(j), , True))
+                End If
+            Else
+                 Call tmp.Append(arr2dData(i, j))
+            End If
+            If j = ub2 Then
+                If allowAppendEdge Then
+                    If allowSpaceArrange Then Call tmp.Append(" ")
+                    Call tmp.Append(separator)
+                End If
+            Else
+                If allowSpaceArrange Then Call tmp.Append(" ")
+                Call tmp.Append(separator)
+                If allowSpaceArrange Then Call tmp.Append(" ")
+            End If
+        Next
+        arrSvList.Add tmp.ToString
+    Next
+    Array2DToSVList = arrSvList.ToArray
 End Function
 
 '*******************************************************************************

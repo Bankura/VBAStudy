@@ -72,6 +72,8 @@ Private Const SND_NOSTOP = &H10
 '* 変数定義
 '******************************************************************************
 Private mIsSoundOpened As Boolean
+Private mMciRegistDic  As DictionaryEx
+Private mSapiVoice As Object
 Private mSapiTokenCategory As Object
 Private mIsMidiOpened As Boolean
 Private mMidiHandle As LongPtr
@@ -86,6 +88,7 @@ Private mMidiStdTempo   As Long
 '******************************************************************************
 Private Sub Class_Initialize()
     mIsSoundOpened = False
+    Set mMciRegistDic = New DictionaryEx
     mIsMidiOpened = False
     mMidiHandle = 0
     mMidiStdTimbre = 1
@@ -100,11 +103,38 @@ Private Sub Class_Terminate()
     Call CloseSound
     Call CloseMidi
     Set mSapiTokenCategory = Nothing
+    Set mSapiVoice = Nothing
 End Sub
 
 '******************************************************************************
 '* プロパティ定義
 '******************************************************************************
+'*-----------------------------------------------------------------------------
+'* MciRegistDic プロパティ
+'*
+'* 登録済みのMci音源向け音声ファイルリスト（ディクショナリ）。
+'*-----------------------------------------------------------------------------
+Public Property Get MciRegistDic() As DictionaryEx
+    Set MciRegistDic = mMciRegistDic
+End Property
+
+'*-----------------------------------------------------------------------------
+'* IsMciAliasRegisted プロパティ
+'*
+'* Mci音源向け音声ファイルのアイリアスが登録済みか。
+'*-----------------------------------------------------------------------------
+Public Property Get IsMciAliasRegisted(aliasSndName As String) As Boolean
+    If mMciRegistDic Is Nothing Then
+        IsMciAliasRegisted = False
+        Exit Property
+    End If
+    If mMciRegistDic.Exists(aliasSndName) Then
+        IsMciAliasRegisted = True
+        Exit Property
+    End If
+    IsMciAliasRegisted = False
+End Property
+
 '*-----------------------------------------------------------------------------
 '* MidiStdTimbre プロパティ
 '*
@@ -181,11 +211,20 @@ End Property
 '* @param useByteData バイトデータに変換するか
 '*
 '******************************************************************************
-Public Sub PlaySoundJust(Optional ByVal useByteData As Boolean = False)
+Public Sub PlaySoundJust(Optional sndFilePath As String, Optional ByVal useByteData As Boolean = False)
     '音声ファイルの選択
-    Dim strFilePath As String
-    strFilePath = Application.GetOpenFileName("音声ファイル (*.wav),*.wav")
-    If strFilePath <> "False" Then
+    Dim strFilePath
+    If sndFilePath = "" Then
+        strFilePath = Application.GetOpenFilename("音声ファイル (*.wav),*.wav")
+    Else
+        If IO.FileExists(sndFilePath) Then
+            strFilePath = sndFilePath
+        Else
+            Err.Raise 9999, "SoundUtils#PlaySoundJust", "指定した音声ファイルは存在しません。[" & sndFilePath & "]"
+        End If
+    End If
+    
+    If strFilePath <> False Then
         If useByteData Then
             Dim buf() As Byte
             Dim fileNum As Long:  fileNum = FreeFile
@@ -195,6 +234,7 @@ Public Sub PlaySoundJust(Optional ByVal useByteData As Boolean = False)
             Close fileNum
     
             PlaySoundOfByteData buf(0), 0, SND_ASYNC + SND_MEMORY
+
             Exit Sub
         End If
         PlaySoundAPI strFilePath, 0, SND_ASYNC
@@ -202,70 +242,368 @@ Public Sub PlaySoundJust(Optional ByVal useByteData As Boolean = False)
 End Sub
 
 '******************************************************************************
-'* [概  要] OpenSound
-'* [詳  細] 音声ファイルをメモリに読み込み｡
+'* [概  要] PlaySoundFromBookCustomXML
+'* [詳  細] ExcelブックのカスタムXMLのプロパティからBase64形式のWav音声ファイル
+'*          を読み込み再生する｡
+'*
+'* @param propName プロパティ名
+'* @param wb       ワークブックオブジェクト
+'* @param ns       名前空間
 '*
 '******************************************************************************
-Public Sub OpenSound()
+Public Sub PlaySoundFromBookCustomXML(ByVal propName As String, _
+                                      Optional ByRef wb As Workbook, _
+                                      Optional ByVal ns As String)
+    If wb Is Nothing Then
+        Set wb = ThisWorkbook
+    End If
+
+    Dim wavBase64Data As String
+    If ns = "" Then
+        wavBase64Data = XlBookUtils.LoadCustomXMLProperty(propName, wb)
+    Else
+        wavBase64Data = XlBookUtils.LoadCustomXMLProperty(propName, wb, ns)
+    End If
+    Dim buf() As Byte: buf = EncodeDecodeUtils.Base64toBytes(wavBase64Data)
+
+    PlaySoundOfByteData buf(0), 0, SND_ASYNC + SND_MEMORY
+
+End Sub
+
+'******************************************************************************
+'* [概  要] OpenSound
+'* [詳  細] 音声ファイルをメモリに読み込み｡
+'* [参  考] https://docs.microsoft.com/en-us/windows/win32/multimedia/open
+'*
+'* @param aliasSndName 音声ファイルのエイリアス名
+'* @param sndFilePath  音声ファイルパス
+'******************************************************************************
+Public Sub OpenSound(Optional aliasSndName As String = MCI_SEND_CON_FILENAME, Optional sndFilePath As String)
     '音声ファイルの選択
-    Dim strFilePath As String
-    strFilePath = Application.GetOpenFileName("音声ファイル (*.wav;*.mid;*.mp3;*.wma),*.wav;*.mid;*.mp3;*.wma")
-    If strFilePath <> "False" Then
+    Dim strFilePath
+    If sndFilePath = "" Then
+        strFilePath = Application.GetOpenFilename("音声ファイル (*.wav;*.mid;*.mp3;*.wma),*.wav;*.mid;*.mp3;*.wma")
+    Else
+        If IO.FileExists(sndFilePath) Then
+            strFilePath = sndFilePath
+        Else
+            Err.Raise 9999, "SoundUtils#OpenSound", "指定した音声ファイルは存在しません。[" & sndFilePath & "]"
+        End If
+    End If
+    
+    If IsMciAliasRegisted(aliasSndName) Then
+        Err.Raise 9999, "SoundUtils#OpenSound", "指定したエイリアスは登録済みです。[" & aliasSndName & "]"
+    End If
+            
+    If strFilePath <> False Then
         If 0 < InStrRev(strFilePath, ".") Then
-            Call mciSendString("Open """ & strFilePath & """ alias " & MCI_SEND_CON_FILENAME)
+        
+            Dim mciCommandTxt As String
+            mciCommandTxt = "Open """ & strFilePath & """ alias " & aliasSndName
+            If IO.GetExtensionName(strFilePath) = "mp3" Then
+                mciCommandTxt = mciCommandTxt & " type mpegvideo"
+            ElseIf IO.GetExtensionName(strFilePath) = "wma" Then
+                mciCommandTxt = mciCommandTxt & " type mpegvideo2"
+            ElseIf IO.GetExtensionName(strFilePath) = "mid" Then
+                mciCommandTxt = mciCommandTxt & " type sequencer"
+            ElseIf IO.GetExtensionName(strFilePath) = "wav" Then
+                mciCommandTxt = mciCommandTxt & " type waveaudio"
+            End If
+    
+            Call mciSendString(mciCommandTxt)
+
+            If mMciRegistDic Is Nothing Then
+                Set mMciRegistDic = New DictionaryEx
+            End If
+            Call mMciRegistDic.Add(aliasSndName, strFilePath)
             mIsSoundOpened = True
         End If
     End If
 End Sub
 
 '******************************************************************************
+'* [概  要] OpenSoundFromBookCustomXML
+'* [詳  細] ExcelブックのカスタムXMLのプロパティからBase64形式の音声ファイル
+'*          を読み込み、指定フォルダに保存後Openする｡
+'*
+'* @param propName プロパティ名
+'* @param wb       ワークブックオブジェクト
+'* @param ns       名前空間
+'*
+'******************************************************************************
+Public Sub OpenSoundFromBookCustomXML(ByVal filePath As String, _
+                                      ByVal propName As String, _
+                                      Optional aliasSndName As String = MCI_SEND_CON_FILENAME, _
+                                      Optional ByRef wb As Workbook, _
+                                      Optional ByVal ns As String)
+    If wb Is Nothing Then
+        Set wb = ThisWorkbook
+    End If
+    If ns = "" Then
+        Call XlBookUtils.LoadFileCustomXML(filePath, propName, wb)
+    Else
+        Call XlBookUtils.LoadFileCustomXML(filePath, propName, wb, ns)
+    End If
+
+    Call OpenSound(aliasSndName, filePath)
+End Sub
+
+'******************************************************************************
+'* [概  要] AdjustSoundVolume
+'* [詳  細] 音声のボリュームを調整する｡
+'* [備  考] OpenSoundで開いた音声ファイルに対しての操作であるため、先に
+'*          OpenSoundの実行が必要。
+'* [参  考] https://docs.microsoft.com/en-us/windows/win32/multimedia/setaudio
+'*
+'* @param aliasSndName 音声ファイルのエイリアス名
+'* @param volNum       ボリューム
+'******************************************************************************
+Public Sub AdjustSoundVolume(Optional aliasSndName As String = MCI_SEND_CON_FILENAME, Optional volNum As Long = 1000)
+    If Not IsMciAliasRegisted(aliasSndName) Then
+        Exit Sub
+    End If
+    
+    Dim mciCommandTxt As String
+    mciCommandTxt = "setaudio " & aliasSndName & " volume to " & CStr(volNum)
+    
+    Call mciSendString(mciCommandTxt)
+End Sub
+
+'******************************************************************************
 '* [概  要] CloseSound
 '* [詳  細] 音声ファイルをメモリからクリア｡
 '* [補  足] ブックを閉じる前に実行すること｡
+'* [参  考] https://docs.microsoft.com/en-us/windows/win32/multimedia/close
 '*
 '******************************************************************************
 Public Sub CloseSound()
     If mIsSoundOpened Then
         Call mciSendString("Close All")
         mIsSoundOpened = False
+        Set mMciRegistDic = Nothing
     End If
 End Sub
 
 '******************************************************************************
 '* [概  要] PlaySound
 '* [詳  細] 音声ファイルを再生｡
-'* [補  足] 事前に音声ファイルを読み込まないと、再生できない｡
+'* [補  足] 事前に OpenSound で音声ファイルを読み込まないと、再生できない｡
+'* [参  考] https://docs.microsoft.com/en-us/windows/win32/multimedia/play
 '*
+'* @param aliasSndName     音声ファイルのエイリアス名（デバイス名）
+'* @param willRepeat       リピート再生するかどうか
+'* @param sndStartPosition 再生開始位置
+'* @param sndEndPosition   再生終了位置
 '******************************************************************************
-Public Sub PlaySound()
-    Call mciSendString("Play " & MCI_SEND_CON_FILENAME & " from 0")
+Public Sub PlaySound(Optional aliasSndName As String = MCI_SEND_CON_FILENAME, _
+                     Optional willRepeat As Boolean = False, _
+                     Optional sndStartPosition As Variant = -1, _
+                     Optional sndEndPosition As Variant = -1)
+    If Not IsMciAliasRegisted(aliasSndName) Then
+        Exit Sub
+    End If
+    
+    Dim mciCommandTxt As String
+    mciCommandTxt = "Play " & aliasSndName
+    If ValidateUtils.IsNumericType(sndStartPosition) Then
+        If sndStartPosition >= 0 Then
+            mciCommandTxt = mciCommandTxt & " from " & CStr(sndStartPosition)
+        End If
+    ElseIf ValidateUtils.IsString(sndStartPosition) Then
+        If sndStartPosition <> "" Then
+            If ValidateUtils.ValidatePattern(sndStartPosition, "^[0-9]{2}:[0-9]{2}\.[0-9]{3}$") Then
+                sndStartPosition = DateTimeUtils.hhmmnnssfffToMSec(CStr(sndStartPosition))
+            End If
+            mciCommandTxt = mciCommandTxt & " from " & CStr(sndStartPosition)
+        End If
+    End If
+    
+    If ValidateUtils.IsNumericType(sndEndPosition) Then
+        If sndEndPosition >= 0 Then
+            mciCommandTxt = mciCommandTxt & " to " & CStr(sndEndPosition)
+        End If
+    ElseIf ValidateUtils.IsString(sndEndPosition) Then
+        If sndEndPosition <> "" Then
+            If ValidateUtils.ValidatePattern(sndEndPosition, "^[0-9]{2}:[0-9]{2}\.[0-9]{3}$") Then
+                sndEndPosition = DateTimeUtils.hhmmnnssfffToMSec(CStr(sndEndPosition))
+            End If
+            
+            mciCommandTxt = mciCommandTxt & " to " & CStr(sndEndPosition)
+        End If
+    End If
+    
+    If willRepeat Then
+        mciCommandTxt = mciCommandTxt & " repeat"
+    End If
+    
+    Call mciSendString(mciCommandTxt)
 End Sub
 
 '******************************************************************************
 '* [概  要] PauseSound
 '* [詳  細] 音声ファイルの再生を一時停止｡
 '*
+'* @param aliasSndName 音声ファイルのエイリアス名
 '******************************************************************************
-Public Sub PauseSound()
-    Call mciSendString("Pause " & MCI_SEND_CON_FILENAME)
+Public Sub PauseSound(Optional aliasSndName As String = MCI_SEND_CON_FILENAME)
+    If Not IsMciAliasRegisted(aliasSndName) Then
+        Exit Sub
+    End If
+    
+    Dim mciCommandTxt As String
+    mciCommandTxt = "Pause " & aliasSndName
+    
+    Call mciSendString(mciCommandTxt)
 End Sub
 
 '******************************************************************************
 '* [概  要] ResumeSound
 '* [詳  細] 音声ファイルの再生一時停止解除｡
 '*
+'* @param aliasSndName 音声ファイルのエイリアス名
 '******************************************************************************
-Public Sub ResumeSound()
-    Call mciSendString("Resume " & MCI_SEND_CON_FILENAME)
+Public Sub ResumeSound(Optional aliasSndName As String = MCI_SEND_CON_FILENAME)
+    If Not IsMciAliasRegisted(aliasSndName) Then
+        Exit Sub
+    End If
+    
+    Dim mciCommandTxt As String
+    mciCommandTxt = "Resume " & aliasSndName
+    
+    Call mciSendString(mciCommandTxt)
 End Sub
 
 '******************************************************************************
 '* [概  要] StopSound
 '* [詳  細] 音声ファイルの再生を停止｡
 '*
+'* @param aliasSndName 音声ファイルのエイリアス名
 '******************************************************************************
-Public Sub StopSound()
-    Call mciSendString("Stop " & MCI_SEND_CON_FILENAME)
+Public Sub StopSound(Optional aliasSndName As String = MCI_SEND_CON_FILENAME)
+    If Not IsMciAliasRegisted(aliasSndName) Then
+        Exit Sub
+    End If
+    
+    Dim mciCommandTxt As String
+    mciCommandTxt = "Stop " & aliasSndName
+    
+    Call mciSendString(mciCommandTxt)
+End Sub
+
+'******************************************************************************
+'* [概  要] GetSoundStatus
+'* [詳  細] MCI音源デバイスの各種状態を取得する｡
+'* [参  考] https://docs.microsoft.com/ja-jp/windows/win32/multimedia/status
+'*
+'* @param statusRequestTxt statusコマンドで要求する対象
+'* @param aliasSndName     音声ファイルのエイリアス名
+'* @return String 再生状態を示す文字列（STOPPED / PLAYING / PAUSED）
+'******************************************************************************
+Public Function GetSoundStatus(statusRequestTxt As String, Optional aliasSndName As String = MCI_SEND_CON_FILENAME) As String
+    If Not IsMciAliasRegisted(aliasSndName) Then
+        Exit Function
+    End If
+    
+    Dim mciCommandTxt As String
+    mciCommandTxt = "status " & aliasSndName & " " & statusRequestTxt
+    
+    Dim statusBuf As String: statusBuf = Space(512)
+    Call mciSendString(mciCommandTxt, statusBuf, Len(statusBuf))
+    statusBuf = Left(statusBuf, InStr(1, statusBuf, vbNullChar) - 1)
+    GetSoundStatus = UCase(statusBuf)
+End Function
+
+'******************************************************************************
+'* [概  要] GetSoundMode
+'* [詳  細] 音声ファイルの再生状態を取得する｡
+'*
+'* @param aliasSndName 音声ファイルのエイリアス名
+'* @return String 再生状態を示す文字列（STOPPED / PLAYING / PAUSED）
+'******************************************************************************
+Public Function GetSoundMode(Optional aliasSndName As String = MCI_SEND_CON_FILENAME) As String
+    GetSoundMode = GetSoundStatus("mode", aliasSndName)
+    If GetSoundMode = "" Then
+        GetSoundMode = "CLOSED"
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] GetSoundLength
+'* [詳  細] 音声ファイルの長さ（時間）を取得する｡
+'*
+'* @param aliasSndName 音声ファイルのエイリアス名
+'* @param willReturnMMSSfff 戻り値の形式をMM:SS.fff形式の文字列とするか
+'* @return Variant 音声ファイルの長さ（時間）
+'******************************************************************************
+Public Function GetSoundLength(Optional aliasSndName As String = MCI_SEND_CON_FILENAME, _
+                               Optional willReturnMMSSfff As Boolean = True) As Variant
+    Dim ret As String: ret = GetSoundStatus("length", aliasSndName)
+
+    If willReturnMMSSfff Then
+        GetSoundLength = DateTimeUtils.mSecTohhmmnnssfff(CLng(ret), True)
+    Else
+        GetSoundLength = CLng(ret)
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] GetSoundPosition
+'* [詳  細] 音声ファイルの再生位置を取得する｡
+'*
+'* @param aliasSndName 音声ファイルのエイリアス名
+'* @param willReturnMMSSfff 戻り値の形式をMM:SS.fff形式の文字列とするか
+'* @return Variant 再生位置
+'******************************************************************************
+Public Function GetSoundPosition(Optional aliasSndName As String = MCI_SEND_CON_FILENAME, _
+                                 Optional willReturnMMSSfff As Boolean = True) As Variant
+    Dim ret As String: ret = GetSoundStatus("position", aliasSndName)
+
+    If willReturnMMSSfff Then
+        GetSoundPosition = DateTimeUtils.mSecTohhmmnnssfff(CLng(ret), True)
+    Else
+        GetSoundPosition = CLng(ret)
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] GetSoundVolume
+'* [詳  細] 音声ファイルのボリュームを取得する｡
+'*
+'* @param aliasSndName 音声ファイルのエイリアス名
+'* @return Long ボリューム
+'******************************************************************************
+Public Function GetSoundVolume(Optional aliasSndName As String = MCI_SEND_CON_FILENAME) As Long
+    Dim ret As String: ret = GetSoundStatus("volume", aliasSndName)
+    GetSoundVolume = CLng(ret)
+End Function
+
+'******************************************************************************
+'* [概  要] SeekSoundPosition
+'* [詳  細] 音声ファイルの再生位置を指定する｡
+'*
+'* @param sndPos       再生位置
+'* @param aliasSndName 音声ファイルのエイリアス名
+'******************************************************************************
+Public Sub SeekSoundPosition(sndPos As Variant, Optional aliasSndName As String = MCI_SEND_CON_FILENAME)
+    If Not IsMciAliasRegisted(aliasSndName) Then
+        Exit Sub
+    End If
+    
+    Dim sndPosEdt As String
+    If ValidateUtils.IsNumericType(sndPos) Then
+        sndPosEdt = CStr(sndPos)
+    ElseIf ValidateUtils.IsString(sndPos) Then
+        If ValidateUtils.ValidatePattern(sndPos, "^[0-9]{2}:[0-9]{2}\.[0-9]{3}$") Then
+            sndPosEdt = CStr(DateTimeUtils.hhmmnnssfffToMSec(CStr(sndPos)))
+        Else
+            sndPosEdt = CStr(sndPos)
+        End If
+    End If
+
+    Dim mciCommandTxt As String
+    mciCommandTxt = "seek " & aliasSndName & " to " & sndPosEdt
+    
+    Call mciSendString(mciCommandTxt)
 End Sub
 
 '******************************************************************************
@@ -312,7 +650,9 @@ End Sub
 '******************************************************************************
 Public Sub Speak(ByVal spText As String, Optional engineNo As Integer = 0, Optional engineNoOneCore As Integer = 9999, _
                  Optional spRate As Integer = 0, Optional spVolume As Integer = 100, Optional spAsync As Boolean = False)
-    With CreateObject("SAPI.SpVoice")
+    Dim spVoiceObj As Object
+    Set spVoiceObj = CreateObject("SAPI.SpVoice")
+    With spVoiceObj
         If engineNoOneCore = 9999 Then
             Set .Voice = .GetVoices.Item(engineNo)
         Else
@@ -321,12 +661,28 @@ Public Sub Speak(ByVal spText As String, Optional engineNo As Integer = 0, Optio
         .Rate = spRate
         .Volume = spVolume
         If spAsync Then
+            Set mSapiVoice = spVoiceObj
             .Speak spText, 1
         Else
             .Speak spText
         End If
         
     End With
+End Sub
+
+'******************************************************************************
+'* [概  要] WaitAsyncSpeakEnd
+'* [詳  細] テキストの非同期音声の完了を待つ｡
+'* [参  考] https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ee125654(v=vs.85)
+'*
+'******************************************************************************
+Public Sub WaitAsyncSpeakEnd()
+    If Not mSapiVoice Is Nothing Then
+        Do
+            DoEvents
+        Loop Until mSapiVoice.WaitUntilDone(-1&)
+    End If
+    Set mSapiVoice = Nothing
 End Sub
 
 '******************************************************************************

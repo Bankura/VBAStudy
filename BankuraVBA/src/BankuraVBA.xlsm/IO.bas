@@ -443,8 +443,8 @@ End Function
 '* @return TextStream
 '*
 '******************************************************************************
-Public Function CreateTextFile(ByVal fileName As String, Optional ByVal overwrite As Boolean = True, Optional ByVal unicode As Boolean = False) As Object
-    Set CreateTextFile = fso.CreateTextFile(fileName, overwrite, unicode)
+Public Function CreateTextFile(ByVal FileName As String, Optional ByVal overwrite As Boolean = True, Optional ByVal unicode As Boolean = False) As Object
+    Set CreateTextFile = fso.CreateTextFile(FileName, overwrite, unicode)
 End Function
 
 '******************************************************************************
@@ -616,8 +616,8 @@ End Function
 '* @return file version
 '*
 '******************************************************************************
-Public Function GetFileVersion(ByVal fileName As String) As String
-    GetFileVersion = fso.GetFileVersion(fileName)
+Public Function GetFileVersion(ByVal FileName As String) As String
+    GetFileVersion = fso.GetFileVersion(FileName)
 End Function
 
 '******************************************************************************
@@ -724,11 +724,11 @@ End Sub
 '* @return TextStream ファイルストリーム
 '*
 '******************************************************************************
-Public Function OpenTextFile(ByVal fileName As String, _
+Public Function OpenTextFile(ByVal FileName As String, _
                       Optional ByVal IOMode As OpenFileEnum = ForReading, _
                       Optional ByVal create As Boolean = False, _
                       Optional ByVal Format As TristateEnum = False_) As Object
-    Set OpenTextFile = fso.OpenTextFile(fileName, IOMode, create, Format)
+    Set OpenTextFile = fso.OpenTextFile(FileName, IOMode, create, Format)
 End Function
 
 '******************************************************************************

@@ -229,7 +229,7 @@ Public Function Validate(vArr, Optional forOutput As Boolean = False) As Boolean
     rEnumerator.IsActionable = False
     rEnumerator.MaxReportCount = arr2dex.RowLength
     rEnumerator.startRow = 0
-    rEnumerator.EndRow = arr2dex.RowMaxIndex
+    rEnumerator.endRow = arr2dex.RowMaxIndex
     mRowCount = arr2dex.RowLength
     
     ' ProgressControllerÇÃê›íË
@@ -365,7 +365,7 @@ Public Function Convert(vArr, Optional forOutput As Boolean = False) As Array2DE
     rEnumerator.IsActionable = False
     rEnumerator.MaxReportCount = arr2dex.RowLength
     rEnumerator.startRow = 0
-    rEnumerator.EndRow = arr2dex.RowMaxIndex
+    rEnumerator.endRow = arr2dex.RowMaxIndex
     mRowCount = arr2dex.RowLength
     
     ' ProgressControllerÇÃê›íË

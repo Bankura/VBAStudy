@@ -980,7 +980,7 @@ Public Function SaveFileOLEObject(ByVal filePath As String, _
     
     ws.Activate
     ws.Cells(rowIdx, colIdx).Select
-    Set SaveFileOLEObject = ws.OLEObjects.Add(fileName:=filePath, DisplayAsIcon:=True, IconFileName:=IO.GetFileName(filePath), IconLabel:=IO.GetFileName(filePath))
+    Set SaveFileOLEObject = ws.OLEObjects.Add(FileName:=filePath, DisplayAsIcon:=True, IconFileName:=IO.GetFileName(filePath), IconLabel:=IO.GetFileName(filePath))
     SaveFileOLEObject.Name = IO.GetFileName(filePath)
 End Function
 
@@ -1172,6 +1172,62 @@ Public Function GetRangeSelection(Optional ByVal sheetName As String, Optional B
 End Function
 
 '******************************************************************************
+'* [概  要] GetVisibleRange
+'* [詳  細] 対象のシート中で表示されているセル範囲を返却する。
+'*
+'* @param sheetName 対象のシート名（省略すると選択中のシートで処理）
+'* @param wb ワークブックオブジェクト
+'* @return Range 選択中のセル範囲
+'******************************************************************************
+Public Function GetVisibleRange(Optional ByVal sheetName As String, Optional ByRef wb As Workbook) As Range
+    Dim ws As Worksheet
+    If Not SetWorkbookAndSheetDefault(wb, ws, sheetName) Then
+        Exit Function
+    End If
+
+    Dim orgActiveSheet As Worksheet: Set orgActiveSheet = wb.ActiveSheet
+    
+    With wb.Application
+        Dim tmpScrUpd As Boolean: tmpScrUpd = .ScreenUpdating
+        .ScreenUpdating = False
+        ws.Select
+        Set GetVisibleRange = wb.Windows(1).VisibleRange
+        orgActiveSheet.Select
+        .ScreenUpdating = tmpScrUpd
+    End With
+End Function
+
+'******************************************************************************
+'* [概  要] Scroll
+'* [詳  細] 指定したセルアドレスが画面左上隅に表示されるようにスクロールする。
+'*
+'* @param rowNo  スクロール先セル位置行
+'* @param colNo  スクロール先セル位置列
+'* @param sheetName 対象のシート名（省略すると選択中のシートで処理）
+'* @param wb ワークブックオブジェクト
+'******************************************************************************
+Public Sub Scroll(ByVal rowNo As Long, ByVal colNo As Long, Optional ByVal sheetName As String, Optional ByRef wb As Workbook)
+    Dim ws As Worksheet
+    If Not SetWorkbookAndSheetDefault(wb, ws, sheetName) Then
+        Exit Sub
+    End If
+
+    Dim orgActiveSheet As Worksheet: Set orgActiveSheet = wb.ActiveSheet
+    
+    With wb.Application
+        Dim tmpScrUpd As Boolean: tmpScrUpd = .ScreenUpdating
+        .ScreenUpdating = False
+        ws.Select
+        With wb.Windows(1)
+            .ScrollRow = rowNo
+            .ScrollColumn = colNo
+        End With
+        orgActiveSheet.Select
+        .ScreenUpdating = tmpScrUpd
+    End With
+End Sub
+
+'******************************************************************************
 '* [概  要] Column1ToA
 '* [詳  細] 列番号の整数を文字列に変換する（1→A）。
 '* [参  考] https://www.excel-chunchun.com/entry/2019/02/08/020935#%E3%81%A7VBA%E3%81%A7%E6%9C%80%E9%80%9F%E3%81%AE%E9%96%A2%E6%95%B0%E3%81%AF
@@ -1279,11 +1335,14 @@ Public Sub DeleteRowBlank(colNo As Long, startRowNo As Long, endRowNo As Long, O
     If Not SetWorkbookAndSheetDefault(wb, ws, sheetName) Then
         Exit Sub
     End If
-
+    On Error GoTo ErrorHandler
     With ws.Range(ws.Cells(startRowNo, colNo), ws.Cells(endRowNo, colNo)).SpecialCells(xlCellTypeBlanks).EntireRow
         .Hidden = True
         .Delete
     End With
+    Exit Sub
+ErrorHandler:
+    ' Nothing
 End Sub
 
 '******************************************************************************
@@ -1382,8 +1441,8 @@ End Sub
 '* [概  要] GetMousePointPosition
 '* [詳  細] マウスカーソルのあるセル位置を取得する。
 '*
-'* @param rowNo  マウスカーソルのあるセル位置行
-'* @param colNo  マウスカーソルのあるセル位置列
+'* @param rowNo  マウスカーソルのあるセル位置行（取得値返却に使用）
+'* @param colNo  マウスカーソルのあるセル位置列（取得値返却に使用）
 '* @param sheetName  対象のシート名（省略すると選択中のシートで処理）
 '* @param wb         ワークブックオブジェクト
 '******************************************************************************
@@ -1419,7 +1478,7 @@ End Sub
 '* [詳  細] Range範囲の表示領域のデータを2次元配列で取得する。
 '* [参  考] https://www.excel-chunchun.com/entry/readcellvalue3
 '*
-'* @param rngAddress  対象とするアドレス。
+'* @param rngAddress  対象とするアドレス
 '* @param sheetName   対象のシート名（省略すると選択中のシートで処理）
 '* @param wb          ワークブックオブジェクト
 '* @return Variant 対象範囲の表示領域データ（2次元配列）
@@ -1467,7 +1526,7 @@ End Function
 '* [概  要] GetVisibleRangeToArray2DEx
 '* [詳  細] Range範囲の表示領域のデータをArray2DExで取得する。
 '*
-'* @param rngAddress  対象とするアドレス。
+'* @param rngAddress  対象とするアドレス
 '* @param sheetName   対象のシート名（省略すると選択中のシートで処理）
 '* @param wb          ワークブックオブジェクト
 '* @return Array2DEx 対象範囲の表示領域データ
@@ -1617,6 +1676,25 @@ Private Sub CountDataOfAreas(targetAreas As Areas, areasRowsCount As Long, areas
     totalRowsCount = totalRowsCount / areasColsCount
 End Sub
 
+'******************************************************************************
+'* [概  要] HasHiddenCells
+'* [詳  細] 非表示のセル（行・列）が存在するかチェックする。
+'*
+'* @param sheetName  対象のシート名（省略すると選択中のシートで処理）
+'* @param wb         ワークブックオブジェクト
+'* @return Boolean 存在する場合、True
+'******************************************************************************
+Public Function HasHiddenCells(Optional ByVal sheetName As String, Optional ByRef wb As Workbook) As Boolean
+    Dim ws As Worksheet
+    If Not SetWorkbookAndSheetDefault(wb, ws, sheetName) Then
+        Exit Function
+    End If
+    On Error GoTo ErrorHandler
+    HasHiddenCells = (ws.UsedRange.SpecialCells(xlCellTypeVisible).Areas.Count > 1)
+    Exit Function
+ErrorHandler:
+    ' Nothing
+End Function
 
 '******************************************************************************
 '* [概  要] SetWorkbookAndSheetDefault

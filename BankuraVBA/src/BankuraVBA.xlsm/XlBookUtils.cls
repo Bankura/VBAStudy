@@ -71,7 +71,7 @@ Public Sub ApplyProc2Books(ByVal srcPath As String, ByVal proc2Apply, Optional B
     Dim v
     For Each v In FileUtils.SearchFile(srcPath, "", "*.xls*", , recursive)
         Dim bookObj As Workbook
-        Set bookObj = Workbooks.Open(fileName:=CStr(v))
+        Set bookObj = Workbooks.Open(FileName:=CStr(v))
         
         If ValidateUtils.IsFunc(proc2Apply) Then
             Call proc2Apply.Apply(bookObj)
@@ -156,12 +156,12 @@ Public Sub ChangeExcelFiles2007Format(srcPath As String, destPath As String)
 
     Do Until strXlsFileName = ""
         If LCase(Right(strXlsFileName, 3)) = "xls" Then
-            Workbooks.Open fileName:=FileUtils.AddPathSeparator(srcPath) & strXlsFileName
+            Workbooks.Open FileName:=FileUtils.AddPathSeparator(srcPath) & strXlsFileName
             Application.DisplayAlerts = False
             If ActiveWorkbook.HasVBProject = True Then
-                ActiveWorkbook.SaveAs fileName:=FileUtils.AddPathSeparator(destPath) & strXlsFileName & "m", FileFormat:=xlOpenXMLWorkbookMacroEnabled
+                ActiveWorkbook.SaveAs FileName:=FileUtils.AddPathSeparator(destPath) & strXlsFileName & "m", FileFormat:=xlOpenXMLWorkbookMacroEnabled
             Else
-                ActiveWorkbook.SaveAs fileName:=FileUtils.AddPathSeparator(destPath) & strXlsFileName & "x", FileFormat:=xlOpenXMLWorkbook
+                ActiveWorkbook.SaveAs FileName:=FileUtils.AddPathSeparator(destPath) & strXlsFileName & "x", FileFormat:=xlOpenXMLWorkbook
             End If
             ActiveWorkbook.Close
             Application.DisplayAlerts = True
@@ -197,12 +197,12 @@ End Sub
 '* @param destPath ï€ë∂êÊÉtÉHÉãÉ_
 '******************************************************************************
 Public Sub ChangeExcelFileFormatXlsx(xlsFileName As String, srcPath As String, destPath As String)
-    Workbooks.Open fileName:=FileUtils.AddPathSeparator(srcPath) & xlsFileName
+    Workbooks.Open FileName:=FileUtils.AddPathSeparator(srcPath) & xlsFileName
 
     Dim displayAlertsState As Boolean: displayAlertsState = Application.DisplayAlerts
     If Application.DisplayAlerts Then Application.DisplayAlerts = False
 
-    ActiveWorkbook.SaveAs fileName:=FileUtils.AddPathSeparator(destPath) & Split(xlsFileName, ".")(0) & ".xlsx", FileFormat:=xlOpenXMLWorkbook
+    ActiveWorkbook.SaveAs FileName:=FileUtils.AddPathSeparator(destPath) & Split(xlsFileName, ".")(0) & ".xlsx", FileFormat:=xlOpenXMLWorkbook
     ActiveWorkbook.Close
     
     Application.DisplayAlerts = displayAlertsState

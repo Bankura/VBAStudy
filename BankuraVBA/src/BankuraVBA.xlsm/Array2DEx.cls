@@ -37,6 +37,8 @@ Private mColLength As Long
 Private mRowMaxIndex As Long
 Private mColMaxIndex As Long
 Private mDefaultInitValue As Variant
+Private mBaseRowStartIndex As Long
+Private mBaseColStartIndex As Long
 
 '******************************************************************************
 '* プロパティ定義
@@ -158,10 +160,42 @@ Public Property Let DefaultInitValue(ByVal arg)
     End If
 End Property
 
+'*-----------------------------------------------------------------------------
+'* BaseRowStartIndex プロパティ
+'* 2次元配列変換時の添え字の開始インデックス（行）
+'*-----------------------------------------------------------------------------
+Public Property Get BaseRowStartIndex() As Long
+    BaseRowStartIndex = mBaseRowStartIndex
+End Property
+Public Property Let BaseRowStartIndex(ByVal arg As Long)
+    If arg < 0 Then
+        mBaseRowStartIndex = 0
+    Else
+        mBaseRowStartIndex = arg
+    End If
+End Property
+
+'*-----------------------------------------------------------------------------
+'* BaseColStartIndex プロパティ
+'* 2次元配列変換時の添え字の開始インデックス（列）
+'*-----------------------------------------------------------------------------
+Public Property Get BaseColStartIndex() As Long
+    BaseColStartIndex = mBaseColStartIndex
+End Property
+Public Property Let BaseColStartIndex(ByVal arg As Long)
+    If arg < 0 Then
+        mBaseColStartIndex = 0
+    Else
+        mBaseColStartIndex = arg
+    End If
+End Property
+
 '******************************************************************************
 '* コンストラクタ・デストラクタ
 '******************************************************************************
 Private Sub Class_Initialize()
+    mBaseRowStartIndex = 0
+    mBaseColStartIndex = 0
     Call Clear
 End Sub
 
@@ -298,7 +332,7 @@ End Function
 '******************************************************************************
 Public Function To2DArray() As Variant
     If mRowMaxIndex > -1 Then
-        To2DArray = ArrayUtils.Array2DExTo2DArray(Me)
+        To2DArray = ArrayUtils.Array2DExTo2DArray(Me, mBaseRowStartIndex, mBaseColStartIndex)
     Else
         To2DArray = ArrayUtils.EmptyVariant2DArray
     End If

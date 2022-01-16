@@ -98,7 +98,7 @@ End Function
 '*
 '******************************************************************************
 Public Function IsHalfUpperCase(ByVal val As String) As Boolean
-    IsHalfUpperCase = (val Like "[‚`-‚y]")
+    IsHalfUpperCase = (val Like "[A-Z]")
 End Function
 
 '******************************************************************************

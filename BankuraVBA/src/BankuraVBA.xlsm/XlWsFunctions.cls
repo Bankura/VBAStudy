@@ -1497,8 +1497,8 @@ Public Function TDist(arg1 As Double, arg2 As Double, arg3 As Double) As Double
     TDist = mXlWsFunc.TDist(arg1, arg2, arg3)
 End Function
 
-Public Function text(arg1, arg2 As String) As String
-    text = mXlWsFunc.text(arg1, arg2)
+Public Function Text(arg1, arg2 As String) As String
+    Text = mXlWsFunc.Text(arg1, arg2)
 End Function
 
 Public Function TextJoin(arg1 As String, arg2 As Boolean, arg3 As String, Optional arg4, Optional arg5, Optional arg6, Optional arg7, Optional arg8, Optional arg9, Optional arg10, Optional arg11, Optional arg12, Optional arg13, Optional arg14, Optional arg15, Optional arg16, Optional arg17, Optional arg18, Optional arg19, Optional arg20, Optional arg21, Optional arg22, Optional arg23, Optional arg24, Optional arg25, Optional arg26, Optional arg27, Optional arg28, Optional arg29) As String

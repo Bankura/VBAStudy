@@ -121,10 +121,10 @@ End Property
 '*
 '* èIóπçsî‘çÜ
 '*-----------------------------------------------------------------------------
-Public Property Get EndRow() As Long
-    EndRow = mEndRow
+Public Property Get endRow() As Long
+    endRow = mEndRow
 End Property
-Public Property Let EndRow(arg As Long)
+Public Property Let endRow(arg As Long)
     mEndRow = arg
 End Property
 

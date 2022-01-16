@@ -157,6 +157,25 @@ End Sub
 '******************************************************************************
 
 '******************************************************************************
+'* [概  要] RepeatDoEvents
+'* [詳  細] DoEventsを繰り返し実行し、画面描画停止の抑止を確実に行う。
+'*
+'* @param repCount DoEventsを行う回数（1カウントにつきDoEventsは2回実施）
+'* @param withSleep Sleep処理を行うか（True:Yes）
+'* @param sleepMSec Sleepの時間（millisecond）
+'******************************************************************************
+Public Sub RepeatDoEvents(Optional ByVal repCount As Long = 3, _
+                          Optional ByVal withSleep As Boolean = True, _
+                          Optional ByVal sleepMSec As Long = 20)
+    Dim i As Long
+    For i = 1 To repCount
+        DoEvents
+        DoEvents
+        If withSleep Then Sleep sleepMSec
+    Next
+End Sub
+
+'******************************************************************************
 '* [概  要] DoEvents実行処理
 '* [詳  細] DoEventsを最適なタイミングで実行する。
 '*
@@ -191,17 +210,54 @@ End Sub
 '*          シートを指定している場合、選択したファイルパスを指定した
 '*          シートのセルに設定する。
 '*
+'* @param fFilter   ファイルの種類を指定する文字列(ファイルフィルタ文字列)を指定
+'*                  （Ex. Excelファイル,*.xlsx）
+'* @param fIndex    fFilterの何番目のペアを既定値とするか（1始まり）
+'* @param dlgTitle  ダイアログボックスのタイトル
+'* @param initialFile 初期表示用ファイルパス。省略可能。
 '* @param sheetName シート名
 '* @param pos セル位置（A1形式）
 '* @return String 選択したファイルパス
 '*
 '******************************************************************************
-Public Function ShowOpenFileDialog(Optional sheetName As String, Optional pos As String = "A1") As String
-    Dim fileName: fileName = Application.ShowOpenFileDialog
-    If fileName <> False Then
-        ShowOpenFileDialog = fileName
+Public Function ShowOpenFileDialog(Optional fFilter As String, Optional fIndex As Long, Optional dlgTitle As String, Optional ByVal initialFile As String, Optional sheetName As String, Optional pos As String = "A1") As String
+    If initialFile <> "" Then
+        If IO.FolderExists(initialFile) Then
+            Call FileUtils.ChangeDirectory(initialFile)
+        Else
+            With Application.FileDialog(msoFileDialogOpen)
+                .Filters.Clear
+                If fFilter <> "" Then
+                    Dim vFiltersList As Variant: vFiltersList = Split(fFilter, ",")
+                    If MathUtils.IsEven(ArrayUtils.GetLength(vFiltersList)) Then
+                        Dim i As Long
+                        For i = LBound(vFiltersList) To UBound(vFiltersList) Step 2
+                            .Filters.Add vFiltersList(i), vFiltersList(i + 1)
+                        Next
+                        .FilterIndex = fIndex
+                    End If
+                End If
+                .InitialFileName = initialFile
+                .InitialView = msoFileDialogViewDetails
+                .Title = dlgTitle
+                .AllowMultiSelect = False
+                If .Show = True Then
+                    ShowOpenFileDialog = .SelectedItems(1)
+                    If sheetName <> "" Then
+                        ThisWorkbook.Worksheets(sheetName).Range(pos).Value = ShowOpenFileDialog
+                    End If
+                End If
+            End With
+            Exit Function
+        End If
+    End If
+    ' FileDialogだとファイル入力欄にフォルダ名が表示されるため、初期表示用ファイルパスがフォルダの場合
+    ' GetOpenFilename で対応
+    Dim FileName: FileName = Application.GetOpenFilename(fFilter, fIndex, dlgTitle)
+    If FileName <> False Then
+        ShowOpenFileDialog = FileName
         If sheetName <> "" Then
-            ThisWorkbook.Worksheets(sheetName).Range(pos).Value = fileName
+            ThisWorkbook.Worksheets(sheetName).Range(pos).Value = FileName
         End If
     End If
 End Function
@@ -215,16 +271,46 @@ End Function
 '*
 '******************************************************************************
 Public Function ShowCsvFileDialog(Optional ByVal initialFile As String) As String
-    ShowCsvFileDialog = ""
-    With Application.FileDialog(msoFileDialogOpen)
-        .Filters.Clear
-        .Filters.Add "CSVファイル", "*.csv"
-        .InitialFileName = initialFile
-        .AllowMultiSelect = False
-        If .Show = True Then
-            ShowCsvFileDialog = .SelectedItems(1)
+    ShowCsvFileDialog = ShowOpenFileDialog("CSVファイル,*.csv", , , initialFile)
+End Function
+
+'******************************************************************************
+'* [概  要] ShowSaveFileDialog メソッド
+'* [詳  細] ファイルを保存するダイアログを表示する｡
+'*
+'* @param fFilter   ファイルの種類を指定する文字列(ファイルフィルタ文字列)を指定
+'*                  （Ex. Excelファイル,*.xlsx）
+'* @param fIndex    fFilterの何番目のペアを既定値とするか（1始まり）
+'* @param dlgTitle  ダイアログボックスのタイトル
+'* @param initialFile 初期表示用ファイルパス。省略可能。
+'* @return String 保存ファイルのパス
+'*
+'******************************************************************************
+Public Function ShowSaveFileDialog(Optional fFilter As String, Optional fIndex As Long, Optional dlgTitle As String, Optional ByVal initialFile As String, Optional sheetName As String, Optional pos As String = "A1") As String
+    If initialFile <> "" Then
+        If IO.FolderExists(initialFile) Then
+            Call FileUtils.ChangeDirectory(initialFile)
+        Else
+            If fFilter = "" Then
+                With Application.FileDialog(msoFileDialogSaveAs)
+    
+                    .InitialFileName = initialFile
+                    .InitialView = msoFileDialogViewDetails
+                    .Title = dlgTitle
+                    If .Show = True Then
+                        ShowSaveFileDialog = .SelectedItems(1)
+                    End If
+                End With
+                Exit Function
+            End If
         End If
-    End With
+    End If
+    ' FileDialogだとフィルターが使用できない、かつファイル入力欄にフォルダ名が表示されるため、
+    ' フィルター指定時と、初期表示用ファイルパスがフォルダの場合は、GetSaveAsFilename で対応
+    Dim FileName: FileName = Application.GetSaveAsFilename(initialFile, fFilter, fIndex, dlgTitle)
+    If FileName <> False Then
+        ShowSaveFileDialog = FileName
+    End If
 End Function
 
 '******************************************************************************
@@ -236,31 +322,54 @@ End Function
 '*
 '******************************************************************************
 Public Function ShowCsvSaveFileDialog(Optional ByVal initialFile As String) As String
-    Dim fileName As Variant
-    fileName = Application.GetSaveAsFilename(initialFile, "CSVファイル,*.csv")
-    If fileName = False Then
-        Exit Function
-    End If
-    ShowCsvSaveFileDialog = CStr(fileName)
+    ShowCsvSaveFileDialog = ShowSaveFileDialog("CSVファイル,*.csv", , , initialFile)
 End Function
 
 '******************************************************************************
 '* [概  要] ShowFolderDialog メソッド
 '* [詳  細] フォルダダイアログを表示する｡
 '*
-'* @param sheetName シート名
-'* @param pos セル位置（A1形式）
-'* @return String 選択したファイルパス
+'* @param dlgTitle      ダイアログボックスのタイトル
+'* @param initialFolder 初期表示用フォルダパス。省略可能。
+'* @param sheetName     シート名
+'* @param pos           セル位置（A1形式）
+'* @return String 選択したフォルダパス
 '*
 '******************************************************************************
-Public Function ShowFolderDialog(Optional sheetName As String, Optional pos As String = "A1") As String
+Public Function ShowFolderDialog(Optional dlgTitle As String = "フォルダを開く", Optional ByVal initialFolder As String, Optional sheetName As String, Optional pos As String = "A1") As String
+    With Application.FileDialog(msoFileDialogFolderPicker)
+
+        .InitialFileName = initialFolder
+        .InitialView = msoFileDialogViewDetails
+        .Title = dlgTitle
+        If .Show = True Then
+            ShowFolderDialog = .SelectedItems(1)
+            If sheetName <> "" Then
+                ThisWorkbook.Worksheets(sheetName).Range(pos).Value = .SelectedItems(1)
+            End If
+        End If
+    End With
+End Function
+
+'******************************************************************************
+'* [概  要] ShowFolderTreeDialog メソッド
+'* [詳  細] フォルダツリーダイアログを表示する｡
+'*
+'* @param dlgMessage ダイアログボックスのメッセージ
+'* @param rootFolder ルートフォルダパス。省略可能。
+'* @param sheetName シート名
+'* @param pos セル位置（A1形式）
+'* @return String 選択したフォルダパス
+'*
+'******************************************************************************
+Public Function ShowFolderTreeDialog(Optional dlgMessage As String = "フォルダを選択してください", Optional ByVal rootFolder As Variant, Optional sheetName As String, Optional pos As String = "A1") As String
     On Error GoTo ErrorHandler
     
     'フォルダダイアログ表示
     Dim objPath As Object
-    Set objPath = Base.GetShell().BrowseForFolder(0, "フォルダを選択してください", &H1)
+    Set objPath = Base.GetShell().BrowseForFolder(0, dlgMessage, &H1, rootFolder)
     If Not objPath Is Nothing Then
-        ShowFolderDialog = CStr(objPath.items.Item.Path)
+        ShowFolderTreeDialog = CStr(objPath.items.Item.Path)
         If sheetName <> "" Then
             ThisWorkbook.Worksheets(sheetName).Range(pos).Value = CStr(objPath.items.Item.Path)
         End If

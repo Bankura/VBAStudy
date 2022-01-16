@@ -94,8 +94,8 @@ End Function
 '* @param clct As Collection(Of T)
 '* @param val As Variant(Of T)
 '******************************************************************************
-Public Sub Shift(ByVal clct As Collection, ByVal val As Variant)
-    Call Core.Shift(clct, val)
+Public Sub shift(ByVal clct As Collection, ByVal val As Variant)
+    Call Core.shift(clct, val)
 End Sub
 
 '******************************************************************************

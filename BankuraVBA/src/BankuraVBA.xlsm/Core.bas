@@ -843,7 +843,7 @@ End Function
 
 ''' @param clct As Collection(Of T)
 ''' @param val As Variant(Of T)
-Public Sub Shift(ByVal clct As Collection, ByVal val As Variant)
+Public Sub shift(ByVal clct As Collection, ByVal val As Variant)
     If clct.Count < 1 Then
         clct.Add val
     Else

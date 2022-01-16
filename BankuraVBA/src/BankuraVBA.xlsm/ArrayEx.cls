@@ -18,6 +18,9 @@ Private xItems As Variant
 Private xLength As Long
 Private xIndex As Long
 
+' ADD Bankura
+Private mBaseStartIndex As Long
+
 Private Sub Class_Initialize()
     xIndex = -1
     xLength = -1 + 32
@@ -45,6 +48,7 @@ Public Function AddObj(ByVal obj As Variant)
     Set xItems(xIndex) = obj
 End Function
 
+'MOD Bankura
 Public Function ToArray() As Variant
     Dim arr As Variant: arr = xItems
     If xIndex > -1 Then
@@ -52,7 +56,11 @@ Public Function ToArray() As Variant
     Else
         arr = Array()
     End If
-    ToArray = arr
+    If mBaseStartIndex <= 0 Then
+        ToArray = arr
+    Else
+        ToArray = ArrayUtils.ArrayExToArray(Me, mBaseStartIndex)
+    End If
 End Function
 
 
@@ -61,7 +69,7 @@ End Function
 '* 拡張メソッド
 '*
 '* @author Bankura
-'* Copyright (c) 2020-2021 Bankura
+'* Copyright (c) 2020-2022 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 '*-----------------------------------------------------------------------------
@@ -89,6 +97,21 @@ Public Property Let Item(ByVal idx As Long, ByVal arg As Variant)
         Set xItems(idx) = arg
     Else
         xItems(idx) = arg
+    End If
+End Property
+
+'*-----------------------------------------------------------------------------
+'* BaseStartIndex プロパティ
+'* 1次元配列変換時の添え字の開始インデックス
+'*-----------------------------------------------------------------------------
+Public Property Get BaseStartIndex() As Long
+    BaseStartIndex = mBaseStartIndex
+End Property
+Public Property Let BaseStartIndex(ByVal arg As Long)
+    If arg < 0 Then
+        mBaseStartIndex = 0
+    Else
+        mBaseStartIndex = arg
     End If
 End Property
 

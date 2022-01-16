@@ -131,10 +131,10 @@ End Property
 '*
 '* èIóπçsî‘çÜ
 '*-----------------------------------------------------------------------------
-Public Property Get EndRow() As Long
-    EndRow = mEndRow
+Public Property Get endRow() As Long
+    endRow = mEndRow
 End Property
-Public Property Let EndRow(arg As Long)
+Public Property Let endRow(arg As Long)
     mEndRow = arg
 End Property
 
@@ -155,10 +155,10 @@ End Property
 '*
 '* èIóπóÒî‘çÜ
 '*-----------------------------------------------------------------------------
-Public Property Get EndCol() As Long
-    EndCol = mEndCol
+Public Property Get endCol() As Long
+    endCol = mEndCol
 End Property
-Public Property Let EndCol(arg As Long)
+Public Property Let endCol(arg As Long)
     mEndCol = arg
 End Property
 

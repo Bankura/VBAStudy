@@ -168,7 +168,7 @@ Public Function BytesToBase64(varBytes() As Byte) As String
     With CreateObject("Msxml2.DOMDocument.6.0").createElement("b64")
         .DataType = "bin.base64"
         .nodeTypedValue = varBytes
-        BytesToBase64 = Replace(.text, vbLf, "")
+        BytesToBase64 = Replace(.Text, vbLf, "")
     End With
 End Function
 
@@ -197,7 +197,7 @@ End Function
  Public Function Base64toBytes(varStr As String) As Byte()
     With CreateObject("Msxml2.DOMDocument.6.0").createElement("b64")
          .DataType = "bin.base64"
-         .text = varStr
+         .Text = varStr
          Base64toBytes = .nodeTypedValue
     End With
  End Function
