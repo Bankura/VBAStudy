@@ -8,7 +8,6 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
-
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 '*
 '* [機能名] Excel WorkSheet Cell/Rangeユーティリティクラス
@@ -58,11 +57,15 @@ End Sub
 '* @param vArray Variant配列データ
 '* @param lStartRow データ開始行番号
 '* @param lStartCol データ開始列番号
+'* @param willTxtFormat 書式を文字列にして出力するか
 '*
 '******************************************************************************
-Public Sub InjectVariantArrayToCells(ByVal dataSheet As Worksheet, vArray, lStartRow As Long, lStartCol As Long)
+Public Sub InjectVariantArrayToCells(ByVal dataSheet As Worksheet, vArray, lStartRow As Long, lStartCol As Long, Optional willTxtFormat As Boolean = False)
     If ArrayUtils.IsEmptyArray(vArray) Then Exit Sub
-    dataSheet.Cells(lStartRow, lStartCol).Resize(UBound(vArray, 1) - LBound(vArray, 1) + 1, UBound(vArray, 2) - LBound(vArray, 2) + 1).Value = vArray
+    Dim rng As Range
+    Set rng = dataSheet.Cells(lStartRow, lStartCol).Resize(UBound(vArray, 1) - LBound(vArray, 1) + 1, UBound(vArray, 2) - LBound(vArray, 2) + 1)
+    If willTxtFormat Then rng.NumberFormat = "@"
+    rng.Value = vArray
 End Sub
 
 '******************************************************************************
@@ -1695,6 +1698,55 @@ Public Function HasHiddenCells(Optional ByVal sheetName As String, Optional ByRe
 ErrorHandler:
     ' Nothing
 End Function
+
+
+'******************************************************************************
+'* [概  要] ArrangeTableFormat
+'* [詳  細] 対象のシート中で選択中のセル範囲を返却する。
+'*
+'* @param rngAddress  対象とするアドレス
+'* @param sheetName 対象のシート名（省略すると選択中のシートで処理）
+'* @param wb ワークブックオブジェクト
+'* @return Range 選択中のセル範囲
+'******************************************************************************
+Public Sub ArrangeTableFormat(ByVal rngAddress As String, _
+                              Optional ByVal sheetName As String, _
+                              Optional ByVal useHeader As Boolean = False, _
+                              Optional ByVal numFormat As String = "#,###", _
+                              Optional ByVal dateFormat As String = "yyyy/mm/dd", _
+                              Optional ByRef wb As Workbook)
+    Dim ws As Worksheet
+    If Not SetWorkbookAndSheetDefault(wb, ws, sheetName) Then
+        Exit Sub
+    End If
+
+    With ws.Range(rngAddress)
+        Dim startRowNo As Long
+        If useHeader Then
+            With .Rows(1).Interior
+                .ThemeColor = msoThemeColorAccent6
+                .TintAndShade = 0.5
+            End With
+            startRowNo = 1
+        Else
+            startRowNo = 2
+        End If
+        Dim colrng As Range
+        For Each colrng In .Columns
+            Select Case TypeName(colrng.Cells(startRowNo).Value)
+                Case "String"
+                    colrng.HorizontalAlignment = xlLeft
+                Case "Double"
+                    colrng.NumberFormatLocal = numFormat
+                Case "Date"
+                    colrng.NumberFormatLocal = dateFormat
+            End Select
+            
+            colrng.EntireColumn.AutoFit
+            colrng.ColumnWidth = colrng.ColumnWidth + 2
+        Next
+    End With
+End Sub
 
 '******************************************************************************
 '* [概  要] SetWorkbookAndSheetDefault

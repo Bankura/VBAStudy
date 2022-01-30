@@ -288,12 +288,13 @@ End Function
 '*          AriawaseのCoreモジュールラッパーメソッド。
 '*
 '* @param arr As Variant(Of Array(Of T))
+'* @return ArrayEx
 '******************************************************************************
-Public Sub reverse()
+Public Function reverse() As ArrayEx
     Dim arr: arr = Me.ToArray
     Call Core.ArrRev(arr)
-    Call Init(arr)
-End Sub
+    Set reverse = Init(arr)
+End Function
 
 '******************************************************************************
 '* [概  要] Sort
@@ -301,12 +302,13 @@ End Sub
 '*          AriawaseのCoreモジュールラッパーメソッド。
 '*
 '* @param orderAsc As Boolean
+'* @return ArrayEx
 '******************************************************************************
-Public Sub Sort(Optional ByVal orderAsc As Boolean = True)
+Public Function Sort(Optional ByVal orderAsc As Boolean = True) As ArrayEx
     Dim arr: arr = Me.ToArray
     Call Core.ArrSort(arr, orderAsc)
-    Call Init(arr)
-End Sub
+    Set Sort = Init(arr)
+End Function
 
 '******************************************************************************
 '* [概  要] Uniq

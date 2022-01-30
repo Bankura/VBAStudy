@@ -304,14 +304,14 @@ End Function
 '* @return String ÉRÅ[Éh
 '*
 '******************************************************************************
-Public Function GetComponentCodes(ByVal componentName As String, startline As Long, Count As Long, Optional book As Workbook) As String
+Public Function GetComponentCodes(ByVal componentName As String, startLine As Long, Count As Long, Optional book As Workbook) As String
     Dim mybook As Workbook
     If book Is Nothing Then
         Set mybook = ThisWorkbook
     Else
         Set mybook = book
     End If
-    GetComponentCodes = mybook.VBProject.VBComponents(componentName).CodeModule.lines(startline, Count)
+    GetComponentCodes = mybook.VBProject.VBComponents(componentName).CodeModule.lines(startLine, Count)
 End Function
 
 '******************************************************************************

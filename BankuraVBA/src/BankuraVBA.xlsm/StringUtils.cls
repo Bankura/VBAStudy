@@ -28,7 +28,7 @@ Option Explicit
 '*          https://guava.dev/releases/19.0/api/docs/com/google/common/base/Strings.html
 '*
 '* @author Bankura
-'* Copyright (c) 2019-2021 Bankura
+'* Copyright (c) 2019-2022 Bankura
 '*/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 
@@ -1197,9 +1197,9 @@ End Function
 '*          空文字の検索文字はFalseを返す｡
 '*
 '* [用  例]
-'*   StringUtils.Contains("", *)      = false
-'*   StringUtils.Contains("abc", 'a') = true
-'*   StringUtils.Contains("abc", 'z') = false
+'*   StringUtils.Contains("", *)      = False
+'*   StringUtils.Contains("abc", "a") = True
+'*   StringUtils.Contains("abc", "z") = False
 '*
 '* @param str 文字列
 '* @param searchStr 検索文字列
@@ -1248,11 +1248,11 @@ End Function
 '*          空文字または長さがゼロの検索配列はFalseを返す｡
 '*
 '* [用  例]
-'*   StringUtils.ContainsAny("", *)                    = false
-'*   StringUtils.ContainsAny(*, [])                    = false
-'*   StringUtils.containsAny("abcd", "ab", "") = true
-'*   StringUtils.containsAny("abcd", "ab", "cd") = true
-'*   StringUtils.containsAny("abc", "d", "abc")  = true
+'*   StringUtils.ContainsAny("", *)              = False
+'*   StringUtils.ContainsAny(*, [])              = False
+'*   StringUtils.ContainsAny("abcd", "ab", "")   = True
+'*   StringUtils.ContainsAny("abcd", "ab", "cd") = True
+'*   StringUtils.ContainsAny("abc", "d", "abc")  = True
 '*
 '* @param str 文字列
 '* @param searchStr 検索文字配列（複数指定）
@@ -1283,8 +1283,8 @@ End Function
 '*          空文字の検索文字はFalseを返す｡
 '*
 '* [用  例]
-'*   StringUtils.ContainsIgnoreCase("", "") = True
-'*   StringUtils.ContainsIgnoreCase("abc", "") = True
+'*   StringUtils.ContainsIgnoreCase("", "")     = False
+'*   StringUtils.ContainsIgnoreCase("abc", "")  = False
 '*   StringUtils.ContainsIgnoreCase("abc", "a") = True
 '*   StringUtils.ContainsIgnoreCase("abc", "z") = False
 '*   StringUtils.ContainsIgnoreCase("abc", "A") = True
@@ -1312,11 +1312,11 @@ End Function
 '*          空文字の検索文字はTrueを返す｡
 '*
 '* [用  例]
-'*   StringUtils.ContainsNone("", *)         = true
-'*   StringUtils.ContainsNone("ab", "")      = true
-'*   StringUtils.ContainsNone("abab", "xyz") = true
-'*   StringUtils.ContainsNone("ab1", "xyz")  = true
-'*   StringUtils.ContainsNone("abz", "xyz")  = false
+'*   StringUtils.ContainsNone("", *)         = True
+'*   StringUtils.ContainsNone("ab", "")      = True
+'*   StringUtils.ContainsNone("abab", "xyz") = True
+'*   StringUtils.ContainsNone("ab1", "xyz")  = True
+'*   StringUtils.ContainsNone("abz", "xyz")  = False
 '*
 '* @param str 文字列
 '* @param searchStr 検索文字列
@@ -1325,7 +1325,7 @@ End Function
 '******************************************************************************
 Public Function ContainsNone(ByVal str As String, ByVal searchStr As String) As Boolean
     If Me.IsEmpty(str) Or Me.IsEmpty(searchStr) Then
-        ContainsNone = False
+        ContainsNone = True
         Exit Function
     End If
     ContainsNone = Not ContainsAny(str, Me.ToCharArray(searchStr))
@@ -1357,7 +1357,8 @@ Public Function ContainsOnly(ByVal str As String, ByVal searchStr As String) As 
         ContainsOnly = False
         Exit Function
     End If
-    ContainsOnly = (Me.IndexOfAnyBut(str, searchStr) = INDEX_NOT_FOUND)
+    
+    ContainsOnly = (Me.IndexOfAnyBut(str, Me.ToCharArray(searchStr)) = INDEX_NOT_FOUND)
 End Function
 
 '******************************************************************************
@@ -1414,8 +1415,8 @@ End Function
 '* [詳  細] 渡された文字列がスペースか空（""）の場合は、指定したデフォルト値を返す｡
 '*
 '* [用  例]
-'*   StringUtils.DefaultIfBlank("", "NULL") = "NULL"
-'*   StringUtils.DefaultIfBlank(" ", "NULL") = "NULL"
+'*   StringUtils.DefaultIfBlank("", "NULL")    = "NULL"
+'*   StringUtils.DefaultIfBlank(" ", "NULL")   = "NULL"
 '*   StringUtils.DefaultIfBlank("bat", "NULL") = "bat"
 '*
 '* @param str 文字列
@@ -1432,8 +1433,8 @@ End Function
 '* [詳  細] 渡された文字列が空（""）の場合は、指定したデフォルト値を返す｡
 '*
 '* [用  例]
-'*   StringUtils.DefaultIfEmpty("", "NULL") = "NULL"
-'*   StringUtils.DefaultIfEmpty(" ", "NULL") = " "
+'*   StringUtils.DefaultIfEmpty("", "NULL")    = "NULL"
+'*   StringUtils.DefaultIfEmpty(" ", "NULL")   = " "
 '*   StringUtils.DefaultIfEmpty("bat", "NULL") = "bat"
 '*
 '* @param str 文字列
@@ -1448,11 +1449,11 @@ End Function
 '******************************************************************************
 '* [概  要] DeleteWhitespace
 '* [詳  細] 文字列からすべての半角スペースを削除｡
-'*   StringUtils.DeleteWhitespace("") = ""
-'*   StringUtils.DeleteWhitespace("abc") = "abc"
-'*   StringUtils.DeleteWhitespace("   ab  c  ") = "abc"
 '*
 '* [用  例]
+'*   StringUtils.DeleteWhitespace("")           = ""
+'*   StringUtils.DeleteWhitespace("abc")        = "abc"
+'*   StringUtils.DeleteWhitespace("   ab  c  ") = "abc"
 '*
 '* @param str 文字列
 '* @return String 削除後文字列
@@ -1463,13 +1464,13 @@ Public Function DeleteWhitespace(ByVal str As String) As String
 End Function
 
 '******************************************************************************
-'* [概  要] DeleteWhitespace
-'* [詳  細] 文字列からすべての半角スペースを削除｡
-'*   StringUtils.DeleteWhitespace("") = ""
-'*   StringUtils.DeleteWhitespace("abc") = "abc"
-'*   StringUtils.DeleteWhitespace("   ab  c  ") = "abc"
+'* [概  要] DeleteMultiWhitespace
+'* [詳  細] 文字列から連続する半角スペースを削除｡
 '*
 '* [用  例]
+'*   StringUtils.DeleteMultiWhitespace("")           = ""
+'*   StringUtils.DeleteMultiWhitespace("a   b c")    = "a b c"
+'*   StringUtils.DeleteMultiWhitespace("   ab  c  ") = " ab c "
 '*
 '* @param str 文字列
 '* @return String 削除後文字列
@@ -1482,7 +1483,6 @@ Public Function DeleteMultiWhitespace(ByVal str As String) As String
     Loop
 End Function
 
-
 '******************************************************************************
 '* [概  要] Difference
 '* [詳  細] 2つの文字列を比較し、それらが異なる部分を返す。
@@ -1491,14 +1491,14 @@ End Function
 '*
 '* [用  例]
 '*   StringUtils.Difference("i am a machine", "i am a robot") = "robot"
-'*   StringUtils.Difference("", "") = ""
-'*   StringUtils.Difference("", "abc") = "abc"
-'*   StringUtils.Difference("abc", "") = ""
-'*   StringUtils.Difference("abc", "abc") = ""
-'*   StringUtils.Difference("abc", "ab") = ""
-'*   StringUtils.Difference("ab", "abxyz") = "xyz"
+'*   StringUtils.Difference("", "")           = ""
+'*   StringUtils.Difference("", "abc")        = "abc"
+'*   StringUtils.Difference("abc", "")        = ""
+'*   StringUtils.Difference("abc", "abc")     = ""
+'*   StringUtils.Difference("abc", "ab")      = ""
+'*   StringUtils.Difference("ab", "abxyz")    = "xyz"
 '*   StringUtils.Difference("abcde", "abxyz") = "xyz"
-'*   StringUtils.Difference("abcde", "xyz") = "xyz"
+'*   StringUtils.Difference("abcde", "xyz")   = "xyz"
 '*
 '* @param str1 比較する文字列1
 '* @param str2 比較する文字列2
@@ -1528,8 +1528,8 @@ End Function
 '*
 '* [用  例]
 '*   StringUtils.EndsWithAny("abcxyz", Array("xyz", "abc")) = True
-'*   StringUtils.EndsWithAny("abcXYZ", "def", "XYZ") = True
-'*   StringUtils.EndsWithAny("abcXYZ", "def", "xyz") = False
+'*   StringUtils.EndsWithAny("abcXYZ", "def", "XYZ")        = True
+'*   StringUtils.EndsWithAny("abcXYZ", "def", "xyz")        = False
 '*
 '* @param str 文字列
 '* @param endStr 終了文字列（複数指定）
@@ -1616,8 +1616,10 @@ End Function
 '* [詳  細] 文字列が指定した文字列のいづれかに等しいかチェック｡
 '*
 '* [用  例]
-'*   StringUtils.EqualsAny("abc", "abc", "def") = True
-'*   StringUtils.EqualsAny("abc", "ABC", "DEF") = False
+'*   StringUtils.EqualsAny("abc", "abc", "def")         = True
+'*   StringUtils.EqualsAny("abc", "ABC", "DEF")         = False
+'*   StringUtils.EqualsAny("abc", Array("abc", "def"))  = True
+'*   StringUtils.EqualsAny("abc", Array("ABC", "def"))  = False
 '*
 '* @param str 文字列
 '* @param searchStrings 比較文字列（複数指定）
@@ -1646,11 +1648,13 @@ End Function
 '*          大文字小文字を考慮しない。
 '*
 '* [用  例]
-'*   StringUtils.EqualsAnyIgnoreCase("abc", "abc", "def") = True
-'*   StringUtils.EqualsAnyIgnoreCase("abc", "ABC", "DEF") = True
+'*   StringUtils.EqualsAnyIgnoreCase("abc", "abc", "def")        = True
+'*   StringUtils.EqualsAnyIgnoreCase("abc", "ABC", "DEF")        = True
+'*   StringUtils.EqualsAnyIgnoreCase("abc", Array("ABC", "def")) = True
+'*   StringUtils.EqualsAnyIgnoreCase("abc", Array("aa", "def"))  = False
 '*
-'* @param str1 文字列1
-'* @param str2 文字列2
+'* @param str 文字列
+'* @param searchStrings 比較文字列（複数指定）
 '* @return Boolean チェック結果（True:該当）
 '*
 '******************************************************************************
@@ -1676,11 +1680,11 @@ End Function
 '*          すべての値が空白であるか、配列が空である場合、空が返される。
 '*
 '* [用  例]
-'*   StringUtils.FirstNonBlank("", " ") = ""
-'*   StringUtils.FirstNonBlank("abc") = "abc"
-'*   StringUtils.FirstNonBlank("", "xyz") = "xyz"
+'*   StringUtils.FirstNonBlank("", " ")        = ""
+'*   StringUtils.FirstNonBlank("abc")          = "abc"
+'*   StringUtils.FirstNonBlank("", "xyz")      = "xyz"
 '*   StringUtils.FirstNonBlank("", " ", "xyz") = "xyz"
-'*   StringUtils.FirstNonBlank() = ""
+'*   StringUtils.FirstNonBlank()               = ""
 '*
 '* @param values 文字列（複数指定）
 '* @return String 該当文字列
@@ -1709,11 +1713,11 @@ End Function
 '*          すべての値が空である場合、空が返される。
 '*
 '* [用  例]
-'*   StringUtils.FirstNonEmpty("", " ") = " "
-'*   StringUtils.FirstNonEmpty("abc") = "abc"
-'*   StringUtils.FirstNonEmpty("", "xyz") = "xyz"
+'*   StringUtils.FirstNonEmpty("", " ")        = " "
+'*   StringUtils.FirstNonEmpty("abc")          = "abc"
+'*   StringUtils.FirstNonEmpty("", "xyz")      = "xyz"
 '*   StringUtils.FirstNonEmpty("", " ", "xyz") = " "
-'*   StringUtils.FirstNonEmpty() = ""
+'*   StringUtils.FirstNonEmpty()               = ""
 '*
 '* @param values 文字列（複数指定）
 '* @return String 該当文字列
@@ -1772,17 +1776,17 @@ End Function
 '* [詳  細] 配列内のすべての文字列を比較し、共通する接頭辞を返却する。
 '*
 '* [用  例]
-'*   StringUtils.GetCommonPrefix(Array("abc")) = "abc"
-'*   StringUtils.GetCommonPrefix(Array("", "")) = ""
-'*   StringUtils.GetCommonPrefix(Array("", "abc")) = ""
-'*   StringUtils.GetCommonPrefix(Array("abc", "")) = ""
-'*   StringUtils.GetCommonPrefix(Array("abc", "abc")) = "abc"
-'*   StringUtils.GetCommonPrefix(Array("abc", "a")) = "a"
-'*   StringUtils.GetCommonPrefix(Array("ab", "abxyz")) = "ab"
+'*   StringUtils.GetCommonPrefix(Array("abc"))            = "abc"
+'*   StringUtils.GetCommonPrefix(Array("", ""))           = ""
+'*   StringUtils.GetCommonPrefix(Array("", "abc"))        = ""
+'*   StringUtils.GetCommonPrefix(Array("abc", ""))        = ""
+'*   StringUtils.GetCommonPrefix(Array("abc", "abc"))     = "abc"
+'*   StringUtils.GetCommonPrefix(Array("abc", "a"))       = "a"
+'*   StringUtils.GetCommonPrefix(Array("ab", "abxyz"))    = "ab"
 '*   StringUtils.GetCommonPrefix(Array("abcde", "abxyz")) = "ab"
-'*   StringUtils.GetCommonPrefix(Array("abcde", "xyz")) = ""
-'*   StringUtils.GetCommonPrefix(Array("xyz", "abcde")) = ""
-'*   StringUtils.GetCommonPrefix(Array("i am a machine", "i am a robot")) = "i am a "
+'*   StringUtils.GetCommonPrefix(Array("abcde", "xyz"))   = ""
+'*   StringUtils.GetCommonPrefix(Array("xyz", "abcde"))   = ""
+'*   StringUtils.GetCommonPrefix("i am a machine", "i am a robot") = "i am a "
 '*
 '* @param strs 文字配列
 '* @return String 共通する接頭辞文字列
@@ -1794,10 +1798,11 @@ Public Function GetCommonPrefix(ParamArray strs() As Variant) As String
         Exit Function
     End If
     Dim tmp: tmp = strs ' ParamArrayを別関数に渡すための対応
+    tmp = ArrayUtils.ToVArrayFlattened(tmp)
     Dim smallestIndexOfDiff As Long: smallestIndexOfDiff = Me.IndexOfDifference(tmp)
     If smallestIndexOfDiff = INDEX_NOT_FOUND Then
         ' all strings were identical
-        GetCommonPrefix = CStr(strs(0))
+        GetCommonPrefix = CStr(tmp(0))
         Exit Function
     ElseIf smallestIndexOfDiff = 0 Then
         ' there were no common initial characters
@@ -1805,7 +1810,7 @@ Public Function GetCommonPrefix(ParamArray strs() As Variant) As String
         Exit Function
     End If
     ' we found a common initial character sequence
-    GetCommonPrefix = Me.Substring(CStr(strs(0)), 0, smallestIndexOfDiff)
+    GetCommonPrefix = Me.Substring(CStr(tmp(0)), 0, smallestIndexOfDiff)
 End Function
 
 
@@ -1816,10 +1821,10 @@ End Function
 '*          数字が見つからない場合は、空の（""）文字列が返される。
 '*
 '* [用  例]
-'*   StringUtils.GetDigits("") = ""
-'*   StringUtils.GetDigits("abc") = ""
-'*   StringUtils.GetDigits("1000$") = "1000"
-'*   StringUtils.GetDigits("1123~45") = "112345"
+'*   StringUtils.GetDigits("")               = ""
+'*   StringUtils.GetDigits("abc")            = ""
+'*   StringUtils.GetDigits("1000$")          = "1000"
+'*   StringUtils.GetDigits("1123~45")        = "112345"
 '*   StringUtils.GetDigits("(541) 754-3010") = "5417543010"
 '*
 '* @param str 文字列
@@ -1828,11 +1833,11 @@ End Function
 '******************************************************************************
 Public Function GetDigits(ByVal str As String) As String
     If Me.IsEmpty(str) Then
-        GetDigits = False
+        GetDigits = ""
         Exit Function
     End If
     Dim sz As Long: sz = Len(str)
-    Dim strDigits As StringEx: strDigits = Core.Init(New StringEx, "", sz)
+    Dim strDigits As StringEx: Set strDigits = Core.Init(New StringEx, "", sz)
     Dim i As Long
     For i = 0 To sz - 1
         Dim tempChar As String: tempChar = Me.CharAt(str, i)
@@ -1902,19 +1907,19 @@ End Function
 '* [詳  細] 文字列内の最初のインデックス（文字位置）を検索する｡
 '*
 '* [用  例]
-'*   StringUtils.IndexOf("", *)            = -1 (except when * = "")
-'*   StringUtils.IndexOf("aabaabaa", "a") = 0
-'*   StringUtils.IndexOf("aabaabaa", "b") = 2
-'*   StringUtils.IndexOf("aabaabaa", "ab") = 1
-'*   StringUtils.IndexOf("aabaabaa", "") = 0
-'*   StringUtils.IndexOf("aabaabaa", "a", 0) = 0
-'*   StringUtils.IndexOf("aabaabaa", "b", 0) = 2
-'*   StringUtils.IndexOf("aabaabaa", "ab", 0) = 1
-'*   StringUtils.IndexOf("aabaabaa", "b", 3) = 5
-'*   StringUtils.IndexOf("aabaabaa", "b", 9) = -1
-'*   StringUtils.IndexOf("aabaabaa", "b", -1) = 2
-'*   StringUtils.IndexOf("aabaabaa", "", 2) = 2
-'*   StringUtils.IndexOf("abc", "", 9) = 3
+'*   StringUtils.IndexOf("", *)               = -1 (except when * = "")
+'*   StringUtils.IndexOf("aabaabaa", "a")     =  0
+'*   StringUtils.IndexOf("aabaabaa", "b")     =  2
+'*   StringUtils.IndexOf("aabaabaa", "ab")    =  1
+'*   StringUtils.IndexOf("aabaabaa", "")      =  0
+'*   StringUtils.IndexOf("aabaabaa", "a", 0)  =  0
+'*   StringUtils.IndexOf("aabaabaa", "b", 0)  =  2
+'*   StringUtils.IndexOf("aabaabaa", "ab", 0) =  1
+'*   StringUtils.IndexOf("aabaabaa", "b", 3)  =  5
+'*   StringUtils.IndexOf("aabaabaa", "b", 9)  = -1
+'*   StringUtils.IndexOf("aabaabaa", "b", -1) =  2
+'*   StringUtils.IndexOf("aabaabaa", "", 2)   =  2
+'*   StringUtils.IndexOf("abc", "", 9)        = -1
 '*
 '* @param str 文字列
 '* @param searchStr 検索文字列
@@ -1934,7 +1939,7 @@ Public Function IndexOf(ByVal str As String, ByVal searchStr As String, Optional
     If startPos < 0 Then
         startPos = 0
     ElseIf startPos >= Len(str) Then
-        IndexOf = Len(str) - 1
+        IndexOf = INDEX_NOT_FOUND
         Exit Function
     End If
     IndexOf = InStr(startPos + 1, str, searchStr) - 1
@@ -1946,14 +1951,14 @@ End Function
 '* [詳  細] 指定された文字セット内の任意の文字の最初のインデックス（文字位置）を検索する｡
 '*
 '* [用  例]
-'*   StringUtils.indexOfAny(*, [])                        = -1
-'*   StringUtils.IndexOfAny("zzabyycdxx", ["ab", "cd"]) = 2
-'*   StringUtils.IndexOfAny("zzabyycdxx", ["cd", "ab"]) = 2
-'*   StringUtils.IndexOfAny("zzabyycdxx", ["mn", "op"]) = -1
-'*   StringUtils.IndexOfAny("zzabyycdxx", ["zab", "aby"]) = 1
-'*   StringUtils.IndexOfAny("zzabyycdxx", [""]) = 0
-'*   StringUtils.IndexOfAny("", [""]) = 0
-'*   StringUtils.IndexOfAny("", ["a"]) = -1
+'*   StringUtils.IndexOfAny(*, [])                      = -1
+'*   StringUtils.IndexOfAny("zzabyycdxx", "ab", "cd")   =  2
+'*   StringUtils.IndexOfAny("zzabyycdxx", "cd", "ab")   =  2
+'*   StringUtils.IndexOfAny("zzabyycdxx", "mn", "op")   = -1
+'*   StringUtils.IndexOfAny("zzabyycdxx", "zab", "aby") =  1
+'*   StringUtils.IndexOfAny("zzabyycdxx", "")           =  0
+'*   StringUtils.IndexOfAny("", "")                     =  0
+'*   StringUtils.IndexOfAny("", "a")                    = -1
 '*
 '* @param str 文字列
 '* @param searchStrs 検索文字列（複数指定）
@@ -1986,6 +1991,16 @@ End Function
 '* [詳  細] 指定された文字セット内の任意の文字のインデックス（文字位置）を
 '*          すべて検索する｡
 '*
+'* [用  例]
+'*   StringUtils.IndexOfAnyAll(*, [])                      = []
+'*   StringUtils.IndexOfAnyAll("zzabyycdxx", "ab", "cd")   = [2, 6]
+'*   StringUtils.IndexOfAnyAll("zzabyycdxx", "cd", "ab")   = [2, 6]
+'*   StringUtils.IndexOfAnyAll("zzabyycdxx", "mn", "op")   = []
+'*   StringUtils.IndexOfAnyAll("zzabyycdxx", "zab", "aby") = [1, 2]
+'*   StringUtils.IndexOfAnyAll("zzabyycdxx", "")           = []
+'*   StringUtils.IndexOfAnyAll("", "")                     = []
+'*   StringUtils.IndexOfAnyAll("", "a")                    = []
+'*
 '* @param str 文字列
 '* @param searchStrs 検索文字列（複数指定）
 '* @return Variant 文字列のインデックス。一致がない場合、空配列入力の場合は空配列
@@ -2000,13 +2015,18 @@ Public Function IndexOfAnyAll(ByVal str As String, ParamArray searchStrs() As Va
     Dim tmp: tmp = searchStrs ' ParamArrayを別関数に渡すための対応
     Dim v, i As Long: i = 0
     Dim arrex As ArrayEx: Set arrex = New ArrayEx
-    For Each v In Me.ToCharArray(str)
-        If Me.EqualsAny(CStr(v), tmp) Then
-            arrex.Add i
-        End If
-        i = i + 1
+    For Each v In ArrayUtils.Uniq(ArrayUtils.ToVArrayFlattened(tmp))
+        i = 0
+        Do Until i = INDEX_NOT_FOUND
+            i = Me.IndexOf(str, CStr(v), i)
+            If i <> INDEX_NOT_FOUND Then
+                arrex.Add i
+                i = i + 1
+            End If
+        Loop
     Next
-    IndexOfAnyAll = arrex.ToArray
+    
+    IndexOfAnyAll = arrex.Uniq.Sort.ToArray
 End Function
 
 '******************************************************************************
@@ -2017,8 +2037,8 @@ End Function
 '* [用  例]
 '*   StringUtils.IndexOfAnyBut("", *)                  = -1
 '*   StringUtils.IndexOfAnyBut(*, "")                  = -1
-'*   StringUtils.IndexOfAnyBut("zzabyycdxx", "z", "a") = 3
-'*   StringUtils.IndexOfAnyBut("aba", "z")             = 0
+'*   StringUtils.IndexOfAnyBut("zzabyycdxx", "z", "a") =  3
+'*   StringUtils.IndexOfAnyBut("aba", "z")             =  0
 '*   StringUtils.IndexOfAnyBut("aba", "a","b")         = -1
 '*
 '* @param str 文字列
@@ -2054,17 +2074,16 @@ End Function
 '* [詳  細] 2つの文字列を比較し、文字が異なり始めるインデックスを返す｡
 '*
 '* [用  例]
-'*   StringUtils.IndexOfDifference("", "") = -1
-'*   StringUtils.IndexOfDifference("", "abc") = 0
-'*   StringUtils.IndexOfDifference("abc", "") = 0
-'*   StringUtils.IndexOfDifference("abc", "abc") = -1
-'*   StringUtils.IndexOfDifference("ab", "abxyz") = 2
-'*   StringUtils.IndexOfDifference("abcde", "abxyz") = 2
-'*   StringUtils.IndexOfDifference("abcde", "xyz") = 0
+'*   StringUtils.IndexOfDifference("", "")           = -1
+'*   StringUtils.IndexOfDifference("", "abc")        =  0
+'*   StringUtils.IndexOfDifference("abc", "")        =  0
+'*   StringUtils.IndexOfDifference("abc", "abc")     = -1
+'*   StringUtils.IndexOfDifference("ab", "abxyz")    =  2
+'*   StringUtils.IndexOfDifference("abcde", "abxyz") =  2
+'*   StringUtils.IndexOfDifference("abcde", "xyz")   =  0
 '*
-'* @param str 文字列
-'* @param startStr 開始文字列
-'* @return Boolean チェック結果（True:該当）
+'* @param strs 文字列
+'* @return Long 文字が異なり始めるインデックス。一致がない場合、空文字列入力の場合は-1
 '*
 '******************************************************************************
 Public Function IndexOfDifference(ParamArray strs() As Variant) As Long
@@ -2073,19 +2092,21 @@ Public Function IndexOfDifference(ParamArray strs() As Variant) As Long
         Exit Function
     End If
     Dim var: var = strs ' ParamArrayを別関数に渡すための対応
+    var = ArrayUtils.ToVArrayFlattened(var)
+    
     If ArrayUtils.GetLength(var) <= 1 Then
         IndexOfDifference = INDEX_NOT_FOUND
         Exit Function
     ElseIf ArrayUtils.GetLength(var) = 2 Then
-        Dim str1 As String: str1 = strs(LBound(strs))
-        Dim str2 As String: str2 = strs(UBound(strs))
+        Dim str1 As String: str1 = var(LBound(var))
+        Dim str2 As String: str2 = var(UBound(var))
         If Me.Equals(str1, str2) Then
             IndexOfDifference = INDEX_NOT_FOUND
             Exit Function
         End If
         Dim i As Long: i = 0
         Do While i < Len(str1) And i < Len(str2)
-            If Me.CharAt(str1) <> Me.CharAt(str2) Then
+            If Me.CharAt(str1, i) <> Me.CharAt(str2, i) Then
                 Exit Do
             End If
             i = i + 1
@@ -2108,7 +2129,7 @@ Public Function IndexOfDifference(ParamArray strs() As Variant) As Long
     ' sure we are not exceeding the length of the string each time through
     ' the bottom loop.
     Dim s
-    For Each s In strs
+    For Each s In var
 
        If Me.IsEmpty(CStr(s)) Then
            anyStringEmpty = True
@@ -2136,10 +2157,10 @@ Public Function IndexOfDifference(ParamArray strs() As Variant) As Long
     Dim firstDiff As Long: firstDiff = -1
     Dim stringPos As Long
     For stringPos = 0 To shortestStrLen - 1
-        Dim comparisonChar As String: comparisonChar = Me.CharAt(CStr(strs(0)), stringPos)
+        Dim comparisonChar As String: comparisonChar = Me.CharAt(CStr(var(0)), stringPos)
         Dim arrayPos As Long: arrayPos = 1
         For arrayPos = 1 To ArrayLen - 1
-            If Me.CharAt(CStr(strs(arrayPos)), stringPos) <> comparisonChar Then
+            If Me.CharAt(CStr(var(arrayPos)), stringPos) <> comparisonChar Then
                 firstDiff = stringPos
                 Exit For
             End If
@@ -2166,9 +2187,9 @@ End Function
 '*          大文字小文字を考慮しない。
 '*
 '* [用  例]
-'*   StringUtils.IndexOfIgnoreCase("", "") = 0
-'*   StringUtils.IndexOfIgnoreCase("Aabaabaa", "a") = 0
-'*   StringUtils.IndexOfIgnoreCase("aaBaabaa", "b") = 2
+'*   StringUtils.IndexOfIgnoreCase("", "")           = 0
+'*   StringUtils.IndexOfIgnoreCase("Aabaabaa", "a")  = 0
+'*   StringUtils.IndexOfIgnoreCase("aaBaabaa", "b")  = 2
 '*   StringUtils.IndexOfIgnoreCase("aABaabaa", "ab") = 1
 '*
 '* @param str 文字列
@@ -2188,13 +2209,13 @@ End Function
 '* [詳  細] すべての文字列が空（""）、またはスペースのみかどうかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsAllBlank(" ", " ") = True
-'*   StringUtils.IsAllBlank("", "") = True
-'*   StringUtils.IsAllBlank("", "bar") = False
-'*   StringUtils.IsAllBlank("bob", "") = False
+'*   StringUtils.IsAllBlank(" ", " ")      = True
+'*   StringUtils.IsAllBlank("", "")        = True
+'*   StringUtils.IsAllBlank("", "bar")     = False
+'*   StringUtils.IsAllBlank("bob", "")     = False
 '*   StringUtils.IsAllBlank("  bob  ", "") = False
-'*   StringUtils.IsAllBlank(" ", "bar") = False
-'*   StringUtils.IsAllBlank("foo", "bar") = False
+'*   StringUtils.IsAllBlank(" ", "bar")    = False
+'*   StringUtils.IsAllBlank("foo", "bar")  = False
 '*
 '* @param strs() 文字列（複数指定）
 '* @return Boolean チェック結果（True:該当）
@@ -2221,13 +2242,13 @@ End Function
 '* [詳  細] すべての文字列が空（""のみかどうかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsAllBlank(" ", " ") = False
-'*   StringUtils.IsAllBlank("", "") = True
-'*   StringUtils.IsAllBlank("", "bar") = False
-'*   StringUtils.IsAllBlank("bob", "") = False
+'*   StringUtils.IsAllBlank(" ", " ")      = False
+'*   StringUtils.IsAllBlank("", "")        = True
+'*   StringUtils.IsAllBlank("", "bar")     = False
+'*   StringUtils.IsAllBlank("bob", "")     = False
 '*   StringUtils.IsAllBlank("  bob  ", "") = False
-'*   StringUtils.IsAllBlank(" ", "bar") = False
-'*   StringUtils.IsAllBlank("foo", "bar") = False
+'*   StringUtils.IsAllBlank(" ", "bar")    = False
+'*   StringUtils.IsAllBlank("foo", "bar")  = False
 '*
 '* @param strs() 文字列（複数指定）
 '* @return Boolean チェック結果（True:該当）
@@ -2254,10 +2275,10 @@ End Function
 '* [詳  細] 小文字のみかどうかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsAllLowerCase("") = False
-'*   StringUtils.IsAllLowerCase("  ") = False
-'*   StringUtils.IsAllLowerCase("abc") = True
-'*   StringUtils.IsAllLowerCase("abC") = False
+'*   StringUtils.IsAllLowerCase("")     = False
+'*   StringUtils.IsAllLowerCase("  ")   = False
+'*   StringUtils.IsAllLowerCase("abc")  = True
+'*   StringUtils.IsAllLowerCase("abC")  = False
 '*   StringUtils.IsAllLowerCase("ab c") = False
 '*   StringUtils.IsAllLowerCase("ab1c") = False
 '*   StringUtils.IsAllLowerCase("ab/c") = False
@@ -2286,8 +2307,8 @@ End Function
 '* [詳  細] 大文字のみかどうかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsAllUpperCase("") = False
-'*   StringUtils.IsAllUpperCase("  ") = False
+'*   StringUtils.IsAllUpperCase("")    = False
+'*   StringUtils.IsAllUpperCase("  ")  = False
 '*   StringUtils.IsAllUpperCase("ABC") = True
 '*   StringUtils.IsAllUpperCase("aBC") = False
 '*   StringUtils.IsAllUpperCase("A C") = False
@@ -2318,9 +2339,9 @@ End Function
 '* [詳  細] 文字列が英字かどうかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsAlpha("") = False
-'*   StringUtils.IsAlpha("  ") = False
-'*   StringUtils.IsAlpha("abc") = True
+'*   StringUtils.IsAlpha("")     = False
+'*   StringUtils.IsAlpha("  ")   = False
+'*   StringUtils.IsAlpha("abc")  = True
 '*   StringUtils.IsAlpha("ab2c") = False
 '*   StringUtils.IsAlpha("ab-c") = False
 '*
@@ -2349,9 +2370,9 @@ End Function
 '* [詳  細] 文字列が英数字かどうかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsAlphanumeric("") = False
-'*   StringUtils.IsAlphanumeric("  ") = False
-'*   StringUtils.IsAlphanumeric("abc") = True
+'*   StringUtils.IsAlphanumeric("")     = False
+'*   StringUtils.IsAlphanumeric("  ")   = False
+'*   StringUtils.IsAlphanumeric("abc")  = True
 '*   StringUtils.IsAlphanumeric("ab c") = False
 '*   StringUtils.IsAlphanumeric("ab2c") = True
 '*   StringUtils.IsAlphanumeric("ab-c") = False
@@ -2381,9 +2402,9 @@ End Function
 '* [詳  細] 文字列が英数字とスペースかどうかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsAlphanumericSpace("") = True
-'*   StringUtils.IsAlphanumericSpace("  ") = True
-'*   StringUtils.IsAlphanumericSpace("abc") = True
+'*   StringUtils.IsAlphanumericSpace("")     = True
+'*   StringUtils.IsAlphanumericSpace("  ")   = True
+'*   StringUtils.IsAlphanumericSpace("abc")  = True
 '*   StringUtils.IsAlphanumericSpace("ab c") = True
 '*   StringUtils.IsAlphanumericSpace("ab2c") = True
 '*   StringUtils.IsAlphanumericSpace("ab-c") = False
@@ -2412,9 +2433,9 @@ End Function
 '* [詳  細] 文字列が英字とスペースかどうかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsAlphaSpace("") = True
-'*   StringUtils.IsAlphaSpace("  ") = True
-'*   StringUtils.IsAlphaSpace("abc") = True
+'*   StringUtils.IsAlphaSpace("")     = True
+'*   StringUtils.IsAlphaSpace("  ")   = True
+'*   StringUtils.IsAlphaSpace("abc")  = True
 '*   StringUtils.IsAlphaSpace("ab c") = True
 '*   StringUtils.IsAlphaSpace("ab2c") = False
 '*   StringUtils.IsAlphaSpace("ab-c") = False
@@ -2443,9 +2464,9 @@ End Function
 '* [詳  細] 文字列のいずれかが空（""）か空白のみかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsAnyBlank("", "bar") = True
-'*   StringUtils.IsAnyBlank("bob", "") = True
-'*   StringUtils.IsAnyBlank(" ", "bar") = True
+'*   StringUtils.IsAnyBlank("", "bar")    = True
+'*   StringUtils.IsAnyBlank("bob", "")    = True
+'*   StringUtils.IsAnyBlank(" ", "bar")   = True
 '*   StringUtils.IsAnyBlank("foo", "bar") = False
 '*
 '* @param str 文字列
@@ -2475,9 +2496,9 @@ End Function
 '* [詳  細] 文字列のいずれかが空（""）のみかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsAnyEmpty("", "bar") = True
-'*   StringUtils.IsAnyEmpty("bob", "") = True
-'*   StringUtils.IsAnyEmpty(" ", "bar") = False
+'*   StringUtils.IsAnyEmpty("", "bar")    = True
+'*   StringUtils.IsAnyEmpty("bob", "")    = True
+'*   StringUtils.IsAnyEmpty(" ", "bar")   = False
 '*   StringUtils.IsAnyEmpty("foo", "bar") = False
 '*
 '* @param str 文字列
@@ -2507,15 +2528,15 @@ End Function
 '* [詳  細] 文字列にASCII印刷可能文字のみが含まれているかどうかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsAsciiPrintable("") = True
-'*   StringUtils.IsAsciiPrintable(" ") = True
-'*   StringUtils.IsAsciiPrintable("Ceki") = True
-'*   StringUtils.IsAsciiPrintable("ab2c") = True
+'*   StringUtils.IsAsciiPrintable("")       = True
+'*   StringUtils.IsAsciiPrintable(" ")      = True
+'*   StringUtils.IsAsciiPrintable("Ceki")   = True
+'*   StringUtils.IsAsciiPrintable("ab2c")   = True
 '*   StringUtils.IsAsciiPrintable("!ab-c~") = True
-'*   StringUtils.IsAsciiPrintable(" ") = True
-'*   StringUtils.IsAsciiPrintable("!") = True
-'*   StringUtils.IsAsciiPrintable("~") = True
-'*   StringUtils.IsAsciiPrintable("") = False
+'*   StringUtils.IsAsciiPrintable(" ")      = True
+'*   StringUtils.IsAsciiPrintable("!")      = True
+'*   StringUtils.IsAsciiPrintable("~")      = True
+'*   StringUtils.IsAsciiPrintable("")      = False
 '*
 '* @param str 文字列
 '* @return Boolean チェック結果（True:該当）
@@ -2541,9 +2562,9 @@ End Function
 '* [詳  細] 文字列が空（""）、スペースのみかどうかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsBlank("") = True
-'*   StringUtils.IsBlank(" ") = True
-'*   StringUtils.IsBlank("bob") = False
+'*   StringUtils.IsBlank("")        = True
+'*   StringUtils.IsBlank(" ")       = True
+'*   StringUtils.IsBlank("bob")     = False
 '*   StringUtils.IsBlank("  bob  ") = False
 '*
 '* @param str 文字列
@@ -2570,9 +2591,9 @@ End Function
 '* [詳  細] 文字列が空（""）かどうかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsEmpty("") = True
-'*   StringUtils.IsEmpty(" ") = False
-'*   StringUtils.IsEmpty("bob") = False
+'*   StringUtils.IsEmpty("")        = True
+'*   StringUtils.IsEmpty(" ")       = False
+'*   StringUtils.IsEmpty("bob")     = False
 '*   StringUtils.IsEmpty("  bob  ") = False
 '*
 '* @param str 文字列
@@ -2592,13 +2613,13 @@ End Function
 '* [詳  細] 文字列が大文字と小文字の両方が混在しているかどうかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsMixedCase("") = False
-'*   StringUtils.IsMixedCase("ABC") = False
-'*   StringUtils.IsMixedCase("abc") = False
-'*   StringUtils.IsMixedCase("aBc") = True
-'*   StringUtils.IsMixedCase("A c") = True
-'*   StringUtils.IsMixedCase("A1c") = True
-'*   StringUtils.IsMixedCase("a/C") = True
+'*   StringUtils.IsMixedCase("")     = False
+'*   StringUtils.IsMixedCase("ABC")  = False
+'*   StringUtils.IsMixedCase("abc")  = False
+'*   StringUtils.IsMixedCase("aBc")  = True
+'*   StringUtils.IsMixedCase("A c")  = True
+'*   StringUtils.IsMixedCase("A1c")  = True
+'*   StringUtils.IsMixedCase("a/C")  = True
 '*   StringUtils.IsMixedCase("aC\t") = True
 '*
 '* @param str 文字列
@@ -2631,11 +2652,11 @@ End Function
 '* [詳  細] 文字列のセットが空（""）、スペースのみでないかどうかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsNoneBlank("", "bar") = False
-'*   StringUtils.IsNoneBlank("bob", "") = False
+'*   StringUtils.IsNoneBlank("", "bar")       = False
+'*   StringUtils.IsNoneBlank("bob", "")       = False
 '*   StringUtils.IsNoneBlank("  bob  ", Null) = False
-'*   StringUtils.IsNoneBlank(" ", "bar") = False
-'*   StringUtils.IsNoneBlank("foo", "bar") = True
+'*   StringUtils.IsNoneBlank(" ", "bar")      = False
+'*   StringUtils.IsNoneBlank("foo", "bar")    = True
 '*
 '* @param strs() 文字列（複数指定）
 '* @return Boolean チェック結果（True:該当）
@@ -2651,11 +2672,11 @@ End Function
 '* [詳  細] 文字列のセットが空（""）のみでないかどうかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsNoneEmpty("", "bar") = False
-'*   StringUtils.IsNoneEmpty("bob", "") = False
+'*   StringUtils.IsNoneEmpty("", "bar")       = False
+'*   StringUtils.IsNoneEmpty("bob", "")       = False
 '*   StringUtils.IsNoneEmpty("  bob  ", Null) = False
-'*   StringUtils.IsNoneEmpty(" ", "bar") = True
-'*   StringUtils.IsNoneEmpty("foo", "bar") = True
+'*   StringUtils.IsNoneEmpty(" ", "bar")      = True
+'*   StringUtils.IsNoneEmpty("foo", "bar")    = True
 '*
 '* @param strs() 文字列（複数指定）
 '* @return Boolean チェック結果（True:該当）
@@ -2671,9 +2692,9 @@ End Function
 '* [詳  細] 文字列が空（""）、スペースのみでないかどうかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsNotBlank("") = False
-'*   StringUtils.IsNotBlank(" ") = False
-'*   StringUtils.IsNotBlank("bob") = True
+'*   StringUtils.IsNotBlank("")        = False
+'*   StringUtils.IsNotBlank(" ")       = False
+'*   StringUtils.IsNotBlank("bob")     = True
 '*   StringUtils.IsNotBlank("  bob  ") = True
 '*
 '* @param str 文字列
@@ -2689,9 +2710,9 @@ End Function
 '* [詳  細] 文字列が空（""）のみでないかどうかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsNotEmpty("") = False
-'*   StringUtils.IsNotEmpty(" ") = True
-'*   StringUtils.IsNotEmpty("bob") = True
+'*   StringUtils.IsNotEmpty("")        = False
+'*   StringUtils.IsNotEmpty(" ")       = True
+'*   StringUtils.IsNotEmpty("bob")     = True
 '*   StringUtils.IsNotEmpty("  bob  ") = True
 '*
 '* @param str 文字列
@@ -2708,9 +2729,9 @@ End Function
 '*          小数は、Falseを返す。
 '*
 '* [用  例]
-'*   StringUtils.IsNumeric("") = False
-'*   StringUtils.IsNumeric("  ") = False
-'*   StringUtils.IsNumeric("123") = True
+'*   StringUtils.IsNumeric("")     = False
+'*   StringUtils.IsNumeric("  ")   = False
+'*   StringUtils.IsNumeric("123")  = True
 '*   StringUtils.IsNumeric("12 3") = False
 '*   StringUtils.IsNumeric("ab2c") = False
 '*   StringUtils.IsNumeric("12-3") = False
@@ -2742,9 +2763,9 @@ End Function
 '* [詳  細] 文字列が数字またはスペースかどうかをチェック｡
 '*
 '* [用  例]
-'*   StringUtils.IsNumericSpace("") = True
-'*   StringUtils.IsNumericSpace("  ") = True
-'*   StringUtils.IsNumericSpace("123") = True
+'*   StringUtils.IsNumericSpace("")     = True
+'*   StringUtils.IsNumericSpace("  ")   = True
+'*   StringUtils.IsNumericSpace("123")  = True
 '*   StringUtils.IsNumericSpace("12 3") = True
 '*   StringUtils.IsNumericSpace("ab2c") = False
 '*   StringUtils.IsNumericSpace("12-3") = False
@@ -2774,21 +2795,21 @@ End Function
 '* [詳  細] 文字列内の最後のインデックスを検索｡
 '*
 '* [用  例]
-'*   StringUtils.LastIndexOf("", "") = 0
-'*   StringUtils.LastIndexOf("aabaabaa", "a") = 7
-'*   StringUtils.LastIndexOf("aabaabaa", "b") = 5
-'*   StringUtils.LastIndexOf("aabaabaa", "ab") = 4
-'*   StringUtils.LastIndexOf("aabaabaa", "") = 8
-'*   StringUtils.LastIndexOf("aabaabaa", "a", 8) = 7
-'*   StringUtils.LastIndexOf("aabaabaa", "b", 8) = 5
-'*   StringUtils.LastIndexOf("aabaabaa", "ab", 8) = 4
-'*   StringUtils.LastIndexOf("aabaabaa", "b", 9) = 5
+'*   StringUtils.LastIndexOf("", "")              =  0
+'*   StringUtils.LastIndexOf("aabaabaa", "a")     =  7
+'*   StringUtils.LastIndexOf("aabaabaa", "b")     =  5
+'*   StringUtils.LastIndexOf("aabaabaa", "ab")    =  4
+'*   StringUtils.LastIndexOf("aabaabaa", "")      =  8
+'*   StringUtils.LastIndexOf("aabaabaa", "a", 8)  =  7
+'*   StringUtils.LastIndexOf("aabaabaa", "b", 8)  =  5
+'*   StringUtils.LastIndexOf("aabaabaa", "ab", 8) =  4
+'*   StringUtils.LastIndexOf("aabaabaa", "b", 9)  =  5
 '*   StringUtils.LastIndexOf("aabaabaa", "b", -1) = -1
-'*   StringUtils.LastIndexOf("aabaabaa", "a", 0) = 0
-'*   StringUtils.LastIndexOf("aabaabaa", "b", 0) = -1
-'*   StringUtils.LastIndexOf("aabaabaa", "b", 1) = -1
-'*   StringUtils.LastIndexOf("aabaabaa", "b", 2) = 2
-'*   StringUtils.LastIndexOf("aabaabaa", "ba", 2) = 2
+'*   StringUtils.LastIndexOf("aabaabaa", "a", 0)  =  0
+'*   StringUtils.LastIndexOf("aabaabaa", "b", 0)  = -1
+'*   StringUtils.LastIndexOf("aabaabaa", "b", 1)  = -1
+'*   StringUtils.LastIndexOf("aabaabaa", "b", 2)  =  2
+'*   StringUtils.LastIndexOf("aabaabaa", "ba", 2) =  2
 '*
 '* @param str 文字列
 '* @param searchStr 検索文字列
@@ -2823,16 +2844,16 @@ End Function
 '*          接尾辞の存在チェックは大文字小文字を考慮しない。
 '*
 '* [用  例]
-'*   StringUtils.LastIndexOfIgnoreCase("aabaabaa", "A") = 7
-'*   StringUtils.LastIndexOfIgnoreCase("aabaabaa", "B") = 5
-'*   StringUtils.LastIndexOfIgnoreCase("aabaabaa", "AB") = 4
-'*   StringUtils.LastIndexOfIgnoreCase("aabaabaa", "A", 8) = 7
-'*   StringUtils.LastIndexOfIgnoreCase("aabaabaa", "B", 8) = 5
+'*   StringUtils.LastIndexOfIgnoreCase("aabaabaa", "A")     = 7
+'*   StringUtils.LastIndexOfIgnoreCase("aabaabaa", "B")     = 5
+'*   StringUtils.LastIndexOfIgnoreCase("aabaabaa", "AB")    = 4
+'*   StringUtils.LastIndexOfIgnoreCase("aabaabaa", "A", 8)  = 7
+'*   StringUtils.LastIndexOfIgnoreCase("aabaabaa", "B", 8)  = 5
 '*   StringUtils.LastIndexOfIgnoreCase("aabaabaa", "AB", 8) = 4
-'*   StringUtils.LastIndexOfIgnoreCase("aabaabaa", "B", 9) = 5
+'*   StringUtils.LastIndexOfIgnoreCase("aabaabaa", "B", 9)  = 5
 '*   StringUtils.LastIndexOfIgnoreCase("aabaabaa", "B", -1) = -1
-'*   StringUtils.LastIndexOfIgnoreCase("aabaabaa", "A", 0) = 0
-'*   StringUtils.LastIndexOfIgnoreCase("aabaabaa", "B", 0) = -1
+'*   StringUtils.LastIndexOfIgnoreCase("aabaabaa", "A", 0)  = 0
+'*   StringUtils.LastIndexOfIgnoreCase("aabaabaa", "B", 0)  = -1
 '*
 '* @param str 文字列
 '* @param searchStr 検索文字列
@@ -2857,25 +2878,26 @@ End Function
 '*          デフォルトのパディング文字列は半角スペース。
 '*
 '* [用  例]
-'*   StringUtils.LeftPad("", 3) = "   "
-'*   StringUtils.LeftPad("bat", 3) = "bat"
-'*   StringUtils.LeftPad("bat", 5) = "  bat"
-'*   StringUtils.LeftPad("bat", 1) = "bat"
-'*   StringUtils.LeftPad("bat", -1) = "bat"
-'*   StringUtils.LeftPad("", 3, "z") = "zzz"
-'*   StringUtils.LeftPad("bat", 3, "z") = "bat"
-'*   StringUtils.LeftPad("bat", 5, "z") = "zzbat"
-'*   StringUtils.LeftPad("bat", 1, "z") = "bat"
-'*   StringUtils.LeftPad("bat", -1, "z") = "bat"
-'*   StringUtils.LeftPad("bat", 3, "yz") = "bat"
-'*   StringUtils.LeftPad("bat", 5, "yz") = "yzbat"
-'*   StringUtils.LeftPad("bat", 8, "yz") = "yzyzybat"
-'*   StringUtils.LeftPad("bat", 1, "yz") = "bat"
+'*   StringUtils.LeftPad("", 3)           = "   "
+'*   StringUtils.LeftPad("bat", 3)        = "bat"
+'*   StringUtils.LeftPad("bat", 5)        = "  bat"
+'*   StringUtils.LeftPad("bat", 1)        = "bat"
+'*   StringUtils.LeftPad("bat", -1)       = "bat"
+'*   StringUtils.LeftPad("", 3, "z")      = "zzz"
+'*   StringUtils.LeftPad("bat", 3, "z")   = "bat"
+'*   StringUtils.LeftPad("bat", 5, "z")   = "zzbat"
+'*   StringUtils.LeftPad("bat", 1, "z")   = "bat"
+'*   StringUtils.LeftPad("bat", -1, "z")  = "bat"
+'*   StringUtils.LeftPad("bat", 3, "yz")  = "bat"
+'*   StringUtils.LeftPad("bat", 5, "yz")  = "yzbat"
+'*   StringUtils.LeftPad("bat", 8, "yz")  = "yzyzybat"
+'*   StringUtils.LeftPad("bat", 1, "yz")  = "bat"
 '*   StringUtils.LeftPad("bat", -1, "yz") = "bat"
 '*
 '* @param str 文字列
 '* @param size パディングするサイズ
 '* @param padStr パディング文字列
+'* @param useZenkaku2Width 全角1文字を半角2文字とみなすかどうか
 '* @return String 変換後文字列
 '*
 '******************************************************************************
@@ -3456,6 +3478,7 @@ End Function
 '* @param str 文字列
 '* @param size パディングするサイズ
 '* @param padStr パディング文字列
+'* @param useZenkaku2Width 全角1文字を半角2文字とみなすかどうか
 '* @return String 変換後文字列
 '*
 '******************************************************************************
@@ -3593,20 +3616,20 @@ End Function
 '*          開始する位置の指定が終了する位置と逆転していた場合、 ""が返される。
 '*
 '* [用  例]
-'*   StringUtils.substring("", *)     = ""
-'*   StringUtils.Substring("abc", 0) = "abc"
-'*   StringUtils.Substring("abc", 2) = "c"
-'*   StringUtils.Substring("abc", 4) = ""
-'*   StringUtils.Substring("abc", -2) = "bc"
-'*   StringUtils.Substring("abc", -4) = "abc"
+'*   StringUtils.substring("", *)         = ""
+'*   StringUtils.Substring("abc", 0)      = "abc"
+'*   StringUtils.Substring("abc", 2)      = "c"
+'*   StringUtils.Substring("abc", 4)      = ""
+'*   StringUtils.Substring("abc", -2)     = "bc"
+'*   StringUtils.Substring("abc", -4)     =  "abc"
 '*   StringUtils.Substring("", * ,  *)    = "";
-'*   StringUtils.Substring("abc", 0, 2) = "ab"
-'*   StringUtils.Substring("abc", 2, 0) = ""
-'*   StringUtils.Substring("abc", 2, 4) = "c"
-'*   StringUtils.Substring("abc", 4, 6) = ""
-'*   StringUtils.Substring("abc", 2, 2) = ""
+'*   StringUtils.Substring("abc", 0, 2)   = "ab"
+'*   StringUtils.Substring("abc", 2, 0)   = ""
+'*   StringUtils.Substring("abc", 2, 4)   = "c"
+'*   StringUtils.Substring("abc", 4, 6)   = ""
+'*   StringUtils.Substring("abc", 2, 2)   = ""
 '*   StringUtils.Substring("abc", -2, -1) = "b"
-'*   StringUtils.Substring("abc", -4, 2) = "ab"
+'*   StringUtils.Substring("abc", -4, 2)  = "ab"
 '*
 '* @param str 文字列
 '* @param startPos 開始する位置
@@ -4115,12 +4138,12 @@ End Function
 '*   StringUtils.CharAt("abc", 0) = "a"
 '*
 '* @param str 文字列
-'* @param index インデックス
+'* @param idx インデックス
 '* @return String 文字
 '*
 '******************************************************************************
-Public Function CharAt(ByVal str As String, Optional ByVal Index As Long = 0) As String
-    CharAt = Mid(str, Index + 1, 1)
+Public Function CharAt(ByVal str As String, Optional ByVal idx As Long = 0) As String
+    CharAt = Mid(str, idx + 1, 1)
 End Function
 
 '*******************************************************************************
@@ -4145,6 +4168,7 @@ End Function
 '*
 '* @param str 編集対象文字列
 '* @param size 桁数
+'* @param useZenkaku2Width 全角1文字を半角2文字とみなすかどうか
 '* @return String 左ゼロ埋めした値
 '*
 '*******************************************************************************
@@ -4158,6 +4182,7 @@ End Function
 '*
 '* @param str 編集対象文字列
 '* @param size 桁数
+'* @param useZenkaku2Width 全角1文字を半角2文字とみなすかどうか
 '* @return String 右ゼロ埋めした値
 '*
 '*******************************************************************************
@@ -4169,13 +4194,13 @@ End Function
 '* [概  要] シングルクォーテーションエスケープ処理
 '* [詳  細] SQLに埋め込む文字列にシングルクォーテーションがある場合にエスケープ
 '*          を行うための処理。
+'* [備  考] 「'」が2つ連続している場合はエスケープ済みと見做して対応する。
 '*
 '* @param val エスケープ対象文字列
 '* @return String エスケープ後文字列
 '*
 '*******************************************************************************
 Public Function EscapeSqlQuot(ByVal val As String) As String
-    '「'」が2つ連続している場合はエスケープ済みと見做して対応
     EscapeSqlQuot = VBA.Replace(VBA.Replace(val, "''", "'"), "'", "''")
 End Function
 
@@ -4189,7 +4214,7 @@ End Function
 '* @return Variant Variant文字配列
 '*
 '*******************************************************************************
-Public Function SplitByLength(ByVal str As String, ByVal cutLength) As Variant
+Public Function SplitByLength(ByVal str As String, ByVal cutLength As Long) As Variant
     If cutLength <= 0 Then
         SplitByLength = ArrayUtils.EmptyVariantArray
         Exit Function
@@ -4476,13 +4501,30 @@ End Function
 '* [詳  細] 文字列から左端より検索して見つかったNull文字以降の文字を除去する。
 '*          WinAPI等での戻り値に対して使用することを想定。
 '*
-'* @param text 文字列
+'* @param txt     文字列
 '* @return String 変換後文字列
 '*
 '******************************************************************************
-Public Function RemoveNullChar(ByVal Text As String) As String
-    Dim txtLength As Long: txtLength = InStr(Text, vbNullChar) - 1
+Public Function RemoveNullChar(ByVal txt As String) As String
+    Dim txtLength As Long: txtLength = InStr(txt, vbNullChar) - 1
     If txtLength > 0 Then
-        RemoveNullChar = Trim$(Left$(Text, txtLength))
+        RemoveNullChar = Trim$(Left$(txt, txtLength))
     End If
+End Function
+
+'******************************************************************************
+'* [概  要] CountWord
+'* [詳  細] 文字列に含まれるワードの数を返す。
+'*
+'* @param str      文字列
+'* @param wordTxt  ワード文字列
+'* @return Long ワード数
+'*
+'******************************************************************************
+Public Function CountWord(ByVal str As String, wordTxt As String) As Long
+    If str = "" Or wordTxt = "" Then
+        CountWord = 0
+        Exit Function
+    End If
+    CountWord = UBound(VBA.Split(str, wordTxt))
 End Function

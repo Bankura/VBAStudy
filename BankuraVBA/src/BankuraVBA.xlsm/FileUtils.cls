@@ -35,6 +35,8 @@ Private Declare PtrSafe Function CloseHandle Lib "kernel32" (ByVal hObject As Lo
 Private Declare PtrSafe Function FindFirstFileEx Lib "kernel32" Alias "FindFirstFileExW" (ByVal lpFileName As LongPtr, ByVal fInfoLevelId As FINDEX_INFO_LEVELS, lpFindFileData As WIN32_FIND_DATA, ByVal fSearchOp As FINDEX_SEARCH_OPS, ByVal lpSearchFilter As LongPtr, ByVal dwAdditionalFlags As Long) As LongPtr
 Private Declare PtrSafe Function FindNextFile Lib "kernel32" Alias "FindNextFileW" (ByVal hFindFile As LongPtr, lpFindFileData As WIN32_FIND_DATA) As LongPtr
 Private Declare PtrSafe Function FindClose Lib "kernel32" (ByVal hFindFile As LongPtr) As LongPtr
+Private Declare PtrSafe Function PathFileExists Lib "SHLWAPI.DLL" Alias "PathFileExistsA" (ByVal pszPath As String) As Long
+Private Declare PtrSafe Function PathIsDirectory Lib "SHLWAPI.DLL" Alias "PathIsDirectoryA" (ByVal pszPath As String) As Long
 
 '******************************************************************************
 '* Enum定義
@@ -174,7 +176,40 @@ End Function
 '*
 '******************************************************************************
 Public Function FileExists(ByVal targetFilePath As String) As Boolean
-    FileExists = IO.FileExists(targetFilePath)
+    'FileExists = IO.FileExists(targetFilePath)
+    
+    Dim uniPath As String
+    If targetFilePath Like "\\*" Then
+        uniPath = "\\?\UNC" & Mid$(targetFilePath, 2)
+    Else
+        uniPath = "\\?\" & targetFilePath
+    End If
+    
+    If PathFileExists(uniPath) <> 0 Then
+        If PathIsDirectory(uniPath) = 0 Then
+            FileExists = True
+        End If
+    End If
+End Function
+
+'******************************************************************************
+'* [概  要] IsEmptyDir メソッド
+'* [詳  細] 空のフォルダかどうか判定｡
+'*
+'* @param strDirPath チェック対象のフォルダパス
+'* @return 判定結果（True:空のフォルダ）
+'******************************************************************************
+Public Function IsEmptyDir(ByVal strDirPath As String) As Boolean
+    ' WinAPIの「PathIsDirectoryEmpty」は260バイト以上のパスに対応できないため使用しない
+    ' If PathIsDirectoryEmpty(uniPath) <> 0 Then
+    '     IsEmptyDir = True
+    ' End If
+    
+    If DirExists(strDirPath) Then
+        If GetSubFoldersCount(strDirPath) = 0 And GetFilesCount(strDirPath) = 0 Then
+            IsEmptyDir = True
+        End If
+    End If
 End Function
 
 '******************************************************************************
@@ -187,9 +222,21 @@ End Function
 Public Function DirExists(strDirPath As String, Optional makeIfAbsent As Boolean = False, Optional makeSilently As Boolean = False) As Boolean
     On Error GoTo ErrorHandler
 
+    Dim uniPath As String, dExistsFlg As Boolean
+    If strDirPath Like "\\*" Then
+        uniPath = "\\?\UNC" & Mid$(strDirPath, 2)
+    Else
+        uniPath = "\\?\" & strDirPath
+    End If
+    
+    If PathFileExists(uniPath) <> 0 Then
+        If PathIsDirectory(uniPath) <> 0 Then
+            dExistsFlg = True
+        End If
+    End If
     
     'フォルダが存在しない場合は作成するか確認する
-    If Not IO.FolderExists(strDirPath) Then
+    If dExistsFlg = False Then
         If Not IsValidFolderPath(strDirPath) Then
             DirExists = False
             Exit Function
@@ -367,7 +414,7 @@ Public Function GetTempFilePath( _
     Optional willCreateFile As Boolean = False) As String
     GetTempFilePath = IO.GetTempFilePath(tdir, extName)
     If willCreateFile Then
-        Call IO.fso.CreateTextFile(GetTempFilePath)
+        Call IO.CreateTextFile(GetTempFilePath)
     End If
 End Function
 
@@ -694,6 +741,7 @@ Public Sub ReadAndWrite(srcFilePath As String, srcEncode As String, srcSep As Li
     End If
 
     ' ファイル保存
+    If Not bomInclude Then ExcludeBom outStream  ' BOM対応
     outStream.SaveToFile destFilePath, adSaveCreateOverWrite
      
     inStream.Close
@@ -734,7 +782,7 @@ End Function
 '*                 「HKEY_CLASSES_ROOT\MIME\Database\Charset」参照。
 '* @return 読込テキストデータ
 '******************************************************************************
-Public Function ReadTextFile(filePath As String, Optional cSet As String = "_autodetect_all") As String
+Public Function ReadTextFile(ByVal filePath As String, Optional ByVal cSet As String = "_autodetect_all") As String
     Dim data As String
     With IO.CreateADODBStream(adTypeText, cSet)
         .mode = adModeReadWrite
@@ -755,13 +803,14 @@ End Function
 '* @param filePath 対象となるテキストファイルのフルパス
 '* @return 読込テキストデータ
 '******************************************************************************
-Public Function ReadUTF8TextFile(filePath As String) As String
+Public Function ReadUTF8TextFile(ByVal filePath As String) As String
     ReadUTF8TextFile = ReadTextFile(filePath, "UTF-8")
 End Function
 
 '******************************************************************************
-'* [概  要] テキストファイル読込処理。
-'* [詳  細] テキストファイルを行単位で読込み、Variant配列に設定して返却する。
+'* [概  要] ReadTextFileToArray
+'* [詳  細] テキストファイル読込処理。
+'*          テキストファイルを行単位で読込み、Variant配列に設定して返却する。
 '*
 '* @param filePath 対象となるテキストファイルのフルパス
 '* @param cSet キャラセット（文字コード指定）
@@ -770,29 +819,104 @@ End Function
 '*                 utf-8、shift_jis、euc-jp、ISO-2022-JP、unicode（既定）
 '*                 「HKEY_CLASSES_ROOT\MIME\Database\Charset」参照。
 '* @param separator 改行コード（省略可。規定はCRLF）
+'* @param startLinePos 読込開始行位置（省略可。0始まり）
+'* @param readLineCnt 読込行数（省略可。0は全読込）
 '* @return 読込テキストデータ（Variant配列）
 '******************************************************************************
-Public Function ReadTextFileToVArray(filePath As String, _
-                                     Optional cSet As String = "_autodetect_all", _
-                                     Optional separator As LineSeparatorsEnum = LineSeparatorsEnum.adCRLF) As Variant
+Public Function ReadTextFileToArray(ByVal filePath As String, _
+                                    Optional ByVal cSet As String = "_autodetect_all", _
+                                    Optional ByVal separator As LineSeparatorsEnum = LineSeparatorsEnum.adCRLF, _
+                                    Optional ByVal startLinePos As Long = 0, _
+                                    Optional ByVal readLineCnt As Long = 0) As Variant
 
-    Dim vArr(), lineCount As Long, cnt As Long
     Dim stream As Object: Set stream = IO.CreateADODBStream(adTypeText, cSet, separator)
     With stream
         .mode = adModeReadWrite
         .Open
         .LoadFromFile filePath 'ファイル指定
-        lineCount = CountLine(stream)
-        ReDim Preserve vArr(lineCount - 1)
+        
+        Dim lineCount As Long: lineCount = CountLine(stream)
+        
+        If (startLinePos > lineCount - 1) Or (lineCount = 0) Then
+            .Close
+            ReadTextFileToArray = ArrayUtils.EmptyVariantArray
+            Exit Function
+        End If
+        If startLinePos < 0 Then startLinePos = 0
+        
+        Dim adjustReadLineCnt As Long
+        If readLineCnt = 0 Then
+            adjustReadLineCnt = lineCount - startLinePos
+        Else
+            If startLinePos + readLineCnt > lineCount Then
+                adjustReadLineCnt = lineCount - startLinePos
+            Else
+                adjustReadLineCnt = readLineCnt
+            End If
+        End If
+        
+        Dim vArr(), i As Long, cnt As Long
+        ReDim Preserve vArr(adjustReadLineCnt - 1)
         .Position = 0
         Do While Not .EOS
-            vArr(cnt) = .ReadText(adReadLine)
+            If cnt >= startLinePos Then
+                vArr(i) = .ReadText(adReadLine)
+                If i = adjustReadLineCnt - 1 Then
+                    Exit Do
+                End If
+                i = i + 1
+            Else
+                .SkipLine
+            End If
             cnt = cnt + 1
         Loop
         .Close
     End With
 
-    ReadTextFileToVArray = vArr
+    ReadTextFileToArray = vArr
+End Function
+
+'******************************************************************************
+'* [概  要] Tail
+'* [詳  細] テキストファイルの末尾を指定した行数分読込む。
+'*
+'* @param filePath 対象となるテキストファイルのフルパス
+'* @param readLineCnt 読込行数（省略可）
+'* @param cSet キャラセット（文字コード指定）
+'*             省略時は自動判別（"_autodetect_all"）
+'*               ※使用可能なCharset例：
+'*                 utf-8、shift_jis、euc-jp、ISO-2022-JP、unicode（既定）
+'*                 「HKEY_CLASSES_ROOT\MIME\Database\Charset」参照。
+'* @param separator 改行コード（省略可。規定はCRLF）
+'* @return 読込テキストデータ（Variant配列）
+'******************************************************************************
+Public Function Tail(ByVal filePath As String, _
+                     Optional ByVal readLineCnt As Long = 5, _
+                     Optional ByVal cSet As String = "_autodetect_all", _
+                     Optional ByVal separator As LineSeparatorsEnum = LineSeparatorsEnum.adCRLF) As Variant
+    Dim lCnt As Long: lCnt = GetTextFileLineCount(filePath, cSet, separator)
+    Tail = ReadTextFileToArray(filePath, cSet, separator, lCnt - readLineCnt)
+End Function
+
+'******************************************************************************
+'* [概  要] Top
+'* [詳  細] テキストファイルの先頭から指定した行数分読込む。
+'*
+'* @param filePath 対象となるテキストファイルのフルパス
+'* @param readLineCnt 読込行数（省略可）
+'* @param cSet キャラセット（文字コード指定）
+'*             省略時は自動判別（"_autodetect_all"）
+'*               ※使用可能なCharset例：
+'*                 utf-8、shift_jis、euc-jp、ISO-2022-JP、unicode（既定）
+'*                 「HKEY_CLASSES_ROOT\MIME\Database\Charset」参照。
+'* @param separator 改行コード（省略可。規定はCRLF）
+'* @return 読込テキストデータ（Variant配列）
+'******************************************************************************
+Public Function Top(ByVal filePath As String, _
+                    Optional ByVal readLineCnt As Long = 5, _
+                    Optional ByVal cSet As String = "_autodetect_all", _
+                    Optional ByVal separator As LineSeparatorsEnum = LineSeparatorsEnum.adCRLF) As Variant
+    Top = ReadTextFileToArray(filePath, cSet, separator, , readLineCnt)
 End Function
 
 '******************************************************************************
@@ -1747,6 +1871,18 @@ Public Function IsFolder(ByVal fPath As String) As Boolean
 End Function
 
 '******************************************************************************
+'* [概  要] IsFile
+'* [詳  細] 指定したパスが、ファイルか判定する。
+'*          フォルダでなければ、ファイルとする。
+'*
+'* @param fPath パス
+'* @return Boolean 判定結果（True:OK）
+'******************************************************************************
+Public Function IsFile(ByVal fPath As String) As Boolean
+    IsFile = Not IsFolder(fPath)
+End Function
+
+'******************************************************************************
 '* [概  要] ChangeExtension
 '* [詳  細] 指定したファイルパスから、拡張子を変更したファイルパスを取得する。
 '*
@@ -2596,19 +2732,19 @@ End Function
 '*          番号を付与して現状存在しないフォルダパスとなるまで番号をインクリ
 '*          メントする。
 '*
-'* @param fPath 元となるフォルダパス
-'* @param delim パス
+'* @param dPath 元となるフォルダパス
+'* @param delim デリミタ
 '* @return String 一意となるフォルダパス
 '******************************************************************************
-Public Function GetUniqueFolderName(ByVal fPath As String, Optional delim As String = "_") As String
-    Dim d As String: d = fso.GetParentFolderName(fPath)
-    Dim b As String: b = fso.GetBaseName(fPath) & delim
+Public Function GetUniqueFolderName(ByVal dPath As String, Optional delim As String = "_") As String
+    Dim d As String: d = fso.GetParentFolderName(dPath)
+    Dim b As String: b = fso.GetBaseName(dPath) & delim
     Dim n As Long: n = 0
-    Do While IO.FolderExists(fPath)
+    Do While IO.FolderExists(dPath)
         n = n + 1
-        fPath = fso.BuildPath(d, b & n)
+        dPath = fso.BuildPath(d, b & n)
     Loop
-    GetUniqueFolderName = fPath
+    GetUniqueFolderName = dPath
 End Function
 
 '******************************************************************************
@@ -2962,7 +3098,7 @@ Public Function GetFiles(ByVal folderPath As String) As Variant
         Exit Function
     End If
     
-    Set GetFiles = fso.GetFolder(folderPath).Files
+    Set GetFiles = IO.GetFolder(folderPath).Files
 End Function
 
 '******************************************************************************
@@ -3189,7 +3325,7 @@ End Function
 '*          WinAPIを使用し高速化を図っている。
 '* [参  考] https://www.excel-chunchun.com/entry/GetFileFolderList_04
 '*
-'* @param fPath            検索対象フォルダ
+'* @param dPath            検索対象フォルダ
 '* @param willTargetFile   ファイルを対象に含めるか
 '* @param willTargetFolder フォルダを対象に含めるか
 '* @param willFullPath     フルパスで出力するか
@@ -3197,18 +3333,18 @@ End Function
 '* @param lvlMax           何階層以前を探索するか（0～n、-1の時は無制限）
 '* @return ArrayEx ファイル・フォルダパスのリスト
 '******************************************************************************
-Public Function GetPathList(ByVal fPath As String, _
+Public Function GetPathList(ByVal dPath As String, _
                             Optional ByVal willTargetFile As Boolean = True, _
                             Optional ByVal willTargetFolder As Boolean = True, _
                             Optional ByVal willFullPath As Boolean = True, _
                             Optional ByVal lvlMin As Long = -1, _
                             Optional ByVal lvlMax As Long = -1) As ArrayEx
-    If fPath <> "" Then
-        fPath = AddPathSeparator(fPath)
+    If dPath <> "" Then
+        dPath = AddPathSeparator(dPath)
     End If
     
     Dim pList As ArrayEx: Set pList = New ArrayEx
-    Call GetPathListImpl(fPath, willTargetFile, willTargetFolder, willFullPath, lvlMin, lvlMax, "", 0, pList)
+    Call GetPathListImpl(dPath, willTargetFile, willTargetFolder, willFullPath, lvlMin, lvlMax, 0, pList)
     Set GetPathList = pList
 End Function
 
@@ -3217,30 +3353,27 @@ End Function
 '* [詳  細] 指定フォルダ以下の任意の階層のファイル・フォルダをリストアップする。
 '*          GetPathListから再帰処理用に呼び出される。
 '*
-'* @param fPath            検索対象フォルダ
+'* @param dPath            検索対象フォルダ
 '* @param willTargetFile   ファイルを対象に含めるか
 '* @param willTargetFolder フォルダを対象に含めるか
 '* @param willFullPath     フルパスで出力するか
 '* @param lvlMin           何階層以降を探索するか（0～n、-1の時は無制限）
 '* @param lvlMax           何階層以前を探索するか（0～n、-1の時は無制限）
-'* @param sFolder          当初のルートフォルダ以降のパス
 '* @param sCount           現在何階層目か
 '* @param pList            パスリスト。最終的な戻り値
-'* @return ファイル・フォルダパスのリスト
 '******************************************************************************
-Private Sub GetPathListImpl(ByVal fPath As String, _
+Private Sub GetPathListImpl(ByVal dPath As String, _
                             ByVal willTargetFile As Boolean, _
                             ByVal willTargetFolder As Boolean, _
                             ByVal willFullPath As Boolean, _
                             ByVal lvlMin As Long, _
                             ByVal lvlMax As Long, _
-                            ByVal sFolder As String, _
                             ByVal sCount As Long, _
                             ByVal pList As ArrayEx _
                            )
     Dim arrexFolder As ArrayEx: Set arrexFolder = New ArrayEx
     Dim arrexFile As ArrayEx: Set arrexFile = New ArrayEx
-    Call FindPathListRapid(fPath, arrexFolder, arrexFile, willTargetFile, willTargetFolder, willFullPath, lvlMin, lvlMax, sFolder, sCount)
+    Call FindPathListRapid(dPath, arrexFolder, arrexFile, willTargetFile, willTargetFolder, willFullPath, lvlMin, lvlMax, sCount)
     
     ' ファイルリストをソートしてから追加
     Call arrexFile.NaturalSort
@@ -3252,12 +3385,12 @@ Private Sub GetPathListImpl(ByVal fPath As String, _
     Dim myFolder As Variant
     For Each myFolder In arrexFolder.ToArray
         If willTargetFolder Then
-            pList.Add AddPathSeparator(IIf(willFullPath, fPath, "") & sFolder & myFolder)
+            pList.Add AddPathSeparator(IIf(willFullPath, dPath, "") & myFolder)
         End If
         ' サブフォルダ再帰探索
         If sCount < lvlMax Or lvlMax = -1 Then
-            Call GetPathListImpl(AddPathSeparator(fPath & myFolder), willTargetFile, willTargetFolder, willFullPath, lvlMin, lvlMax, _
-                                 AddPathSeparator(sFolder & myFolder), sCount + 1, pList)
+            Call GetPathListImpl(AddPathSeparator(dPath & myFolder), willTargetFile, willTargetFolder, willFullPath, lvlMin, lvlMax, _
+                                 sCount + 1, pList)
         End If
     Next
 End Sub
@@ -3267,7 +3400,7 @@ End Sub
 '* [詳  細] WinAPIを使用して指定したフォルダ内のファイル・フォルダパスを
 '*          高速に取得する。
 '*
-'* @param fPath            検索対象フォルダ
+'* @param dPath            検索対象フォルダ
 '* @param arrexFolder      再帰用：フォルダリスト
 '* @param arrexFile        再帰用：ファイルリスト
 '* @param willTargetFile   ファイルを対象に含めるか
@@ -3275,10 +3408,9 @@ End Sub
 '* @param willFullPath     フルパスで出力するか
 '* @param lvlMin           再帰用：何階層以降を探索するか（0～n、-1の時は無制限）
 '* @param lvlMax           再帰用：何階層以前を探索するか（0～n、-1の時は無制限）
-'* @param sFolder          再帰用：当初のルートフォルダ以降のパス
 '* @param sCount           再帰用：現在何階層目か
 '******************************************************************************
-Private Sub FindPathListRapid(ByVal fPath As String, _
+Private Sub FindPathListRapid(ByVal dPath As String, _
                               ByVal arrexFolder As ArrayEx, _
                               ByVal arrexFile As ArrayEx, _
                               Optional ByVal willTargetFile As Boolean = True, _
@@ -3286,17 +3418,16 @@ Private Sub FindPathListRapid(ByVal fPath As String, _
                               Optional ByVal willFullPath As Boolean = True, _
                               Optional ByVal lvlMin As Long = 0, _
                               Optional ByVal lvlMax As Long = 0, _
-                              Optional ByVal sFolder As String = "", _
                               Optional ByVal sCount As Long = 0 _
                              )
     
     ' FindFirstFileW関数では、検索パスの先頭に "\?\"や"\?\UNC" を追加しておくと
     ' 260 (MAX_PATH) 文字よりも長い文字をパスに指定することが出来る
     Dim uniFolderPath As String
-    If fPath Like "\\*" Then
-        uniFolderPath = "\\?\UNC" & Mid$(fPath, 2)
+    If dPath Like "\\*" Then
+        uniFolderPath = "\\?\UNC" & Mid$(dPath, 2)
     Else
-        uniFolderPath = "\\?\" & fPath
+        uniFolderPath = "\\?\" & dPath
     End If
     
     Dim fData As WIN32_FIND_DATA
@@ -3317,10 +3448,211 @@ Private Sub FindPathListRapid(ByVal fPath As String, _
                 arrexFolder.Add sFilename
             Else
                 If willTargetFile And (lvlMin = -1 Or lvlMin <= sCount) Then
-                    arrexFile.Add IIf(willFullPath, fPath, "") & sFolder & sFilename
+                    arrexFile.Add IIf(willFullPath, dPath, "") & sFilename
                 End If
             End If
         End If
     Loop Until FindNextFile(fileHandle, fData) = 0
     FindClose fileHandle
 End Sub
+
+'******************************************************************************
+'* [概  要] GetShortPath
+'* [詳  細] ショートパスを取得する。
+'* [参  考] http://scripting.cocolog-nifty.com/blog/2009/06/260-e7ae.html
+'*
+'* @param fPath   対象パス
+'* @return String ショートパス
+'******************************************************************************
+Public Function GetShortPath(fPath As String) As String
+    Dim sPath As String
+    sPath = fPath
+    If Len(sPath) > 259 Then
+      sPath = IO.BuildPath(GetShortPath(IO.GetParentFolderName(sPath)), IO.GetFileName(sPath))
+      If Len(sPath) > 259 Then
+          GetShortPath = sPath
+          Exit Function
+      End If
+    End If
+    If Me.FileExists(sPath) Then
+      sPath = IO.GetFile(sPath).ShortPath
+    Else
+      sPath = IO.GetFolder(sPath).ShortPath
+    End If
+    GetShortPath = sPath
+End Function
+
+'******************************************************************************
+'* [概  要] ReplaceShortcutLink
+'* [詳  細] ショートカットリンクのパスを置換する。
+'*
+'* @param fPath      対象ファイルパス
+'* @param searchTxt  検索テキスト
+'* @param replaceTxt 置換テキスト
+'******************************************************************************
+Public Sub ReplaceShortcutLink(fPath As String, searchTxt As String, replaceTxt As String)
+    If Not Me.FileExists(fPath) Then
+        Err.Raise 9999, "FileUtils#ReplaceShortcutLink", "対象のファイルが存在しません: " & fPath
+    End If
+    
+    Dim sPath As String: sPath = GetShortPath(fPath)
+    If LCase(IO.GetExtensionName(sPath)) = "lnk" Then
+        If LenB(sPath) > 259 Then
+            Err.Raise 9999, "FileUtils#ReplaceShortcutLink", "対象のショートパスが260バイト以上のため、処理できません: " & sPath
+        End If
+        
+        Dim scObj As Object, repFlg As Boolean
+        Set scObj = Core.Wsh.CreateShortcut(sPath)
+        If scObj Is Nothing Then
+            Err.Raise 9999, "FileUtils#ReplaceShortcutLink", "ショートカットリンクオブジェクトの作成に失敗しました: " & sPath
+        End If
+        
+        If StringUtils.Contains(scObj.TargetPath, searchTxt) Then
+            scObj.TargetPath = VBA.Replace(scObj.TargetPath, searchTxt, replaceTxt)
+            repFlg = True
+        End If
+        If StringUtils.Contains(scObj.WorkingDirectory, searchTxt) Then
+            scObj.WorkingDirectory = VBA.Replace(scObj.WorkingDirectory, searchTxt, replaceTxt)
+            repFlg = True
+        End If
+        If repFlg Then
+            scObj.Save
+        End If
+    End If
+End Sub
+
+'******************************************************************************
+'* [概  要] ReplaceShortcutLinks
+'* [詳  細] 指定したフォルダ配下にあるショートカットリンクのパスを置換する。
+'*
+'* @param dPath      対象フォルダパス
+'* @param searchTxt  検索テキスト
+'* @param replaceTxt 置換テキスト
+'******************************************************************************
+Public Sub ReplaceShortcutLinks(dPath As String, searchTxt As String, replaceTxt As String)
+    If Not Me.DirExists(dPath) Then
+        Err.Raise 9999, "FileUtils#ReplaceShortcutLinks", "対象のフォルダが存在しません: " & dPath
+    End If
+    
+    Dim fList As Variant, fPath As Variant: fList = GetPathList(dPath, , False).ToArray
+    
+    On Error Resume Next
+    For Each fPath In fList
+        Call ReplaceShortcutLink(CStr(fPath), searchTxt, replaceTxt)
+        
+        If Err.Number <> 0 Then
+            Debug.Print "[" & Err.Number & "] " & Err.Source & " " & Err.Description
+            Err.Clear
+        End If
+    Next
+    On Error GoTo 0
+End Sub
+
+'******************************************************************************
+'* [概  要] GetFolderDataList
+'* [詳  細] 指定したパス配下のフォルダの情報リストを取得する。
+'*
+'* @param dPath      対象フォルダパス
+'* @param searchTxt  検索テキスト
+'* @return Array2DEx フォルダの情報リスト（2次元配列）
+'******************************************************************************
+Public Function GetFolderDataList(dPath As String) As Array2DEx
+    Dim arr2dex As Array2DEx: Set arr2dex = New Array2DEx
+    If Not Me.DirExists(dPath) Then
+        Set GetFolderDataList = arr2dex
+        Exit Function
+    End If
+    
+    Dim fPath As Variant
+    For Each fPath In GetPathList(dPath, False, True).ToArray
+        Dim folderObj As Object
+        Set folderObj = IO.GetFolder(fPath)
+        
+        Dim rowArrex As ArrayEx: Set rowArrex = New ArrayEx
+        rowArrex.Add folderObj.Name
+        rowArrex.Add folderObj.Path
+        rowArrex.Add folderObj.DateCreated
+        rowArrex.Add folderObj.DateLastAccessed
+        rowArrex.Add folderObj.DateLastModified
+        rowArrex.Add folderObj.Files.Count
+        rowArrex.Add folderObj.SubFolders.Count
+        rowArrex.Add folderObj.size
+        rowArrex.Add folderObj.Attributes
+        rowArrex.Add folderObj.Type
+        rowArrex.Add folderObj.ShortName
+        rowArrex.Add folderObj.ShortPath
+        arr2dex.AddRow rowArrex
+    Next
+    
+    Set GetFolderDataList = arr2dex
+End Function
+
+'******************************************************************************
+'* [概  要] GetFileDataList
+'* [詳  細] 指定したパス配下のファイルの情報リストを取得する。
+'*          260文字以上のファイルパスには対応していない。
+'*
+'* @param dPath      対象フォルダパス
+'* @param searchTxt  検索テキスト
+'* @return Array2DEx ファイルの情報リスト（2次元配列）
+'******************************************************************************
+Public Function GetFileDataList(dPath As String) As Array2DEx
+    Dim arr2dex As Array2DEx: Set arr2dex = New Array2DEx
+    If Not Me.DirExists(dPath) Then
+        Set GetFileDataList = arr2dex
+        Exit Function
+    End If
+    
+    Dim fPath As Variant
+    For Each fPath In GetPathList(dPath, True, False).ToArray
+        Dim fileObj As Object: Set fileObj = Nothing
+        On Error Resume Next
+        Set fileObj = IO.GetFile(fPath)
+        On Error GoTo 0
+        
+        Dim rowArrex As ArrayEx: Set rowArrex = New ArrayEx
+        If fileObj Is Nothing Then
+            On Error Resume Next
+            Set fileObj = IO.GetFile(GetShortPath(CStr(fPath)))
+            On Error GoTo 0
+            
+            rowArrex.Add IO.GetFileName(fPath)
+            rowArrex.Add fPath
+            If fileObj Is Nothing Then
+                rowArrex.Add ""
+                rowArrex.Add ""
+                rowArrex.Add ""
+                rowArrex.Add ""
+                rowArrex.Add ""
+                rowArrex.Add ""
+                rowArrex.Add ""
+                rowArrex.Add ""
+            Else
+                rowArrex.Add fileObj.DateCreated
+                rowArrex.Add fileObj.DateLastAccessed
+                rowArrex.Add fileObj.DateLastModified
+                rowArrex.Add fileObj.size
+                rowArrex.Add fileObj.Attributes
+                rowArrex.Add fileObj.Type
+                rowArrex.Add fileObj.ShortName
+                rowArrex.Add fileObj.ShortPath
+            End If
+        Else
+            rowArrex.Add fileObj.Name
+            rowArrex.Add fileObj.Path
+            rowArrex.Add fileObj.DateCreated
+            rowArrex.Add fileObj.DateLastAccessed
+            rowArrex.Add fileObj.DateLastModified
+            rowArrex.Add fileObj.size
+            rowArrex.Add fileObj.Attributes
+            rowArrex.Add fileObj.Type
+            rowArrex.Add fileObj.ShortName
+            rowArrex.Add fileObj.ShortPath
+        End If
+        arr2dex.AddRow rowArrex
+    Next
+    
+    Set GetFileDataList = arr2dex
+End Function
+
+

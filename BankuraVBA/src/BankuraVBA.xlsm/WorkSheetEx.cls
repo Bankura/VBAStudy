@@ -1290,21 +1290,23 @@ End Property
 '* @param lStartRow データ開始行番号
 '* @param lStartCol データ開始列番号
 '* @param transpose Trueにすると1次元配列を列方向に設定する
+'* @param willTxtFormat 書式を文字列にして出力するか
 '*
 '******************************************************************************
-Public Sub ImportArray(vArray, lStartRow As Long, lStartCol As Long, Optional Transpose As Boolean = True)
+Public Sub ImportArray(vArray, lStartRow As Long, lStartCol As Long, Optional Transpose As Boolean = True, Optional willTxtFormat As Boolean = False)
     Call StoreFilterCriterias
     Call FilterOff
 
     If ValidateUtils.IsArray2DEx(vArray) Then
-        Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, vArray.To2DArray, lStartRow, lStartCol)
+        Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, vArray.To2DArray, lStartRow, lStartCol, willTxtFormat)
     ElseIf ArrayUtils.Is2DArray(vArray) Then
-        Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, vArray, lStartRow, lStartCol)
+        Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, vArray, lStartRow, lStartCol, willTxtFormat)
     ElseIf ValidateUtils.IsArrayEx(vArray) Then
-        Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, vArray.To2DArray(Transpose), lStartRow, lStartCol)
+        Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, vArray.To2DArray(Transpose), lStartRow, lStartCol, willTxtFormat)
     ElseIf ArrayUtils.Is1DArray(vArray) Then
-        Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, ArrayUtils.ArrayTo2DArray(vArray, Transpose), lStartRow, lStartCol)
+        Call XlWorkSheetUtils.InjectVariantArrayToCells(mOrigin, ArrayUtils.ArrayTo2DArray(vArray, Transpose), lStartRow, lStartCol, willTxtFormat)
     ElseIf ValidateUtils.IsPrimitive(vArray) Then
+        If willTxtFormat Then mOrigin.Cells(lStartRow, lStartCol).NumberFormat = "@"
         mOrigin.Cells(lStartRow, lStartCol).Value = vArray
     End If
     
@@ -1892,8 +1894,6 @@ End Function
 '* [詳  細] Range範囲の表示領域のデータをArray2DExで取得する。
 '*
 '* @param rngAddress  対象とするアドレス。
-'* @param sheetName   対象のシート名（省略すると選択中のシートで処理）
-'* @param wb          ワークブックオブジェクト
 '* @return Array2DEx 対象範囲の表示領域データ
 '*
 '******************************************************************************
@@ -1974,3 +1974,102 @@ Public Sub InsertColumn(colNo As Long, Optional cntOfAdd As Long = 1, Optional c
     Call EntireColumn(colNo, colNo + cntOfAdd - 1).Insert(, cpOrigin)
 End Sub
 
+'******************************************************************************
+'* [概  要] IsEmptyRange
+'* [詳  細] Range範囲のデータが空か判定する。
+'*
+'* @param rngAddress  対象とするアドレス
+'* @return Boolean 判定結果（"":True）
+'*
+'******************************************************************************
+Public Function IsEmptyRange(ByVal rngAdress As String) As Boolean
+    Dim rng As Range
+    For Each rng In Me.Range(rngAdress)
+        If rng.Value <> "" Then
+            IsEmptyRange = False
+            Exit Function
+        End If
+    Next
+    IsEmptyRange = True
+End Function
+
+'******************************************************************************
+'* [概  要] IsNumericRange
+'* [詳  細] Range範囲のデータが数値か判定する。
+'*
+'* @param rngAddress  対象とするアドレス
+'* @return Boolean 判定結果（数値:True）
+'*
+'******************************************************************************
+Public Function IsNumericRange(ByVal rngAdress As String) As Boolean
+    Dim rng As Range
+    For Each rng In Me.Range(rngAdress)
+        If rng.Value = "" Or Not IsNumeric(rng.Value) Then
+            IsNumericRange = False
+            Exit Function
+        End If
+    Next
+    IsNumericRange = True
+End Function
+
+'******************************************************************************
+'* [概  要] IsStringRange
+'* [詳  細] Range範囲のデータが数値か判定する。
+'*
+'* @param rngAddress  対象とするアドレス
+'* @return Boolean 判定結果（数値:True）
+'*
+'******************************************************************************
+Public Function IsStringRange(ByVal rngAdress As String) As Boolean
+    Dim rng As Range
+    For Each rng In Me.Range(rngAdress)
+        If TypeName(rng.Value) <> "String" Then
+            IsStringRange = False
+            Exit Function
+        End If
+    Next
+    IsStringRange = True
+End Function
+
+'******************************************************************************
+'* [概  要] IsDateRange
+'* [詳  細] Range範囲のデータが日付か判定する。
+'*
+'* @param rngAddress  対象とするアドレス
+'* @return Boolean 判定結果（日付:True）
+'*
+'******************************************************************************
+Public Function IsDateRange(ByVal rngAdress As String) As Boolean
+    Dim rng As Range
+    For Each rng In Me.Range(rngAdress)
+        If Not IsDate(rng.Value) Then
+            IsDateRange = False
+            Exit Function
+        End If
+    Next
+    IsDateRange = True
+End Function
+
+'******************************************************************************
+'* [概  要] IsErrorRange
+'* [詳  細] Range範囲のデータがエラーか判定する。
+'*
+'* @param rngAddress  対象とするアドレス
+'* @return Boolean 判定結果（エラー:True）
+'*
+'******************************************************************************
+Public Function IsErrorRange(ByVal rngAdress As String) As Boolean
+    Dim rng As Range
+    For Each rng In Me.Range(rngAdress)
+        If rng.HasFormula Then
+            If Not IsError(rng.Value) Then
+                IsErrorRange = False
+                Exit Function
+            End If
+        Else
+            IsErrorRange = False
+            Exit Function
+        End If
+    Next
+    IsErrorRange = True
+End Function
