@@ -27,6 +27,14 @@ Option Explicit
 '******************************************************************************
 '* Enum定義
 '******************************************************************************
+'******************************************************************************
+'* 構造体定義
+'******************************************************************************
+' 分数型
+Private Type Fraction
+    numerator As Long        ' 分子
+    denominator As Long      ' 分母
+End Type
 
 '******************************************************************************
 '* 定数定義
@@ -35,6 +43,29 @@ Option Explicit
 '******************************************************************************
 '* 変数定義
 '******************************************************************************
+
+'******************************************************************************
+'* プロパティ定義
+'******************************************************************************
+'*-----------------------------------------------------------------------------
+'* PI プロパティ（読み取り専用）
+'*
+'* [補  足]
+'* ・円周率を返す。
+'*-----------------------------------------------------------------------------
+Property Get PI() As Double
+    PI = 4 * Atn(1)
+End Property
+
+'*-----------------------------------------------------------------------------
+'* Radianプロパティ（読み取り専用）
+'*
+'* [補  足]
+'* ・ラジアンを返す。
+'*-----------------------------------------------------------------------------
+Property Get Radian() As Double
+    Radian = PI / 180
+End Property
 
 '******************************************************************************
 '* コンストラクタ・デストラクタ
@@ -201,4 +232,118 @@ Public Function Sum(ParamArray parr() As Variant) As Double
         total = total + CDbl(v)
     Next
     Sum = total
+End Function
+
+'******************************************************************************
+'* [概  要] CalcVSphere
+'* [詳  細] 球体の体積を計算する｡
+'*
+'* @param radius 半径
+'* @return Double 球体の体積
+'******************************************************************************
+Public Function CalcVSphere(radius As Double) As Double
+    CalcVSphere = 4 * PI * radius ^ 3 / 3
+End Function
+
+
+'******************************************************************************
+'* [概  要] GetFractionString
+'* [詳  細] 分数を約分し、文字列で取得する｡
+'*
+'* @param num 分子
+'* @param den 分母
+'* @return String 文字列の分数（num/den）
+'******************************************************************************
+Public Function GetFractionString(num As Long, den As Long) As String
+    GetFractionString = Fraction2String(GetFraction(num, den))
+End Function
+
+'******************************************************************************
+'* [概  要] Fraction2String
+'* [詳  細] 分数を約分し、文字列で取得する｡
+'*
+'* @param num 分子
+'* @param den 分母
+'* @return String 文字列の分数（num/den）
+'******************************************************************************
+Private Function Fraction2String(f As Fraction) As String
+    Fraction2String = f.numerator & "/" & f.denominator
+End Function
+
+'******************************************************************************
+'* [概  要] GetFraction
+'* [詳  細] 分数型を約分して取得する｡
+'*
+'* @param num 分子
+'* @param den 分母
+'* @return Fraction 分数型
+'******************************************************************************
+Private Function GetFraction(num As Long, den As Long) As Fraction
+    ' aとbの最大公約数
+    With New XlWsFunctions
+        Dim fgcd As Long: fgcd = .Gcd(num, den)
+    End With
+    ' 約分
+    GetFraction.numerator = num / fgcd
+    GetFraction.denominator = den / fgcd
+End Function
+
+'******************************************************************************
+'* [概  要] SumFraction
+'* [詳  細] 分数型を加算する｡
+'*
+'* @param f1 分数型値１
+'* @param f2 分数型値２
+'* @return Fraction 分数型
+'******************************************************************************
+Private Function SumFraction(f1 As Fraction, f2 As Fraction) As Fraction
+    Dim f3num As Long: f3num = f1.numerator * f2.denominator + f1.denominator * f2.numerator
+    Dim f3den As Long: f3den = f1.denominator * f2.denominator
+
+    With New XlWsFunctions
+        Dim f3gcd As Long: f3gcd = .Gcd(f3num, f3den)
+    End With
+
+    SumFraction.numerator = f3num / f3gcd
+    SumFraction.denominator = f3den / f3gcd
+End Function
+
+'******************************************************************************
+'* [概  要] ProductFraction
+'* [詳  細] 分数型を乗算する｡
+'*
+'* @param f1 分数型値１
+'* @param f2 分数型値２
+'* @return Fraction 分数型
+'******************************************************************************
+Private Function ProductFraction(f1 As Fraction, f2 As Fraction) As Fraction
+    Dim f3num As Long: f3num = f1.numerator * f2.numerator
+    Dim f3den As Long: f3den = f1.denominator * f2.denominator
+    
+    With New XlWsFunctions
+        Dim f3gcd As Long: f3gcd = .Gcd(f3num, f3den)
+    End With
+    
+    ProductFraction.numerator = f3num / f3gcd
+    ProductFraction.denominator = f3den / f3gcd
+End Function
+
+'******************************************************************************
+'* [概  要] DivFraction
+'* [詳  細] 分数型を除算する｡
+'*
+'* @param f1 分数型値１
+'* @param f2 分数型値２
+'* @return Fraction 分数型
+'******************************************************************************
+Private Function DivFraction(f1 As Fraction, f2 As Fraction) As Fraction
+    Dim f3num As Long: f3num = f1.numerator * f2.denominator
+    Dim f3den As Long: f3den = f1.denominator * f2.numerator
+    
+    With New XlWsFunctions
+        Dim f3gcd As Long: f3gcd = .Gcd(f3num, f3den)
+    End With
+    
+    DivFraction.numerator = f3num / f3gcd
+    DivFraction.denominator = f3den / f3gcd
 End Function

@@ -3518,7 +3518,6 @@ Public Function RightPad(ByVal str As String, ByVal size As Long, Optional ByVal
     RightPad = str & VBA.Join(padding, "")
 End Function
 
-
 '******************************************************************************
 '* [概  要] Rotate
 '* [詳  細] 文字列を循環シフトさせる｡
@@ -3669,7 +3668,6 @@ Public Function Substring(ByVal str As String, ByVal startPos As Long, Optional 
     Substring = Mid(str, startPos + 1, CLng(endPos) - startPos)
 End Function
 
-
 '******************************************************************************
 '* [概  要] SubstringAfter
 '* [詳  細] セパレータが最初に出現した後の部分文字列を取得する。
@@ -3703,7 +3701,6 @@ Public Function SubstringAfter(ByVal str As String, ByVal separator As String) A
     End If
     SubstringAfter = Me.Substring(str, pos + Len(separator))
 End Function
-
 
 '******************************************************************************
 '* [概  要] SubstringAfterLast
@@ -3739,7 +3736,6 @@ Public Function SubstringAfterLast(ByVal str As String, ByVal separator As Strin
     End If
     SubstringAfterLast = Me.Substring(str, pos + Len(separator))
 End Function
-
 
 '******************************************************************************
 '* [概  要] SubstringBefore
@@ -3857,7 +3853,6 @@ Public Function SubstringBetween(ByVal str As String, ByVal tagOrOpenStr As Stri
     SubstringBetween = ""
 End Function
 
-
 '******************************************************************************
 '* [概  要] ToEncodedString
 '* [詳  細] 指定された文字エンコーディングを使用して、バイト配列を文字列に
@@ -3868,11 +3863,11 @@ End Function
 '* @return String 変換後文字列
 '*
 '******************************************************************************
-Public Function ToEncodedString(Bytes() As Byte, ByVal CharSet As String) As String
+Public Function ToEncodedString(bytes() As Byte, ByVal CharSet As String) As String
     With IO.CreateADODBStream(adTypeBinary, CharSet)
         .mode = adModeReadWrite
         .Open
-        .Write Bytes
+        .Write bytes
         .Position = 0
         .Type = adTypeText
         ToEncodedString = .ReadText
@@ -4204,7 +4199,6 @@ Public Function EscapeSqlQuot(ByVal val As String) As String
     EscapeSqlQuot = VBA.Replace(VBA.Replace(val, "''", "'"), "'", "''")
 End Function
 
-
 '*******************************************************************************
 '* [概  要] SplitByLength
 '* [詳  細] 指定した文字数で文字列を分割する。
@@ -4527,4 +4521,48 @@ Public Function CountWord(ByVal str As String, wordTxt As String) As Long
         Exit Function
     End If
     CountWord = UBound(VBA.Split(str, wordTxt))
+End Function
+
+'******************************************************************************
+'* [概  要] FormatByteNum
+'* [詳  細] バイト数を指定した単位（B, KB, MB, GB）に成型して返却。
+'*
+'* @param byteNum バイト数
+'* @param toFormat 入力先の単位（B, KB, MB, GB）
+'* @param fromFormat 入力元の単位（B, KB, MB, GB）
+'* @return String 整形後バイト数
+'*
+'******************************************************************************
+Public Function FormatByteNum(ByVal byteNum As LongLong, Optional toFormat As String = "MB", Optional fromFormat As String = "B", Optional willAddTanni As Boolean = True) As String
+    Dim n As Long, m As Long, tanni As String
+    Select Case fromFormat
+        Case "B"
+            n = 0
+        Case "KB"
+            n = 1
+        Case "GB"
+            n = 3
+        Case Else
+            n = 2
+    End Select
+    Select Case toFormat
+        Case "KB"
+            m = 1
+            tanni = "KB"
+        Case "MB"
+            m = 2
+            tanni = "MB"
+        Case "GB"
+            m = 3
+            tanni = "GB"
+        Case Else
+            m = 0
+            tanni = "B"
+    End Select
+    If willAddTanni Then
+        tanni = " " & tanni
+    Else
+        tanni = ""
+    End If
+    FormatByteNum = Format(byteNum / (1024 ^ (m - n)), "#,#0.00") & tanni
 End Function

@@ -97,7 +97,10 @@ Private Sub LateBindParamTypes(ByVal params As Variant)
         ReDim xParamTypes(xUbParam)
         For i = 0 To xUbParam
             ty = VarType(params(i))
-            If (ty < 2 Or 12 < ty) And ty <> 17 Then ty = vbVariant
+'Mod By Bankura
+'            If (ty < 2 Or 12 < ty) And ty <> 17 Then ty = vbVariant
+            If (ty < 2 Or 12 < ty) And ty <> 17 And ty <> 20 Then ty = vbVariant
+            
             xParamTypes(i) = ty
         Next
     Else

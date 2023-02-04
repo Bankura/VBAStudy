@@ -1699,15 +1699,14 @@ ErrorHandler:
     ' Nothing
 End Function
 
-
 '******************************************************************************
 '* [概  要] ArrangeTableFormat
-'* [詳  細] 対象のシート中で選択中のセル範囲を返却する。
+'* [詳  細] 指定したアドレスのテーブル（セル範囲）を整形する。
 '*
 '* @param rngAddress  対象とするアドレス
-'* @param sheetName 対象のシート名（省略すると選択中のシートで処理）
-'* @param wb ワークブックオブジェクト
-'* @return Range 選択中のセル範囲
+'* @param useHeader   ヘッダ行があるか
+'* @param numFormat   数値のフォーマット形式
+'* @param dateFormat  日付のフォーマット形式
 '******************************************************************************
 Public Sub ArrangeTableFormat(ByVal rngAddress As String, _
                               Optional ByVal sheetName As String, _

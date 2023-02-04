@@ -2073,3 +2073,20 @@ Public Function IsErrorRange(ByVal rngAdress As String) As Boolean
     Next
     IsErrorRange = True
 End Function
+
+'******************************************************************************
+'* [概  要] ArrangeTableFormat
+'* [詳  細] 指定したアドレスのテーブル（セル範囲）を整形する。
+'*
+'* @param rngAddress  対象とするアドレス
+'* @param useHeader   ヘッダ行があるか
+'* @param numFormat   数値のフォーマット形式
+'* @param dateFormat  日付のフォーマット形式
+'******************************************************************************
+Public Sub ArrangeTableFormat(ByVal rngAddress As String, _
+                              Optional ByVal useHeader As Boolean = False, _
+                              Optional ByVal numFormat As String = "#,###", _
+                              Optional ByVal dateFormat As String = "yyyy/mm/dd")
+    Call XlWorkSheetUtils.ArrangeTableFormat(rngAddress, mOrigin.Name, useHeader, numFormat, dateFormat, mOrigin.Parent)
+End Sub
+

@@ -130,7 +130,6 @@ Public Function CodePointCount() As Long
      CodePointCount = StringUtils.CheckLength(Me.ToString)
 End Function
 
-
 '******************************************************************************
 '* [概  要] ToString メソッド
 '* [詳  細] 確保領域内に設定されている文字列を返却する｡
@@ -141,7 +140,6 @@ End Function
 Public Function ToString() As String
     ToString = Left$(mBuffer, mLength)
 End Function
-
 
 '******************************************************************************
 '* [概  要] Insert メソッド
@@ -887,7 +885,6 @@ Public Function IsAlpha() As Boolean
     IsAlpha = StringUtils.IsAlpha(Me.ToString)
 End Function
 
-
 '******************************************************************************
 '* [概  要] IsAlphanumeric
 '* [詳  細] 文字列が英数字かどうかをチェック｡
@@ -898,7 +895,6 @@ End Function
 Public Function IsAlphanumeric() As Boolean
     IsAlphanumeric = StringUtils.IsAlphanumeric(Me.ToString)
 End Function
-
 
 '******************************************************************************
 '* [概  要] IsAlphanumericSpace
@@ -1037,7 +1033,6 @@ Public Function LastIndexOfIgnoreCase(searchStr As String, Optional ByVal startP
     LastIndexOfIgnoreCase = StringUtils.LastIndexOfIgnoreCase(Me.ToString, searchStr, startPos)
 End Function
 
-
 '******************************************************************************
 '* [概  要] LeftPad
 '* [詳  細] 文字列を指定したパディング文字列で左詰めする｡
@@ -1045,13 +1040,13 @@ End Function
 '*
 '* @param size パディングするサイズ
 '* @param padStr パディング文字列
+'* @param useZenkaku2Width 全角1文字を半角2文字とみなすかどうか
 '* @return StringEx 変換後文字列
 '*
 '******************************************************************************
-Public Function LeftPad(size As Long, Optional padStr As String = " ") As StringEx
-    Set LeftPad = Me.Init(StringUtils.LeftPad(Me.ToString, size, padStr))
+Public Function LeftPad(size As Long, Optional padStr As String = " ", Optional useZenkaku2Width As Boolean = False) As StringEx
+    Set LeftPad = Me.Init(StringUtils.LeftPad(Me.ToString, size, padStr, useZenkaku2Width))
 End Function
-
 
 '******************************************************************************
 '* [概  要] LowerCase
@@ -1063,7 +1058,6 @@ End Function
 Public Function LowerCase() As StringEx
     Set LowerCase = Me.Init(StringUtils.LowerCase(Me.ToString))
 End Function
-
 
 '******************************************************************************
 '* [概  要] Narrow
@@ -1106,7 +1100,6 @@ Public Function PrependIfMissing(prefix As String, ParamArray prefixes() As Vari
     End If
 End Function
 
-
 '******************************************************************************
 '* [概  要] PrependIfMissingIgnoreCase
 '* [詳  細] 文字列がどの接頭辞（プレフィックス）でも始まっていない場合は、
@@ -1126,7 +1119,6 @@ Public Function PrependIfMissingIgnoreCase(prefix As String, ParamArray prefixes
         Set PrependIfMissingIgnoreCase = Me.Init(StringUtils.PrependIfMissingIgnoreCase(Me.ToString, prefix))
     End If
 End Function
-
 
 '******************************************************************************
 '* [概  要] Proper
@@ -1163,7 +1155,6 @@ End Function
 Public Function RemoveEnd(removeStr As String) As StringEx
     Set RemoveEnd = Me.Init(StringUtils.RemoveEnd(Me.ToString, removeStr))
 End Function
-
 
 '******************************************************************************
 '* [概  要] RemoveEndIgnoreCase
@@ -1218,7 +1209,6 @@ End Function
 Public Function RemoveStartIgnoreCase(removeStr As String) As StringEx
     Set RemoveStartIgnoreCase = Me.Init(StringUtils.RemoveStartIgnoreCase(Me.ToString, removeStr))
 End Function
-
 
 '******************************************************************************
 '* [概  要] Repeat
@@ -1277,7 +1267,6 @@ Public Function reverse() As StringEx
     Set reverse = Me.Init(StringUtils.reverse(Me.ToString))
 End Function
 
-
 '******************************************************************************
 '* [概  要] RightPad
 '* [詳  細] 文字列を指定したパディング文字列で右詰めする｡
@@ -1285,13 +1274,13 @@ End Function
 '*
 '* @param size パディングするサイズ
 '* @param padStr パディング文字列
+'* @param useZenkaku2Width 全角1文字を半角2文字とみなすかどうか
 '* @return StringEx 変換後文字列
 '*
 '******************************************************************************
-Public Function RightPad(size As Long, Optional padStr As String = " ") As StringEx
-    Set RightPad = Me.Init(StringUtils.RightPad(Me.ToString, size, padStr))
+Public Function RightPad(size As Long, Optional padStr As String = " ", Optional useZenkaku2Width As Boolean = False) As StringEx
+    Set RightPad = Me.Init(StringUtils.RightPad(Me.ToString, size, padStr, useZenkaku2Width))
 End Function
-
 
 '******************************************************************************
 '* [概  要] Rotate
@@ -1350,7 +1339,6 @@ Public Function Substring(startPos As Long, Optional endPos) As StringEx
     Set Substring = Me.Init(StringUtils.Substring(Me.ToString, startPos, endPos))
 End Function
 
-
 '******************************************************************************
 '* [概  要] SubstringAfter
 '* [詳  細] セパレータが最初に出現した後の部分文字列を取得する。
@@ -1363,7 +1351,6 @@ Public Function SubstringAfter(separator As String) As StringEx
     Set SubstringAfter = Me.Init(StringUtils.SubstringAfter(Me.ToString, separator))
 End Function
 
-
 '******************************************************************************
 '* [概  要] SubstringAfterLast
 '* [詳  細] セパレータが最後に出現した後の部分文字列を取得する｡
@@ -1375,7 +1362,6 @@ End Function
 Public Function SubstringAfterLast(separator As String) As StringEx
     Set SubstringAfterLast = Me.Init(StringUtils.SubstringAfterLast(Me.ToString, separator))
 End Function
-
 
 '******************************************************************************
 '* [概  要] SubstringBefore
@@ -1425,8 +1411,8 @@ End Function
 '* @return StringEx 変換後文字列
 '*
 '******************************************************************************
-Public Function ToEncodedString(Bytes() As Byte, CharSet As String) As StringEx
-    Set ToEncodedString = Me.Init(StringUtils.ToEncodedString(Bytes(), CharSet))
+Public Function ToEncodedString(bytes() As Byte, CharSet As String) As StringEx
+    Set ToEncodedString = Me.Init(StringUtils.ToEncodedString(bytes(), CharSet))
 End Function
 
 '******************************************************************************
@@ -1546,17 +1532,17 @@ Public Function CharAt(idx As Long) As StringEx
     Set CharAt = Me.Init(StringUtils.CharAt(Me.ToString, idx))
 End Function
 
-
 '*******************************************************************************
 '* [概  要] LeftPad0 左ゼロ埋め処理
 '* [詳  細] 指定した桁数になる範囲で左ゼロ埋め編集を行う。
 '*
 '* @param size 桁数
+'* @param useZenkaku2Width 全角1文字を半角2文字とみなすかどうか
 '* @return StringEx 左ゼロ埋めした値
 '*
 '*******************************************************************************
-Public Function LeftPad0(ByVal size As Long) As StringEx
-    Set LeftPad0 = Me.Init(StringUtils.LeftPad0(Me.ToString, size))
+Public Function LeftPad0(ByVal size As Long, Optional useZenkaku2Width As Boolean = False) As StringEx
+    Set LeftPad0 = Me.Init(StringUtils.LeftPad0(Me.ToString, size, useZenkaku2Width))
 End Function
 
 '*******************************************************************************
@@ -1564,11 +1550,12 @@ End Function
 '* [詳  細] 指定した桁数になる範囲で右ゼロ埋め編集を行う。
 '*
 '* @param size 桁数
+'* @param useZenkaku2Width 全角1文字を半角2文字とみなすかどうか
 '* @return StringEx 右ゼロ埋めした値
 '*
 '*******************************************************************************
-Public Function RightPad0(ByVal size As Long) As StringEx
-    Set RightPad0 = Me.Init(StringUtils.RightPad0(Me.ToString, size))
+Public Function RightPad0(ByVal size As Long, Optional useZenkaku2Width As Boolean = False) As StringEx
+    Set RightPad0 = Me.Init(StringUtils.RightPad0(Me.ToString, size, useZenkaku2Width))
 End Function
 
 '*******************************************************************************
@@ -1728,3 +1715,14 @@ Public Function RemoveNullChar() As String
     RemoveNullChar = StringUtils.RemoveNullChar(Me.ToString)
 End Function
 
+'******************************************************************************
+'* [概  要] CountWord
+'* [詳  細] 文字列に含まれるワードの数を返す。
+'*
+'* @param wordTxt  ワード文字列
+'* @return Long ワード数
+'*
+'******************************************************************************
+Public Function CountWord(wordTxt As String) As Long
+    CountWord = StringUtils.CountWord(Me.ToString, wordTxt)
+End Function

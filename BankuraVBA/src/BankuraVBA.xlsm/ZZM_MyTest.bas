@@ -1418,7 +1418,11 @@ Sub GetVisibleRangeData_Test001()
     
     With Base.ActiveSheetEx
         DebugUtils.Show .DataRangeAdress(3, 2)
-        DebugUtils.PrintArray .GetVisibleRangeData(.DataRangeAdress(3, 2))
+        'DebugUtils.PrintArray .GetVisibleRangeData(.DataRangeAdress(3, 2))
+        Dim v
+        For Each v In ArrayUtils.Array2DToSVList(.GetVisibleRangeData(.DataRangeAdress(3, 2)), "|", True, True)
+            Debug.Print CStr(v)
+        Next
     End With
 End Sub
 
@@ -1437,4 +1441,37 @@ Sub InjectDataToVisibleRange_Test001()
         'Call XlWorkSheetUtils.InjectDataToVisibleRange(arr, 2, 3, ArrayUtils.GetLength(arr2, 1), ArrayUtils.GetLength(arr2, 2))
         Call .InjectDataToVisibleRange(arr, 2, 3, arr2.RowLength, arr2.ColLength)
     End With
+End Sub
+
+Sub hohjklj()
+    Debug.Print Base.ActiveSheetEx.HasHiddenCells
+End Sub
+
+Sub FileUtils_GetFolderDataList_Test001()
+    Dim arr2dex As Array2DEx
+    Set arr2dex = FileUtils.GetFolderDataList("Z:\", , 0)
+    Set arr2dex = arr2dex.ColRemoveRange(8, 11).ColRemoveRange(2, 6)
+    
+    Dim fun As Func
+    Set fun = Core.Init(New Func, vbString, AddressOf mob001)
+    Set arr2dex = arr2dex.ColMap(2, fun)
+    Call DebugUtils.PrintArray(arr2dex)
+    
+    Call Base.ActiveSheetEx.ImportArray(arr2dex, 23, 2, , True)
+'    Dim arrex
+'    For Each arrex In arr2dex.ToArrayOfArrayEx
+'        Debug.Print arrex(1)
+'        Debug.Print StringUtils.FormatByteNum(arrex(2), "MB")
+'    Next
+
+End Sub
+
+Public Function mob001(ByVal a As LongLong) As String
+    Debug.Print a
+    mob001 = StringUtils.FormatByteNum(a, "GB")
+    Debug.Print mob001
+End Function
+
+Sub ugeeeee()
+    mob001 112809570989#
 End Sub

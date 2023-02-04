@@ -1075,7 +1075,7 @@ End Function
 '******************************************************************************
 Public Function Map(ByVal fun As Func) As Array2DEx
     If IsEmptyArray Then
-        Set Map = Me
+        Set Map = New Array2DEx
         Exit Function
     End If
     Dim arr2d: arr2d = Me.To2DArray()
@@ -1108,7 +1108,7 @@ End Function
 '******************************************************************************
 Public Function Zip(ByVal fun As Func, ByVal arr2 As Variant) As Array2DEx
     If IsEmptyArray Then
-        Set Zip = Me
+        Set Zip = New Array2DEx
         Exit Function
     End If
     If Not ArrayUtils.Is2DArray(arr2) Then Err.Raise 9999, "Array2DEx#Zip", "Invalid argument."
@@ -1153,7 +1153,7 @@ End Function
 '******************************************************************************
 Public Function RowFilter(ByVal fun As Func) As Array2DEx
     If IsEmptyArray Then
-        Set RowFilter = Me
+        Set RowFilter = New Array2DEx
         Exit Function
     End If
 
@@ -1185,7 +1185,7 @@ End Function
 '******************************************************************************
 Public Function ColFilter(ByVal fun As Func) As Array2DEx
     If IsEmptyArray Then
-        Set ColFilter = Me
+        Set ColFilter = New Array2DEx
         Exit Function
     End If
 
@@ -1305,6 +1305,61 @@ Public Function ColScan(ByVal fun As Func, Optional ByVal seedv As Variant) As A
     Next
     
     Set ColScan = arr2dex
+End Function
+
+
+'******************************************************************************
+'* [概  要] RowMap
+'* [詳  細] 指定した行の全要素に対して指定したファンクションの処理を適用する。
+'*
+'* @param idx 行インデックス
+'* @param fun Func(Of T, U)オブジェクト
+'* @return Array2DEx
+'******************************************************************************
+Public Function RowMap(ByVal idx As Long, ByVal fun As Func) As Array2DEx
+    If IsEmptyArray Then
+        Set RowMap = New Array2DEx
+        Exit Function
+    End If
+
+    Dim arr2dex As Array2DEx: Set arr2dex = New Array2DEx
+    Dim x As Long
+    For x = 0 To mRowMaxIndex
+        If x = idx Then
+            arr2dex.AddRow XRow(x).Map(fun)
+        Else
+            arr2dex.AddRow XRow(x)
+        End If
+    Next
+    
+    Set RowMap = arr2dex
+End Function
+
+'******************************************************************************
+'* [概  要] ColMap
+'* [詳  細] 指定した列の全要素に対して指定したファンクションの処理を適用する。
+'*
+'* @param idx 列インデックス
+'* @param fun Func(Of T, U)オブジェクト
+'* @return Array2DEx
+'******************************************************************************
+Public Function ColMap(ByVal idx As Long, ByVal fun As Func) As Array2DEx
+    If IsEmptyArray Then
+        Set ColMap = New Array2DEx
+        Exit Function
+    End If
+
+    Dim arr2dex As Array2DEx: Set arr2dex = New Array2DEx
+    Dim y As Long
+    For y = 0 To mColMaxIndex
+        If y = idx Then
+            arr2dex.AddColumn YColumn(y).Map(fun)
+        Else
+            arr2dex.AddColumn YColumn(y)
+        End If
+    Next
+    
+    Set ColMap = arr2dex
 End Function
 
 '******************************************************************************

@@ -899,7 +899,7 @@ Public Function Tail(ByVal filePath As String, _
 End Function
 
 '******************************************************************************
-'* [概  要] Top
+'* [概  要] Head
 '* [詳  細] テキストファイルの先頭から指定した行数分読込む。
 '*
 '* @param filePath 対象となるテキストファイルのフルパス
@@ -912,11 +912,11 @@ End Function
 '* @param separator 改行コード（省略可。規定はCRLF）
 '* @return 読込テキストデータ（Variant配列）
 '******************************************************************************
-Public Function Top(ByVal filePath As String, _
-                    Optional ByVal readLineCnt As Long = 5, _
-                    Optional ByVal cSet As String = "_autodetect_all", _
-                    Optional ByVal separator As LineSeparatorsEnum = LineSeparatorsEnum.adCRLF) As Variant
-    Top = ReadTextFileToArray(filePath, cSet, separator, , readLineCnt)
+Public Function Head(ByVal filePath As String, _
+                     Optional ByVal readLineCnt As Long = 5, _
+                     Optional ByVal cSet As String = "_autodetect_all", _
+                     Optional ByVal separator As LineSeparatorsEnum = LineSeparatorsEnum.adCRLF) As Variant
+    Head = ReadTextFileToArray(filePath, cSet, separator, , readLineCnt)
 End Function
 
 '******************************************************************************
@@ -3553,10 +3553,13 @@ End Sub
 '* [詳  細] 指定したパス配下のフォルダの情報リストを取得する。
 '*
 '* @param dPath      対象フォルダパス
-'* @param searchTxt  検索テキスト
+'* @param lvlMin     何階層以降を探索するか（0～n、-1の時は無制限）
+'* @param lvlMax     何階層以前を探索するか（0～n、-1の時は無制限）
 '* @return Array2DEx フォルダの情報リスト（2次元配列）
 '******************************************************************************
-Public Function GetFolderDataList(dPath As String) As Array2DEx
+Public Function GetFolderDataList(dPath As String, _
+                                  Optional ByVal lvlMin As Long = -1, _
+                                  Optional ByVal lvlMax As Long = -1) As Array2DEx
     Dim arr2dex As Array2DEx: Set arr2dex = New Array2DEx
     If Not Me.DirExists(dPath) Then
         Set GetFolderDataList = arr2dex
@@ -3564,7 +3567,7 @@ Public Function GetFolderDataList(dPath As String) As Array2DEx
     End If
     
     Dim fPath As Variant
-    For Each fPath In GetPathList(dPath, False, True).ToArray
+    For Each fPath In GetPathList(dPath, False, True, , lvlMin, lvlMax).ToArray
         Dim folderObj As Object
         Set folderObj = IO.GetFolder(fPath)
         
@@ -3576,7 +3579,7 @@ Public Function GetFolderDataList(dPath As String) As Array2DEx
         rowArrex.Add folderObj.DateLastModified
         rowArrex.Add folderObj.Files.Count
         rowArrex.Add folderObj.SubFolders.Count
-        rowArrex.Add folderObj.size
+        rowArrex.Add CLngLng(folderObj.size)
         rowArrex.Add folderObj.Attributes
         rowArrex.Add folderObj.Type
         rowArrex.Add folderObj.ShortName
@@ -3593,10 +3596,13 @@ End Function
 '*          260文字以上のファイルパスには対応していない。
 '*
 '* @param dPath      対象フォルダパス
-'* @param searchTxt  検索テキスト
+'* @param lvlMin     何階層以降を探索するか（0～n、-1の時は無制限）
+'* @param lvlMax     何階層以前を探索するか（0～n、-1の時は無制限）
 '* @return Array2DEx ファイルの情報リスト（2次元配列）
 '******************************************************************************
-Public Function GetFileDataList(dPath As String) As Array2DEx
+Public Function GetFileDataList(dPath As String, _
+                                Optional ByVal lvlMin As Long = -1, _
+                                Optional ByVal lvlMax As Long = -1) As Array2DEx
     Dim arr2dex As Array2DEx: Set arr2dex = New Array2DEx
     If Not Me.DirExists(dPath) Then
         Set GetFileDataList = arr2dex
@@ -3604,7 +3610,7 @@ Public Function GetFileDataList(dPath As String) As Array2DEx
     End If
     
     Dim fPath As Variant
-    For Each fPath In GetPathList(dPath, True, False).ToArray
+    For Each fPath In GetPathList(dPath, True, False, , lvlMin, lvlMax).ToArray
         Dim fileObj As Object: Set fileObj = Nothing
         On Error Resume Next
         Set fileObj = IO.GetFile(fPath)

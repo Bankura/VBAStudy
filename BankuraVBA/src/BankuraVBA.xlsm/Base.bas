@@ -219,6 +219,7 @@ Public Function GetWshNetwork() As Object
     Set GetWshNetwork = mWshNetwork
 End Function
 
+
 '******************************************************************************
 '* [概  要] ScriptControlオブジェクト取得処理。
 '* [詳  細] ScriptControlオブジェクトを取得する。未生成の場合生成する。
@@ -346,6 +347,7 @@ Public Function Is32BitProcessor() As Boolean
     End If
 End Function
 
+
 '******************************************************************************
 '* [概  要] CreateObject32bit
 '* [詳  細] 32ビット環境のObjectを生成する。
@@ -379,17 +381,9 @@ Public Function CreateObject32bit(ByVal strClassName As String) As Variant
                      ""
 
     ' 一時スクリプトファイル作成
-    With IO.fso
-        Dim strTempFile As String
-        Do
-            strTempFile = .BuildPath(.GetSpecialFolder(2), .GetTempName() & ".vbs")
-        Loop While .FileExists(strTempFile)
-        With .OpenTextFile(strTempFile, 2, True)
-            .WriteLine strScriptCodes
-            .Close
-        End With
-    End With
-    
+    Dim strTempFile As String: strTempFile = FileUtils.GetTempFilePath(, ".vbs")
+    Call FileUtils.WriteUTF8TextFile(strTempFile, strScriptCodes)
+
     ' 一時スクリプトファイル実行(32bit)
     With Core.Wsh.Environment("Process")
         .Item("SysWOW64") = IO.fso.BuildPath(.Item("SystemRoot"), "SysWOW64")
@@ -403,7 +397,9 @@ Public Function CreateObject32bit(ByVal strClassName As String) As Variant
     Do
         Set CreateObject32bit = Base.GetShell.Windows().Item(0).GetProperty(strClassName)
     Loop While CreateObject32bit Is Nothing
+
 End Function
+
 
 '******************************************************************************
 '* [概  要] SetAppSettingsNormal

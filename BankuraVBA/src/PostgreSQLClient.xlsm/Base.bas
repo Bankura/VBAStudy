@@ -379,16 +379,8 @@ Public Function CreateObject32bit(ByVal strClassName As String) As Variant
                      ""
 
     ' 一時スクリプトファイル作成
-    With IO.fso
-        Dim strTempFile As String
-        Do
-            strTempFile = .BuildPath(.GetSpecialFolder(2), .GetTempName() & ".vbs")
-        Loop While .FileExists(strTempFile)
-        With .OpenTextFile(strTempFile, 2, True)
-            .WriteLine strScriptCodes
-            .Close
-        End With
-    End With
+    Dim strTempFile As String: strTempFile = FileUtils.GetTempFilePath(, ".vbs")
+    Call FileUtils.WriteUTF8TextFile(strTempFile, strScriptCodes)
     
     ' 一時スクリプトファイル実行(32bit)
     With Core.Wsh.Environment("Process")
